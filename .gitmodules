@@ -1,0 +1,3 @@
+[submodule "src/modules/avl-components"]
+	path = src/modules/avl-components
+	url = https://github.com/availabs/avl-components
