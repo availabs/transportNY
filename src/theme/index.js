@@ -1,7 +1,7 @@
 const ppdaf = () => {
 
   const bg = 'gray-50'
-  const primary =  'gray'
+  const primary =  'nuetral'
   const highlight =  'white'
   const accent =  'blue'
   const secondary =  'green'
@@ -12,10 +12,22 @@ const ppdaf = () => {
       let colors = {
         white: {
           contentBg: `bg-${highlight}`,
+          contentBgAccent: `bg-neutral-100`,
           accentColor: `${accent}-600`,
-          accentBg: `hover:bg-${accent}-600`,
+          accentBg: `hover:bg-${accent}-400`,
           borderColor: `border-${primary}-100`,
           textColor: `text-${primary}-600`,
+          textColorAccent: `text-slate-800`,
+          highlightColor: `text-${primary}-800`,
+        },
+         dark: {
+          contentBg: `bg-neutral-800`,
+          contentBgAccent: `bg-neutral-900`,
+          accentColor: `white`,
+          accentBg: ``,
+          borderColor: `border-neutral-700`,
+          textColor: `text-slate-300`,
+          textColorAccent: `text-slate-100`,
           highlightColor: `text-${highlight}`,
         },
         bright: {
@@ -29,9 +41,15 @@ const ppdaf = () => {
       }
 
       let sizes = {
+        none: {
+          wrapper: "w-0",
+          sideItem: "flex mx-2 pr-4 py-2 text-base hover:pl-2",
+          topItem: "flex items-center text-sm px-4 border-r h-12",
+          icon: "mr-3 text-lg",
+        },
         compact: {
-          wrapper: "w-64",
-          sideItem: "flex mx-6 pr-4 py-2 text-sm font-light hover:pl-4",
+          wrapper: "w-44",
+          sideItem: "flex mx-2 pr-4 py-2 text-base hover:pl-2",
           topItem: "flex items-center text-sm px-4 border-r h-12",
           icon: "mr-3 text-lg",
         },
@@ -57,21 +75,24 @@ const ppdaf = () => {
       }
 
       return {
-        sidenavWrapper: `${colors[color].contentBg} ${sizes[size].wrapper} border-r border-gray-200 h-full`,
+        logoWrapper: `${sizes[size].wrapper} ${colors[color].contentBgAccent} ${colors[color].textColorAccent}`,
+        sidenavWrapper: `${colors[color].contentBg} ${sizes[size].wrapper} h-full hidden md:flex z-20`,
         menuIconSide: ` text-${colors[color].accentColor} ${sizes[size].icon} group-hover:${colors[color].highlightColor}`,
+        itemsWrapper: `p-4 border-t ${colors[color].borderColor} ${sizes[size].wrapper}`,
         navitemSide: ` 
             group font-sans 
             ${sizes[size].sideItem} ${colors[color].textColor} ${colors[color].borderColor} 
-            ${colors[color].accentBg} hover:${colors[color].highlightColor} 
+            hover:${colors[color].highlightColor} 
             focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 
             transition-all cursor-pointer
          `,
 
         navitemSideActive: `
-            group flex pl-8 pr-4 py-2 bg-${colors[color].highlightColor} 
-            text-base font-medium text-darkblue-500 
-            focus:outline-none hover:text-indigo-800 focus:text-indigo-800 focus:bg-blue-200 focus:border-indigo-700 
-            transition duration-150 ease-in-out
+            group font-sans 
+            ${sizes[size].sideItem} ${colors[color].textColor} ${colors[color].borderColor} 
+            hover:${colors[color].highlightColor} 
+            focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 
+            transition-all cursor-pointer
           `,
           vars: {
             colors,
@@ -84,18 +105,18 @@ const ppdaf = () => {
     /* -----
          Top Nav Theme Components Minimal
         ------*/
-        topnav: ({color='white',size='compact'}) => {
+    topnav: ({color='white',size='compact'}) => {
           
           let colors = {
         white: {
-          contentBg: `bg-${highlight}`,
+          contentBg: `bg-gray-100`,
           accentColor: `${accent}-600`,
           accentBg: `hover:bg-${accent}-600`,
           borderColor: `border-${primary}-100`,
           textColor: `text-${primary}-600`,
           highlightColor: `text-${highlight}`,
         },
-          bright: {
+        bright: {
           contentBg: `bg-${accent}-700`,
           accentColor: `${accent}-400`,
           accentBg: `hover:bg-${accent}-400`,
@@ -123,9 +144,9 @@ const ppdaf = () => {
       return {
         topnavWrapper: `w-full ${colors[color].contentBg}`,
         topnavContent: `flex w-full h-full`,
-        topnavMenu: `hidden md:flex flex-1 h-full overflow-x-auto overflow-y-hidden scrollbar-sm`,
+        topnavMenu: `hidden md:flex flex-1 justify-end h-full overflow-x-auto overflow-y-hidden scrollbar-sm`,
         menuIconTop: `text-${colors[color].accentColor} ${sizes[size].icon} group-hover:${colors[color].highlightColor}`,
-        menuOpenIcon: `os-icon os-icon-menu`,
+        menuOpenIcon: `fa fa-bars`,
         menuCloseIcon: `os-icon os-icon-x`,
         navitemTop: `
             group font-sans 
@@ -145,7 +166,7 @@ const ppdaf = () => {
             transition cursor-pointer
           `,
         mobileButton:
-          "md:hidden bg-white inline-flex items-center justify-center p-2  text-gray-400 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-300",
+          `md:hidden ${colors[color].contentBg} inline-flex items-center justify-center p-2  text-gray-400 hover:bg-gray-100 `,
         vars: {
             colors,
             sizes
@@ -154,6 +175,12 @@ const ppdaf = () => {
 
     },
 
+    select: () => {
+      return {
+        menuWrapper: 'bg-white my-1',
+        menuItemActive: `cursor-not-allowed bg-${accent}-200`
+      }
+    },
 
     /* ------------------------- */
     shadow: "shadow",
@@ -260,4 +287,5 @@ const ppdaf = () => {
   }
 };
 
-export const PPDAF_THEME = avl_design();
+const PPDAF_THEME = ppdaf();
+export default PPDAF_THEME

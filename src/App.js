@@ -4,11 +4,12 @@ import { connect } from 'react-redux';
 import ScrollToTop from 'utils/ScrollToTop'
 import { createBrowserHistory } from 'history';
 import Routes from 'Routes';
+import Layout from 'layout/ppdaf-layout'
 
 import {
   DefaultLayout,
   Messages
-} from "@availabs/avl-components"
+} from "modules/avl-components/src"
 
 //export const history = createBrowserHistory({basename: process.env.PUBLIC_URL});
 
@@ -19,7 +20,7 @@ class App extends React.Component {
         <ScrollToTop />
         <Switch>
           { Routes.map((route, i) =>
-              <DefaultLayout key={ i } { ...route } { ...this.props }
+              <DefaultLayout layout={Layout} key={ i } { ...route } { ...this.props }
                 menus={ Routes.filter(r => r.mainNav) }/>
             )
           }

@@ -14,10 +14,9 @@ module.exports = {
             '100': '#679d89'
           }
       },
-      /*fontFamily: {
-        sans: ['Proxima Nova W01', 'Inter var', ...defaultTheme.fontFamily.sans],
-        serif: ['Alfa Slab One', ...defaultTheme.fontFamily.serif]
-      },*/
+      fontFamily: {
+        sans: ['"Proxima Nova W01"','ui-sans-serif', 'system-ui', '-apple-system'],
+      },
     },
   },
   plugins: [],
