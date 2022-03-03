@@ -30,7 +30,7 @@ const Item = (to, icon, span, condition) => (
 export default withAuth(({title, shadowed = true, user, children}) => {
    
     const theme = useTheme()
-     console.log('Auth Menu', theme)
+    // console.log('Auth Menu', theme)
     return (
         <div className="h-full w-full">
             {!user.authed ?

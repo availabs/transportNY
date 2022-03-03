@@ -1,12 +1,15 @@
 const ppdaf = () => {
 
-  const bg = 'gray-50'
+  // const bg = 'gray-50'
   const primary =  'nuetral'
   const highlight =  'white'
   const accent =  'blue'
-  const secondary =  'green'
+  // const secondary =  'green'
   
   return {
+    graphColors: [ '#1e40af','#93c5fd','#1d4ed8','#bfdbfe',],
+    graphCategorical:  ['#eff6ff','#dbeafe','#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#2563eb','#1d4ed8','#1e40af','#1e3a8a'], //
+
     sidenav: ({color='white',size='compact'}) =>  {
       
       let colors = {
@@ -42,30 +45,34 @@ const ppdaf = () => {
 
       let sizes = {
         none: {
-          wrapper: "w-0",
+          wrapper: "w-0 overflow-hidden",
           sideItem: "flex mx-2 pr-4 py-2 text-base hover:pl-2",
           topItem: "flex items-center text-sm px-4 border-r h-12",
           icon: "mr-3 text-lg",
         },
         compact: {
+          fixed: 'pl-44',
           wrapper: "w-44",
           sideItem: "flex mx-2 pr-4 py-2 text-base hover:pl-2",
           topItem: "flex items-center text-sm px-4 border-r h-12",
           icon: "mr-3 text-lg",
         },
         full: {
+          fixed: 'pl-64',
           wrapper: "w-64",
           sideItem: "flex mx-4 pr-4 py-4 text-base font-base border-b hover:pl-4",
           topItem: "flex pr-4 py-2 text-sm font-light",
           icon: "mr-4 text-2xl",
         },
         mini: {
+          fixed: 'pl-20',
           wrapper: "w-20 overflow-x-hidden",
           sideItem: "flex pr-4 py-4 text-base font-base border-b",
           topItem: "flex px-4 items-center text-sm font-light ",
           icon: "w-20 mr-4 text-4xl",
         },
         micro: {
+          fixed: 'pl-14',
           wrapper: "w-14 overflow-x-hidden",
           sideItem: "flex pr-4 py-4 text-base font-base border-b",
           topItem: "flex mx-6 pr-4 py-2 text-sm font-light",
@@ -75,6 +82,7 @@ const ppdaf = () => {
       }
 
       return {
+        fixed: `md:${sizes[size].fixed}`,
         logoWrapper: `${sizes[size].wrapper} ${colors[color].contentBgAccent} ${colors[color].textColorAccent}`,
         sidenavWrapper: `${colors[color].contentBg} ${sizes[size].wrapper} h-full hidden md:flex z-20`,
         menuIconSide: ` text-${colors[color].accentColor} ${sizes[size].icon} group-hover:${colors[color].highlightColor}`,
@@ -175,10 +183,18 @@ const ppdaf = () => {
 
     },
 
-    select: () => {
+    select: ({color='white'}) => {
+      
+      let colors = {
+        white: 'white',
+        transparent: 'gray-100'
+      }
       return {
-        menuWrapper: 'bg-white my-1',
-        menuItemActive: `cursor-not-allowed bg-${accent}-200`
+        menuWrapper: `bg-${colors[color]} my-1`,
+        menuItemActive: `px-4 py-2 cursor-not-allowed bg-${accent}-200 border-1 border-${colors[color]} focus:border-${accent}-300`,
+        menuItem: `px-4 py-2 cursor-pointer hover:bg-blue-100 border-1 border-${colors[color]} focus:border-blue-300`,
+        select: `bg-${colors[color]} w-full flex flex-row flex-wrap justify-between px-4 py-2 cursor-pointer border-2 border-${colors[color]} focus:border-blue-300`,
+        selectIcon: `fal fa-angle-down text-gray-400 pt-2`
       }
     },
 

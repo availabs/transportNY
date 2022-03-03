@@ -1,13 +1,25 @@
-import { createStore, combineReducers, applyMiddleware } from 'redux'
-import thunk from 'redux-thunk'
+/*import { createStore, combineReducers, applyMiddleware } from 'redux'
+import thunk from 'redux-thunk'*/
 
 import { messages } from "modules/avl-components/src"
 
 import { Reducers } from "@availabs/ams"
 
-const reducer = combineReducers({
-  ...Reducers,
-  messages
-});
+import dashboard from 'pages/Dashboards/components/dashboardSlice'
 
-export default createStore(reducer, applyMiddleware(thunk))
+import { configureStore } from '@reduxjs/toolkit'
+
+
+// const reducer = combineReducers({
+//   ...Reducers,
+//   messages
+// });
+
+// export default createStore(reducer, applyMiddleware(thunk))
+export default configureStore({
+  reducer: {
+    dashboard,
+    ...Reducers,
+    messages
+  }
+})

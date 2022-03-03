@@ -5,10 +5,12 @@
   "homepage": ".",
   "dependencies": {
     "@availabs/ams": "^1.0.5",
+    "@reduxjs/toolkit": "^1.8.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.2.2",
     "@testing-library/user-event": "^12.5.0",
     "chokidar": "^3.5.1",
+    "d3-array": "^3.1.1",
     "d3-axis": "^3.0.0",
     "d3-format": "^2.0.0",
     "d3-shape": "^3.1.0",
