@@ -7,15 +7,14 @@ import { useSelector } from 'react-redux';
 import {
   groups as d3groups,
   rollups as d3rollups,
-  rollup as d3rollup,
-  min as d3min
+  rollup as d3rollup
 } from "d3-array"
 
 import { format as d3format } from "d3-format"
 
 import {
   useFalcor,
-  useTheme,
+  /*useTheme,*/
   Table,
 } from "modules/avl-components/src"
 
@@ -99,18 +98,19 @@ const getColumns = (prevMonth, prevYear, prevYearMonth) => {
 
 
 const CongestionSegmentTable = ({rawDelayData}) => {
-  const theme = useTheme()
-  const {region, month: tableDate, fsystem} = useSelector(state => state.dashboard)
+ // const theme = useTheme()
+  const { month: tableDate, /*fsystem*/} = useSelector(state => state.dashboard)
   const [year, month] = tableDate.split("-").map(Number),
         py = year - 1,
         pm = (month - 2 + 12) % 12 + 1,
-        prevMonth = `${ pm == 12 ? year - 1 : year }-${ `0${ pm }`.slice(-2) }`,
-        prevYear = `${ py }-${ `0${ month }`.slice(-2) }`,
-        prevYearMonth = `${ pm == 12 ? py - 1 : py }-${ `0${ pm }`.slice(-2) }`;
+        prevMonth = `${ +pm === 12 ? year - 1 : year }-${ `0${ pm }`.slice(-2) }`,
+        prevYear = `${ +py }-${ `0${ month }`.slice(-2) }`,
+        prevYearMonth = `${ +pm === 12 ? py - 1 : py }-${ `0${ pm }`.slice(-2) }`;
 
   const { falcor, falcorCache } = useFalcor();
 
-  const [showDPM, setShowDPM] = React.useState(false)
+  //const [showDPM, setShowDPM] = React.useState(false)
+  const showDPM = false
 
   const Years = React.useMemo(() => {
     return d3groups(rawDelayData, d => d.year)
@@ -124,6 +124,7 @@ const CongestionSegmentTable = ({rawDelayData}) => {
       .sort((a, b) => b.localeCompare(a));
   }, [rawDelayData]);
 
+ 
   const tmcs = React.useMemo(() => {
     return d3groups(rawDelayData, d => d.tmc)
       .map(([tmc]) => tmc);
@@ -141,10 +142,10 @@ const CongestionSegmentTable = ({rawDelayData}) => {
     return get(falcorCache, ["tmc", tmc, "meta", year], d);
   }, [falcorCache]);
 
-  const getTmcAtt = React.useCallback((tmc, year, att = null, d = null) => {
-    const path = ["tmc", tmc, "meta", year, att].filter(Boolean);
-    return get(falcorCache, path, d);
-  }, [falcorCache]);
+  // const getTmcAtt = React.useCallback((tmc, year, att = null, d = null) => {
+  //   const path = ["tmc", tmc, "meta", year, att].filter(Boolean);
+  //   return get(falcorCache, path, d);
+  // }, [falcorCache]);
 
   const delayData = React.useMemo(() => {
     if (!showDPM) return rawDelayData.map(c => ({
@@ -164,7 +165,7 @@ const CongestionSegmentTable = ({rawDelayData}) => {
       }
       return a;
     }, [])
-  }, [falcorCache, rawDelayData, getTmcData, showDPM])
+  }, [rawDelayData, getTmcData, showDPM])
 
   const ddByMonth = React.useMemo(() => {
     return d3rollups(
@@ -185,7 +186,7 @@ const CongestionSegmentTable = ({rawDelayData}) => {
     );
   }, [delayData, Years]);
 
-  const [tmcData, setTmcData] = React.useState({});
+  const [/*tmcData*/, setTmcData] = React.useState({});
   React.useEffect(() => {
     const data = tmcs.reduce((a, c) => {
       a[c] = Years.reduce((aa, cc) => {
@@ -251,7 +252,7 @@ const CongestionSegmentTable = ({rawDelayData}) => {
     }, [])
   }, [
     tableDate, prevMonth, prevYear, prevYearMonth,
-    tmcs, Months, delayData, getTmcData, ddByTmc
+    Months, getTmcData, ddByTmc, ddByMonth
   ]);
 
   const Columns = React.useMemo(() => {

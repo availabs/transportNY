@@ -4,3 +4,6 @@
 [submodule "src/modules/avl-graph"]
 	path = src/modules/avl-graph
 	url = https://github.com/availabs/avl-graph.git
+[submodule "src/modules/avl-map"]
+	path = src/modules/avl-map
+	url = https://github.com/availabs/avl-map.git

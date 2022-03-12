@@ -6,22 +6,23 @@ import { useSelector } from 'react-redux';
 
 import {
   PieGraph,
-  BarGraph,
-  generateTestPieData
+  BarGraph
 } from "modules/avl-graph/src"
 
 import {
   useFalcor,
-  useTheme,
-  Table
+  useTheme
 } from "modules/avl-components/src"
 
 import {
   useGeographies,
   useComponentDidMount
-} from './components/utils'
+} from 'pages/Dashboards/components/utils'
 
-import DashboardLayout from './components/DashboardLayout'
+import IncidentTable from './components/IncidentsTable'
+import IncidentMap from './components/IncidentsMap'
+
+import DashboardLayout from 'pages/Dashboards/components/DashboardLayout'
 
 const F_SYSTEMS = [1, 2, 3, 4, 5, 6, 7];
 
@@ -77,13 +78,14 @@ const Incidents = props => {
         if (eventIds.length) {
           return falcor.chunk([
             "transcom", "historical", "events", eventIds,
-            ["event_id", "congestion_data", "open_time", "close_time", "duration","event_type", "event_category"]
+            ["event_id", "congestion_data","facility","from_mile_marker", "description","open_time", "close_time", "duration","event_type", "event_category","geom"]
           ])
         }
       })
       .then(() => {
         if (MOUNTED) {
           setLoading(-1)
+          
         }
       });
   }, [month, geography, geographies, MOUNTED]);
@@ -99,6 +101,7 @@ const Incidents = props => {
     let request = getRequest()
     let eventIds = get(falcorCache, ["transcom", "historical", "events", request, "value"], [])
     let keys = []
+    let events = []
     let numEvents = 0
     let totalDuration = 0 
     let data = eventIds.reduce((out, eventId) => {
@@ -107,6 +110,7 @@ const Incidents = props => {
         let day = event.open_time.split(' ')[0]
         numEvents += 1
         totalDuration += duration2minutes(event.duration)
+        events.push(event)
         if(!keys.includes(event.event_type)){
           keys.push(event.event_type)
         }
@@ -172,6 +176,7 @@ const Incidents = props => {
     )
     // console.log('durationData',durationData, Object.keys(durationData).map(k => {return {index: k, value: durationData[k]}}))
     return {
+      events,
       numEvents,
       totalDuration,
       keys,
@@ -190,7 +195,7 @@ const Incidents = props => {
   return (
       <DashboardLayout loading={loading}>
         <div className='bg-white shadow rounded p-4 '>
-          Reported Transcom Accidents
+          Reported Incidents
           <div className='text-6xl text-extrabold text-gray-800 w-full text-center pt-2'>
             {
               data.numEvents
@@ -275,6 +280,13 @@ const Incidents = props => {
             } }
             axisLeft={ { ticks: 5 } }/>
         </div>
+
+        <div className='bg-white shadow rounded p-4 col-span-2'>
+          <IncidentTable events={data.events} />
+        </div>
+        <div className='bg-white shadow rounded p-4 col-span-2'>
+          <IncidentMap events={data.events} />
+        </div>
         <div className='bg-white shadow rounded p-4 col-span-2 min-h-64'>
           Incidents Type Duration by Day
           <BarGraph 
@@ -289,11 +301,8 @@ const Incidents = props => {
             } }
             axisLeft={ { ticks: 5 } }/>
         </div>
-        <div className='bg-white shadow rounded p-4 col-span-2'>
-          {/*<pre>
-            {JSON.stringify(theme.graphColors,null,3)}
-          </pre>*/}
-        </div>
+         <div className='bg-white shadow rounded p-4 col-span-2'>
+         </div>
         {/*<div className='bg-white shadow rounded p-4 col-span-2'>
           <pre>
             {JSON.stringify(data.durationData,null,3)}

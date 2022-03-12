@@ -22,7 +22,8 @@ import {
 import DashboardLayout from './components/DashboardLayout'
 
 
-
+import IncidentTable from 'pages/Dashboards/Incidents/components/IncidentsTable'
+import IncidentMap from 'pages/Dashboards/Incidents/components/IncidentsMap'
 
 
 const Construction = props => {
@@ -75,7 +76,7 @@ const Construction = props => {
         if (eventIds.length) {
           return falcor.chunk([
             "transcom", "historical", "events", eventIds,
-            ["event_id", "congestion_data", "open_time", "close_time", "duration","event_type", "event_category"]
+            ["event_id", "congestion_data","facility","from_mile_marker", "description","open_time", "close_time", "duration","event_type", "event_category","geom"]
           ])
         }
       })
@@ -98,11 +99,13 @@ const Construction = props => {
     let eventIds = get(falcorCache, ["transcom", "historical", "events", request, "value"], [])
     let keys = []
     let numEvents = 0
+    let events = []
     let totalDuration = 0 
     let data = eventIds.reduce((out, eventId) => {
       let event = get(falcorCache, ["transcom", "historical", "events", eventId],  {})
       if(['construction'].includes(event.event_category)){
         let day = event.open_time.split(' ')[0]
+        events.push(event)
         numEvents += 1
         totalDuration += duration2minutes(event.duration)
         if(!keys.includes(event.event_type)){
@@ -171,6 +174,7 @@ const Construction = props => {
     //console.log('durationData',durationData, Object.keys(durationData).map(k => {return {index: k, value: durationData[k]}}))
     return {
       numEvents,
+      events,
       totalDuration,
       keys,
       durationData: Object.keys(durationData).map(k => {return {index: k, value: durationData[k]}}),
@@ -272,6 +276,12 @@ const Construction = props => {
               tickDensity: 2
             } }
             axisLeft={ { ticks: 5 } }/>
+        </div>
+        <div className='bg-white shadow rounded p-4 col-span-2'>
+          <IncidentTable events={data.events} />
+        </div>
+        <div className='bg-white shadow rounded p-4 col-span-2'>
+          <IncidentMap events={data.events} />
         </div>
         <div className='bg-white shadow rounded p-4 col-span-2 min-h-64'>
           Work Zones Type Duration by Day

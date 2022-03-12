@@ -4,14 +4,6 @@ import get from "lodash.get";
 import { useSelector } from 'react-redux';
 
 
-import {
-  groups as d3groups,
-  rollups as d3rollups,
-  rollup as d3rollup,
-} from "d3-array"
-
-import { format as d3format } from "d3-format"
-
 
 import {
   PieGraph,
@@ -23,30 +15,12 @@ import {
   useTheme
 } from "modules/avl-components/src"
 
-import { F_SYSTEMS } from './components/metaData'
+import { F_SYSTEMS } from 'pages/Dashboards/components/metaData'
 
-import DashboardLayout from './components/DashboardLayout'
-
+import DashboardLayout from 'pages/Dashboards/components/DashboardLayout'
 import CongestionSegmentTable from './components/congestionSegmentTable'
-
 import CongestionCorridorTable from './components/congestionCorridorTable'
-
-
-
-
-const fFormat = d3format(",.2f")
-const floatFormat = f => (f === null) || isNaN(f) ? "no data" : fFormat(f);
-
-const getDailyAvgDelay = (delay, date) => {
-  if (!delay) return null;
-  const [year, month] = date.split("-"),
-    numDays = +(new Date(year, month, 0).getDate());
-  return delay / numDays;
-}
-
-const numDaysInYear = year => {
-  return ((+year % 4 === 0) && (+year % 100 !== 0)) || (+year % 400 === 0) ? 366 : 365;
-}
+import CongestionMap from './components/congestionMap'
 
 
 
@@ -64,16 +38,16 @@ const useComponentDidMount = () => {
 const RecurrentDelay = props => {
   const theme = useTheme()
   const MOUNTED = useComponentDidMount();
-  const {region, month: tableDate, fsystem} = useSelector(state => state.dashboard)
-  const [year, month] = tableDate.split("-").map(Number),
-        py = year - 1,
-        pm = (month - 2 + 12) % 12 + 1,
-        prevMonth = `${ pm == 12 ? year - 1 : year }-${ `0${ pm }`.slice(-2) }`,
-        prevYear = `${ py }-${ `0${ month }`.slice(-2) }`,
-        prevYearMonth = `${ pm == 12 ? py - 1 : py }-${ `0${ pm }`.slice(-2) }`;
+  const {region, month: tableDate, /*fsystem*/} = useSelector(state => state.dashboard)
+  const [year, month] = tableDate.split("-").map(Number)
+        // py = year - 1,
+        // pm = (month - 2 + 12) % 12 + 1,
+        // prevMonth = `${ pm == 12 ? year - 1 : year }-${ `0${ pm }`.slice(-2) }`,
+        // prevYear = `${ py }-${ `0${ month }`.slice(-2) }`,
+        // prevYearMonth = `${ pm == 12 ? py - 1 : py }-${ `0${ pm }`.slice(-2) }`;
 
   const [loading, _setLoading] = React.useState(0);
-  const [showDPM, setShowDPM] = React.useState(false)
+  // const [showDPM, setShowDPM] = React.useState(false)
   const setLoading = React.useCallback(
     (loading) => {
       if (MOUNTED) {
@@ -102,7 +76,7 @@ const RecurrentDelay = props => {
       )
       .then(res => console.log("RES:", res))
       .then(() => setLoading(-1));
-  }, [falcor, setLoading, region, F_SYSTEMS]);
+  }, [falcor, setLoading, region]);
 
   const [rawDelayData, setRawDelayData] = React.useState([]);
   
@@ -118,126 +92,25 @@ const RecurrentDelay = props => {
     }
   }, [region,falcorCache]);
 
-   const [fullDelayData, setFullDelayData] = React.useState([]);
+   const [fullDelayData, setFullDelayData] = React.useState({});
   
   React.useEffect(() => {
     const data = get(
       falcorCache,
-      [ "delay", year],
+      [ "delay"],
       {}
     );
-    let mn = +month
-    let tmcs = F_SYSTEMS.reduce((out,fclass) => {
-
-      get(data,`[${mn}][${region}][${fclass}].total.value`,[])
-        .forEach(tmc => {
-          if(!out.includes(tmc.tmc)){
-            out.push(tmc.tmc)
-          }
-        })
-      return out 
-    },[])
-    console.log('getting delay', data, tmcs)
-    
-
-
-
-   
+    if(Object.keys(data).length) {
+      setFullDelayData(data)
+    } 
   }, [region,year,falcorCache]);
 
-  const Years = React.useMemo(() => {
-    return d3groups(rawDelayData, d => d.year)
-      .map(([year]) => year)
-      .sort((a, b) => a - b);
-  }, [rawDelayData]);
-
-  const Months = React.useMemo(() => {
-    return d3groups(rawDelayData, d => `${ d.year }-${ `0${ d.month }`.slice(-2) }`)
-      .map(([month]) => month)
-      .sort((a, b) => b.localeCompare(a));
-  }, [rawDelayData]);
-
-  const tmcs = React.useMemo(() => {
-    return d3groups(rawDelayData, d => d.tmc)
-      .map(([tmc]) => tmc);
-  }, [rawDelayData]);
-
-  React.useEffect(() => {
-    if (tmcs.length) {
-      falcor.get([
-        "tmc", tmcs, "meta", Years, ["length", "roadname", "tmclinear","road_order"]
-      ]);
-    }
-  }, [falcor, tmcs, Years]);
-
-  const getTmcData = React.useCallback((tmc, year, d = null) => {
-    return get(falcorCache, ["tmc", tmc, "meta", year], d);
-  }, [falcorCache]);
-
-  const getTmcAtt = React.useCallback((tmc, year, att = null, d = null) => {
-    const path = ["tmc", tmc, "meta", year, att].filter(Boolean);
-    return get(falcorCache, path, d);
-  }, [falcorCache]);
-
-  const delayData = React.useMemo(() => {
-    if (!showDPM) return rawDelayData.map(c => ({
-      ...c,
-      delay: c.total,
-      total: c.summed_total
-    }));
-    return rawDelayData.reduce((a, c) => {
-      const { tmc, year } = c;
-      const tmcData = getTmcData(tmc, year);
-      if (tmcData) {
-        a.push({
-          ...c,
-          delay: c.total / get(tmcData, "length", 1),
-          total: c.summed_total / get(tmcData, "length", 1)
-        })
-      }
-      return a;
-    }, [])
-  }, [falcorCache, rawDelayData, getTmcData, showDPM])
-
-  const ddByMonth = React.useMemo(() => {
-    return d3rollups(
-      delayData,
-      g => g.sort((a, b) => b.delay - a.delay),
-      d => `${ d.year }-${ `0${ d.month }`.slice(-2) }`
-    ).sort((a, b) => b[0].localeCompare(a[0]));
-  }, [delayData]);
-
-  const ddByTmc = React.useMemo(() => {
-    return d3rollup(
-      delayData,
-      g => ({
-        total: g[0].total,
-        dailyAvg: g[0].total / Years.reduce((a, c) => a + numDaysInYear(c), 0)
-      }),
-      d => d.tmc
-    );
-  }, [delayData, Years]);
-
-  const [tmcData, setTmcData] = React.useState({});
-  React.useEffect(() => {
-    const data = tmcs.reduce((a, c) => {
-      a[c] = Years.reduce((aa, cc) => {
-        const d = get(falcorCache, ["tmc", c, "meta", cc], null);
-        if (d) {
-          aa[cc] = d;
-        }
-        return aa;
-      }, {});
-      return a;
-    }, {});
-    setTmcData(data);
-  }, [falcorCache, tmcs, Years]);
-
+  
 
   const [pieData, setPieData] = React.useState({ data: [], keys: [] });
-  const [months, setMonths] = React.useState([])
+  // const [months, setMonths] = React.useState([])
   React.useEffect(() => {
-    const data = [], keys = [];
+    const data = [];
     for (let y = 2016; y <= 2020; ++y) {
       for (let m = 1; m <= 12; ++m) {
         const index = `${ y }-${ `0${ m }`.slice(-2) }`
@@ -262,7 +135,7 @@ const RecurrentDelay = props => {
     if (data.length) {
       setPieData({ data, keys: ["recurrent", "non-recurrent"] });
     }
-  }, [falcorCache, region, F_SYSTEMS]);
+  }, [falcorCache, region]);
 
   // console.log('pie data', pieData, pieData.data.filter(d => +d.index.substring(0,4) === year))
   const currentMonth = get(get(pieData,'data',[]).filter(d => d.index === tableDate),'[0]',{recurrent: 0, "non-recurrent": 0})
@@ -392,7 +265,7 @@ const RecurrentDelay = props => {
           <BarGraph 
             colors={theme.graphColors}
             indexBy="index"
-            data={ pieData.data.filter(d => d.index.substring(0,4) == year) }
+            data={ pieData.data.filter(d => +d.index.substring(0,4) === +year) }
             keys={ pieData.keys }
             margin={ { top: 5, right: 5, bottom: 35, left: 70 } }
             padding={ 0.2 }
@@ -401,15 +274,24 @@ const RecurrentDelay = props => {
             } }
             axisLeft={ { ticks: 5 } }/>
         </div>
+        
+        <div className='bg-white shadow rounded p-4 col-span-2'>
+          Highest Congestion Segments
+          <CongestionCorridorTable 
+            rawDelayData={fullDelayData}
+          />
+        </div>
+
+        <div className='bg-white shadow rounded p-4 col-span-2'>
+          
+          <CongestionMap 
+            rawDelayData={fullDelayData}
+          />
+        </div>
+
         <div className='bg-white shadow rounded p-4 col-span-4'>
           Highest Congestion Segments
           <CongestionSegmentTable 
-            rawDelayData={rawDelayData}
-          />
-        </div> 
-        <div className='bg-white shadow rounded p-4 col-span-4'>
-          Highest Congestion Segments
-          <CongestionCorridorTable 
             rawDelayData={rawDelayData}
           />
         </div> 
