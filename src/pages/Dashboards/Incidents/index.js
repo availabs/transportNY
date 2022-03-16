@@ -318,7 +318,8 @@ const Incidents = props => {
 
 export default [{
   name:'Incidents',
-  icon: 'fal fa-chart-line',
+  title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
+  icon: 'fa-duotone fa-truck-tow',
   path: "/",
   exact: true,
   auth: false,
@@ -331,7 +332,8 @@ export default [{
 },
 {
   name:'Incidents',
-  icon: 'fal fa-chart-line',
+  title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
+  icon: 'fa-duotone fa-truck-tow',
   path: "/incidents",
   exact: true,
   auth: false,

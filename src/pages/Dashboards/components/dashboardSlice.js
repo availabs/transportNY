@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-const now = new Date()
+// const now = new Date()
 
 export const dashboardSlice = createSlice({
   name: 'dashboard',

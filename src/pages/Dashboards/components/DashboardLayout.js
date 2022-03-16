@@ -31,11 +31,7 @@ const Layout = ({
   
   return (
     <div className='pl-16 pr-2 max-w-7xl mx-auto'> 
-      <div className=''>
-      Transportation Systems Management and Operations (TSMO) System Performance Dashboards <br />
-      
-      </div>
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-4 pt-4">
         <div className={ `
           inset-0 ${ loading ? "fixed" : "hidden" }
           flex justify-center items-center z-50 bg-black opacity-50

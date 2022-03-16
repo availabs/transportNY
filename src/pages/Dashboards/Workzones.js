@@ -47,7 +47,7 @@ const Construction = props => {
   );
   
   
-  const getRequest = () => {
+  const request = React.useMemo(() => {
     // console.log('geographies', geographies)
     if (geographies.length ===0 || !geography || !(month)) return false;
 
@@ -62,10 +62,9 @@ const Construction = props => {
       null, //eCategory.startsWith("All") ? null : eCategory,
       null //eType.startsWith("All") ? null : eType
     ]);
-  }
+  },[geographies,geography,month])
  
   React.useEffect(() => {
-    let request = getRequest()
     if(!request) return     
 
     setLoading(1)
@@ -85,7 +84,7 @@ const Construction = props => {
           setLoading(-1)
         }
       });
-  }, [month, geography, geographies, setLoading,falcor, MOUNTED]);
+  }, [request, setLoading,falcor, MOUNTED]);
   
   const duration2minutes = (dur) => {
     let [days, time] = dur.split('-')
@@ -95,7 +94,6 @@ const Construction = props => {
   }
 
   let data = React.useMemo(()=> {
-    let request = getRequest()
     let eventIds = get(falcorCache, ["transcom", "historical", "events", request, "value"], [])
     let keys = []
     let numEvents = 0
@@ -185,7 +183,7 @@ const Construction = props => {
       pieData: [pieData]
     }
 
-  },[falcorCache,geography,month])
+  },[falcorCache,request,month])
 
  
   
@@ -315,7 +313,8 @@ const page = {
   exact: true,
   auth: false,
   mainNav:true,
-  icon: 'fal fa-chart-bar',
+  icon: 'fa-duotone fa-triangle-person-digging',
+  title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
   sideNav: {
     color: 'dark',
     size: 'micro'

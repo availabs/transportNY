@@ -303,8 +303,8 @@ const RecurrentDelay = props => {
 
 const config = {
   name: "Congestion",
- 
-  icon: "fad fa-flask",
+  title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
+  icon: "fa-duotone fa-traffic-light-slow fa-fw",
   path: '/congestion',
   exact: true,
   mainNav: true,

@@ -39,7 +39,7 @@ const ppdaf = () => {
           accentBg: `hover:bg-${accent}-400`,
           borderColor: `border-${accent}-600`,
           textColor: `text-${highlight}`,
-          highlightColor: `text-${highlight}`,
+          highlightColor: `text-${highlight}-500`,
         }
       }
 
@@ -74,9 +74,9 @@ const ppdaf = () => {
         micro: {
           fixed: 'pl-14',
           wrapper: "w-14 overflow-x-hidden",
-          sideItem: "flex pr-4 py-4 text-base font-base border-b",
+          sideItem: "flex text-base font-base",
           topItem: "flex mx-6 pr-4 py-2 text-sm font-light",
-          icon: "w-14 mr-4 text-2xl",
+          icon: "w-12 text-2xl hover:bg-neutral-900 px-2 py-3 my-2 rounded-lg mr-4 hover:text-blue-500",
         },
 
       }
@@ -86,7 +86,7 @@ const ppdaf = () => {
         logoWrapper: `${sizes[size].wrapper} ${colors[color].contentBgAccent} ${colors[color].textColorAccent}`,
         sidenavWrapper: `${colors[color].contentBg} ${sizes[size].wrapper} h-full hidden md:flex z-20`,
         menuIconSide: ` text-${colors[color].accentColor} ${sizes[size].icon} group-hover:${colors[color].highlightColor}`,
-        itemsWrapper: `p-4 border-t ${colors[color].borderColor} ${sizes[size].wrapper}`,
+        itemsWrapper: `p-1  ${colors[color].borderColor} ${sizes[size].wrapper} pt-4`,
         navitemSide: ` 
             group font-sans 
             ${sizes[size].sideItem} ${colors[color].textColor} ${colors[color].borderColor} 
@@ -97,7 +97,7 @@ const ppdaf = () => {
 
         navitemSideActive: `
             group font-sans 
-            ${sizes[size].sideItem} ${colors[color].textColor} ${colors[color].borderColor} 
+            ${sizes[size].sideItem} text-blue-500 ${colors[color].borderColor} 
             hover:${colors[color].highlightColor} 
             focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 
             transition-all cursor-pointer
@@ -115,7 +115,7 @@ const ppdaf = () => {
         ------*/
     topnav: ({color='white',size='compact'}) => {
           
-          let colors = {
+      let colors = {
         white: {
           contentBg: `bg-gray-100`,
           accentColor: `${accent}-600`,
@@ -150,7 +150,7 @@ const ppdaf = () => {
 
 
       return {
-        topnavWrapper: `w-full ${colors[color].contentBg}`,
+        topnavWrapper: `w-full ${colors[color].contentBg} border-b border-gray-200`,
         topnavContent: `flex w-full h-full`,
         topnavMenu: `hidden md:flex flex-1 justify-end h-full overflow-x-auto overflow-y-hidden scrollbar-sm`,
         menuIconTop: `text-${colors[color].accentColor} ${sizes[size].icon} group-hover:${colors[color].highlightColor}`,
@@ -187,13 +187,13 @@ const ppdaf = () => {
       
       let colors = {
         white: 'white',
-        transparent: 'gray-100'
+        transparent: 'gray-100 border border-gray-200 shadow-sm'
       }
       return {
         menuWrapper: `bg-${colors[color]} my-1`,
-        menuItemActive: `px-4 py-2 cursor-not-allowed bg-${accent}-200 border-1 border-${colors[color]} focus:border-${accent}-300`,
+        menuItemActive: `px-4 py-2 cursor-not-allowed bg-${accent}-200 border-1 focus:border-${accent}-300`,
         menuItem: `px-4 py-2 cursor-pointer hover:bg-blue-100 border-1 border-${colors[color]} focus:border-blue-300`,
-        select: `bg-${colors[color]} w-full flex flex-row flex-wrap justify-between px-4 py-2 cursor-pointer border-2 border-${colors[color]} focus:border-blue-300`,
+        select: `bg-${colors[color]} w-full flex flex-row flex-wrap justify-between px-4 py-2 cursor-pointer focus:border-blue-300`,
         selectIcon: `fal fa-angle-down text-gray-400 pt-2`
       }
     },
