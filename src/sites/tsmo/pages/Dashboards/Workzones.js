@@ -22,8 +22,8 @@ import {
 import DashboardLayout from './components/DashboardLayout'
 
 
-import IncidentTable from 'pages/Dashboards/Incidents/components/IncidentsTable'
-import IncidentMap from 'pages/Dashboards/Incidents/components/IncidentsMap'
+import IncidentTable from 'sites/tsmo/pages/Dashboards/Incidents/components/IncidentsTable'
+import IncidentMap from 'sites/tsmo/pages/Dashboards/Incidents/components/IncidentsMap'
 
 
 const Construction = props => {

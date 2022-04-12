@@ -1,14 +1,13 @@
-import Incidents from "pages/Dashboards/Incidents"
-import Workzones from "pages/Dashboards/Workzones"
-import Congestion from "pages/Dashboards/Congestion"
+
 import Auth from "pages/Auth"
 import NoMatch from "pages/404"
+import DataManager from "pages/DataManager"
+import Documentation from "pages/Documentation"
 
 const Routes = [
-  ...Incidents,
-  Workzones,
-  Congestion,
   Auth,
+  ...DataManager,
+  ...Documentation,
   NoMatch
 ]
 

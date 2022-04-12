@@ -17,12 +17,12 @@ import {
 import {
   useGeographies,
   useComponentDidMount
-} from 'pages/Dashboards/components/utils'
+} from 'sites/tsmo/pages/Dashboards/components/utils'
 
 import IncidentTable from './components/IncidentsTable'
 import IncidentMap from './components/IncidentsMap'
 
-import DashboardLayout from 'pages/Dashboards/components/DashboardLayout'
+import DashboardLayout from 'sites/tsmo/pages/Dashboards/components/DashboardLayout'
 
 const F_SYSTEMS = [1, 2, 3, 4, 5, 6, 7];
 

@@ -5,7 +5,7 @@ import { messages } from "modules/avl-components/src"
 
 import { Reducers } from "@availabs/ams"
 
-import dashboard from 'pages/Dashboards/components/dashboardSlice'
+import dashboard from 'sites/tsmo/pages/Dashboards/components/dashboardSlice'
 
 import { configureStore } from '@reduxjs/toolkit'
 

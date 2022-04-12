@@ -15,9 +15,9 @@ import {
   useTheme
 } from "modules/avl-components/src"
 
-import { F_SYSTEMS } from 'pages/Dashboards/components/metaData'
+import { F_SYSTEMS } from 'sites/tsmo/pages/Dashboards/components/metaData'
 
-import DashboardLayout from 'pages/Dashboards/components/DashboardLayout'
+import DashboardLayout from 'sites/tsmo/pages/Dashboards/components/DashboardLayout'
 import CongestionSegmentTable from './components/congestionSegmentTable'
 import CongestionCorridorTable from './components/congestionCorridorTable'
 import CongestionMap from './components/congestionMap'

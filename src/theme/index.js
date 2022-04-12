@@ -51,28 +51,28 @@ const ppdaf = () => {
           icon: "mr-3 text-lg",
         },
         compact: {
-          fixed: 'pl-44',
+          fixed: 'ml-0 md:ml-44',
           wrapper: "w-44",
           sideItem: "flex mx-2 pr-4 py-2 text-base hover:pl-2",
           topItem: "flex items-center text-sm px-4 border-r h-12",
           icon: "mr-3 text-lg",
         },
         full: {
-          fixed: 'pl-64',
+          fixed: 'ml-0 md:ml-64',
           wrapper: "w-64",
           sideItem: "flex mx-4 pr-4 py-4 text-base font-base border-b hover:pl-4",
           topItem: "flex pr-4 py-2 text-sm font-light",
           icon: "mr-4 text-2xl",
         },
         mini: {
-          fixed: 'pl-20',
+          fixed: 'ml-0 md:ml-20',
           wrapper: "w-20 overflow-x-hidden",
           sideItem: "flex pr-4 py-4 text-base font-base border-b",
           topItem: "flex px-4 items-center text-sm font-light ",
           icon: "w-20 mr-4 text-4xl",
         },
         micro: {
-          fixed: 'pl-14',
+          fixed: 'ml-0 md:ml-14',
           wrapper: "w-14 overflow-x-hidden",
           sideItem: "flex text-base font-base",
           topItem: "flex mx-6 pr-4 py-2 text-sm font-light",
@@ -135,46 +135,51 @@ const ppdaf = () => {
       }
       let sizes = {
         compact: {
-          wrapper: "w-64",
+          menu: 'hidden md:flex flex-1 justify-end',
           sideItem: "flex mx-6 pr-4 py-2 text-sm font-light hover:pl-4",
-          topItem: "flex items-center text-sm px-4 border-r h-12",
+          topItem: `flex items-center text-sm px-4 border-r h-12 ${colors[color].textColor} ${colors[color].borderColor} 
+            ${colors[color].accentBg} hover:${colors[color].highlightColor}`,
+          activeItem: `flex items-center text-sm px-4 border-r h-12 ${colors[color].textColor} ${colors[color].borderColor} 
+            ${colors[color].accentBg} hover:${colors[color].highlightColor}`,
           icon: "mr-3 text-lg",
+          responsive: 'md:hidden'
         },
-        full: {
-          wrapper: "w-64",
+        inline: {
+          menu: 'flex flex-1',
           sideItem: "flex mx-4 pr-4 py-4 text-base font-base border-b hover:pl-4",
-          topItem: "flex pr-4 py-2 text-sm font-light",
+          topItem: `flex px-4 py-2 mx-2 font-medium text-gray-400 border-b-2 ${colors[color].textColor} ${colors[color].borderColor} 
+          hover:border-gray-300 hover:text-gray-700 border-gray-100 `,
+          activeItem: `flex px-4 py-2 mx-2 font-medium text-blue-600 border-b-2 ${colors[color].textColor} ${colors[color].borderColor} border-blue-600 `,
           icon: "mr-4 text-2xl",
-        },
+          responsive: 'hidden'
+        }
+
       }
 
 
       return {
         topnavWrapper: `w-full ${colors[color].contentBg} border-b border-gray-200`,
         topnavContent: `flex w-full h-full`,
-        topnavMenu: `hidden md:flex flex-1 justify-end h-full overflow-x-auto overflow-y-hidden scrollbar-sm`,
+        topnavMenu: `${sizes[size].menu} h-full overflow-x-auto overflow-y-hidden scrollbar-sm`,
         menuIconTop: `text-${colors[color].accentColor} ${sizes[size].icon} group-hover:${colors[color].highlightColor}`,
         menuOpenIcon: `fa fa-bars`,
-        menuCloseIcon: `os-icon os-icon-x`,
+        menuCloseIcon: `fa fa-xmark fa-fw"`,
         navitemTop: `
             group font-sans 
-            ${sizes[size].topItem} ${colors[color].textColor} ${colors[color].borderColor} 
-            ${colors[color].accentBg} hover:${colors[color].highlightColor} 
+            ${sizes[size].topItem} 
             focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 
             transition cursor-pointer
         `,
         //`px-4 text-sm font-medium tracking-widest uppercase inline-flex items-center  border-transparent  leading-5 text-white hover:bg-white hover:text-darkblue-500 border-gray-200 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out h-full`,
         topmenuRightNavContainer: "hidden md:block h-full",
         navitemTopActive: 
-          `
-          group font-sans
-            ${sizes[size].topItem} ${colors[color].textColor} ${colors[color].borderColor} 
-            ${colors[color].accentBg} hover:${colors[color].highlightColor} 
+          ` group font-sans
+            ${sizes[size].activeItem}
             focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 
             transition cursor-pointer
           `,
         mobileButton:
-          `md:hidden ${colors[color].contentBg} inline-flex items-center justify-center p-2  text-gray-400 hover:bg-gray-100 `,
+          `${sizes[size].responsive} ${colors[color].contentBg} inline-flex items-center justify-center p-2  text-gray-400 hover:bg-gray-100 `,
         vars: {
             colors,
             sizes

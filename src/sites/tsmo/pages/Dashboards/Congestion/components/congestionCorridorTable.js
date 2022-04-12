@@ -11,7 +11,7 @@ import {
   Table,
 } from "modules/avl-components/src"
 
-import { F_SYSTEMS } from 'pages/Dashboards/components//metaData'
+import { F_SYSTEMS } from 'sites/tsmo/pages/Dashboards/components/metaData'
 
 const fFormat = d3format(",.1f")
 const floatFormat = f => (f === null) || isNaN(f) ? "no data" : fFormat(f);
