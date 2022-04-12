@@ -61,7 +61,7 @@ const SourcesList = () => {
     <div className=''>
       
         {sources
-          .filter(s => s.category.includes(currentFilter)) 
+          //.filter(s => s.category.includes(currentFilter)) 
           .map(s => <SourceThumb source={s} />)
         }
         {/*<pre>
