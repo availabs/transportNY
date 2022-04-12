@@ -1,14 +1,17 @@
-### Transport NY
+## Transport NY
+https://transportny.org
 
 AVAILabs client for TransportNY platform.
 
+##### Installation
+
 ```
-Install
 
-1 - git clone git@github.com:availabs/transportNY.git 
-2 - cd transportNY
-3 - git submodule init
-4 - git submodule update
-5 - npm install
-6 - npm start
+ $ git clone git@github.com:availabs/transportNY.git 
+ $ cd transportNY
+ $ git submodule init
+ $ git submodule update
+ $ npm install
+ $ npm start
 
+```
