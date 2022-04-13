@@ -55,18 +55,47 @@ const SourcesList = () => {
       .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
   },[falcorCache])
 
-  const currentFilter = 'FREIGHT_ATLAS'
+  const current_site = 'Freight Atlas'
+  const current_filter = null
+  let categories = sources
+    .filter(d => d.categories.map(d => d[0]).includes(current_site))
+    .reduce((a,b) => {
+      b.categories.forEach(cat => {
+        if(cat[0] === current_site){
+          if(!a.includes(cat[1])){
+            a.push(cat[1])
+          }
+        }
+      })
+      return a
+    },[])
+    .sort()
+  categories.unshift('All')
+
 
   return (
-    <div className=''>
-      
-        {sources
-          //.filter(s => s.category.includes(currentFilter)) 
-          .map(s => <SourceThumb source={s} />)
-        }
-        {/*<pre>
-          {JSON.stringify(Object.values(sources),null,3)}
-        </pre>*/}
+    <div>
+      <input className='w-full text-xl p-4 my-4' placeholder='Search' type='text' />
+      <div className='flex'>
+        <div className='pt-1 mr-2'>
+          {
+            categories.map(d => (
+              <div className='border-r-4 border-gray-100 hover:border-blue-500 hover:text-blue-500 cursor-pointer p-4'>
+                {d}
+              </div>
+            ))
+          }
+        </div>
+        <div className='flex-1'>
+            {sources
+              .filter(d => d.categories.map(d => d[0]).includes(current_site))
+              .map(s => <SourceThumb source={s} />)
+            }
+            {/*<pre>
+              {JSON.stringify(Object.values(sources),null,3)}
+            </pre>*/}
+        </div>
+      </div>
     </div>
   )
 }

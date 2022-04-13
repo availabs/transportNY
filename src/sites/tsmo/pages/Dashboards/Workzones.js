@@ -237,16 +237,7 @@ const Construction = props => {
               Hours : Minutes
             </div>
           </div>
-          Avg Work Zones Duration
-          <div className='text-6xl text-extrabold text-gray-800 w-full text-center pt-2'>
-            {
-              (Math.floor((data.totalDuration/data.numEvents)/60)).toLocaleString('en-US',{maximumFractionDigits: 0})
-                
-            }:{(Math.floor((data.totalDuration/data.numEvents))% 60).toString().padStart(2,'0') }
-            <div className='text-sm text-extrabold text-gray-600 w-full text-center '>
-              Hours : Minutes
-            </div>
-          </div>
+          
         </div>
         <div className='bg-white shadow rounded p-4 '>
           Work Zones Duration by Type
@@ -260,26 +251,6 @@ const Construction = props => {
                 } }
             />
           </div>
-        </div>
-        <div className='bg-white shadow rounded p-4 col-span-2 '>
-          Work Zones Type Duration by Day
-          <BarGraph 
-            colors={theme.graphColors}
-            indexBy="index"
-            data={ data.data }
-            keys={ data.keys.map(k => k+' duration') }
-            margin={ { top: 5, right: 5, bottom: 35, left: 70 } }
-            padding={ 0.2 }
-            axisBottom={ {
-              tickDensity: 2
-            } }
-            axisLeft={ { ticks: 5 } }/>
-        </div>
-        <div className='bg-white shadow rounded p-4 col-span-2'>
-          <IncidentTable events={data.events} />
-        </div>
-        <div className='bg-white shadow rounded p-4 col-span-2'>
-          <IncidentMap events={data.events} />
         </div>
         <div className='bg-white shadow rounded p-4 col-span-2 min-h-64'>
           Work Zones Type Duration by Day
@@ -295,6 +266,13 @@ const Construction = props => {
             } }
             axisLeft={ { ticks: 5 } }/>
         </div>
+        <div className='bg-white shadow rounded p-4 col-span-2'>
+          <IncidentTable events={data.events} />
+        </div>
+        <div className='bg-white shadow rounded p-4 col-span-2'>
+          <IncidentMap events={data.events} />
+        </div>
+        
         <div className='bg-white shadow rounded p-4 col-span-2'>
          
         </div>
