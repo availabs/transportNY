@@ -188,8 +188,8 @@ const ppdaf = () => {
 
     },
 
-    select: ({color='white'}) => {
-      
+    select: (opts={}) => {
+      const { color = 'white' } = opts
       let colors = {
         white: 'white',
         transparent: 'gray-100 border border-gray-200 shadow-sm'

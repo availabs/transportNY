@@ -4,8 +4,8 @@ const Routes = [
   Home
 ]
 
-const site = {
-	title: "TransportNY",
+const site =  {
+	title: "Transit",
 	Routes
 }
 

@@ -4,6 +4,8 @@ import ScrollToTop from 'utils/ScrollToTop'
 import DefaultRoutes from 'Routes';
 import Layout from 'layout/ppdaf-layout'
 import get from 'lodash.get'
+import {getDomain,getSubdomain} from 'utils'
+
 
 import {
   DefaultLayout,
@@ -13,20 +15,20 @@ import {
 import transportNY from 'sites/transportny'
 import tsmo from 'sites/tsmo'
 import freightatlas from 'sites/freightatlas'
+import npmrds from 'sites/npmrds'
+import transit from 'sites/transit'
 
 const Sites = {
   'transportNY': transportNY,
   'tsmo': tsmo,
-  'freightatlas' : freightatlas
-
+  'freightatlas' : freightatlas,
+  'npmrds': npmrds,
+  'transit': transit
 }
 
 const App = (props) => {
-  const SUBDOMAIN = window.location.hostname.split('.').length > 1?
-    window.location.hostname.split('.')[0].toLowerCase() : 'www'
-
-  // const PROJECT_HOST = window.location.host.split('.').length > 1 ?
-  //   window.location.host.split('.')[1].toLowerCase() : window.location.host.split('.')[0].toLowerCase()
+  const SUBDOMAIN = getSubdomain(window.location.host)
+  const PROJECT_HOST = getDomain(window.location.host)
 
   const site = useMemo(() => {
       return get(Sites, SUBDOMAIN, Sites['transportNY'])
