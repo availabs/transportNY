@@ -2,6 +2,8 @@ import React from "react";
 import { useTheme, TopNav, SideNav, FlyoutMenu } from "modules/avl-components/src/";
 import { Link } from "react-router-dom";
 import AuthMenu from "pages/Auth/AuthMenu"
+import {getDomain} from "utils"
+
 
 
 
@@ -26,8 +28,7 @@ const Layout = ({ children, menus, sideNav, title, site }) => {
 	const themeOptions = {size: sideNav.size || 'compact',color: sideNav.color || 'dark'}
 	const [flyoutOpen, setFlyoutOpen] = React.useState(false)
 
-	const PROJECT_HOST = window.location.host.split('.').length > 1 ?
-    window.location.host.split('.')[1].toLowerCase() : window.location.host.split('.')[0].toLowerCase()
+	const PROJECT_HOST = getDomain(window.location.host)//psl.parse(window.location.host).domain
 
 	const transportNYItems = [
     {

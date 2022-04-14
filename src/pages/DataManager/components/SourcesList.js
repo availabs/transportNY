@@ -88,7 +88,7 @@ const SourcesList = () => {
         </div>
         <div className='flex-1'>
             {sources
-              .filter(d => d.categories.map(d => d[0]).includes(current_site))
+              //.filter(d => d.categories.map(d => d[0]).includes(current_site))
               .map(s => <SourceThumb source={s} />)
             }
             {/*<pre>

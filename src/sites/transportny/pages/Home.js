@@ -1,5 +1,5 @@
 import React from 'react';
-
+import {getDomain} from "utils"
 
 
 function classNames(...classes) {
@@ -7,9 +7,8 @@ function classNames(...classes) {
 }
 
 const Home = () => {
-  const PROJECT_HOST = window.location.host.split('.').length > 1 ?
-    window.location.host.split('.')[1].toLowerCase() : window.location.host.split('.')[0].toLowerCase()
-
+  const PROJECT_HOST = getDomain(window.location.host)
+  
   const transportNYItems = [
     {
       title: 'NPMRDS',
