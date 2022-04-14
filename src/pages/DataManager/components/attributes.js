@@ -3,6 +3,7 @@ export const SourceAttributes = {
   "name": "name",
   "update_interval": "update_interval",
   "category": "category",
+  "categories": "categories",
   "description": "description",
   "statistics": "statistics",
   "metadata": "metadata",
