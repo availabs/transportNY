@@ -5,7 +5,7 @@ import { useHistory,useLocation } from 'react-router-dom'
 import get from 'lodash.get'
 
 import {
-  /*useTheme,*/
+  useTheme,
   Select,
   ScalableLoading
 } from "modules/avl-components/src"
@@ -28,9 +28,9 @@ const Layout = ({
   // const theme = useTheme()
   const dispatch = useDispatch();
   const {region, month, fsystem} = useSelector(state =>  state.dashboard)
-  
+
   return (
-    <div className='pl-16 pr-2 max-w-7xl mx-auto'> 
+    <div className='pl-16 pr-2 max-w-7xl mx-auto'>
       <div className="grid grid-cols-1 gap-4 pt-4">
         <div className={ `
           inset-0 ${ loading ? "fixed" : "hidden" }
@@ -40,11 +40,11 @@ const Layout = ({
         </div>
 
         <div className="font-bold text-3xl">
-          <Select 
+          <Select
             options={ ['Incidents', 'Work Zones','Congestion'] }
             value={ get(pages ,`[${location.pathname}]`, 'Incidents') }
-            onChange={ (e) => { 
-              history.push(`/${e.replace(/ /g, '').toLowerCase()}`)} 
+            onChange={ (e) => {
+              history.push(`/${e.replace(/ /g, '').toLowerCase()}`)}
             }
             multi={ false }
             className = 'font-bold text-3xl'
@@ -81,7 +81,8 @@ const Layout = ({
             />
           </div>
           {children}
-        </div>      
+        </div>
+
       </div>
     </div>
   )
