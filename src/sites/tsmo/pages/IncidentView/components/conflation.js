@@ -1,7 +1,7 @@
 import flatten from 'lodash.flatten'
 
 const conflationVersion = '0_6_0'
-const years =['2016','2017','2018','2019','2020']
+const years =['2016', '2017', '2018', '2019', '2020', '2021']
 const ConflationSources = years.map(year => {
 	return { id: `conflation_map_${year}_${conflationVersion}`,
 	  source: {
