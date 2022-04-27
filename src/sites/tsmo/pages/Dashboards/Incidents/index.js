@@ -28,7 +28,7 @@ const F_SYSTEMS = [1, 2, 3, 4, 5, 6, 7];
 
 
 const F_SYSTEM_MAP = {
-  'All': [1, 2, 3, 4, 5, 6, 7],
+  'All': [],
   'Highways': [1, 2],
   'State & Local': [3, 4, 5, 6, 7]
 }
@@ -127,7 +127,7 @@ const Incidents = props => {
 
       const fSystems = F_SYSTEM_MAP[fsystem];
 
-      if (event && fSystems.includes(event.n)) {
+      if (event && (!fSystems.length || fSystems.includes(event.n))) {
         let day = event.open_time.split(' ')[0]
         totalDuration += duration2minutes(event.duration)
         events.push(event)
