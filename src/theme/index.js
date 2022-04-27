@@ -5,13 +5,13 @@ const ppdaf = () => {
   const highlight =  'white'
   const accent =  'blue'
   // const secondary =  'green'
-  
+
   return {
     graphColors: [ '#1e40af','#93c5fd','#1d4ed8','#bfdbfe',],
     graphCategorical:  ['#eff6ff','#dbeafe','#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#2563eb','#1d4ed8','#1e40af','#1e3a8a'], //
 
     sidenav: ({color='white',size='compact'}) =>  {
-      
+
       let colors = {
         white: {
           contentBg: `bg-${highlight}`,
@@ -87,19 +87,19 @@ const ppdaf = () => {
         sidenavWrapper: `${colors[color].contentBg} ${sizes[size].wrapper} h-full hidden md:flex z-20`,
         menuIconSide: ` text-${colors[color].accentColor} ${sizes[size].icon} group-hover:${colors[color].highlightColor}`,
         itemsWrapper: `p-1  ${colors[color].borderColor} ${sizes[size].wrapper} pt-4`,
-        navitemSide: ` 
-            group font-sans 
-            ${sizes[size].sideItem} ${colors[color].textColor} ${colors[color].borderColor} 
-            hover:${colors[color].highlightColor} 
-            focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 
+        navitemSide: `
+            group font-sans
+            ${sizes[size].sideItem} ${colors[color].textColor} ${colors[color].borderColor}
+            hover:${colors[color].highlightColor}
+            focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
             transition-all cursor-pointer
          `,
 
         navitemSideActive: `
-            group font-sans 
-            ${sizes[size].sideItem} text-blue-500 ${colors[color].borderColor} 
-            hover:${colors[color].highlightColor} 
-            focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 
+            group font-sans
+            ${sizes[size].sideItem} text-blue-500 ${colors[color].borderColor}
+            hover:${colors[color].highlightColor}
+            focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
             transition-all cursor-pointer
           `,
           vars: {
@@ -114,7 +114,7 @@ const ppdaf = () => {
          Top Nav Theme Components Minimal
         ------*/
     topnav: ({color='white',size='compact'}) => {
-          
+
       let colors = {
         white: {
           contentBg: `bg-gray-100`,
@@ -137,9 +137,9 @@ const ppdaf = () => {
         compact: {
           menu: 'hidden md:flex flex-1 justify-end',
           sideItem: "flex mx-6 pr-4 py-2 text-sm font-light hover:pl-4",
-          topItem: `flex items-center text-sm px-4 border-r h-12 ${colors[color].textColor} ${colors[color].borderColor} 
+          topItem: `flex items-center text-sm px-4 border-r h-12 ${colors[color].textColor} ${colors[color].borderColor}
             ${colors[color].accentBg} hover:${colors[color].highlightColor}`,
-          activeItem: `flex items-center text-sm px-4 border-r h-12 ${colors[color].textColor} ${colors[color].borderColor} 
+          activeItem: `flex items-center text-sm px-4 border-r h-12 ${colors[color].textColor} ${colors[color].borderColor}
             ${colors[color].accentBg} hover:${colors[color].highlightColor}`,
           icon: "mr-3 text-lg",
           responsive: 'md:hidden'
@@ -147,7 +147,7 @@ const ppdaf = () => {
         inline: {
           menu: 'flex flex-1',
           sideItem: "flex mx-4 pr-4 py-4 text-base font-base border-b hover:pl-4",
-          topItem: `flex px-4 py-2 mx-2 font-medium text-gray-400 border-b-2 ${colors[color].textColor} ${colors[color].borderColor} 
+          topItem: `flex px-4 py-2 mx-2 font-medium text-gray-400 border-b-2 ${colors[color].textColor} ${colors[color].borderColor}
           hover:border-gray-300 hover:text-gray-700 border-gray-100 `,
           activeItem: `flex px-4 py-2 mx-2 font-medium text-blue-600 border-b-2 ${colors[color].textColor} ${colors[color].borderColor} border-blue-600 `,
           icon: "mr-4 text-2xl",
@@ -165,17 +165,17 @@ const ppdaf = () => {
         menuOpenIcon: `fa fa-bars`,
         menuCloseIcon: `fa fa-xmark fa-fw"`,
         navitemTop: `
-            group font-sans 
-            ${sizes[size].topItem} 
-            focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 
+            group font-sans
+            ${sizes[size].topItem}
+            focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
             transition cursor-pointer
         `,
         //`px-4 text-sm font-medium tracking-widest uppercase inline-flex items-center  border-transparent  leading-5 text-white hover:bg-white hover:text-darkblue-500 border-gray-200 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out h-full`,
         topmenuRightNavContainer: "hidden md:block h-full",
-        navitemTopActive: 
+        navitemTopActive:
           ` group font-sans
             ${sizes[size].activeItem}
-            focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 
+            focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
             transition cursor-pointer
           `,
         mobileButton:
@@ -337,7 +337,7 @@ const ppdaf = () => {
     width: "",
 
     transition: "transition ease-in-out duration-150",
-    button: `
+    button: () => `
         inline-flex items-center
         px-4 py-2 border border-gray-300
         text-sm leading-5 font-medium
