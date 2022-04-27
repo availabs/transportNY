@@ -30,7 +30,7 @@ const Layout = ({
   const {region, month, fsystem} = useSelector(state =>  state.dashboard)
 
   return (
-    <div className='pl-16 pr-2 max-w-7xl mx-auto'>
+    <div className='max-w-7xl mx-auto mb-8'>
       <div className="grid grid-cols-1 gap-4 pt-4">
         <div className={ `
           inset-0 ${ loading ? "fixed" : "hidden" }

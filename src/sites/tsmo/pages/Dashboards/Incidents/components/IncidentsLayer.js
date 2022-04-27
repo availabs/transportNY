@@ -26,7 +26,7 @@ const fFormat = d3format(",.2s")
 const duration2minutes = (dur) => {
     let [days, time] = dur.split('-')
     let [hours, minutes] = time.split(':')
-    let out = 1440 * (+days) + 60 * (+hours) + (+minutes) 
+    let out = 1440 * (+days) + 60 * (+hours) + (+minutes)
     return isNaN(out) ? 0 : out
   }
 
@@ -41,35 +41,44 @@ return rhours + " hour(s) and " + rminutes + " minute(s).";
 
 
 const HoverComp = ({ data, layer }) => {
-      return (
-        <div className='bg-white p-4 w-72'>
-          <div className='text-lg font-bold'>{data.facility} <span className='text-gray-600 text-base'>{data.type}</span></div>
-          <div className='flex'>
-            <div className='flex-1 text-center'>
-              Cost.
-              <div>${fFormat(data.delay*15)}</div>
-            </div>
-            <div className='flex-1 text-center'>
-              Delay.
-              <div>{get(data,'delay',0).toFixed(0)} min</div>
-            </div>
-            <div className='flex-1 text-center'>
-              Dur.
-              <div>{data.duration} min</div>
-            </div>
-            
-          </div>
-         {/* <div className='w-72' style={{overflowWrap: "break-word"}}>
-            {data.description}
-          </div>*/}
-          
-        </div>)
+  return (
+    <div className='bg-white p-4 w-72 grid grid-cols-1 gap-1'>
 
+      { data.sort((a, b) => b.delay - a.delay).slice(0, 8)
+          .map(d =>
+            <div key={ d.id }>
+              <div className='text-base leading-4 font-bold'>
+                {d.facility} <span className='text-gray-600 text-base'>{d.type}</span>
+              </div>
+              <div className='flex'>
+                <div className='flex-1 text-center'>
+                  Cost
+                  <div>${ fFormat(d.delay * 15) }</div>
+                </div>
+                <div className='flex-1 text-center'>
+                  Delay
+                  <div>{ d.delay.toFixed(0) } min</div>
+                </div>
+                <div className='flex-1 text-center'>
+                  Dur.
+                  <div>{d.duration} min</div>
+                </div>
+              </div>
+            </div>
+          )
+      }
 
-    }
+     {/* <div className='w-72' style={{overflowWrap: "break-word"}}>
+        {data.description}
+      </div>*/}
+
+    </div>
+  )
+}
 
 class CongestionLayer extends LayerContainer {
   name = "Congestion Layer";
+  doZoom = true;
   sources = [
     {
       id: "geo-boundaries-source",
@@ -98,16 +107,28 @@ class CongestionLayer extends LayerContainer {
       type: "circle",
       source: "events-source",
       paint: {
-      "circle-radius": {
-       stops: [[8, 5], [16, 8]]
-      },
-      'circle-opacity': [
-        "case",
-        ["boolean", ["feature-state", "hover"], false],
-        0.4,
-        1
-      ],
-      "circle-color": "#b91c1c",
+        "circle-radius": [
+          "interpolate",
+          ["linear"],
+          ["number", ["get", "delay"], 0],
+          0, 3,
+          1000, 20,
+          4000, 40
+        ],
+        // 'circle-opacity': [
+        //   "case",
+        //   ["boolean", ["feature-state", "hover"], false],
+        //   0.4,
+        //   1
+        // ],
+        "circle-color": [
+          "case",
+          ["boolean", ["feature-state", "hover"], false],
+          "#d92",
+          ["get", "color"]
+        ],
+        "circle-stroke-width": 0,
+        "circle-stroke-color": "#d92"
       },
     },
     {
@@ -115,14 +136,14 @@ class CongestionLayer extends LayerContainer {
       type: "line",
       source: "geo-boundaries-source",
       paint: {
-        "line-color": "#000",
+        "line-color": "#ccc",
       },
     },
   ];
 
-  
 
-  
+
+
   legend = {
     type: "quantile",
     domain: [0, 150],
@@ -139,9 +160,7 @@ class CongestionLayer extends LayerContainer {
     },
   };
   onHover = {
-    layers: [
-      "events-points",
-    ],
+    layers: ["events-points"],
     // filterFunc: function(layer, features, point, latlng) {
     //   const key = 'tmc',
     //     value = get(features, [0, "properties", key], "none"),
@@ -150,19 +169,19 @@ class CongestionLayer extends LayerContainer {
     // },
     callback: (layerId, features, lngLat) => {
       let feature = features[0];
-      
+
 
       //console.log('hover', v)
-      let data = [
-        ...Object.keys(feature.properties).map((k) => [
-          k,
-          feature.properties[k],
-        ])
-      ];
-      data.push(["hoverlayer", layerId]);
+      // let data = [
+      //   ...Object.keys(feature.properties).map((k) => [
+      //     k,
+      //     feature.properties[k],
+      //   ])
+      // ];
+      // data.push(["hoverlayer", layerId]);
       //data.push([this.getMeasure(this.filters), v])
 
-      return feature.properties;
+      return features.map(f => f.properties);
     },
     HoverComp
   };
@@ -176,7 +195,7 @@ class CongestionLayer extends LayerContainer {
   // };
 
   zoomToGeography(geo) {
-    if (!this.mapboxMap) return;
+    if (!this.mapboxMap || !this.doZoom) return;
 
     const bounds = new mapboxgl.LngLatBounds(bbox(geo));
 
@@ -184,7 +203,7 @@ class CongestionLayer extends LayerContainer {
 
     const options = {
       padding: {
-        top: 50,
+        top: 25,
         right: 25,
         bottom: 25,
         left: 25,
@@ -216,9 +235,11 @@ class CongestionLayer extends LayerContainer {
     );
 
     this.mapboxMap.easeTo(options);
+
+    this.doZoom = false;
   }
 
- 
+
 
   getColorScale(domain) {
     if (this.legend.range.length > domain.length) {
@@ -244,7 +265,7 @@ class CongestionLayer extends LayerContainer {
   fetchData(falcor) {
     const {region,events} = this.props
     const [geolevel, value] = region.split('|')
-    
+
     // let request = []
     ///let tmcs = this.getTMCs()
 
@@ -253,9 +274,9 @@ class CongestionLayer extends LayerContainer {
 
   render(map,) {
     const falcorCache = this.falcor.getCache();
-    
+
     // --- Set Boundary and Zoom to Regions
-    const {region, events} = this.props
+    const {region, events, hoveredEvent} = this.props
     const [geolevel, value] = region.split('|')
     const geom =  get(
       falcorCache,
@@ -272,31 +293,47 @@ class CongestionLayer extends LayerContainer {
         }]
     };
     map.getSource("geo-boundaries-source").setData(collection);
-    this.zoomToGeography(geom)
+    this.zoomToGeography(geom);
+
+    if (hoveredEvent) {
+      map.setPaintProperty("events-points", "circle-stroke-width",
+        ["case",
+          ["boolean", ["==", ["get", "id"], hoveredEvent], false],
+          4, 0
+        ]
+      )
+    }
+    else {
+      map.setPaintProperty("events-points", "circle-stroke-width", 0)
+    }
+
+// console.log('events', events)
+
     // --- Process and Map Event Data
-    console.log('events', events)
     const eventsCollection = {
       type: "FeatureCollection",
-      features: events.map(event => {
-        return {
-          type: "Feature",
-          properties: { 
-            id: event.event_id,
-            facility: event.facility,
-            type: event.event_type,
-            delay: get(event, 'congestion_data.value.vehicleDelay', 0),
-            duration: duration2minutes(event.duration),
-            description: event.description
-
-
-          },
-          geometry: event.geom.value
-        }
-      })
+      features: events
+        .sort((a, b) => a.event_id.localeCompare(b.event_id))
+        .map((event, i) => {
+          return {
+            type: "Feature",
+            id: i,
+            properties: {
+              id: event.event_id,
+              facility: event.facility,
+              type: event.event_type,
+              delay: +get(event, 'congestion_data.value.vehicleDelay', 0),
+              duration: duration2minutes(event.duration),
+              description: event.description,
+              color: get(this, ["props", "colorsForTypes", event.event_type], "#009")
+            },
+            geometry: event.geom.value
+          }
+        })
     }
     map.getSource("events-source").setData(eventsCollection);
   }
-   
+
 }
 
 export const MacroLayerFactory = (options = {}) => new CongestionLayer(options);

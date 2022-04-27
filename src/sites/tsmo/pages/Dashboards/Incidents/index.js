@@ -27,7 +27,11 @@ import DashboardLayout from 'sites/tsmo/pages/Dashboards/components/DashboardLay
 const F_SYSTEMS = [1, 2, 3, 4, 5, 6, 7];
 
 
-
+const F_SYSTEM_MAP = {
+  'All': [1, 2, 3, 4, 5, 6, 7],
+  'Highways': [1, 2],
+  'State & Local': [3, 4, 5, 6, 7]
+}
 
 const Incidents = props => {
 
@@ -50,6 +54,7 @@ const Incidents = props => {
   );
 
   const requests = React.useMemo(() => {
+
     if (geographies.length ===0 || !geography || !(month)) return [];
 
     let [y, m] = month.split('-')
@@ -78,6 +83,7 @@ const Incidents = props => {
   }, [geographies, geography, month])
 
   React.useEffect(() => {
+
     if(!requests.length) return
 
     setLoading(1)
@@ -94,14 +100,12 @@ const Incidents = props => {
         if (eventIds.length) {
           return falcor.chunk([
             "transcom", "historical", "events", eventIds,
-            ["event_id", "congestion_data","facility","from_mile_marker", "description","open_time", "close_time", "duration","event_type", "event_category","geom"]
+            ["event_id", "n", "congestion_data","facility","from_mile_marker", "description","open_time", "close_time", "duration","event_type", "event_category","geom"]
           ])
         }
       })
-      .then(() => {
-        setLoading(-1)
-      });
-  }, [requests]);
+      .then(() => { setLoading(-1); });
+  }, [requests, setLoading]);
 
   const duration2minutes = (dur) => {
     let [days, time] = dur.split('-')
@@ -115,14 +119,16 @@ const Incidents = props => {
     let eventIds = get(falcorCache, ["transcom", "historical", "events", "byGeom", request, "value"], [])
     let keys = []
     let events = []
-    let numEvents = 0
-    let totalDuration = 0
+    let totalDuration = 0;
+
     let data = eventIds.reduce((out, eventId) => {
       let event = get(falcorCache, ["transcom", "historical", "events", eventId],  null)
       // if(['accident', 'other'].includes(event.event_category)){
-      if (event) {
+
+      const fSystems = F_SYSTEM_MAP[fsystem];
+
+      if (event && fSystems.includes(event.n)) {
         let day = event.open_time.split(' ')[0]
-        numEvents += 1
         totalDuration += duration2minutes(event.duration)
         events.push(event)
         if(!keys.includes(event.event_type)){
@@ -139,7 +145,6 @@ const Incidents = props => {
          out[day][`${event.event_type} duration`] += duration2minutes(event.duration)
       }
       return out
-
     },{})
 
     const prevMonthIds = get(falcorCache, ["transcom", "historical", "events", "byGeom", requests[1], "value"], []);
@@ -158,8 +163,8 @@ const Incidents = props => {
         return a + duration2minutes(e.duration);
       }, 0);
 
-    let pieData = eventIds.reduce((out, eventId) => {
-      let event = get(falcorCache, ["transcom", "historical", "events", eventId],  {})
+    let pieData = events.reduce((out, event) => {
+      // let event = get(falcorCache, ["transcom", "historical", "events", eventId],  {})
       if(['accident', 'other'].includes(event.event_category)){
         let day = event.open_time.split(' ')[0]
 
@@ -175,11 +180,11 @@ const Incidents = props => {
 
     },{index: month})
 
-    let durationData = eventIds.reduce((out, eventId) => {
-      let event = get(falcorCache, ["transcom", "historical", "events", eventId],  {})
-      if(['accident', 'other'].includes(event.event_category)){
-        let duration = duration2minutes(event.duration)
-        if(duration < 30) {
+    let durationData = events.reduce((out, e) => {
+      // let e = get(falcorCache, ["transcom", "historical", "events", eventId],  null)
+
+        let duration = duration2minutes(e.duration)
+        if (duration < 30) {
           out['under 30'] += 1
         } else if (duration < 60) {
           out['30 to 60'] += 1
@@ -193,38 +198,43 @@ const Incidents = props => {
           out['above 240'] += 1
         }
 
-      }
       return out
-    },{
-        'under 30':0,
-        '30 to 60':0,
+    }, {
+        'under 30': 0,
+        '30 to 60': 0,
         '60 to 90': 0,
         '90 to 120': 0,
         '120 to 240': 0,
         'above 240': 0
       }
     )
-    // console.log('durationData',durationData, Object.keys(durationData).map(k => {return {index: k, value: durationData[k]}}))
+
+    keys.sort((a, b) => a.localeCompare(b));
+
+    const nc = theme.graphCategorical.length;
+    const colorsForTypes = keys.reduce((a, c, i) => {
+      a[c] = theme.graphCategorical[i % nc];
+      return a;
+    }, {})
+
     return {
       events,
-      numEvents,
+      numEvents: events.length,
       prevMonth,
       prevMonthDur,
       prevYear,
       prevYearDur,
       totalDuration,
       keys,
-      durationData: Object.keys(durationData).map(k => {return {index: k, value: durationData[k]}}),
-      data: Object.values(data)
-        .sort((a,b) => {
-          return a.index.localeCompare(b.index)
-        }),
+      colorsForTypes,
+      durationData: Object.keys(durationData).map(k => ({ index: k, count: durationData[k] })),
+      data: Object.values(data),
       pieData: [pieData]
     }
 
-  },[falcorCache,requests,month])
+  }, [falcorCache,requests,month, theme.graphCategorical,fsystem])
 
-console.log("?????", data.prevMonthDur, data.prevYearDur)
+  const [hoveredEvent, setHoveredEvent] = React.useState(null);
 
   return (
       <DashboardLayout loading={loading}>
@@ -232,9 +242,7 @@ console.log("?????", data.prevMonthDur, data.prevYearDur)
           Reported Incidents
           <div className='text-gray-800 text-center pt-2 grid grid-cols-2'>
             <div className="text-6xl col-span-2">
-              { data.numEvents
-                  .toLocaleString('en-US',{maximumFractionDigits: 0})
-              }
+              { fraction(data.numEvents) }
             </div>
             <CompareComp title="Prev. Month"
               prev={ data.prevMonth }
@@ -258,19 +266,21 @@ console.log("?????", data.prevMonthDur, data.prevYearDur)
             />
           </div>
         </div>
-        <div className='bg-white shadow rounded p-4 col-span-2'>
-          Incidents Type by Day
-          <BarGraph
-            colors={theme.graphCategorical.reverse()}
-            indexBy="index"
-            data={ data.data }
-            keys={ data.keys }
-            margin={ { top: 5, right: 5, bottom: 35, left: 70 } }
-            padding={ 0.2 }
-            axisBottom={ {
-              tickDensity: 2
-            } }
-            axisLeft={ { ticks: 5 } }/>
+        <div className='bg-white shadow rounded p-4 col-span-2 flex flex-col'>
+          <div>Incidents Type by Day</div>
+          <div className="flex-1">
+
+            <BarGraph
+              colors={theme.graphCategorical}
+              indexBy="index"
+              data={ data.data }
+              keys={ data.keys }
+              margin={ { top: 5, right: 5, bottom: 25, left: 50 } }
+              padding={ 0.2 }
+              axisBottom={ { tickDensity: 1 } }
+              axisLeft={ { ticks: 5 } }/>
+
+          </div>
         </div>
         <div className='bg-white shadow rounded p-4 '>
           Total Incident Duration
@@ -306,36 +316,33 @@ console.log("?????", data.prevMonthDur, data.prevYearDur)
             />
           </div>
         </div>
-        <div className='bg-white shadow rounded p-4 col-span-2 min-h-64'>
-          Incidents Count by Duration
+        <div className='bg-white shadow rounded p-4 col-span-2 flex flex-col'>
+          <div>Incidents Count by Duration</div>
+          <div className="flex-1">
 
-          <BarGraph
-            colors={theme.graphColors}
-            indexBy="index"
-            data={ get(data,'durationData',[]) }
-            keys={ ['value'] }
-            margin={ { top: 5, right: 5, bottom: 35, left: 70 } }
-            padding={ 0.2 }
-            axisBottom={ {
-              tickDensity: 2
-            } }
-            axisLeft={ { ticks: 5 } }/>
+            <BarGraph
+              colors={theme.graphColors}
+              indexBy="index"
+              data={ data.durationData }
+              keys={ ['count'] }
+              margin={ { top: 5, right: 5, bottom: 25, left: 50 } }
+              padding={ 0.2 }
+              axisBottom={ { tickDensity: 2 } }
+              axisLeft={ { ticks: 5 } }/>
+
+          </div>
         </div>
 
         <div className='bg-white shadow rounded p-4 col-span-2'>
-          <IncidentTable events={data.events} />
-        </div>
-        <div className='bg-white shadow rounded p-4 col-span-2'>
-          <IncidentMap events={data.events} />
+          <IncidentTable events={data.events} setHoveredEvent={ setHoveredEvent }/>
         </div>
 
-         <div className='bg-white shadow rounded p-4 col-span-2'>
-         </div>
-        {/*<div className='bg-white shadow rounded p-4 col-span-2'>
-          <pre>
-            {JSON.stringify(data.durationData,null,3)}
-          </pre>
-        </div>*/}
+        <div className='bg-white shadow rounded p-4 col-span-2'>
+          <IncidentMap colorsForTypes={ data.colorsForTypes }
+            events={data.events}
+            hoveredEvent={ hoveredEvent }/>
+        </div>
+
       </DashboardLayout>
 
   )
@@ -343,18 +350,22 @@ console.log("?????", data.prevMonthDur, data.prevYearDur)
 
 const fraction = (f, d = 0) => f.toLocaleString('en-US', { maximumFractionDigits: d } );
 
-const CompareComp = ({ prev, curr, title, display = fraction }) => {
-  const percent = (curr - prev) / prev * 100;
-  const icon = percent < 0.0 ? "fa fa-down" :
-                  percent > 0.0 ? "fa fa-up":
-                  "";
+const lessThan0 = v => v < 0.0;
+
+const CompareComp = ({ prev, curr, title, display = fraction, green = lessThan0 }) => {
+  const diff = curr - prev;
+  const percent = diff / prev * 100;
+  const icon = diff < 0.0 ? "fa fa-down" :
+                diff > 0.0 ? "fa fa-up":
+                "";
+  const color = diff === 0 ? "" : green(diff) ? "text-green-600" : "text-red-600";
   return (
     <div>
       <div>{ title }</div>
       <div className='text-3xl'>
         { display(prev) }
       </div>
-      <div className='text-3xl'>
+      <div className={ `text-3xl ${ color }` }>
         <span className={ `pr-1 ${ icon }` }/>
         { fraction(Math.abs(percent), 1) }%
       </div>
@@ -365,31 +376,31 @@ const CompareComp = ({ prev, curr, title, display = fraction }) => {
 const displayDuration = duration =>
   `${ fraction(Math.floor(duration / 60)) }:${ duration % 60 }`;
 
-export default [{
-  name:'Incidents',
-  title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
-  icon: 'fa-duotone fa-truck-tow',
-  path: "/",
-  exact: true,
-  auth: false,
-  mainNav: false,
-  sideNav: {
-    color: 'dark',
-    size: 'micro'
+export default [
+  { name:'Incidents',
+    title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
+    icon: 'fa-duotone fa-truck-tow',
+    path: "/",
+    exact: true,
+    auth: false,
+    mainNav: false,
+    sideNav: {
+      color: 'dark',
+      size: 'micro'
+    },
+    component: Incidents,
   },
-  component: Incidents,
-},
-{
-  name:'Incidents',
-  title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
-  icon: 'fa-duotone fa-truck-tow',
-  path: "/incidents",
-  exact: true,
-  auth: false,
-  mainNav: true,
-  sideNav: {
-    color: 'dark',
-    size: 'micro'
-  },
-  component: Incidents,
-}];
+  { name:'Incidents',
+    title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
+    icon: 'fa-duotone fa-truck-tow',
+    path: "/incidents",
+    exact: true,
+    auth: false,
+    mainNav: true,
+    sideNav: {
+      color: 'dark',
+      size: 'micro'
+    },
+    component: Incidents,
+  }
+];

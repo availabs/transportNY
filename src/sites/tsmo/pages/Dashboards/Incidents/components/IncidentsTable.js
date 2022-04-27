@@ -2,6 +2,7 @@ import React from "react"
 
 import get from "lodash.get";
 // import { useSelector } from 'react-redux';
+import { Link } from "react-router-dom"
 
 import { format as d3format } from "d3-format"
 import {
@@ -18,7 +19,7 @@ const fFormat = d3format(",.2s")
 const duration2minutes = (dur) => {
     let [days, time] = dur.split('-')
     let [hours, minutes] = time.split(':')
-    let out = 1440 * (+days) + 60 * (+hours) + (+minutes) 
+    let out = 1440 * (+days) + 60 * (+hours) + (+minutes)
     return isNaN(out) ? 0 : out
   }
 
@@ -31,33 +32,39 @@ var rminutes = Math.round(minutes);
 return rhours + " hour(s) and " + rminutes + " minute(s).";
 }
 
-const IncidentsTable = ({events}) => {
-  // const theme = useTheme()
-  
-  
+const IncidentsTable = ({ events, setHoveredEvent }) => {
+
+  const onRowEnter = React.useCallback((e, row) => {
+    setHoveredEvent(row.original.event_id);
+  }, [setHoveredEvent]);
+
+  const onRowLeave = React.useCallback((e, row) => {
+    setHoveredEvent(null);
+  }, [setHoveredEvent]);
+
   return (
     <>
       <div>
         <Table
+          onRowEnter={ onRowEnter }
+          onRowLeave={ onRowLeave }
           disableFilters={ true }
           data={events}
           columns={[
             { accessor: "event_id",
               Header: "Event",
-              Cell: (d) => {
-                  return (<div>
-
-                    <div className='text-sm'>
-                      {get(d, 'row.original.event_type', '')} 
-                    </div>
-                     <div>
-                      <span className='text-xs  text-gray-500'>
-                      {get(d, 'row.original.event_id','')} 
-                      </span>
-                    </div>
-                  </div>)
-               
-              },
+              Cell: (d) => (
+                <Link to={ `/incidents/${get(d, 'row.original.event_id','')}`}>
+                  <div className='text-sm'>
+                    {get(d, 'row.original.event_type', '')}
+                  </div>
+                   <div>
+                    <span className='text-xs  text-gray-500'>
+                    {get(d, 'row.original.event_id','')}
+                    </span>
+                  </div>
+                </Link>
+              ),
             },
             { accessor: "facility",
               Header: "Facility",
@@ -76,19 +83,19 @@ const IncidentsTable = ({events}) => {
               Header: "Duration",
               Cell: (d) => <span className='text-sm'>{timeConvert(d.value)}</span>
             },
-            
+
             { accessor: d => get(d, 'congestion_data.value.vehicleDelay', 0),
               Header: "Veh_Delay",
               id: 'vehicle_delay',
               Cell: (d) => <span className='text-sm'>{timeConvert(d.value)}</span>
             },
-            
+
           ]}
           sortBy="delay_cost"
           sortOrder="DESC"
         />
-        
-        {/* <Table 
+
+        {/* <Table
             data={ corridors }
             columns={[
               // { accessor: "corridor",
@@ -103,7 +110,7 @@ const IncidentsTable = ({events}) => {
 
                   return (<div>
                     <div>
-                      {get(d, 'row.original.roadname', '')} 
+                      {get(d, 'row.original.roadname', '')}
                       <span className='font-bold text-sm'>
                       &nbsp;{get(d, 'row.original.direction','')}
                       </span>
@@ -111,11 +118,11 @@ const IncidentsTable = ({events}) => {
                       &nbsp;{get(d, 'row.original.length',0).toFixed(2)} mi
                       </span>
                     </div>
-                    <div className='text-xs font-italic text-gray-600'> 
+                    <div className='text-xs font-italic text-gray-600'>
                       {from} {from !== to ? `to ${to}` : ''}
                     </div>
                   </div>)
-                } 
+                }
               },
               { accessor: "fsystem",
                 Header: "F cls"
@@ -135,7 +142,7 @@ const IncidentsTable = ({events}) => {
           />*/}
       </div>
     </>
-   
+
   )
 }
 

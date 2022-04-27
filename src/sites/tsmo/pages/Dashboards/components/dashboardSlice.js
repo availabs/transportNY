@@ -6,8 +6,8 @@ export const dashboardSlice = createSlice({
   name: 'dashboard',
   initialState: {
     region : 'REGION|1',
-    month: '2020-12',//`${ now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}`,
-    fsystem: 'All' // [1, 2, 3, 4, 5, 6, 7] 
+    month: '2021-04',//`${ now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}`,
+    fsystem: 'All' // [1, 2, 3, 4, 5, 6, 7]
   },
   reducers: {
     setRegion: (state,action) => {
