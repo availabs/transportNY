@@ -229,6 +229,32 @@ const ppdaf = () => {
                 }
             }
         },
+
+    tabpanel: (opts = {}) => {
+            const {color = 'white', size = 'compact'} = opts
+            let colors = {
+                white: 'bg-white hover:bg-gray-100',
+                transparent: 'gray-100'
+            }
+
+            let sizes = {
+                compact: 'px-4 py-1',
+                full: 'px-10 py-5'
+            }
+            return {
+                tabpanelWrapper: 'flex flex-row w-full h-full',
+                tabWrapper: 'flex flex-col',
+                tab: `px-4 py-2 hover:text-gray-800 cursor-pointer border-r-2  text-center text-gray-500`,
+                tabActive: `px-4 py-2 text-${accent}-500 border-r-2 border-blue-500 text-center`,
+                icon: '',
+                tabName: '',
+                contentWrapper: 'bg-white p-4 flex-1 h-full',
+                vars: {
+                    color: colors,
+                    size: sizes
+                }
+            }
+        },
     /* ------------------------- */
     shadow: "shadow",
     ySpace: "py-4",
