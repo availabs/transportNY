@@ -33,6 +33,13 @@ const F_SYSTEM_MAP = {
   'State & Local': [3, 4, 5, 6, 7]
 }
 
+const duration2minutes = (dur) => {
+  let [days, time] = dur.split('-')
+  let [hours, minutes] = time.split(':')
+  let out = 1440 * (+days) + 60 * (+hours) + (+minutes)
+  return isNaN(out) ? 0 : out
+}
+
 const Incidents = props => {
 
   const theme = useTheme()
@@ -105,14 +112,9 @@ const Incidents = props => {
         }
       })
       .then(() => { setLoading(-1); });
-  }, [requests, setLoading]);
+  }, [falcor,requests, setLoading]);
 
-  const duration2minutes = (dur) => {
-    let [days, time] = dur.split('-')
-    let [hours, minutes] = time.split(':')
-    let out = 1440 * (+days) + 60 * (+hours) + (+minutes)
-    return isNaN(out) ? 0 : out
-  }
+
 
   let data = React.useMemo(()=> {
     let request = requests[0];
@@ -164,8 +166,7 @@ const Incidents = props => {
       }, 0);
 
     let pieData = events.reduce((out, event) => {
-      // let event = get(falcorCache, ["transcom", "historical", "events", eventId],  {})
-      if(['accident', 'other'].includes(event.event_category)){
+
         let day = event.open_time.split(' ')[0]
 
         if(!out[event.event_type]) {
@@ -175,7 +176,7 @@ const Incidents = props => {
         }
         out[event.event_type] += 1
         out[`${event.event_type} duration`] += duration2minutes(event.duration)
-      }
+
       return out
 
     },{index: month})
@@ -251,8 +252,8 @@ const Incidents = props => {
               prev={ data.prevYear }
               curr={ data.numEvents }/>
           </div>
-
         </div>
+
         <div className='bg-white shadow rounded p-4 '>
           Incidents by Type
           <div className='h-64'>
@@ -266,6 +267,7 @@ const Incidents = props => {
             />
           </div>
         </div>
+
         <div className='bg-white shadow rounded p-4 col-span-2 flex flex-col'>
           <div>Incidents Type by Day</div>
           <div className="flex-1">
@@ -282,6 +284,7 @@ const Incidents = props => {
 
           </div>
         </div>
+
         <div className='bg-white shadow rounded p-4 '>
           Total Incident Duration
           <div className='text-gray-800 text-center pt-2 grid grid-cols-2 gap-x-2'>
@@ -374,7 +377,7 @@ const CompareComp = ({ prev, curr, title, display = fraction, green = lessThan0 
 }
 
 const displayDuration = duration =>
-  `${ fraction(Math.floor(duration / 60)) }:${ duration % 60 }`;
+  `${ fraction(Math.floor(duration / 60)) }:${ `00${ duration % 60 }`.slice(-2) }`;
 
 export default [
   { name:'Incidents',

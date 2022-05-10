@@ -56,19 +56,15 @@ class ConflationLayer extends LayerContainer {
     const string = `^con-${year}(?:-\\w+)+?`,
       regex = new RegExp(string);
 
-console.log("PROPS:", this.props);
-
     ConflationLayers.forEach(({ id }) => {
       if (regex.test(id)) {
-
-console.log("LAYER:", id)
 
         mapboxMap.setLayoutProperty(id, "visibility", "visible");
         mapboxMap.setFilter(id,
           ["all",
             BaseLayerFilters[id],
             ["any",
-              ["in", ["get", "tmc"], ["literal", tmcsWithData]],
+              ["in", ["get", "tmc"], ["literal", tmcs]],
               ["in", ["get", "id"], ["literal", ways]]
             ]
           ]
