@@ -4,6 +4,8 @@ import { AvlMap } from "modules/avl-map/src"
 import {MacroLayerFactory} from './layers/congestion-layer'
 import config from "config.json"
 
+import { ThemeContext } from "@availabs/avl-components"
+import PPDAF_THEME from "theme"
 
 const Map = ({ rawDelayData }) => {
     const {region, month, fsystem} = useSelector(state => state.dashboard)
@@ -15,8 +17,8 @@ const Map = ({ rawDelayData }) => {
             style: 'mapbox://styles/am3081/cl0ieiesd000514mop5fkqjox'},
          {name: "Light",
             style: 'mapbox://styles/am3081/ckm86j4bw11tj18o5zf8y9pou' },
-           
-           
+
+
             {name: "Dark",
             style: 'mapbox://styles/am3081/ckm85o7hq6d8817nr0y6ute5v' }
         ]
@@ -29,9 +31,10 @@ const Map = ({ rawDelayData }) => {
   }, [region, month, rawDelayData, fsystem]);
 
     return (
-        
-        <div className='w-full h-full border h-[700px]'  >   
-           
+
+        <div className='w-full h-full border h-[700px]'  >
+          <ThemeContext.Provider value={ PPDAF_THEME }>
+
             <AvlMap
                 accessToken={ config.MAPBOX_TOKEN }
                 mapOptions={ mapOptions }
@@ -40,11 +43,11 @@ const Map = ({ rawDelayData }) => {
                 sidebarTabPosition='side'
                 navigationControl="bottom-right"
             />
+
+          </ThemeContext.Provider>
         </div>
-       
+
     )
 }
 
 export default Map
-
-
