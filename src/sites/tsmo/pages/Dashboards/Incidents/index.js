@@ -24,6 +24,8 @@ import IncidentMap from './components/IncidentsMap'
 
 import DashboardLayout from 'sites/tsmo/pages/Dashboards/components/DashboardLayout'
 
+import { fraction, CompareComp, displayDuration } from "./components/CompareComp"
+
 const F_SYSTEMS = [1, 2, 3, 4, 5, 6, 7];
 
 
@@ -31,6 +33,13 @@ const F_SYSTEM_MAP = {
   'All': [],
   'Highways': [1, 2],
   'State & Local': [3, 4, 5, 6, 7]
+}
+
+const duration2minutes = (dur) => {
+  let [days, time] = dur.split('-')
+  let [hours, minutes] = time.split(':')
+  let out = 1440 * (+days) + 60 * (+hours) + (+minutes)
+  return isNaN(out) ? 0 : out
 }
 
 const Incidents = props => {
@@ -105,14 +114,9 @@ const Incidents = props => {
         }
       })
       .then(() => { setLoading(-1); });
-  }, [requests, setLoading]);
+  }, [falcor,requests, setLoading]);
 
-  const duration2minutes = (dur) => {
-    let [days, time] = dur.split('-')
-    let [hours, minutes] = time.split(':')
-    let out = 1440 * (+days) + 60 * (+hours) + (+minutes)
-    return isNaN(out) ? 0 : out
-  }
+
 
   let data = React.useMemo(()=> {
     let request = requests[0];
@@ -164,8 +168,7 @@ const Incidents = props => {
       }, 0);
 
     let pieData = events.reduce((out, event) => {
-      // let event = get(falcorCache, ["transcom", "historical", "events", eventId],  {})
-      if(['accident', 'other'].includes(event.event_category)){
+
         let day = event.open_time.split(' ')[0]
 
         if(!out[event.event_type]) {
@@ -175,7 +178,7 @@ const Incidents = props => {
         }
         out[event.event_type] += 1
         out[`${event.event_type} duration`] += duration2minutes(event.duration)
-      }
+
       return out
 
     },{index: month})
@@ -251,8 +254,8 @@ const Incidents = props => {
               prev={ data.prevYear }
               curr={ data.numEvents }/>
           </div>
-
         </div>
+
         <div className='bg-white shadow rounded p-4 '>
           Incidents by Type
           <div className='h-64'>
@@ -266,6 +269,7 @@ const Incidents = props => {
             />
           </div>
         </div>
+
         <div className='bg-white shadow rounded p-4 col-span-2 flex flex-col'>
           <div>Incidents Type by Day</div>
           <div className="flex-1">
@@ -282,6 +286,7 @@ const Incidents = props => {
 
           </div>
         </div>
+
         <div className='bg-white shadow rounded p-4 '>
           Total Incident Duration
           <div className='text-gray-800 text-center pt-2 grid grid-cols-2 gap-x-2'>
@@ -347,34 +352,6 @@ const Incidents = props => {
 
   )
 }
-
-const fraction = (f, d = 0) => f.toLocaleString('en-US', { maximumFractionDigits: d } );
-
-const lessThan0 = v => v < 0.0;
-
-const CompareComp = ({ prev, curr, title, display = fraction, green = lessThan0 }) => {
-  const diff = curr - prev;
-  const percent = diff / prev * 100;
-  const icon = diff < 0.0 ? "fa fa-down" :
-                diff > 0.0 ? "fa fa-up":
-                "";
-  const color = diff === 0 ? "" : green(diff) ? "text-green-600" : "text-red-600";
-  return (
-    <div>
-      <div>{ title }</div>
-      <div className='text-3xl'>
-        { display(prev) }
-      </div>
-      <div className={ `text-3xl ${ color }` }>
-        <span className={ `pr-1 ${ icon }` }/>
-        { fraction(Math.abs(percent), 1) }%
-      </div>
-    </div>
-  )
-}
-
-const displayDuration = duration =>
-  `${ fraction(Math.floor(duration / 60)) }:${ duration % 60 }`;
 
 export default [
   { name:'Incidents',

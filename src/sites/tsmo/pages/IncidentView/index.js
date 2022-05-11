@@ -3,7 +3,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
-  // extent as d3extent,
+  extent as d3extent,
   groups as d3groups,
   range as d3range,
   rollup as d3rollup,
@@ -49,6 +49,7 @@ const rawDataKeys = [
   "Event Type",
   "Open Time",
   "Close Time",
+  "Creation",
   "Duration",
   "Vehicle Delay",
 ];
@@ -67,7 +68,17 @@ const getTableValue = (key, eData) => {
       return capitalize(eData[key]);
     case "open_time":
     case "close_time":
+    case "creation":
       return new Date(eData[key]).toLocaleString();
+    case "duration": {
+      const dur = eData[key];
+      const [days, hours, mins] = dur.split(/[-:]/g).map(Number);
+      return [
+        days ? `${ days } day${ days > 1 ? "s": "" }` : "",
+        hours ? `${ hours } hour${ hours > 1 ? "s": "" }` : "",
+        mins ? `${ mins } minute${ mins > 1 ? "s": "" }` : ""
+      ].filter(Boolean).join(", ")
+    }
     default:
       return eData[key];
   }
@@ -116,9 +127,12 @@ const makeNpmrdsRequestKeys = (eventData) => {
   const year = dates[0].slice(0, 4);
 
   const keys = dates.map(date => {
-    const mDate = new Date(date),
+    const [year, month, day] = date.split("-"),
+      mDate = new Date(year, +month - 1, day),
       dow = mDate.getDay(),
       npmrdsDate = getNpmrdsDate(mDate);
+
+console.log("DATE:", date, mDate, dow , npmrdsDate);
 
     return [
       tmcArray,
@@ -228,6 +242,14 @@ const branchSort = ((a, b) => {
   return b.branch.length - a.branch.length;
 })
 
+const changeFormat = d3format("+,.1%")
+const gridValueFormat1 = (v) =>
+  isNaN(String(v)) ? "No Data"
+    : `${ Math.round(v) } MPH`;
+const gridValueFormat2 = (v) =>
+  isNaN(String(v)) ? "No Data"
+    : changeFormat(v);
+
 const IncidentViewNew = ({}) => {
   const { event_id } = useParams(),
     { falcor, falcorCache } = useFalcor();
@@ -270,6 +292,7 @@ const IncidentViewNew = ({}) => {
         "open_time",
         "geom",
         "duration",
+        "creation",
         "close_time",
         "description",
         "event_category",
@@ -293,7 +316,9 @@ const IncidentViewNew = ({}) => {
       falcor
         .get(
           ["routes", "data", requestKeys],
-          ["tmc", tmcs, "meta", year, ["aadt", "length", "avg_speedlimit"]],
+          ["tmc", tmcs, "meta", year,
+            ["aadt", "length", "avg_speedlimit", "roadname", "firstname"]
+          ],
           ["pm3", "measuresByTmc", tmcs, year, "freeflow_tt"]
         )
         .then(() => loadingStop());
@@ -364,11 +389,13 @@ const IncidentViewNew = ({}) => {
 
   const [upstreamBranches, downstreamBranches] = React.useMemo(() => {
     const conData = get(eventData, ["congestion_data", "value"], {}),
-      { branches = [] } = conData;;
+      { branches = [], dates = [] } = conData;;
 
     if (!branches.length) {
       return [[], []];
     }
+
+    const year = get(dates, 0, "").slice(0, 4);
 
     const tmcKey = showRaw ? "rawTmcDelayData" : "tmcDelayData";
 
@@ -376,7 +403,14 @@ const IncidentViewNew = ({}) => {
         .filter((b) => b.direction === "up-stream")
         .map(b => ({
           ...b,
-          key: b.branch.join(", "),
+          key: b.branch.join("|"),
+          names: b.branch.reduce((a, c, i) => {
+            const rn = get(falcorCache, ["tmc", c, "meta", year, "roadname"]);
+            if (rn !== a[a.length - 1]) {
+              a.push(rn);
+            }
+            return a;
+          }, []).join(", "),
           delay: b.branch.reduce((a, c) => a + get(conData, [tmcKey, c], 0), 0)
         }))
         .sort((a, b) => b.delay - a.delay);
@@ -384,13 +418,20 @@ const IncidentViewNew = ({}) => {
         .filter((b) => b.direction === "down-stream")
         .map(b => ({
           ...b,
-          key: b.branch.join(", "),
+          key: b.branch.join("|"),
+          names: b.branch.reduce((a, c, i) => {
+            const rn = get(falcorCache, ["tmc", c, "meta", year, "roadname"]);
+            if (rn !== a[a.length - 1]) {
+              a.push(rn);
+            }
+            return a;
+          }, []).join(", "),
           delay: b.branch.reduce((a, c) => a + get(conData, [tmcKey, c], 0), 0)
         }))
         .sort((a, b) => b.delay - a.delay);
 
     return [upBranches, downBranches];
-  }, [eventData, showRaw]);
+  }, [falcorCache, eventData, showRaw]);
 
   React.useEffect(() => {
     if (!activeBranches[0] && !activeBranches[1] && (upstreamBranches.length || downstreamBranches.length)) {
@@ -408,14 +449,12 @@ const IncidentViewNew = ({}) => {
       return [];
     }
 
-console.log("cData:", cData);
-
     const { dates, branches = [], tmcDelayData = {}, eventTmcs = [] } = cData;
 
     const year = dates[0].slice(0, 4);
 
     const branchMap = branches.reduce((a, c) => {
-      a[c.branch.join(", ")] = c;
+      a[c.branch.join("|")] = c;
       return a;
     }, {})
 
@@ -454,8 +493,8 @@ console.log("cData:", cData);
       return a;
     }, []);
 
-    // const colors = scaleQuantize()
-    //   .domain(d3extent(dataDomain))
+    // const _colors = scaleQuantize()
+    //   .domain([33, d3extent(dataDomain)[1]])
     //   .range(ColorRange);
 
     const _colors = scaleQuantile()
@@ -467,113 +506,138 @@ console.log("cData:", cData);
       return d.interpolated.includes(x) ? `${c}88` : c;
     };
 
-    const gData = requestKeys.reduce((a, c, i) => {
+    const keys1 = dates.reduce((a, c) => {
+      d3range(288).forEach(e => a.push(`${ c }|${ e }`));
+      return a;
+    }, []);
 
-      const date = dates[i] || dates[0].slice(0, 4);
+    const tmcLengths = [...tmcs].reduce((a, c) => {
+      a[c] = get(falcorCache, ["tmc", c, "meta", year, "length"], 1);
+      return a;
+    }, {})
 
-      const keys = d3range(288)
-        .map(e => `${ date }|${ e }`);
+    const grid1 = [...tmcs].reduce((a, tmc) => {
 
-      if ((i === 0) || (i === (requestKeys.length - 1))) {
-        a.push({ data: [], keys, colors })
-      }
+      const length = get(tmcLengths, tmc, 1);
 
-      const data = get(expandedData, c, [])
-        .filter(({ tmc }) => tmcs.has(tmc))
-        .map((d) => {
-          const { tmc, value } = d;
-          const length = get(falcorCache, [
-            "tmc",
-            tmc,
-            "meta",
-            date.slice(0, 4),
-            "length",
-          ]);
-          return {
-            ...d,
-            value: length * (3600.0 / value),
-            length,
-          };
-        });
-
-        const grouped = d3groups(data, (d) => d.tmc);
-
-        a[a.length - 1].data.push(...grouped
-          .map(([tmc, group]) => {
-            return {
-              index: tmc,
-              height: get(
-                falcorCache,
-                ["tmc", tmc, "meta", date.slice(0, 4), "length"],
-                1
-              ),
-              interpolated: group.reduce((a, c) => {
-                if (c.interpolated) {
-                  a.push(`${ date }|${ c.resolution }`);
-                }
-                return a;
-              }, []),
-              ...group.reduce((a, c) => {
-                a[`${ date }|${ c.resolution }`] = c.value;
-                return a;
-              }, {}),
-            };
-          })
-          .sort((a, b) => tmcMap.get(a.index) - tmcMap.get(b.index)));
-
-        return a;
-
-      }, []);
-
-      const keys1 = dates.reduce((a, c) => {
-        d3range(288). forEach(e => {
-          a.push(`${ c }|${ e }`);
-        });
-        return a;
+      const tmcData = requestKeys.slice(0, -1).reduce((aa, rk, i) => {
+        const data = get(expandedData, rk, []).filter(d => d.tmc === tmc);
+        aa.push(...data.map(d => ({
+          ...d,
+          value: length * (3600.0 / d.value),
+          key: `${ dates[i] }|${ d.resolution }`
+        })));
+        return aa;
       }, [])
 
-      const diffData = { keys: keys1, data: [] },
-        indexMap = new Map(),
-        keySets = [],
-        diffDomain = [];
-
-      get(gData, [0, "data"], []).forEach(({ index, height, ...rest }, i) => {
-        indexMap.set(index, i);
-        const dData = { index, height };
-        keySets.push(new Set());
-        keys1.forEach((k) => {
-          if (k in rest) {
-            keySets[i].add(k);
-            dData[k] = rest[k];
+      a.data.push({
+        index: tmc,
+        roadname: get(
+          falcorCache,
+          ["tmc", tmc, "meta", year, "roadname"],
+          ""
+        ),
+        height: length,
+        interpolated: tmcData.reduce((a, c) => {
+          if (c.interpolated) {
+            a.push(c.key);
           }
-        });
-        diffData.data.push(dData);
-      });
+          return a;
+        }, []),
+        ...tmcData.reduce((a, c) => {
+          a[c.key] = c.value;
+          return a;
+        }, {})
+      })
 
-      const keys2 = d3range(288).map(e => `${ dates[0].slice(0, 4) }|${ e }`);
+      return a;
+    }, { data: [], keys: keys1, colors });
 
-      get(gData, [1, "data"], []).forEach(({ index, height, ...rest }) => {
-        if (!indexMap.has(index)) return;
-        const i = indexMap.get(index);
-        keys1.forEach((k1, ii) => {
-          const k2 = keys2[ii % 288];
-          if ((k2 in rest) && keySets[i].has(k1)) {
-            keySets[i].delete(k1);
-            diffData.data[i][k1] -= rest[k2];
-            diffDomain.push(diffData.data[i][k1]);
+    grid1.data.sort((a, b) => tmcMap.get(a.index) - tmcMap.get(b.index))
+
+
+    const keys2 = d3range(288).map(e => `${ year }|${ e }`);
+
+    const grid2 = [...tmcs].reduce((a, tmc) => {
+
+      const length = get(tmcLengths, tmc, 1);
+
+      const tmcData = requestKeys.slice(-1).reduce((aa, rk, i) => {
+        const data = get(expandedData, rk, []).filter(d => d.tmc === tmc);
+        aa.push(...data.map(d => ({
+          ...d,
+          value: length * (3600.0 / d.value),
+          key: `${ year }|${ d.resolution }`
+        })));
+        return aa;
+      }, [])
+
+      a.data.push({
+        index: tmc,
+        roadname: get(
+          falcorCache,
+          ["tmc", tmc, "meta", year, "roadname"],
+          ""
+        ),
+        height: length,
+        interpolated: tmcData.reduce((a, c) => {
+          if (c.interpolated) {
+            a.push(c.key);
           }
-        });
+          return a;
+        }, []),
+        ...tmcData.reduce((a, c) => {
+          a[c.key] = c.value;
+          return a;
+        }, {})
+      })
+
+      return a;
+    }, { data: [], keys: keys2, colors });
+
+    grid2.data.sort((a, b) => tmcMap.get(a.index) - tmcMap.get(b.index))
+
+
+    const diffData = { keys: keys1, data: [] },
+      indexMap = new Map(),
+      keySets = [],
+      diffDomain = [];
+
+    grid1.data.forEach(({ index, height, ...rest }, i) => {
+      indexMap.set(index, i);
+      const dData = { index, height };
+      keySets.push(new Set());
+      keys1.forEach((k) => {
+        if (k in rest) {
+          keySets[i].add(k);
+          dData[k] = rest[k];
+        }
       });
+      diffData.data.push(dData);
+    });
 
-      keySets.forEach((set, i) => {
-        set.forEach((k) => delete diffData.data[i][k]);
+    grid2.data.forEach(({ index, height, ...rest }) => {
+      if (!indexMap.has(index)) return;
+      const i = indexMap.get(index);
+      keys1.forEach((k1, ii) => {
+        const k2 = keys2[ii % 288];
+        if ((k2 in rest) && keySets[i].has(k1)) {
+          keySets[i].delete(k1);
+          diffData.data[i][k1] = (diffData.data[i][k1] - rest[k2]) / rest[k2];
+          diffDomain.push(diffData.data[i][k1]);
+        }
       });
+    });
 
-      diffData.colors = scaleQuantile()
-        .domain(diffDomain)
-        .range(ColorRange);
+    keySets.forEach((set, i) => {
+      set.forEach((k) => delete diffData.data[i][k]);
+    });
 
-      gData.push(diffData);
+    diffData.colors = scaleQuantile()
+      .domain(diffDomain)
+      .range(ColorRange);
+
+    const gData = [grid1, grid2, diffData];
 
     return gData.map((gData, i) => ({
       gData,
@@ -648,7 +712,7 @@ console.log("cData:", cData);
     }
 
     return [bounds1, bounds2];
-  });
+  }, [eventData]);
 
   const mapData = React.useMemo(() => {
     let mData = {
@@ -667,7 +731,7 @@ console.log("cData:", cData);
     }
 
     const branchMap = congestionData.branches.reduce((a, c) => {
-      a[c.branch.join(", ")] = c;
+      a[c.branch.join("|")] = c;
       return a;
     }, {})
 
@@ -687,6 +751,11 @@ console.log("cData:", cData);
 
     return mData;
   }, [eventData, activeBranches]);
+
+  const axisLeftFormat = React.useCallback(tmc => {
+    const year = get(eventData, ["congestion_data", "value", "dates", 0], "").slice(0, 4);
+    return get(falcorCache, ["tmc", tmc, "meta", year, "roadname"]);
+  }, [falcorCache, eventData])
 
   return (
     <ThemeContext.Provider value={THEME}>
@@ -749,7 +818,7 @@ console.log("cData:", cData);
               </div>
               <Select options={ upstreamBranches }
                 value={ activeBranches[0] }
-                accessor={ d => d.key }
+                accessor={ d => d.names }
                 valueAccessor={ d => d.key }
                 onChange={ setUpstreamBranch }/>
             </div>
@@ -759,13 +828,12 @@ console.log("cData:", cData);
               </div>
               <Select options={ downstreamBranches }
                 value={ activeBranches[1] }
-                accessor={ d => d.key }
+                accessor={ d => d.names }
                 valueAccessor={ d => d.key }
                 onChange={ setDownstreamBranch }/>
             </div>
 
-            {!gridData.length
-              ? null
+            {!gridData.length ? null
               : gridData.map(({ gData, label }, i) => (
                   <div
                     key={i}
@@ -784,22 +852,21 @@ console.log("cData:", cData);
                       <GridGraph
                         {...gData}
                         showAnimations={false}
-                        margin={{ top: 5, right: 5, bottom: 25, left: 75 }}
+                        margin={{ top: 5, right: 5, bottom: 25, left: 150 }}
                         axisBottom={{
                           format: epochFormat,
                           tickDensity: 0.5,
                         }}
                         points={ points[i % 2] }
                         bounds={ bounds[i % 2] }
-                        axisLeft={true}
-                        hoverComp={{
+                        axisLeft={ {
+                          format: axisLeftFormat
+                        } }
+                        hoverComp={ {
                           HoverComp: GridHoverComp,
-                          valueFormat: (v) =>
-                            isNaN(String(v))
-                              ? "No Data"
-                              : `${Math.round(v)} MPH`,
+                          valueFormat: i === 2 ? gridValueFormat2 : gridValueFormat1,
                           keyFormat: epochFormat,
-                        }}
+                        } }
                       />
                     </div>
                   </div>
@@ -947,7 +1014,6 @@ const config = {
     color: 'dark',
     size: 'micro'
   },
-  auth: true,
   component: IncidentViewNew
 }
 

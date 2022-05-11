@@ -23,6 +23,8 @@ import CongestionCorridorTable from './components/congestionCorridorTable'
 import CongestionMap from './components/congestionMap'
 
 
+import { fraction, CompareComp, displayDuration } from "sites/tsmo/pages/Dashboards/Incidents/components/CompareComp"
+
 
 const useComponentDidMount = () => {
   const [mounted, setMounted] = React.useState(false);
@@ -40,11 +42,6 @@ const RecurrentDelay = props => {
   const MOUNTED = useComponentDidMount();
   const {region, month: tableDate, /*fsystem*/} = useSelector(state => state.dashboard)
   const [year, month] = tableDate.split("-").map(Number)
-        // py = year - 1,
-        // pm = (month - 2 + 12) % 12 + 1,
-        // prevMonth = `${ pm == 12 ? year - 1 : year }-${ `0${ pm }`.slice(-2) }`,
-        // prevYear = `${ py }-${ `0${ month }`.slice(-2) }`,
-        // prevYearMonth = `${ pm == 12 ? py - 1 : py }-${ `0${ pm }`.slice(-2) }`;
 
   const [loading, _setLoading] = React.useState(0);
   // const [showDPM, setShowDPM] = React.useState(false)
@@ -62,9 +59,9 @@ const RecurrentDelay = props => {
 
   React.useEffect(() => {
 
-    if (!region || !F_SYSTEMS.length) return;
+    if (!region) return;
     setLoading(1);
-    //sconsole.log('test', region, F_SYSTEMS)
+
     falcor
       .get(
         ["delay",
@@ -74,12 +71,11 @@ const RecurrentDelay = props => {
         ],
         ["excessive", "delay", region, "top", 10]
       )
-      .then(res => console.log("RES:", res))
       .then(() => setLoading(-1));
   }, [falcor, setLoading, region]);
 
   const [rawDelayData, setRawDelayData] = React.useState([]);
-  
+
   React.useEffect(() => {
     const data = get(
       falcorCache,
@@ -93,7 +89,7 @@ const RecurrentDelay = props => {
   }, [region,falcorCache]);
 
    const [fullDelayData, setFullDelayData] = React.useState({});
-  
+
   React.useEffect(() => {
     const data = get(
       falcorCache,
@@ -102,10 +98,10 @@ const RecurrentDelay = props => {
     );
     if(Object.keys(data).length) {
       setFullDelayData(data)
-    } 
+    }
   }, [region,year,falcorCache]);
 
-  
+
 
   const [pieData, setPieData] = React.useState({ data: [], keys: [] });
   // const [months, setMonths] = React.useState([])
@@ -137,86 +133,57 @@ const RecurrentDelay = props => {
     }
   }, [falcorCache, region]);
 
-  // console.log('pie data', pieData, pieData.data.filter(d => +d.index.substring(0,4) === year))
-  const currentMonth = get(get(pieData,'data',[]).filter(d => d.index === tableDate),'[0]',{recurrent: 0, "non-recurrent": 0})
-  const currentMonthTotal = (currentMonth['recurrent'] + currentMonth['non-recurrent'])
+    const currentMonth = get(get(pieData,'data',[]).filter(d => d.index === tableDate),'[0]',{recurrent: 0, "non-recurrent": 0})
+    const currentMonthTotal = (currentMonth['recurrent'] + currentMonth['non-recurrent'])
 
-
-
-  const totalByYear = React.useMemo(() => get(pieData,'data',[])
-    .reduce((total, curr) => {
-      let year = curr.index.substring(0,4)
-      let month = curr.index.substring(5,7)
-
-      if(!total[year]) {
-        total[year] = {
-          recurrent: 0,
-          non_recurrent: 0,
-          total: 0,
-          months:0
-        }
+    const compareData = React.useMemo(() => {
+      const py = year - 1,
+        pm = (month - 2 + 12) % 12 + 1,
+        prevMonth = `${ pm == 12 ? year - 1 : year }-${ `0${ pm }`.slice(-2) }`,
+        prevYear = `${ py }-${ `0${ month }`.slice(-2) }`;
+      return {
+        currMonth: pieData.data.reduce((a, c) => {
+            if (c.index === tableDate) {
+              return c.recurrent + c["non-recurrent"];
+            }
+            return a;
+          }, 0),
+        prevMonth: pieData.data.reduce((a, c) => {
+            if (c.index === prevMonth) {
+              return c.recurrent + c["non-recurrent"];
+            }
+            return a;
+          }, 0),
+        prevYear: pieData.data.reduce((a, c) => {
+            if (c.index === prevYear) {
+              return c.recurrent + c["non-recurrent"];
+            }
+            return a;
+          }, 0),
       }
-      total[year].recurrent += curr.recurrent
-      total[year].non_recurrent += curr['non-recurrent']
-      total[year].total += curr['non-recurrent'] + curr.recurrent
-      total[year].months += 1
+    }, [pieData, tableDate, year, month]);
 
-      if(!total[month]) {
-        total[month] = {
-          recurrent: 0,
-          non_recurrent: 0,
-          total: 0,
-          avg: 0,
-          count:0
-        }
-      }
-      total[month].recurrent += curr.recurrent
-      total[month].non_recurrent += curr['non-recurrent']
-      total[month].total += curr['non-recurrent'] + curr.recurrent
-      total[month].count += 1
-      total[month].avg = total[month].total / total[month].count 
-      return total
-    },{}),[pieData])
-  
   return (
       <DashboardLayout
         loading={loading}>
         <div className='bg-white shadow rounded p-4 '>
           Total Congestion
-          <div className='text-5xl text-extrabold text-gray-800 w-full text-center pt-2'>
-            {
-              currentMonthTotal
-                .toLocaleString('en-US',{maximumFractionDigits: 0})
-            }
+
+          <div className='text-gray-800 text-center pt-2 grid grid-cols-2'>
+            <div className="text-6xl col-span-2">
+              { fraction(compareData.currMonth) }
+            </div>
+            <CompareComp title="Prev. Month"
+              prev={ compareData.prevMonth }
+              curr={ compareData.currMonth }/>
+            <CompareComp title="Prev. Year"
+              prev={ compareData.prevYear }
+              curr={ compareData.currMonth }/>
           </div>
-          <div className='text-sm text-extrabold text-gray-600 w-full text-center '>
-          Vehicle Hours of Delay
-          </div>
-          Total Year Congestion {year}
-          <div className='text-5xl text-extrabold text-gray-800 w-full text-center pt-2'>
-            {
-              get(totalByYear,`[${year}].total`,0)
-                .toLocaleString('en-US',{maximumFractionDigits: 0})
-            }
-          </div>
-          <div className='text-sm text-extrabold text-gray-600 w-full text-center '>
-          Vehicle Hours of Delay
-          </div>
-         
-          Monthly Avg Congestion {month}
-          <div className='text-5xl text-extrabold text-gray-800 w-full text-center pt-2'>
-            {
-              get(totalByYear,`[${month}].avg`,0)
-                .toLocaleString('en-US',{maximumFractionDigits: 0})
-            }
-          </div>
-          <div className='text-sm text-extrabold text-gray-600 w-full text-center '>
-          Vehicle Hours of Delay
-          </div>
-          
+
         </div>
         <div className='bg-white shadow rounded p-4'>
-          Recurrent vs Non-Recurrent 
+          Recurrent vs Non-Recurrent
           <div className='flex'>
             <div className='flex-1 text-center'>
               Recurrent
@@ -229,7 +196,7 @@ const RecurrentDelay = props => {
               <div className='text-lg text-extrabold text-gray-800 w-full '>
                 {
                   ((currentMonth.recurrent / currentMonthTotal) * 100).toFixed(1)
-                  
+
                 }%
               </div>
             </div>
@@ -244,13 +211,13 @@ const RecurrentDelay = props => {
               <div className='text-lg text-extrabold text-gray-800 w-full'>
                 {
                   ((get(currentMonth, `['non-recurrent']`,0) / currentMonthTotal) * 100).toFixed(1)
-                  
+
                 }%
               </div>
             </div>
           </div>
           <div className='w-full h-64'>
-            <PieGraph 
+            <PieGraph
               keys={pieData.keys}
               data={get(pieData,'data',[]).filter(d => d.index === tableDate)}
               colors={theme.graphColors}
@@ -258,11 +225,11 @@ const RecurrentDelay = props => {
                 valueFormat: ",.2f"
               } }/>
           </div>
-          
+
         </div>
         <div className='bg-white shadow rounded p-4 col-span-2'>
           Bar Graph
-          <BarGraph 
+          <BarGraph
             colors={theme.graphColors}
             indexBy="index"
             data={ pieData.data.filter(d => +d.index.substring(0,4) === +year) }
@@ -274,29 +241,29 @@ const RecurrentDelay = props => {
             } }
             axisLeft={ { ticks: 5 } }/>
         </div>
-        
+
         <div className='bg-white shadow rounded p-4 col-span-2'>
           Highest Congestion Segments
-          <CongestionCorridorTable 
+          <CongestionCorridorTable
             rawDelayData={fullDelayData}
           />
         </div>
 
         <div className='bg-white shadow rounded p-4 col-span-2'>
-          
-          <CongestionMap 
+
+          <CongestionMap
             rawDelayData={fullDelayData}
           />
         </div>
 
         <div className='bg-white shadow rounded p-4 col-span-4'>
           Highest Congestion Segments
-          <CongestionSegmentTable 
+          <CongestionSegmentTable
             rawDelayData={rawDelayData}
           />
-        </div> 
+        </div>
 
-        
+
     </DashboardLayout>
   )
 }
@@ -312,7 +279,7 @@ const config = {
   sideNav: {
     size: 'micro'
   },
-  
+
   component: RecurrentDelay,
 };
 
