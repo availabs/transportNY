@@ -13,15 +13,19 @@ const LayersTab = ({activeLayers,MapActions,...rest},) => {
     const theme = useTheme()
     return (
         <div>
-           <div>
-                <div className={theme.button}>Add Data</div>
-           </div>
-           { activeLayers.map(layer =>
-              <LayerPanel
-                key={ layer.id } { ...rest }
-                layer={ layer } MapActions={ MapActions }/>
-            )
-          }
+           <div className='pb-2 border-b border-gray-200'>
+                <button className={theme.button({color:'primary',width:'full', size: 'sm'}).button}>
+                    Add Data
+                    <i className='fa-solid fa-plus px-2' />
+                </button>
+            </div>
+            <div className='py-2'>
+                { activeLayers.map(layer =>
+                  <LayerPanel
+                    key={ layer.id } { ...rest }
+                    layer={ layer } MapActions={ MapActions }/>)
+                }
+            </div>
         </div>
     )
 

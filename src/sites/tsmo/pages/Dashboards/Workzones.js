@@ -25,11 +25,7 @@ import DashboardLayout from './components/DashboardLayout'
 import IncidentTable from 'sites/tsmo/pages/Dashboards/Incidents/components/IncidentsTable'
 import IncidentMap from 'sites/tsmo/pages/Dashboards/Incidents/components/IncidentsMap'
 
-const F_SYSTEM_MAP = {
-  'All': [],
-  'Highways': [1, 2],
-  'State & Local': [3, 4, 5, 6, 7]
-}
+import { F_SYSTEMS, F_SYSTEM_MAP } from 'sites/tsmo/pages/Dashboards/components/metaData'
 
 const duration2minutes = (dur) => {
   let [days, time] = dur.split('-')

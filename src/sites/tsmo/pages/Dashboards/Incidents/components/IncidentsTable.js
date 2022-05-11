@@ -29,7 +29,7 @@ var hours = (num / 60);
 var rhours = Math.floor(hours);
 var minutes = (hours - rhours) * 60;
 var rminutes = Math.round(minutes);
-return rhours + " hour(s) and " + rminutes + " minute(s).";
+return rhours + " h  " + rminutes + " m";
 }
 
 const IncidentsTable = ({ events, setHoveredEvent }) => {
@@ -54,26 +54,36 @@ const IncidentsTable = ({ events, setHoveredEvent }) => {
             { accessor: "event_id",
               Header: "Event",
               Cell: (d) => (
-                <Link to={ `/incidents/${get(d, 'row.original.event_id','')}`}>
+                <Link className='min-w-20' to={ `/incidents/${get(d, 'row.original.event_id','')}`}>
                   <div className='text-sm'>
                     {get(d, 'row.original.event_type', '')}
                   </div>
-                   <div>
-                    <span className='text-xs  text-gray-500'>
-                    {get(d, 'row.original.event_id','')}
-                    </span>
+                   
+                  <div>
+                  <span className='text-xs text-gray-500'>{get(d, 'row.original.open_time','').split(' ')[0]}</span>
                   </div>
                 </Link>
               ),
             },
             { accessor: "facility",
               Header: "Facility",
-              canFilter: true
+              canFilter: true,
+              Cell: (d) => (
+                  <div>
+                    <div>
+                   <span className='text-xs'>{get(d, 'value','')}</span>
+                   </div>
+                    <span className='text-xs text-gray-500'>{get(d, 'row.original.open_time','').split(' ')[1]}</span>
+                   
+                  </div>
+              )
             },
-          /*  { accessor: "open_time",
-              Header: "Date Time",
-              Cell: (d) => <span className='text-sm'>{d.value}</span>
-            },*/
+            // { accessor: "open_time",
+            //   Header: "Date Time",
+            //   Cell: (d) => <div>
+            //       <span className='text-xs'>{get(d, 'row.original.open_time','')}</span>
+            //       </div>
+            // },
             { accessor: d => get(d, 'congestion_data.value.vehicleDelay', 0),
               Header: "Cost",
               id: 'delay_cost',
@@ -93,53 +103,8 @@ const IncidentsTable = ({ events, setHoveredEvent }) => {
           ]}
           sortBy="delay_cost"
           sortOrder="DESC"
+          initialPageSize={20}
         />
-
-        {/* <Table
-            data={ corridors }
-            columns={[
-              // { accessor: "corridor",
-              //   Header: "TMC",
-              //   disableSortBy: true
-              // },
-              { accessor: "roadname",
-                Header: "Road Name",
-                Cell: (d) => {
-                  let from = get(d, 'row.original.from', ''),
-                      to = get(d, 'row.original.to', '')
-
-                  return (<div>
-                    <div>
-                      {get(d, 'row.original.roadname', '')}
-                      <span className='font-bold text-sm'>
-                      &nbsp;{get(d, 'row.original.direction','')}
-                      </span>
-                      <span className='font-bold text-sm float-right text-gray-500'>
-                      &nbsp;{get(d, 'row.original.length',0).toFixed(2)} mi
-                      </span>
-                    </div>
-                    <div className='text-xs font-italic text-gray-600'>
-                      {from} {from !== to ? `to ${to}` : ''}
-                    </div>
-                  </div>)
-                }
-              },
-              { accessor: "fsystem",
-                Header: "F cls"
-              },
-              { accessor: "total_delay_per_mile",
-                Header: "Delay / Mile",
-                Cell: ({ value }) => floatFormat(value)
-              },
-              { accessor: "total_delay",
-                Header: () => <div>Total Delay</div>,
-                Cell: ({ value }) => floatFormat(value)
-              }
-            ]}
-            disableFilters={ true }
-            sortBy="total_delay_per_mile"
-            sortOrder="DESC"
-          />*/}
       </div>
     </>
 

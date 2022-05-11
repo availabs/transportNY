@@ -19,20 +19,18 @@ import {
   useComponentDidMount
 } from 'sites/tsmo/pages/Dashboards/components/utils'
 
-import IncidentTable from './components/IncidentsTable'
-import IncidentMap from './components/IncidentsMap'
+import IncidentTable from '../Incidents/components/IncidentsTable'
+import IncidentMap from '../Incidents/components/IncidentsMap'
 
 import DashboardLayout from 'sites/tsmo/pages/Dashboards/components/DashboardLayout'
 
-import { fraction, CompareComp, displayDuration } from "./components/CompareComp"
+// const F_SYSTEMS = [1, 2, 3, 4, 5, 6, 7];
 
-import {F_SYSTEM_MAP} from '../components/metaData'
 
-const duration2minutes = (dur) => {
-  let [days, time] = dur.split('-')
-  let [hours, minutes] = time.split(':')
-  let out = 1440 * (+days) + 60 * (+hours) + (+minutes)
-  return isNaN(out) ? 0 : out
+const F_SYSTEM_MAP = {
+  'All': [],
+  'Highways': [1, 2],
+  'State & Local': [3, 4, 5, 6, 7]
 }
 
 const Incidents = props => {
@@ -66,19 +64,19 @@ const Incidents = props => {
       JSON.stringify([new Date(y, m-1, 1).toISOString().substring(0, 10), //start date
         new Date(y, m, 0).toISOString().substring(0, 10), //end date
         get(geo,'geoid',""),
-        ['accident', 'other'], //eCategory.startsWith("All") ? null : eCategory,
+        ['construction'], //eCategory.startsWith("All") ? null : eCategory,
         null //eType.startsWith("All") ? null : eType
       ]),
       JSON.stringify([new Date(y, m-2, 1).toISOString().substring(0, 10), //start date
         new Date(y, m-1, 0).toISOString().substring(0, 10), //end date
         get(geo,'geoid',""),
-        ['accident', 'other'], //eCategory.startsWith("All") ? null : eCategory,
+        ['construction'], //eCategory.startsWith("All") ? null : eCategory,
         null //eType.startsWith("All") ? null : eType
       ]),
       JSON.stringify([new Date(y-1, m-1, 1).toISOString().substring(0, 10), //start date
         new Date(y-1, m, 0).toISOString().substring(0, 10), //end date
         get(geo,'geoid',""),
-        ['accident', 'other'], //eCategory.startsWith("All") ? null : eCategory,
+        ['construction'], //eCategory.startsWith("All") ? null : eCategory,
         null //eType.startsWith("All") ? null : eType
       ])
     ];
@@ -107,9 +105,14 @@ const Incidents = props => {
         }
       })
       .then(() => { setLoading(-1); });
-  }, [falcor,requests, setLoading]);
+  }, [requests, setLoading]);
 
-
+  const duration2minutes = (dur) => {
+    let [days, time] = dur.split('-')
+    let [hours, minutes] = time.split(':')
+    let out = 1440 * (+days) + 60 * (+hours) + (+minutes)
+    return isNaN(out) ? 0 : out
+  }
 
   let data = React.useMemo(()=> {
     let request = requests[0];
@@ -120,7 +123,7 @@ const Incidents = props => {
 
     let data = eventIds.reduce((out, eventId) => {
       let event = get(falcorCache, ["transcom", "historical", "events", eventId],  null)
-      // if(['accident', 'other'].includes(event.event_category)){
+      // if(['construction'].includes(event.event_category)){
 
       const fSystems = F_SYSTEM_MAP[fsystem];
 
@@ -161,7 +164,8 @@ const Incidents = props => {
       }, 0);
 
     let pieData = events.reduce((out, event) => {
-
+      // let event = get(falcorCache, ["transcom", "historical", "events", eventId],  {})
+      if(['construction'].includes(event.event_category)){
         let day = event.open_time.split(' ')[0]
 
         if(!out[event.event_type]) {
@@ -171,7 +175,7 @@ const Incidents = props => {
         }
         out[event.event_type] += 1
         out[`${event.event_type} duration`] += duration2minutes(event.duration)
-
+      }
       return out
 
     },{index: month})
@@ -213,11 +217,8 @@ const Incidents = props => {
       return a;
     }, {})
 
-    console.log('data', events)
     return {
-      events: events
-        .sort((a,b) => get(a,'congestion_data.value.vehicleDelay',0) - get(b,'congestion_data.value.vehicleDelay',0))
-        .filter((d,i) => i < 20),
+      events,
       numEvents: events.length,
       prevMonth,
       prevMonthDur,
@@ -238,7 +239,7 @@ const Incidents = props => {
   return (
       <DashboardLayout loading={loading}>
         <div className='bg-white shadow rounded p-4 '>
-          <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '> Reported Incidents </div>
+          Number of Active Workzones
           <div className='text-gray-800 text-center pt-2 grid grid-cols-2'>
             <div className="text-6xl col-span-2">
               { fraction(data.numEvents) }
@@ -250,10 +251,10 @@ const Incidents = props => {
               prev={ data.prevYear }
               curr={ data.numEvents }/>
           </div>
-        </div>
 
+        </div>
         <div className='bg-white shadow rounded p-4 '>
-           <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '>Incidents by Type</div>
+          Workzone by Type
           <div className='h-64'>
             <PieGraph
                 keys={data.keys}
@@ -265,15 +266,14 @@ const Incidents = props => {
             />
           </div>
         </div>
-
         <div className='bg-white shadow rounded p-4 col-span-2 flex flex-col'>
-           <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '>Incidents Type by Day</div>
+          <div>Incidents Type by Day</div>
           <div className="flex-1">
 
             <BarGraph
               colors={theme.graphCategorical}
               indexBy="index"
-              data={ data.data.sort((a,b)=> a.index.localeCompare(b.index))}
+              data={ data.data }
               keys={ data.keys }
               margin={ { top: 5, right: 5, bottom: 25, left: 50 } }
               padding={ 0.2 }
@@ -282,14 +282,13 @@ const Incidents = props => {
 
           </div>
         </div>
-
         <div className='bg-white shadow rounded p-4 '>
-           <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '>Total Incident Duration</div>
+          Total Incident Duration
           <div className='text-gray-800 text-center pt-2 grid grid-cols-2 gap-x-2'>
             <div className="text-6xl col-span-2">
               { displayDuration(data.totalDuration) }
             </div>
-            <div className='text-xs col-span-2 text-center '>
+            <div className='text-sm col-span-2 text-center '>
               Hours : Minutes
             </div>
             <CompareComp title="Prev. Month"
@@ -304,7 +303,7 @@ const Incidents = props => {
 
         </div>
         <div className='bg-white shadow rounded p-4 '>
-           <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '>Incident Duration by Type</div>
+          Incident Duration by Type
           <div className='h-64'>
 
             <PieGraph
@@ -318,7 +317,7 @@ const Incidents = props => {
           </div>
         </div>
         <div className='bg-white shadow rounded p-4 col-span-2 flex flex-col'>
-          <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '>Incidents Count by Duration</div>
+          <div>Incidents Count by Duration</div>
           <div className="flex-1">
 
             <BarGraph
@@ -333,23 +332,15 @@ const Incidents = props => {
 
           </div>
         </div>
-        <div className='pt-4 px-2 col-span-4'>
-          <span className='text-xl font-medium uppercase text-gray-700'> Top 20 Incidents by Cost {month}</span>
-        </div>
+
         <div className='bg-white shadow rounded p-4 col-span-2'>
-          
-          <IncidentTable 
-            events={data.events} 
-            setHoveredEvent={ setHoveredEvent }
-          />
+          <IncidentTable events={data.events} setHoveredEvent={ setHoveredEvent }/>
         </div>
 
         <div className='bg-white shadow rounded p-4 col-span-2'>
-          <IncidentMap 
-            colorsForTypes={ data.colorsForTypes }
+          <IncidentMap colorsForTypes={ data.colorsForTypes }
             events={data.events}
-            hoveredEvent={ hoveredEvent }
-          />
+            hoveredEvent={ hoveredEvent }/>
         </div>
 
       </DashboardLayout>
@@ -357,31 +348,46 @@ const Incidents = props => {
   )
 }
 
-export default [
-  { name:'Incidents',
-    title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
-    icon: 'fa-duotone fa-truck-tow',
-    path: "/",
-    exact: true,
-    auth: false,
-    mainNav: false,
-    sideNav: {
-      color: 'dark',
-      size: 'micro'
-    },
-    component: Incidents,
+const fraction = (f, d = 0) => f.toLocaleString('en-US', { maximumFractionDigits: d } );
+
+const lessThan0 = v => v < 0.0;
+
+const CompareComp = ({ prev, curr, title, display = fraction, green = lessThan0 }) => {
+  const diff = curr - prev;
+  const percent = diff / prev * 100;
+  const icon = diff < 0.0 ? "fa fa-down" :
+                diff > 0.0 ? "fa fa-up":
+                "";
+  const color = diff === 0 ? "" : green(diff) ? "text-green-600" : "text-red-600";
+  return (
+    <div>
+      <div>{ title }</div>
+      <div className='text-3xl'>
+        { display(prev) }
+      </div>
+      <div className={ `text-3xl ${ color }` }>
+        <span className={ `pr-1 ${ icon }` }/>
+        { fraction(Math.abs(percent), 1) }%
+      </div>
+    </div>
+  )
+}
+
+const displayDuration = duration =>
+  `${ fraction(Math.floor(duration / 60)) }:${ duration % 60 }`;
+
+export default {
+  name: 'Work Zones',
+  path: "/workzones",
+  exact: true,
+  auth: false,
+  mainNav:true,
+  icon: 'fa-duotone fa-triangle-person-digging',
+  title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
+  sideNav: {
+    color: 'dark',
+    size: 'micro'
   },
-  { name:'Incidents',
-    title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
-    icon: 'fa-duotone fa-truck-tow',
-    path: "/incidents",
-    exact: true,
-    auth: false,
-    mainNav: true,
-    sideNav: {
-      color: 'dark',
-      size: 'micro'
-    },
     component: Incidents,
-  }
-];
+}
+;

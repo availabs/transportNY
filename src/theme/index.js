@@ -212,17 +212,19 @@ const ppdaf = () => {
             }
 
             let sizes = {
-                compact: 'px-4 py-1',
+                compact: 'px-2 ',
                 full: 'px-10 py-5'
             }
             return {
                 tableHeader:
-                    `${sizes[size]} pb-1 border-b-2 border-gray-300 bg-gray-200 text-left font-medium text-gray-700 uppercase first:rounded-tl-md last:rounded-tr-md`,
+                    `${sizes[size]} py-1 border-b-2 bg-gray-100 border-gray-200 text-left font-medium text-gray-600  first:rounded-tl-md last:rounded-tr-md`,
                 tableInfoBar: "bg-white",
-                tableRow: `${colors[color]} transition ease-in-out duration-150`,
+                tableRow: `${colors[color]} transition ease-in-out duration-150 border-b border-gray-100`,
                 tableRowStriped: `bg-gray-100 even:bg-gray-200 hover:bg-gray-300 transition ease-in-out duration-150`,
                 tableCell: `${sizes[size]} whitespace-no-wrap`,
                 inputSmall: 'w-24',
+                sortIconDown: 'px-2 text-sm fa fa-chevron-down',
+                sortIconUp: 'px-2 text-sm fa fa-chevron-up',
                 vars: {
                     color: colors,
                     size: sizes
@@ -255,6 +257,52 @@ const ppdaf = () => {
                 }
             }
         },
+        button: (opts = {}) => {
+            const {color = 'white', size = 'base', width = 'block'} = opts
+            let colors = {
+                white: `
+                    border border-gray-300  text-gray-700 bg-white hover:text-gray-500
+                    focus:outline-none focus:shadow-outline-blue focus:border-blue-300
+                    active:text-gray-800 active:bg-gray-50 transition duration-150 ease-in-out
+                    disabled:cursor-not-allowed
+                `,
+                transparent: `
+                    border border-gray-300  text-gray-700 bg-white hover:text-gray-500
+                    focus:outline-none focus:shadow-outline-blue focus:border-blue-300
+                    active:text-gray-800 active:bg-gray-50 transition duration-150 ease-in-out
+                    disabled:cursor-not-allowed
+                `,
+                primary: `
+                    border border-transparent shadow 
+                    text-sm leading-4 rounded-sm text-white bg-blue-600 hover:bg-blue-700 
+                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`,
+                danger: ''
+            }
+
+            let sizes  = { 
+                base: 'px-4 py-4 leading-5 font-medium',
+                sm: 'text-sm px-2 py-2 leading-5 font-medium',
+                lg: 'text-lg px-6 py-6 leading-5 font-medium',
+                xl: 'text-2xl px-12 py-8 leading-5 font-medium'
+            }
+
+            let widths = {
+                'block': '',
+                'full' : 'w-full'
+            }
+
+            return {
+                button: `
+                  ${colors[color]} ${sizes[size]} ${widths[width]}
+                `,
+                vars: {
+                    color: colors,
+                    size: sizes,
+                    width: widths
+                }
+            } 
+        },
+
     /* ------------------------- */
     shadow: "shadow",
     ySpace: "py-4",
@@ -337,18 +385,7 @@ const ppdaf = () => {
     width: "",
 
     transition: "transition ease-in-out duration-150",
-    button: () => `
-        inline-flex items-center
-        px-4 py-2 border border-gray-300
-        text-sm leading-5 font-medium
-        rounded-md text-gray-700 bg-white
-        hover:text-gray-500
-        focus:outline-none focus:shadow-outline-blue focus:border-blue-300
-        active:text-gray-800 active:bg-gray-50 transition duration-150 ease-in-out
-        disabled:cursor-not-allowed`,
-    buttonPrimary:
-      "inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:shadow-outline-indigo focus:border-indigo-700 active:bg-indigo-700 transition duration-150 ease-in-out disabled:cursor-not-allowed",
-
+    
     tableRow: "bg-gray-100 hover:bg-gray-200 transition ease-in-out duration-150",
     tableRowStriped:
       "bg-gray-100 even:bg-gray-200 hover:bg-gray-300 transition ease-in-out duration-150",

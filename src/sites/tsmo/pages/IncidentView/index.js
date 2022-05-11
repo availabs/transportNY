@@ -1,15 +1,12 @@
 import React from "react";
 
-import { connect } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
-  extent as d3extent,
-  groups as d3groups,
   range as d3range,
   rollup as d3rollup,
 } from "d3-array";
 import { format as d3format } from "d3-format";
-import { scaleQuantize, scaleQuantile, scaleLinear } from "d3-scale";
+import { scaleQuantile, scaleLinear } from "d3-scale";
 
 import get from "lodash.get";
 

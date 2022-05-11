@@ -1,52 +1,59 @@
 export const REGIONS = [
     {
         "region": "REGION|1",
-        "name": "Capital District"
+        "name": "Region 1 - Capital District"
     },
     {
         "region": "REGION|2",
-        "name": "Mohawk Valley"
+        "name": "Region 2 - Mohawk Valley"
     },
     {
         "region": "REGION|3",
-        "name": "Central New York"
+        "name": "Region 3 - Central New York"
     },
     {
         "region": "REGION|4",
-        "name": "Genesee Valley"
+        "name": "Region 4 - Genesee Valley"
     },
     {
         "region": "REGION|5",
-        "name": "Western New York"
+        "name": "Region 5 - Western New York"
     },
     {
         "region": "REGION|6",
-        "name": "Southern Tier/Central New York"
+        "name": "Region 6 - Southern Tier/Central New York"
     },
     {
         "region": "REGION|7",
-        "name": "North Country"
+        "name": "Region 7 - North Country"
     },
     {
         "region": "REGION|8",
-        "name": "Hudson Valley"
+        "name": "Region 8 - Hudson Valley"
     },
     {
         "region": "REGION|9",
-        "name": "Southern Tier"
+        "name": "Region 9 - Southern Tier"
     },
     {
         "region": "REGION|10",
-        "name": "Long Island"
+        "name": "Region 10 - Long Island"
     },
     {
         "region": "REGION|11",
-        "name": "New York City "
+        "name": "Region 11 - New York City "
     }
 ]
 
 export const F_SYSTEMS = [1, 2, 3, 4, 5, 6, 7];
 
+
+
+export const F_SYSTEM_MAP = {
+  'All': [],
+  'Interstates and Limited Access': [1, 2],
+  'Arterials and Local': [3, 4, 5, 6, 7]
+}
 const calcMonths = () => {
   var date = new Date()
   let dates = []

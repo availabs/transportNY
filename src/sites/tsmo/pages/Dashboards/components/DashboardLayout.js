@@ -10,7 +10,7 @@ import {
   ScalableLoading
 } from "modules/avl-components/src"
 
-import { REGIONS, MONTHS, /*F_SYSTEMS*/ } from './metaData'
+import { REGIONS, MONTHS, F_SYSTEM_MAP } from './metaData'
 
 const pages = {
   '/': 'Incidents',
@@ -69,15 +69,15 @@ const Layout = ({
             <Select options={ MONTHS }
               value={ month }
               onChange={ (v) => dispatch(setMonth(v)) }
-              className = 'font-bold text-3xl'
+              className = 'font-bold py-3.5 '
               multi={ false }/>
           </div>
           <div>
             <span className="">ROAD CLASS</span>
-            <Select options={ ['All', 'Highways', 'State & Local'] }
+            <Select options={ Object.keys(F_SYSTEM_MAP) }
               value={ fsystem }
               onChange={ (v) => dispatch(setFsystem(v)) }
-              className = 'font-bold text-3xl'
+              className = 'font-bold py-3.5 '
             />
           </div>
           {children}
