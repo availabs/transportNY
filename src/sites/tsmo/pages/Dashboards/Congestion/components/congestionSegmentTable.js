@@ -98,6 +98,9 @@ const getColumns = (prevMonth, prevYear, prevYearMonth) => {
 
 
 const CongestionSegmentTable = ({rawDelayData}) => {
+
+console.log("?????????????", rawDelayData)
+
  // const theme = useTheme()
   const { month: tableDate, /*fsystem*/} = useSelector(state => state.dashboard)
   const [year, month] = tableDate.split("-").map(Number),
@@ -124,7 +127,7 @@ const CongestionSegmentTable = ({rawDelayData}) => {
       .sort((a, b) => b.localeCompare(a));
   }, [rawDelayData]);
 
- 
+
   const tmcs = React.useMemo(() => {
     return d3groups(rawDelayData, d => d.tmc)
       .map(([tmc]) => tmc);
@@ -258,10 +261,10 @@ const CongestionSegmentTable = ({rawDelayData}) => {
   const Columns = React.useMemo(() => {
     return getColumns(prevMonth, prevYear, prevYearMonth);
   }, [prevMonth, prevYear, prevYearMonth]);
-  
-  
+
+
   return (
-    <Table 
+    <Table
       data={ tableData }
       columns={ Columns }
       disableFilters={ true }

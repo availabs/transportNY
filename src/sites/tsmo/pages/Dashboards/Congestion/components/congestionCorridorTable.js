@@ -13,6 +13,12 @@ import {
 
 import { F_SYSTEMS } from 'sites/tsmo/pages/Dashboards/components/metaData'
 
+const F_SYSTEM_MAP = {
+  'All': F_SYSTEMS,
+  'Highways': [1, 2],
+  'State & Local': [3, 4, 5, 6, 7]
+}
+
 const fFormat = d3format(",.1f")
 const floatFormat = f => (f === null) || isNaN(f) ? "no data" : fFormat(f);
 
@@ -20,7 +26,7 @@ const floatFormat = f => (f === null) || isNaN(f) ? "no data" : fFormat(f);
 
 const CongestionSegmentTable = ({rawDelayData}) => {
   // const theme = useTheme()
-  const {region, month: tableDate, /*fsystem*/} = useSelector(state => state.dashboard)
+  const {region, month: tableDate, fsystem } = useSelector(state => state.dashboard)
   const [year, month] = tableDate.split("-").map(Number)
         // py = year - 1,
         // pm = (month - 2 + 12) % 12 + 1,
@@ -38,32 +44,34 @@ const CongestionSegmentTable = ({rawDelayData}) => {
       .sort((a, b) => a - b);
   }, [rawDelayData]);
 
-  
+  const f_systems = get(F_SYSTEM_MAP, fsystem, []);
+
+
   const tmcs = React.useMemo(() => {
-    let total = F_SYSTEMS.reduce((out,fclass) => {
+    let total = f_systems.reduce((out,fclass) => {
       // console.log('tmcs get', rawDelayData, get(rawDelayData,`[${year}][${+month}][${region}][${fclass}].total.value`,[]))
       get(rawDelayData,`[${year}][${+month}][${region}][${fclass}].total.value`,[])
         .forEach(tmc => {
           if(!out[tmc.tmc]){
-            out[tmc.tmc] = tmc 
+            out[tmc.tmc] = tmc
           }
         })
-      return out 
+      return out
     },{})
 
-     F_SYSTEMS.forEach((fclass) => {
+     f_systems.forEach((fclass) => {
       // console.log('tmcs get', rawDelayData, get(rawDelayData,`[${year}][${+month}][${region}][${fclass}].total.value`,[]))
       get(rawDelayData,`[${year}][${+month}][${region}][${fclass}].non_recurrent.value`,[])
         .forEach(tmc => {
           if(total[tmc.tmc]){
-            total[tmc.tmc].non_recurrent = tmc.value 
+            total[tmc.tmc].non_recurrent = tmc.value
           }
         })
-      
+
     },{})
 
     return total
-  }, [rawDelayData,year,month,region]);
+  }, [rawDelayData,year,month,region,f_systems]);
 
   React.useEffect(() => {
     if (Object.keys(tmcs).length) {
@@ -94,7 +102,7 @@ const CongestionSegmentTable = ({rawDelayData}) => {
   const corridors = React.useMemo(() => {
     let corridors = Object.keys(tmcMetaData).reduce((corridors,tmcId) => {
       let tmc = tmcMetaData[tmcId]
-      
+
       let tmcLinear = get(tmc, `[${year}].tmclinear`, false)
       let county_code = get(tmc, `[${year}].county_code`, false)
       let direction = get(tmc, `[${year}].direction`, false)
@@ -127,12 +135,12 @@ const CongestionSegmentTable = ({rawDelayData}) => {
           corridors[corridor].fsystems.push(tmcs[tmcId].fsystem)
         }
 
-        corridors[corridor].tmcs[tmc[year].road_order*10] = tmcId 
+        corridors[corridor].tmcs[tmc[year].road_order*10] = tmcId
         corridors[corridor].total_delay += get(tmcs,`[${tmcId}].value`,0)
         corridors[corridor].non_recurrent_delay += get(tmcs,`[${tmcId}].non_recurrent`,0)
         corridors[corridor].recurrent_delay += get(tmcs,`[${tmcId}].value`,0) - get(tmcs,`[${tmcId}].non_recurrent`,0)
 
-      }        
+      }
       return corridors
     },{})
 
@@ -150,12 +158,12 @@ const CongestionSegmentTable = ({rawDelayData}) => {
     .sort((a,b) => b.total_delay_per_mile - a.total_delay_per_mile)
     .filter(d => d.length > 2)
 
-  },[tmcMetaData,year,tmcs]) 
-  
+  },[tmcMetaData,year,tmcs])
+
   return (
     <>
       <div>
-         <Table 
+         <Table
             data={ corridors }
             columns={[
               // { accessor: "corridor",
@@ -170,7 +178,7 @@ const CongestionSegmentTable = ({rawDelayData}) => {
 
                   return (<div>
                     <div>
-                      {get(d, 'row.original.roadname', '')} 
+                      {get(d, 'row.original.roadname', '')}
                       <span className='font-bold text-sm'>
                       &nbsp;{get(d, 'row.original.direction','')}
                       </span>
@@ -178,11 +186,11 @@ const CongestionSegmentTable = ({rawDelayData}) => {
                       &nbsp;{get(d, 'row.original.length',0).toFixed(2)} mi
                       </span>
                     </div>
-                    <div className='text-xs font-italic text-gray-600'> 
+                    <div className='text-xs font-italic text-gray-600'>
                       {from} {from !== to ? `to ${to}` : ''}
                     </div>
                   </div>)
-                } 
+                }
               },
               { accessor: "fsystem",
                 Header: "F cls"
@@ -202,7 +210,7 @@ const CongestionSegmentTable = ({rawDelayData}) => {
           />
       </div>
     </>
-   
+
   )
 }
 
