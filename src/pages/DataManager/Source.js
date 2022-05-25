@@ -5,25 +5,25 @@ import { useParams } from 'react-router-dom'
 
 import {SourceAttributes, ViewAttributes, getAttributes} from './components/attributes'
 
+import SourcesLayout from './components/SourcesLayout'
+
 
 const Overview = ({source, views}) => {
   return (
     <div className="overflow-hidden">
       <div className="px-4 py-5 sm:px-6">
-        {/*<h3 className="text-lg leading-6 font-medium text-gray-900">{source.name}</h3>*/}
         <p className="mt-1 max-w-2xl text-sm text-gray-500">{get(source,'description', false) || 'No Description'}</p>
       </div>
       <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
         <dl className="sm:divide-y sm:divide-gray-200">
           {Object.keys(SourceAttributes)
             .filter(d => !['id','metadata','description'].includes(d))
-            .map(attr => (
-            <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            .map((attr,i) => (
+            <div key={i} className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">{attr}</dt>
               <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                 {typeof source[attr] === 'object'}
                 {typeof source[attr] === 'object' ? JSON.stringify(source[attr]) : source[attr]}
-                
               </dd>
             </div>
           ))}
@@ -32,8 +32,8 @@ const Overview = ({source, views}) => {
             <dt className="text-sm font-medium text-gray-500">Versions</dt>
             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
               <ul role="list" className="border border-gray-200 rounded-md divide-y divide-gray-200">
-                {views.map(v => (
-                  <li className="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                {views.map((v,i) => (
+                  <li key={i} className="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
                   
                     <div className="w-0 flex-1 flex items-center">
                       <span className="ml-2 flex-1 w-0 truncate">{v.version}</span>
@@ -50,7 +50,6 @@ const Overview = ({source, views}) => {
                     </div>
                   </li>
                 ))}
-               
               </ul>
             </dd>
           </div>
@@ -61,25 +60,38 @@ const Overview = ({source, views}) => {
 }
 
 const Metadata = ({source}) => {
+  const metadata = get(source,'metadata',[])
+  if (!metadata || metadata.length === 0) return <div> Metadata Not Available </div> 
   return (
     <div className="overflow-hidden">
-      <div className="px-4 py-5 sm:px-6">
-        <h3 className="text-lg leading-6 font-medium text-gray-900">Columns</h3>
-        {/*<p className="mt-1 max-w-2xl text-sm text-gray-500">{get(source,'description', false) || 'No Description'}</p>*/}
+      <div className="py-4 sm:py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 border-b-2">
+        <dt className="text-sm font-medium text-gray-600">
+          Column
+        </dt>
+        <dd className="text-sm font-medium text-gray-600 ">
+          Description
+        </dd>
+        <dd className="text-sm font-medium text-gray-600">
+          Type
+        </dd>
       </div>
       <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
         <dl className="sm:divide-y sm:divide-gray-200">
-          {get(source,'metadata',[])
+         
+          {metadata
             //.filter(d => !['id','metadata','description'].includes(d))
             .map(col => (
             <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt className="text-sm font-medium text-gray-600 uppercase">
-                {col.name} <div className='text-gray-400 italic'>{col.type}</div>
+              <dt className="text-sm text-gray-900">
+                {col.name}
               </dt>
-              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 ">
                 {get(col,'desc', false) || 'No Description'}
-                
               </dd>
+              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 ">
+                <div className='text-gray-400 italic'>{col.type}</div>
+              </dd>
+
             </div>
           ))}
           
@@ -88,6 +100,7 @@ const Metadata = ({source}) => {
     </div>
   )
 }
+
 
 const Pages = {
   meta: Metadata
@@ -126,27 +139,28 @@ const Source = ({}) => {
   },[falcorCache,sourceId])
 
   return (
-    <div className='max-w-6xl mx-auto px-2'>
-      <div className='text-xl font-medium pt-6 overflow-hidden '>
-        {source.name}
-      </div>
-      <TopNav 
-        menuItems={[
-          { 
-            name: 'Overview',
-            path: `/datasources/source/${sourceId}`
-          },
-          {
-            
-            name: 'Metadata',
-            path: `/datasources/source/${sourceId}/meta`
-          }
-        ]}
-        themeOptions={{size:'inline'}}
-      />
-      <div className='w-full p-4 bg-white'>
-        <Page source={source} views={views} />
-      </div>
+    <div className='max-w-6xl mx-auto'>
+      <SourcesLayout>
+        <div className='text-xl font-medium overflow-hidden '>
+          {source.name}
+        </div>
+        <TopNav 
+          menuItems={[
+            { 
+              name: 'Overview',
+              path: `/datasources/source/${sourceId}`
+            },
+            {
+              name: 'Metadata',
+              path: `/datasources/source/${sourceId}/meta`
+            }
+          ]}
+          themeOptions={{size:'inline'}}
+        />
+        <div className='w-full p-4 bg-white shadow mb-4'>
+          <Page source={source} views={views} />
+        </div>
+      </SourcesLayout>
     </div>
   )
 }

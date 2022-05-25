@@ -94,7 +94,7 @@ const LayerPanel = ({ layer, layersLoading, ...rest }) => {
   }, [layer.filters, theme]);
 
   return (
-    <div className={`${theme.menuBg} p-1 mb-1 rounded relative`}>
+    <div className={`${theme.menuBg} p-1 mb-1 rounded`}>
       <div
         className={`
         absolute top-0 bottom-0 left-0 right-0 z-10 opacity-50

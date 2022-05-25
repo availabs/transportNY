@@ -1,12 +1,11 @@
 import React from 'react';
-import SourcesList from './components/SourcesList'
+import SourcesLayout from './components/SourcesLayout'
 import SourceView from './Source'
 
 const DataManager = () => {
   return (
     <div className='max-w-6xl mx-auto'>
-      <h2>Data Sources</h2>
-      <SourcesList />
+      <SourcesLayout />
     </div>
   )
 }

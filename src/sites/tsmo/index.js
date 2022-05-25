@@ -4,7 +4,10 @@ import Congestion from "sites/tsmo/pages/Dashboards/Congestion"
 
 import IncidentView from "./pages/IncidentView"
 
+import Home from './pages/Home'
+
 const Routes = [
+  Home,
   ...Incidents,
   Workzones,
   Congestion,

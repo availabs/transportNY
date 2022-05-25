@@ -10,103 +10,140 @@ const ppdaf = () => {
     graphColors: [ '#1e40af','#93c5fd','#1d4ed8','#bfdbfe',],
     graphCategorical:  ['#eff6ff','#dbeafe','#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#2563eb','#1d4ed8','#1e40af','#1e3a8a'], //
 
-    sidenav: ({color='white',size='compact'}) =>  {
-
-      let colors = {
-        white: {
-          contentBg: `bg-${highlight}`,
-          contentBgAccent: `bg-neutral-100`,
-          accentColor: `${accent}-600`,
-          accentBg: `hover:bg-${accent}-400`,
-          borderColor: `border-${primary}-100`,
-          textColor: `text-${primary}-600`,
-          textColorAccent: `text-slate-800`,
-          highlightColor: `text-${primary}-800`,
-        },
-         dark: {
-          contentBg: `bg-neutral-800`,
-          contentBgAccent: `bg-neutral-900`,
-          accentColor: `white`,
-          accentBg: ``,
-          borderColor: `border-neutral-700`,
-          textColor: `text-slate-300`,
-          textColorAccent: `text-slate-100`,
-          highlightColor: `text-${highlight}`,
-        },
-        bright: {
-          contentBg: `bg-${accent}-700`,
-          accentColor: `${accent}-400`,
-          accentBg: `hover:bg-${accent}-400`,
-          borderColor: `border-${accent}-600`,
-          textColor: `text-${highlight}`,
-          highlightColor: `text-${highlight}-500`,
-        }
-      }
+    sidenav: (opts={}) =>  {
+        const {color = 'white', size = 'compact',  subMenuStyle = 'inline', responsive = 'top'} = opts
+          let mobile = {
+            top : 'hidden md:block',
+            side: 'hidden md:block',
+            none: ''
+          }
+          let colors = {
+            white: {
+              contentBg: `bg-${highlight}`,
+              contentBgAccent: `bg-neutral-100`,
+              accentColor: `${accent}-600`,
+              accentBg: `hover:bg-${accent}-400`,
+              borderColor: `border-${primary}-100`,
+              textColor: `text-${primary}-600`,
+              textColorAccent: `text-slate-800`,
+              highlightColor: `text-${primary}-800`,
+            },
+            transparent: {
+              contentBg: `bg-neutral-100`,
+              contentBgAccent: `bg-neutral-100`,
+              accentColor: `${accent}-600`,
+              accentBg: `hover:bg-${accent}-400`,
+              borderColor: `border-${primary}-100`,
+              textColor: `text-${primary}-600`,
+              textColorAccent: `text-slate-800`,
+              highlightColor: `text-${primary}-800`,
+            },
+             dark: {
+              contentBg: `bg-neutral-800`,
+              contentBgAccent: `bg-neutral-900`,
+              accentColor: `white`,
+              accentBg: ``,
+              borderColor: `border-neutral-700`,
+              textColor: `text-slate-300`,
+              textColorAccent: `text-slate-100`,
+              highlightColor: `text-${highlight}`,
+            },
+            bright: {
+              contentBg: `bg-${accent}-700`,
+              accentColor: `${accent}-400`,
+              accentBg: `hover:bg-${accent}-400`,
+              borderColor: `border-${accent}-600`,
+              textColor: `text-${highlight}`,
+              highlightColor: `text-${highlight}-500`,
+            }
+          }
 
       let sizes = {
         none: {
           wrapper: "w-0 overflow-hidden",
-          sideItem: "flex mx-2 pr-4 py-2 text-base hover:pl-2",
+          sideItem: "flex mx-2 pr-4 py-2 text-base ",
           topItem: "flex items-center text-sm px-4 border-r h-12",
           icon: "mr-3 text-lg",
         },
         compact: {
           fixed: 'ml-0 md:ml-44',
-          wrapper: "w-44",
-          sideItem: "flex mx-2 pr-4 py-2 text-base hover:pl-2",
+          wrapper: "w-44 p-1 pt-4",
+          sideItem: "flex mx-2 pr-4 py-2 text-base ",
           topItem: "flex items-center text-sm px-4 border-r h-12",
           icon: "mr-3 text-lg",
         },
         full: {
-          fixed: 'ml-0 md:ml-64',
-          wrapper: "w-64",
-          sideItem: "flex mx-4 pr-4 py-4 text-base font-base border-b hover:pl-4",
+          fixed: '',
+          wrapper: "w-full",
+          sideItem: "flex px-4 py-2 text-base font-base border-b ",
           topItem: "flex pr-4 py-2 text-sm font-light",
           icon: "mr-4 text-2xl",
         },
         mini: {
           fixed: 'ml-0 md:ml-20',
-          wrapper: "w-20 overflow-x-hidden",
+          wrapper: "w-20 overflow-x-hidden p-1 pt-4",
           sideItem: "flex pr-4 py-4 text-base font-base border-b",
           topItem: "flex px-4 items-center text-sm font-light ",
           icon: "w-20 mr-4 text-4xl",
+          sideItemContent: 'hidden',
         },
         micro: {
           fixed: 'ml-0 md:ml-14',
           wrapper: "w-14 overflow-x-hidden",
+          itemWrapper: 'p-1',
           sideItem: "flex text-base font-base",
           topItem: "flex mx-6 pr-4 py-2 text-sm font-light",
           icon: "w-12 text-2xl hover:bg-neutral-900 px-2 py-3 my-2 rounded-lg mr-4 hover:text-blue-500",
+          sideItemContent: 'hidden',
         },
 
       }
 
-      return {
+      let subMenuStyles = {
+                inline: {
+                    indicatorIcon: 'fa fa-angle-right',
+                    indicatorIconOpen: 'fa fa-angle-down',
+                    subMenuWrapper: `w-full`,
+                    subMenuParentWrapper: `flex flex-col w-full`
+                },
+                flyout: {
+                    indicatorIcon: 'fa fa-angle-down',
+                    indicatorIconOpen: 'fa fa-angle-right',
+                    subMenuWrapper: `absolute ml-${sizes[size].width - 8}`,
+                    subMenuParentWrapper: `flex flex-row`,
+                    subMenuWrapperTop: `absolute top-full`,
+                },
+        }
+
+        return {
         fixed: `md:${sizes[size].fixed}`,
         logoWrapper: `${sizes[size].wrapper} ${colors[color].contentBgAccent} ${colors[color].textColorAccent}`,
-        sidenavWrapper: `${colors[color].contentBg} ${sizes[size].wrapper} h-full hidden md:flex z-20`,
+        sidenavWrapper: `${mobile[responsive]} ${colors[color].contentBg} ${sizes[size].wrapper} h-full z-20`,
         menuIconSide: ` text-${colors[color].accentColor} ${sizes[size].icon} group-hover:${colors[color].highlightColor}`,
-        itemsWrapper: `p-1  ${colors[color].borderColor} ${sizes[size].wrapper} pt-4`,
+        itemsWrapper: `${colors[color].borderColor} ${sizes[size].itemWrapper}  `,
         navitemSide: `
-            group font-sans
+            group font-sans flex flex-col
             ${sizes[size].sideItem} ${colors[color].textColor} ${colors[color].borderColor}
             hover:${colors[color].highlightColor}
             focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
             transition-all cursor-pointer
          `,
-
+        navItemContent: `${sizes[size].sideItemContent}`,
         navitemSideActive: `
-            group font-sans
+            group font-sans flex flex-col
             ${sizes[size].sideItem} text-blue-500 ${colors[color].borderColor}
             hover:${colors[color].highlightColor}
             focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
             transition-all cursor-pointer
           `,
+          ...subMenuStyles[subMenuStyle],
           vars: {
             colors,
-            sizes
+            sizes,
+            mobile
           }
         }
+        
     },
 
 
@@ -302,6 +339,62 @@ const ppdaf = () => {
                 }
             } 
         },
+        input: (opts = {}) => {
+            const {color = 'white', size = 'small', width = 'block'} = opts
+            let colors = {
+                white: 'bg-white',
+                gray: 'bg-gray-100'
+            }
+
+            let sizes  = {
+                base: 'px-4 py-4 font-medium',
+                small: 'text-sm px-2 py-2 font-medium text-xs',
+                large: 'text-lg px-6 py-6 font-medium text-xl'
+            }
+
+            let widths = {
+                'block': '',
+                'full' : 'w-full'
+            }
+
+            return {
+                input: `
+                 ${colors[color]} ${sizes[size]} ${widths[width]}
+                `,
+                vars: {
+                    color: colors,
+                    size: sizes,
+                    width: widths
+                }
+            }
+        },
+        modal: (opts = {}) => {
+            const {size = 'base', overlay = 'default'} = opts
+            let overlays = {
+                default: 'fixed  inset-0 bg-gray-500 opacity-75',
+                none: ''
+            }
+
+            let sizes = {
+                base: 'sm:max-w-2xl',
+                small: 'w-64',
+                large: 'sm:max-w-5xl',
+                xlarge: 'sm:max-w-8xl'
+
+            }
+            
+            return {
+                modalContainer: `${overlay === 'default' ? '' : 'pointer-events-none'} fixed bottom-0 inset-x-0 px-4 pb-4 inset-0 flex items-center justify-center`,
+                modalOverlay: overlays[overlay],
+                modal: `${sizes[size]} w-full  pointer-events-auto bg-white rounded-lg overflow-hidden shadow-xl transform transition-all`,
+                vars: {
+                    size: sizes,
+                    overlay: overlays
+                }
+            }
+        },
+
+
 
     /* ------------------------- */
     shadow: "shadow",

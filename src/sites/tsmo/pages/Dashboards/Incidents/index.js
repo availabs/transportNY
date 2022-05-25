@@ -216,7 +216,7 @@ const Incidents = props => {
     console.log('data', events)
     return {
       events: events
-        .sort((a,b) => get(a,'congestion_data.value.vehicleDelay',0) - get(b,'congestion_data.value.vehicleDelay',0))
+        .sort((a,b) => get(b,'congestion_data.value.vehicleDelay',0) - get(a,'congestion_data.value.vehicleDelay',0))
         .filter((d,i) => i < 20),
       numEvents: events.length,
       prevMonth,
@@ -240,7 +240,7 @@ const Incidents = props => {
         <div className='bg-white shadow rounded p-4 '>
           <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '> Reported Incidents </div>
           <div className='text-gray-800 text-center pt-2 grid grid-cols-2'>
-            <div className="text-6xl col-span-2">
+            <div className=" col-span-2">
               { fraction(data.numEvents) }
             </div>
             <CompareComp title="Prev. Month"
@@ -333,10 +333,12 @@ const Incidents = props => {
 
           </div>
         </div>
-        <div className='pt-4 px-2 col-span-4'>
-          <span className='text-xl font-medium uppercase text-gray-700'> Top 20 Incidents by Cost {month}</span>
+        <div className='pt-4 pb-2 px-2 col-span-4'>
+          <span className='text-xl font-medium uppercase text-gray-700'>
+             Top 20 Incidents by Cost {month}
+          </span>
         </div>
-        <div className='bg-white shadow rounded p-4 col-span-2'>
+        <div className='bg-white shadow rounded col-span-2'>
           
           <IncidentTable 
             events={data.events} 
@@ -344,7 +346,7 @@ const Incidents = props => {
           />
         </div>
 
-        <div className='bg-white shadow rounded p-4 col-span-2'>
+        <div className='bg-white shadow rounded col-span-2'>
           <IncidentMap 
             colorsForTypes={ data.colorsForTypes }
             events={data.events}
@@ -358,19 +360,7 @@ const Incidents = props => {
 }
 
 export default [
-  { name:'Incidents',
-    title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
-    icon: 'fa-duotone fa-truck-tow',
-    path: "/",
-    exact: true,
-    auth: false,
-    mainNav: false,
-    sideNav: {
-      color: 'dark',
-      size: 'micro'
-    },
-    component: Incidents,
-  },
+  
   { name:'Incidents',
     title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
     icon: 'fa-duotone fa-truck-tow',

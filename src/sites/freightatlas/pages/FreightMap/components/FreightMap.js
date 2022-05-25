@@ -1,20 +1,22 @@
 import React from "react"
 // import { useSelector } from 'react-redux';
 import { AvlMap } from "modules/avl-map/src"
-import { Select, useTheme, CollapsibleSidebar, TabPanel } from "modules/avl-components/src"
+import { Select, useTheme, CollapsibleSidebar, TabPanel, Modal } from "modules/avl-components/src"
 // import {MacroLayerFactory} from './IncidentsLayer'
 import {FreightAtlasFactory} from '../layers/freight_atlas'
 import config from "config.json"
 
 import {StylesTab, LayerPanel} from './map-controls'
 
+import LayerManager from './LayerManager'
 
 const LayersTab = ({activeLayers,MapActions,...rest},) => {
     const theme = useTheme()
+    const [modalOpen, modalToggle] = React.useState()
     return (
         <div>
            <div className='pb-2 border-b border-gray-200'>
-                <button className={theme.button({color:'primary',width:'full', size: 'sm'}).button}>
+                <button onClick={e => modalToggle(!modalOpen)} className={theme.button({color:'primary',width:'full', size: 'sm'}).button}>
                     Add Data
                     <i className='fa-solid fa-plus px-2' />
                 </button>
@@ -26,6 +28,16 @@ const LayersTab = ({activeLayers,MapActions,...rest},) => {
                     layer={ layer } MapActions={ MapActions }/>)
                 }
             </div>
+            <Modal open={modalOpen} themeOptions={{size: 'large'}}>
+                <LayerManager activeLayers={activeLayers} />
+                <div className='border-t border-gray-300'>
+                    <button 
+                        onClick={e => modalToggle(!modalOpen)} 
+                        className={theme.button({color:'primary', size: 'base'}).button + ' float-right'}>
+                        Close
+                    </button>
+                </div>
+            </Modal>
         </div>
     )
 
