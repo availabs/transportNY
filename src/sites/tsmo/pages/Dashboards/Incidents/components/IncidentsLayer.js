@@ -24,6 +24,7 @@ const fFormat = d3format(",.2s")
 
 
 const duration2minutes = (dur) => {
+    if(!dur) return 0
     let [days, time] = dur.split('-')
     let [hours, minutes] = time.split(':')
     let out = 1440 * (+days) + 60 * (+hours) + (+minutes)
@@ -323,9 +324,9 @@ class CongestionLayer extends LayerContainer {
               facility: event.facility,
               type: event.event_type,
               delay: +get(event, 'congestion_data.value.vehicleDelay', 0),
-              duration: duration2minutes(event.duration),
+              duration: duration2minutes(event.event_duration),
               description: event.description,
-              color: get(this, ["props", "colorsForTypes", event.event_type], "#009")
+              color: get(this, ["props", "colorsForTypes", event.sub_category], "#009")
             },
             geometry: event.geom.value
           }

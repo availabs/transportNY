@@ -8,7 +8,12 @@ const ppdaf = () => {
 
   return {
     graphColors: [ '#1e40af','#93c5fd','#1d4ed8','#bfdbfe',],
-    graphCategorical:  ['#eff6ff','#dbeafe','#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#2563eb','#1d4ed8','#1e40af','#1e3a8a'], //
+    graphCategorical:  ['#fde72f','#95d840','#55a488','#2f708e','#453781','#472354'],
+    // ['#e5496d', '#fad264', '#76d9a2'],
+    // ['#e96835','#f5dc50','#a63b6e','#e54249','#49969b'], 
+    // ['#1e4b5a','#e75148','#0f1e37','#8c786e',],
+    // ['#fde72f','#95d840','#55a488','#2f708e','#453781','#472354'], 
+    //  ['#5fc0c8','#5559d3','#ed8534','#7e84fa','#7fe06a']
 
     sidenav: (opts={}) =>  {
         const {color = 'white', size = 'compact',  subMenuStyle = 'inline', responsive = 'top'} = opts
