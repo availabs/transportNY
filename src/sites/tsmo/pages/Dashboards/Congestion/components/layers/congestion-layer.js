@@ -28,6 +28,12 @@ import { F_SYSTEMS } from 'sites/tsmo/pages/Dashboards/components/metaData'
 
    ---------------- */
 
+ const F_SYSTEM_MAP = {
+   'All': F_SYSTEMS,
+   'Highways': [1, 2],
+   'State & Local': [3, 4, 5, 6, 7]
+ }
+
 class CongestionLayer extends LayerContainer {
   name = "Congestion Layer";
   sources = [
@@ -116,7 +122,7 @@ class CongestionLayer extends LayerContainer {
     // },
     callback: (layerId, features, lngLat) => {
       let feature = features[0];
-      
+
 
       //console.log('hover', v)
       let data = [
@@ -187,27 +193,29 @@ class CongestionLayer extends LayerContainer {
     console.time('getTMcs')
     const {region, month: tableDate} = this.props
     const [year, month] = tableDate.split("-").map(Number)
-    
-     let total = F_SYSTEMS.reduce((out,fclass) => {
+
+    const f_systems = get(F_SYSTEM_MAP, this.props.fsystem, []);
+
+     let total = f_systems.reduce((out,fclass) => {
       // console.log('tmcs get', rawDelayData, get(rawDelayData,`[${year}][${+month}][${region}][${fclass}].total.value`,[]))
       get(rawDelayData,`[${year}][${+month}][${region}][${fclass}].total.value`,[])
         .forEach(tmc => {
           if(!out[tmc.tmc]){
-            out[tmc.tmc] = tmc 
+            out[tmc.tmc] = tmc
           }
         })
-      return out 
+      return out
     },{})
 
-     F_SYSTEMS.forEach((fclass) => {
+     f_systems.forEach((fclass) => {
       // console.log('tmcs get', rawDelayData, get(rawDelayData,`[${year}][${+month}][${region}][${fclass}].total.value`,[]))
       get(rawDelayData,`[${year}][${+month}][${region}][${fclass}].non_recurrent.value`,[])
         .forEach(tmc => {
           if(total[tmc.tmc]){
-            total[tmc.tmc].non_recurrent = tmc.value 
+            total[tmc.tmc].non_recurrent = tmc.value
           }
         })
-      
+
     },{})
     console.timeEnd('getTMcs')
     return Object.values(total)
@@ -250,7 +258,7 @@ class CongestionLayer extends LayerContainer {
   fetchData(falcor) {
     const {region} = this.props
     const [geolevel, value] = region.split('|')
-    
+
     // let request = []
     ///let tmcs = this.getTMCs()
 
@@ -259,7 +267,7 @@ class CongestionLayer extends LayerContainer {
 
   render(map,) {
     const falcorCache = this.falcor.getCache();
-    
+
     // --- Set Boundary and Zoom to Regions
     const {region} = this.props
     const [geolevel, value] = region.split('|')
@@ -301,7 +309,7 @@ class CongestionLayer extends LayerContainer {
       });
     }
   }
-   
+
 }
 
 export const MacroLayerFactory = (options = {}) => new CongestionLayer(options);
