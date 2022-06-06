@@ -1,132 +1,43 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useFalcor,TopNav } from 'modules/avl-components/src'
+import { useFalcor,TopNav, /*withAuth, Input, Button*/ } from 'modules/avl-components/src'
 import get from 'lodash.get'
 import { useParams } from 'react-router-dom'
-
-import {SourceAttributes, ViewAttributes, getAttributes} from './components/attributes'
+import {Pages, DataTypes} from './DataTypes'
 
 import SourcesLayout from './components/SourcesLayout'
 
-
-const Overview = ({source, views}) => {
-  return (
-    <div className="overflow-hidden">
-      <div className="px-4 py-5 sm:px-6">
-        <p className="mt-1 max-w-2xl text-sm text-gray-500">{get(source,'description', false) || 'No Description'}</p>
-      </div>
-      <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
-        <dl className="sm:divide-y sm:divide-gray-200">
-          {Object.keys(SourceAttributes)
-            .filter(d => !['id','metadata','description'].includes(d))
-            .map((attr,i) => (
-            <div key={i} className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt className="text-sm font-medium text-gray-500">{attr}</dt>
-              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {typeof source[attr] === 'object'}
-                {typeof source[attr] === 'object' ? JSON.stringify(source[attr]) : source[attr]}
-              </dd>
-            </div>
-          ))}
-          
-          <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt className="text-sm font-medium text-gray-500">Versions</dt>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <ul role="list" className="border border-gray-200 rounded-md divide-y divide-gray-200">
-                {views.map((v,i) => (
-                  <li key={i} className="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
-                  
-                    <div className="w-0 flex-1 flex items-center">
-                      <span className="ml-2 flex-1 w-0 truncate">{v.version}</span>
-                    </div>
-                    <div className="ml-4 flex-shrink-0">
-                      <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
-                        Table
-                      </a>
-                    </div>
-                    <div className="ml-4 flex-shrink-0">
-                      <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
-                        Download
-                      </a>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </dd>
-          </div>
-        </dl>
-      </div>
-    </div>
-  )
-}
-
-const Metadata = ({source}) => {
-  const metadata = get(source,'metadata',[])
-  if (!metadata || metadata.length === 0) return <div> Metadata Not Available </div> 
-  return (
-    <div className="overflow-hidden">
-      <div className="py-4 sm:py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 border-b-2">
-        <dt className="text-sm font-medium text-gray-600">
-          Column
-        </dt>
-        <dd className="text-sm font-medium text-gray-600 ">
-          Description
-        </dd>
-        <dd className="text-sm font-medium text-gray-600">
-          Type
-        </dd>
-      </div>
-      <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
-        <dl className="sm:divide-y sm:divide-gray-200">
-         
-          {metadata
-            //.filter(d => !['id','metadata','description'].includes(d))
-            .map(col => (
-            <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt className="text-sm text-gray-900">
-                {col.name}
-              </dt>
-              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 ">
-                {get(col,'desc', false) || 'No Description'}
-              </dd>
-              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 ">
-                <div className='text-gray-400 italic'>{col.type}</div>
-              </dd>
-
-            </div>
-          ))}
-          
-        </dl>
-      </div>
-    </div>
-  )
-}
+import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
+    
 
 
-const Pages = {
-  meta: Metadata
-}
-
-
-const Source = ({}) => {
+const Source = () => {
   const {falcor,falcorCache} = useFalcor()
-  const { sourceId,view } = useParams()
+  const { sourceId,page } = useParams()
+  const [ pages, setPages] = useState(Pages)
   const Page = useMemo(() => {
-    return view ? get(Pages,view,Overview)  : Overview
-  },[view])
-  useEffect(async () => {
-    const lengthPath = ["datamanager","sources","byId",sourceId,"views","length"]
-    const resp = await falcor.get(lengthPath);
-    return await falcor.get(
-      [
-        "datamanager","sources","byId",sourceId,"views","byIndex",
-        {from:0, to:  get(resp.json, lengthPath, 0)-1},
-        "attributes",Object.values(ViewAttributes)
-      ],
-      [
-        "datamanager","sources","byId",sourceId,
-        "attributes",Object.values(SourceAttributes)
-      ]
-    )
+    // console.log('page', page, pages)
+    return page ? get(pages,`[${page}].component`,Pages['overview'].component)  : Pages['overview'].component
+  },[page,pages])
+  useEffect(() => {
+    async function fetchData () {
+      console.time('fetch data')
+      const lengthPath = ["datamanager","sources","byId",sourceId,"views","length"]
+      const resp = await falcor.get(lengthPath);
+      let data =  await falcor.get(
+        [
+          "datamanager","sources","byId",sourceId,"views","byIndex",
+          {from:0, to:  get(resp.json, lengthPath, 0)-1},
+          "attributes",Object.values(ViewAttributes)
+        ],
+        [
+          "datamanager","sources","byId",sourceId,
+          "attributes",Object.values(SourceAttributes)
+        ]
+      )
+      console.timeEnd('fetch data')
+      return data
+    }
+    fetchData()
   }, [])
 
   const views = useMemo(() => {
@@ -135,7 +46,13 @@ const Source = ({}) => {
   },[falcorCache,sourceId])
 
   const source = useMemo(() => {
-    return getAttributes(get(falcorCache,['datamanager','sources','byId', sourceId],{'attributes': {}})['attributes']) 
+    let attributes =  getAttributes(get(falcorCache,['datamanager','sources','byId', sourceId],{'attributes': {}})['attributes']) 
+    if(DataTypes[attributes.type]){
+      setPages({...pages,...DataTypes[attributes.type]})  
+    } else {
+       setPages(Pages) 
+    }
+    return attributes
   },[falcorCache,sourceId])
 
   return (
@@ -145,16 +62,13 @@ const Source = ({}) => {
           {source.name}
         </div>
         <TopNav 
-          menuItems={[
-            { 
-              name: 'Overview',
-              path: `/datasources/source/${sourceId}`
-            },
-            {
-              name: 'Metadata',
-              path: `/datasources/source/${sourceId}/meta`
-            }
-          ]}
+          menuItems={Object.values(pages)
+            .map(d => {
+              return {
+                name:d.name,
+                path: `/datasources/source/${sourceId}${d.path}`
+              }
+            })}
           themeOptions={{size:'inline'}}
         />
         <div className='w-full p-4 bg-white shadow mb-4'>
@@ -181,7 +95,7 @@ const config = [{
 },
 {
   name:'View Source',
-  path: "/datasources/source/:sourceId/:view",
+  path: "/datasources/source/:sourceId/:page",
   exact: true,
   auth: false,
   mainNav: false,

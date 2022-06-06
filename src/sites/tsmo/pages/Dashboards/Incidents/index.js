@@ -313,16 +313,16 @@ const Incidents = props => {
   }, [falcorCache,requests,month, theme.graphCategorical,fsystem, loading])
 
   const [hoveredEvent, setHoveredEvent] = React.useState(null);
-  console.log('output', data)
+  //console.log('output', data)
 
   return (
       <DashboardLayout loading={loading}>
-        <div className='bg-white shadow rounded p-4 '>
+        <div className='bg-white shadow rounded p-4 col-span-4 md:col-span-2 lg:col-span-1'>
           <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '> Reported Incidents ( vs Prev Month/day )</div>
           <HeroStatComp data={data} stat={'count'} />
         </div>
 
-        <div className='bg-white shadow rounded p-4 '>
+        <div className='bg-white shadow rounded p-4 col-span-4 md:col-span-2 lg:col-span-1'>
            <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '>Incidents by Type</div>
           <div className='h-64'>
             <PieGraph
@@ -336,7 +336,7 @@ const Incidents = props => {
           </div>
         </div>
 
-        <div className='bg-white shadow rounded p-4 col-span-2 flex flex-col'>
+        <div className='bg-white shadow rounded p-4 col-span-4 lg:col-span-2 flex flex-col'>
            <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '>Incidents Type by Day</div>
           <div className="flex-1">
 
@@ -353,7 +353,7 @@ const Incidents = props => {
           </div>
         </div>
 
-        <div className='bg-white shadow rounded p-4 '>
+        <div className='bg-white shadow rounded p-4 col-span-4 md:col-span-2 lg:col-span-1 '>
           <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-1 '>Total Incident Delay Cost ( vs Prev Month/day )</div>
           <HeroStatComp 
             data={data} 
@@ -361,7 +361,7 @@ const Incidents = props => {
             display={vehicleDelay2cost}
           />
         </div>
-        <div className='bg-white shadow rounded p-4 '>
+        <div className='bg-white shadow rounded p-4 col-span-4 md:col-span-2 lg:col-span-1'>
           <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-1 '>Top 20 Incident Delay Cost ( vs Prev Month/day )</div>
           
 
@@ -372,7 +372,7 @@ const Incidents = props => {
             perUnit={false}
           />
         </div>
-        <div className='bg-white shadow rounded p-4 col-span-2 flex flex-col'>
+        <div className='bg-white shadow rounded p-4 col-span-4 lg:col-span-2 flex flex-col'>
           <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '>Incidents Count by Duration</div>
           <div className="flex-1">
 
@@ -393,7 +393,7 @@ const Incidents = props => {
              Top 20 Incidents by Cost {month}
           </span>
         </div>
-        <div className='bg-white shadow rounded col-span-2'>
+        <div className='bg-white shadow rounded col-span-4 lg:col-span-2'>
           
           <IncidentTable 
             events={data.events} 
@@ -401,7 +401,7 @@ const Incidents = props => {
           />
         </div>
 
-        <div className='bg-white shadow rounded col-span-2'>
+        <div className='bg-white shadow rounded col-span-4 lg:col-span-2'>
           <IncidentMap 
             colorsForTypes={ data.colorsForTypes }
             events={data.events}

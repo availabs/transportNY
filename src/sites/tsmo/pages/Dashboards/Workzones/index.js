@@ -264,13 +264,13 @@ const Incidents = props => {
 
   return (
       <DashboardLayout loading={loading}>
-        <div className='bg-white shadow rounded p-4 '>
-          <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '> Reported Incidents ( vs Prev Month/day )</div>
+        <div className='bg-white shadow rounded p-4 col-span-4 md:col-span-2 lg:col-span-1'>
+          <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '> Reported Workzones ( vs Prev Month/day )</div>
           <HeroStatComp data={data} stat={'count'} />
         </div>
 
-         <div className='bg-white shadow rounded p-4 '>
-          <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-1 '>Total Incident Delay Cost ( vs Prev Month/day )</div>
+         <div className='bg-white shadow rounded p-4 col-span-4 md:col-span-2 lg:col-span-1'>
+          <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-1 '>Total Workzone Delay Cost ( vs Prev Month/day )</div>
           <HeroStatComp 
             data={data} 
             stat={'v_delay'} 
@@ -278,8 +278,8 @@ const Incidents = props => {
           />
         </div>
 
-        <div className='bg-white shadow rounded p-4 col-span-2 flex flex-col'>
-           <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '>Incidents Type by Day</div>
+        <div className='bg-white shadow rounded p-4 col-span-4 lg:col-span-2  flex flex-col'>
+           <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '>Workzones Type by Day</div>
           <div className="flex-1">
 
             <BarGraph
@@ -299,10 +299,10 @@ const Incidents = props => {
        
         <div className='pt-4 pb-2 px-2 col-span-4'>
           <span className='text-xl font-medium uppercase text-gray-700'>
-             Top 20 Incidents by Cost {month}
+             Top 20 Workzones by Delay Cost {month}
           </span>
         </div>
-        <div className='bg-white shadow rounded col-span-2'>
+        <div className='bg-white shadow rounded col-span-4 lg:col-span-2'>
           
           <IncidentTable 
             events={data.events} 
@@ -310,7 +310,7 @@ const Incidents = props => {
           />
         </div>
 
-        <div className='bg-white shadow rounded col-span-2'>
+        <div className='bg-white shadow rounded col-span-4 lg:col-span-2'>
           <IncidentMap 
             colorsForTypes={ data.colorsForTypes }
             events={data.events}

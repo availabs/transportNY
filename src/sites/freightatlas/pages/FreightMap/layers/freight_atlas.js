@@ -19,26 +19,20 @@ class FreightAtlasSimple extends LayerContainer {
       }
     }
   ];
-  layers = [
-    { 
-      id: `primary_freight_network_v2016`,
-      type: 'line',
+  layers = [{ 
+      id: 'primary_freight_network_v2016',
       source: 'freight_atlas',
       'source-layer': 'primary_freight_network_v2016',
-      layout: {
-        'visibility': 'visible',
-        'line-join': 'round',
-        'line-cap': 'round'
-      },
-      paint: {
-        'line-color': "hsl(185, 0%, 27%)",
-        'line-opacity': [
+      "type": "line",
+      "paint": {
+        "line-color": "hsl(185, 0%, 27%)",
+        "line-opacity": [
           "case",
           ["boolean", ["feature-state", "hover"], false],
           0.4,
           1
         ],
-        'line-width': [
+        "line-width": [
           "interpolate",
           ["exponential", 1.5],
           ["zoom"],
@@ -50,8 +44,7 @@ class FreightAtlasSimple extends LayerContainer {
           32
         ]
       }
-    }
-  ];
+  }]
 
   
   legend = {

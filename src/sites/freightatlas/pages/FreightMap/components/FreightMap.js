@@ -92,14 +92,14 @@ const Map = ({ events }) => {
     //     layerList.map(d => )
     // },[layerList])
  
-    const layers = React.useRef([FreightAtlasFactory({name: 'Primary Freight Network'})])
+    const layers =[FreightAtlasFactory({name: 'Primary Freight Network'})]
     return (
         
         <div className='w-full h-full'  >   
             <AvlMap
                 accessToken={ config.MAPBOX_TOKEN }
                 mapOptions={ mapOptions }
-                layers={layers.current}
+                layers={layers}
                 CustomSidebar={CustomSidebar}
             />
         </div>

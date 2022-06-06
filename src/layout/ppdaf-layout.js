@@ -76,7 +76,7 @@ const Layout = ({ children, menus, sideNav, title, site }) => {
 					<TopNav
 						leftMenu={
 							<>
-								<div className='flex items-center justify-center h-12 shrink'>
+								<div className='flex items-center justify-center h-12'>
 									<Link to="/" className={`${sideNav.size === 'none' ? '' : 'md:hidden'}` }>
 										<div>
 											<img src='/nys_logo_blue.svg' className='w-full h-12' alt='New York State Logo' />
@@ -88,8 +88,8 @@ const Layout = ({ children, menus, sideNav, title, site }) => {
 									>
 										{site} <span className='fal fa-angle-down pl-2 relative top-[2px]'/>
 									</div>
-									<div className={`text-2xl font-thin text-blue-500 truncate shrink` }>
-										{title}
+									<div className={`text-2xl font-thin text-blue-500  flex-1` }>
+										<div className='h-[34px] overflow-hidden'> {title} </div>
 									</div>
 								</div>
 								<div>

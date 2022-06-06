@@ -1,6 +1,8 @@
 export const SourceAttributes = {
   "id": "id",
   "name": "name",
+  "display_name": "display_name",
+  "type": "type",
   "update_interval": "update_interval",
   "category": "category",
   "categories": "categories",
@@ -16,6 +18,7 @@ export const ViewAttributes = {
   "interval_version": "interval_version",
   "geography_version": "geography_version",
   "version": "version",
+  "metadata": "metadata",
   "source_url": "source_url",
   "publisher": "publisher",
   "data_table": "data_table",

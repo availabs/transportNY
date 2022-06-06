@@ -160,10 +160,10 @@ const ppdaf = () => {
       let colors = {
         white: {
           contentBg: `bg-gray-100`,
-          accentColor: `${accent}-600`,
-          accentBg: `hover:bg-${accent}-600`,
+          accentColor: `${accent}-500`,
+          accentBg: `hover:bg-${accent}-500`,
           borderColor: `border-${primary}-100`,
-          textColor: `text-${primary}-600`,
+          textColor: `text-${primary}-500`,
           highlightColor: `text-${highlight}`,
         },
         bright: {
@@ -306,6 +306,12 @@ const ppdaf = () => {
                     border border-gray-300  text-gray-700 bg-white hover:text-gray-500
                     focus:outline-none focus:shadow-outline-blue focus:border-blue-300
                     active:text-gray-800 active:bg-gray-50 transition duration-150 ease-in-out
+                    disabled:cursor-not-allowed
+                `,
+                cancel: `
+                    border border-red-300  text-red-700 bg-white hover:text-red-500
+                    focus:outline-none focus:shadow-outline-blue focus:border-blue-300
+                    active:text-red-800 active:bg-gray-50 transition duration-150 ease-in-out
                     disabled:cursor-not-allowed
                 `,
                 transparent: `

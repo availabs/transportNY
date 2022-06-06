@@ -26,11 +26,11 @@ import CongestionMap from './components/congestionMap'
 import { fraction, CompareComp, displayDuration } from "sites/tsmo/pages/Dashboards/Incidents/components/CompareComp"
 
 
-const F_SYSTEM_MAP = {
-  'All': F_SYSTEMS,
-  'Highways': [1, 2],
-  'State & Local': [3, 4, 5, 6, 7]
-}
+// const F_SYSTEM_MAP = {
+//   'All':  [1,2,3, 4, 5, 6, 7],
+//   'Highways': [1, 2],
+//   'State & Local': [3, 4, 5, 6, 7]
+// }
 
 const useComponentDidMount = () => {
   const [mounted, setMounted] = React.useState(false);
@@ -76,7 +76,7 @@ const RecurrentDelay = props => {
       .get(
         ["delay",
           { from: 2016, to: 2021 }, { from: 1, to: 12 },
-          region, F_SYSTEMS,
+          region, [],
           ["total", "non_recurrent", "construction", "accident", "other"]
         ],
         // ["excessive", "delay", region, "top", 10],

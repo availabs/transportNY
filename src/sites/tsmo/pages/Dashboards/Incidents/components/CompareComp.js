@@ -52,7 +52,7 @@ export const HeroStatComp = ({data,stat,display=fraction, perUnit='day'}) => (
               prevPer = {perUnit ? data.prevMonthDays.length : 1}
               curr={ get(data, `currentMonthbyCat[${cat}][${stat}]`,0)}
               currPer = {perUnit ? data.currentMonthDays.length : 1}
-              perUnit = {perUnit ? 'Day' : null }
+              perUnit = {perUnit ? 'day' : null }
               display={display}
             />
           </div>

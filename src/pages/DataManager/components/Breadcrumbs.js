@@ -6,16 +6,19 @@ import { getAttributes } from './attributes'
 
 
 export default function BreadCrumbs () {
-  const { sourceId,view } = useParams()
+  const { sourceId /*,view*/ } = useParams()
   const {falcor,falcorCache} = useFalcor()
-  useEffect(async () => {
-    return await falcor.get(
-      [
-        "datamanager","sources","byId",sourceId,
-        "attributes",["categories","name"]
-      ]
-    )
-  }, [])
+  useEffect(() => { 
+    async function fetchData () {
+      return await falcor.get(
+        [
+          "datamanager","sources","byId",sourceId,
+          "attributes",["categories","name"]
+        ]
+      )
+    }
+    fetchData()
+  }, [falcor, sourceId])
 
   const pages = useMemo(() => {
     let attr = getAttributes(get(falcorCache,['datamanager','sources','byId', sourceId],{'attributes': {}})['attributes']) 
@@ -34,8 +37,8 @@ export default function BreadCrumbs () {
   },[falcorCache,sourceId])
 
   return (
-    <nav className="border-b border-gray-200 flex" aria-label="Breadcrumb">
-      <ol role="list" className="max-w-screen-xl w-full mx-auto px-4 flex space-x-4 sm:px-6 lg:px-8">
+    <nav className="border-b border-gray-200 flex " aria-label="Breadcrumb">
+      <ol className="max-w-screen-xl w-full mx-auto px-4 flex space-x-4 sm:px-6 lg:px-8">
         <li className="flex">
           <div className="flex items-center">
             <Link to='/datasources' className="text-blue-400 hover:text-blue-500">
@@ -57,13 +60,21 @@ export default function BreadCrumbs () {
               >
                 <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
               </svg>
-              <Link
-                href={page.href}
-                className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700"
-                aria-current={page.current ? 'page' : undefined}
-              >
-                {page.name}
-              </Link>
+              {page.href ? 
+                <Link
+                  to={page.href}
+                  className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700"
+                  aria-current={page.current ? 'page' : undefined}
+                >
+                  {page.name}
+                </Link> :
+                <div
+                  className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700"
+                  aria-current={page.current ? 'page' : undefined}
+                >
+                  {page.name}
+                </div> 
+              }
             </div>
           </li>
         ))}

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useFalcor, SideNav } from 'modules/avl-components/src'
 import { Link } from 'react-router-dom'
 import get from 'lodash.get'
-import {getDomain,getSubdomain} from 'utils'
+import {/*getDomain,*/getSubdomain} from 'utils'
 import { useParams } from 'react-router-dom'
 
 import {SourceAttributes, ViewAttributes, getAttributes} from './attributes'
@@ -14,21 +14,24 @@ import Breadcrumbs from './Breadcrumbs'
 const SourceThumb = ({source}) => {
   const {falcor,falcorCache} = useFalcor()
   
-  useEffect(async () => {
-    const lengthPath = ["datamanager","sources","byId",source.id,"views","length"]
-    const resp = await falcor.get(lengthPath);
-    return await falcor.get([
-      "datamanager","sources","byId",
-      source.id, "views","byIndex",
-      {from:0, to:  get(resp.json, lengthPath, 0)-1},
-      "attributes", Object.values(ViewAttributes)
-    ])
+  useEffect(() => {
+    async function fetchData () {
+      const lengthPath = ["datamanager","sources","byId",source.id,"views","length"]
+      const resp = await falcor.get(lengthPath);
+      return await falcor.get([
+        "datamanager","sources","byId",
+        source.id, "views","byIndex",
+        {from:0, to:  get(resp.json, lengthPath, 0)-1},
+        "attributes", Object.values(ViewAttributes)
+      ])
+    }
+    fetchData()
   }, [])
 
-  const views = useMemo(() => {
-    return Object.values(get(falcorCache,["datamanager","sources","byId",source.id,"views","byIndex",],{}))
-      .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
-  },[falcorCache,source.id])
+  // const views = useMemo(() => {
+  //   return Object.values(get(falcorCache,["datamanager","sources","byId",source.id,"views","byIndex",],{}))
+  //     .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
+  // },[falcorCache,source.id])
 
   return (
     <div className='w-full p-4 bg-white my-1'>
@@ -42,33 +45,44 @@ const SourceThumb = ({source}) => {
   )
 }
 
+const domainFilters = {
+  freightatlas: 'Freight Atlas',
+  npmrds: 'NPMRDS',
+  tsmo: 'TSMO',
+  transit: 'Transit'
+}
+
 const SourcesLayout = ({children}) => {
   const SUBDOMAIN = getSubdomain(window.location.host)
   const {falcor,falcorCache} = useFalcor()
-  const [displayLayer, setDisplayLayer] = useState(null)
+  // const [displayLayer, setDisplayLayer] = useState(null)
   const [layerSearch, setLayerSearch] = useState('')
   const { sourceId } = useParams()
   
-  useEffect(async () => {
-      const lengthPath = ["datamanager", "sources", "length"];
-      const resp = await falcor.get(lengthPath);
-      return await falcor.get([
-        "datamanager","sources","byIndex",
-        {from:0, to:  get(resp.json, lengthPath, 0)-1},
-        "attributes",Object.values(SourceAttributes),
-      ])
-  }, [])
+  useEffect(() => {
+      async function fetchData () {
+        const lengthPath = ["datamanager", "sources", "length"];
+        const resp = await falcor.get(lengthPath);
+        return await falcor.get([
+          "datamanager","sources","byIndex",
+          {from:0, to:  get(resp.json, lengthPath, 0)-1},
+          "attributes",Object.values(SourceAttributes),
+        ])
+      }
+      return fetchData()
+  }, [falcor])
 
   const sources = useMemo(() => {
       return Object.values(get(falcorCache,['datamanager','sources','byIndex'],{}))
         .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
   },[falcorCache])
 
-  const current_site = 'Freight Atlas'
-  const current_filter = null
+  const current_site = get(domainFilters, `[${SUBDOMAIN}]`, '') //'Freight Atlas'
+  
   let menuItems =  useMemo(() => { 
+      //console.log('what crashes', sources)
       return Object.values(sources
-      .filter(d => d.categories.map(d => d[0]).includes(current_site))
+      .filter(d => get(d,`categories`,[]).map(d => d[0]).includes(current_site))
       .filter(d => { 
         return !layerSearch || d.name.split('/').pop().split('_').join(' ').toLowerCase().includes(layerSearch.toLowerCase()) 
       })
@@ -98,7 +112,7 @@ const SourcesLayout = ({children}) => {
         })
         return a
       },{}))
-    },[sources,sourceId,layerSearch])
+    },[sources,sourceId,layerSearch,current_site])
 
 
   return (
@@ -108,7 +122,7 @@ const SourcesLayout = ({children}) => {
       </div>
       <div className='flex'>
         <div className='w-72  shadow h-full sticky top-0 '>
-          <div className='pt-1 pb-4 pr-1'>
+          <div className='pt-1 pb-4 px-1'>
             <input 
               className='w-full text-lg p-2 border border-gray-300 ' 
               placeholder='Search for Layers'

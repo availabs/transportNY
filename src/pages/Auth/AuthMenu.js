@@ -1,5 +1,5 @@
 import React from "react"
-import {useTheme, NavMenu, NavMenuItem, NavMenuSeparator, NavItem, withAuth } from 'modules/avl-components/src'
+import {useTheme, Dropdown, withAuth } from 'modules/avl-components/src'
 import {Link} from 'react-router-dom'
 // import {NavItem, NavMenu, NavMenuItem, NavMenuSeparator, withAuth} from 'components/avl-components/src'
 // import user from "@availabs/ams/dist/reducers/user";
@@ -7,11 +7,19 @@ import {Link} from 'react-router-dom'
 const UserMenu = ({user}) => {
     const theme = useTheme()
     return (
-        <div className={`text-sm text-white font-normal tracking-widest flex justify-column align-middle pb-5 pt-5`}>
-            <i className="fas fa-user text-md pr-1 pt-1"></i>
-            <span>
-                <div className='text-s -my-1 text-left text-white'>{user.email ? user.email : ''}</div>
-                <div className='text-xs -my-1 text-left text-gray-400'>{user.groups[0] ? user.groups[0] : ''}</div>
+        <div className={`flex justify-column align-middle py-1 px-4`}>
+            <div className='pt-[4px]'>
+                <span className={`rounded-full border-2 border-blue-400
+                    inline-flex items-center justify-center 
+                    h-6 w-6 sm:h-8 sm:w-8 ring-white text-white 
+                    bg-blue-500 overflow-hidden`}>
+                    <i className="fa-duotone fa-user fa-fw pt-2 text-2xl" aria-hidden="true"></i>
+                </span>
+            </div>
+            
+            <span className='pl-2'>
+                <div className='text-md font-thin tracking-tighter  text-left text-blue-600 group-hover:text-white '>{user.email ? user.email : ''}</div>
+                <div className='text-xs font-medium -mt-1 tracking-widest text-left text-gray-500 group-hover:text-gray-200'>{user.groups[0] ? user.groups[0] : ''}</div>
             </span>
         </div>
     )
@@ -19,13 +27,15 @@ const UserMenu = ({user}) => {
 
 const Item = (to, icon, span, condition) => (
     condition === undefined || condition ?
-        <React.Fragment>
-            <NavMenuSeparator className={'text-gray-600'}/>
-            <NavMenuItem to={to}>
-                <i className={icon}></i>
-                <span>{span}</span>
-            </NavMenuItem>
-        </React.Fragment> : null
+        <Link to={ to } >
+            <div className='px-6 py-2 bg-blue-500 text-white hover:text-blue-100'>
+                <div className='hover:translate-x-2 transition duration-100 ease-out hover:ease-in'>
+                    <i className={`${icon} `} />
+                    <span className='pl-2'>{span}</span>
+                </div>
+            </div>
+        </Link>
+    : null
 )
 export default withAuth(({title, shadowed = true, user, children}) => {
    
@@ -35,16 +45,11 @@ export default withAuth(({title, shadowed = true, user, children}) => {
         <div className="h-full w-full">
             {!user.authed ?
                 <Link className={`${theme.topnav({}).navitemTop}`} to="/auth/login">Login</Link> :
-                <NavMenu control={<UserMenu user={user}/>} >
-                    <div>
-                        {<UserMenu user={user}/>}
+                <Dropdown control={<UserMenu user={user}/>} className={`hover:bg-blue-500 group `} >
+                    <div className='py-4 bg-blue-500'> 
+                        {Item('/auth/logout', 'fad fa-sign-out-alt pb-2 pr-1 pt-2', 'Logout')}
                     </div>
-
-                    {Item('/admin', 'fas fa-arrow-right pr-1', 'Home' )}
-                    {Item('/meta', 'fas fa-arrow-right pr-1', 'Admin Panel', user.authLevel >= 5 )}
-                    {Item('/auth/logout', 'fas fa-sign-out-alt pb-2 pr-1 pt-2', 'Logout')}
-
-                </NavMenu>
+                </Dropdown>
             }
         </div>
     )
