@@ -91,7 +91,6 @@ const LayerManager = ({activeLayers,...rest}) => {
                     	</div>
 
                 	}
-                    
                 </div>
             </div>
         </div>

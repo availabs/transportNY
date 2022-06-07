@@ -6,7 +6,7 @@ import { Select, useTheme, CollapsibleSidebar, TabPanel, Modal } from "modules/a
 import {FreightAtlasFactory} from '../layers/freight_atlas'
 import config from "config.json"
 
-import {StylesTab, LayerPanel} from './map-controls'
+import {StylesTab, LayerPanel} from 'components/map-controls'
 
 import LayerManager from './LayerManager'
 

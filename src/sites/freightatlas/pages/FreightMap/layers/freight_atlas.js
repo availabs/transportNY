@@ -9,7 +9,7 @@ import { LayerContainer } from "modules/avl-map/src";
 
 
 
-class FreightAtlasSimple extends LayerContainer {
+class FreightAtlasLayer extends LayerContainer {
   sources = [
       { 
         id: "freight_atlas",
@@ -91,4 +91,4 @@ class FreightAtlasSimple extends LayerContainer {
    
 }
 
-export const FreightAtlasFactory = (options = {}) => new FreightAtlasSimple(options);
+export const FreightAtlasFactory = (options = {}) => new FreightAtlasLayer(options);

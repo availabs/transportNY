@@ -2,12 +2,55 @@ import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useFalcor, Button } from 'modules/avl-components/src'
 import get from 'lodash.get'
 import { useParams } from 'react-router-dom'
+import FreightAtlasLayer from './FreightAtlasLayer'
+import { AvlMap } from "modules/avl-map/src"
+import config from "config.json"
 
 
 
 
 import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
     
+const Map = ({layers}) => {
+    
+    const mapOptions =  {
+        zoom: 6.2,
+        center: [
+            -75.95,
+           42.89
+        ],
+        logoPosition: "bottom-right",
+        styles: [
+            {name: "Light",
+                style: 'mapbox://styles/am3081/ckm86j4bw11tj18o5zf8y9pou' },
+            {name: "Blank Road Labels",
+                style: 'mapbox://styles/am3081/cl0ieiesd000514mop5fkqjox'},
+            {name: "Dark",
+                style: 'mapbox://styles/am3081/ckm85o7hq6d8817nr0y6ute5v' }
+        ]
+    }
+    
+ 
+    const map_layers = useMemo(() => {
+      return layers.map(l => FreightAtlasLayer(l))
+    },[layers])
+    
+    return (
+        
+        <div className='w-full h-full'>   
+            <AvlMap
+                accessToken={ config.MAPBOX_TOKEN }
+                mapOptions={ mapOptions }
+                layers={map_layers}
+                CustomSidebar={() => <div/>}
+            />
+        </div>
+       
+    )
+}
+
+
+
 const Edit = ({startValue, attr, viewId, parentData, cancel=()=>{}}) => {
   const { falcor } = useFalcor()
   const [value, setValue] = useState('')
@@ -73,7 +116,10 @@ const Edit = ({startValue, attr, viewId, parentData, cancel=()=>{}}) => {
   )
 }
 
-const Map = () => {
+
+
+
+const MapPage = () => {
   const {falcor,falcorCache} = useFalcor()
   const { sourceId } = useParams()
   const [ activeView, setActiveView ] = useState(null)
@@ -98,6 +144,10 @@ const Map = () => {
   return (
     <div> 
       Map View {get(activeView,'id','')}
+
+      <div className='w-ful h-[700px]'>
+        <Map layers={[{name: "Test123", sources: get(mapData,'sources',[]), layers: get(mapData,'layers',[])}]}/>
+      </div>
       <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
         <dl className="sm:divide-y sm:divide-gray-200">
           {['sources','layers']
@@ -148,7 +198,7 @@ export default {
   map: {
     name: 'Map',
     path: '/map',
-    component: Map
+    component: MapPage
   },
   table: {
     name: 'Table',
