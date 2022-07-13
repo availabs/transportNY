@@ -43,7 +43,7 @@ const AuthConfig = {
   ]
 }
 
-export default {
+const AuthSystemConfig = {
   path: "/auth",
   mainNav: false,
   sideNav: {
@@ -51,3 +51,4 @@ export default {
   },
   component: AuthConfig
 }
+export default AuthSystemConfig

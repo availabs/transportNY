@@ -8,9 +8,10 @@ let colors = ['#e8c1a0', '#f47560', '#f1e15b', '#e8a838', '#61cdbb', '#97e3d5']
 
 const Home = () => {
   const [crosswalk, setCrosswalk] = useState([])
+  const [activeSurvey, setActiveSurvey] = useState(SURVEYS[0])
 
   useEffect(() => {
-    fetch('/data/survey_cross.json')
+    fetch('/data/survey_cross_v2.json')
       .then(r => r.json())
       .then(d => setCrosswalk(d))
   },[])
@@ -18,6 +19,7 @@ const Home = () => {
   const treeData = useMemo(() => {
     let data = crosswalk
     .filter(d => d["Variable Categories"])
+    .filter(d => !['Identifier','Survey-related','Census-related'].includes(d["Variable Subject"]))
     .reduce((out, curr) => {
       
       if(!out[curr["Variable Categories"]]){
@@ -30,41 +32,58 @@ const Home = () => {
       if(!out[curr["Variable Categories"]].children[curr["Variable Subject"]]){
         out[curr["Variable Categories"]].children[curr["Variable Subject"]] = {
           name: curr["Variable Subject"],
-          children: []
+          children: {}
         }
       }
       let surveyQuestion = SURVEYS
         .reduce((out,survey) => {
           out[survey] = 0
-          out[`${survey}_color`] = '#eee'
           let surveyKeys = Object.keys(crosswalk[0])
-          .filter(d => !['Variable','Label', survey].some(e => d.includes(e)))
+            .filter(d => !['Variable','Label'].some(e => d.includes(e)))
+            .filter(d => d.includes(survey))
 
           surveyKeys.forEach(surveyKey => {
-            if(+curr[surveyKey] === 1) {
+            if([1,2].includes(+curr[surveyKey])) {
               out[survey] = 1
-              out[`${survey}_color`] = "#b2df8a"
+              
             }
           })
           return out
         },{})
 
-      let varData = {
-        name: curr["Mother - Label"],
-        color: surveyQuestion['RHTS_color'],
-        fill: surveyQuestion['RHTS_color'],
-        q: 1,
-        ...surveyQuestion,
-        total: SURVEYS.reduce((out,c) => out+= surveyQuestion[c])
+      let varName = curr["Collapse Category"] ? curr["Collapse Category"] :  curr["Mother - Label"]
+      if(!out[curr["Variable Categories"]].children[curr["Variable Subject"]].children[varName]){
+        out[curr["Variable Categories"]].children[curr["Variable Subject"]].children[varName] = {
+          name: varName,
+          q: 1,
+          mother_survey: curr['Mother Variable Survey Origin'],
+          ...surveyQuestion
+        }
+      } 
 
-      }
+      // if collapse variable
+      // update surveyQuestions
+      Object.keys(SURVEYS).forEach(survey => {
+        if(surveyQuestion[survey] === 0 &&
+          out[curr["Variable Categories"]].children[curr["Variable Subject"]].children[varName][survey] !== 0) {
+          out[curr["Variable Categories"]].children[curr["Variable Subject"]].children[varName][survey] = 1
+        }
+      })
 
-      out[curr["Variable Categories"]].children[curr["Variable Subject"]].children.push(varData)
+
+      
       return out
     },{})
+    // flatten children to arrays
     Object.values(data).forEach((tl,i) => {
       tl.color = colors[i%6]
       tl.children = Object.values(tl.children)
+      tl.children.forEach(ll => {
+        ll.children = Object.values(ll.children)
+          .sort(function(a,b){
+              return a.mother_survey.localeCompare(b.mother_survey);
+          })
+      })
     })
     return {
       name: "survey",
@@ -78,10 +97,17 @@ const Home = () => {
   }
   return (
     <div className='max-w-6xl mx-auto'>
-        Test {crosswalk.length} x
-        {SURVEYS.map((survey)=> (
-          <div>
-            <div className='p-4 text-lg font-bold'>{survey}</div>
+        Survey Topic Overlap
+        {/*<pre>
+          {crosswalk[0] ? JSON.stringify(crosswalk[0],null,3) : ''}
+        </pre>*/}
+        
+          <div className='pb-4'>
+            <div className='pb-4  '>
+              <select className='bg-gray-100 p-4 text-lg font-bold border border-gray-300 rounded' value={activeSurvey} onChange={e => setActiveSurvey(e.target.value)}>
+                {SURVEYS.map(survey => <option value={survey} >{survey}</option>)}
+              </select>
+            </div>
             <div className='bg-white w-full h-[800px]'>
               
               <ResponsiveTreeMap
@@ -92,11 +118,10 @@ const Home = () => {
                 enableLabel={false}
                 margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
                 labelSkipSize={12}
-                tile={'binary'}
+                
                 nodeComponent={n => {
-                  if(n.node.isLeaf && n.node.data[`${survey}_color`] === '#eee'){
-                    //console.log('n',n, n.node.color, n.node.data.color )
-                    n.node.fill = n.node.data[`${survey}_color`]
+                  if(n.node.isLeaf && n.node.data[`${activeSurvey}`] === 0){
+                    n.node.fill = '#eee'
                     n.node.opacity = 1
                   }
                   return <TreeMapNode {...n} />
@@ -135,9 +160,9 @@ const Home = () => {
                 
                 animate={false}
             />
-            </div>
           </div>
-      ))}
+        </div>
+     
     </div>
   )
 }

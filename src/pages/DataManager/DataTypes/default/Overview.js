@@ -1,16 +1,16 @@
 import React, { useEffect, /*useMemo,*/ useState } from 'react';
 import { useFalcor, withAuth, Input, Button } from 'modules/avl-components/src'
 import get from 'lodash.get'
-import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
+import { SourceAttributes } from 'pages/DataManager/components/attributes'
 
 const Edit = ({startValue, attr, sourceId, cancel=()=>{}}) => {
   const { falcor } = useFalcor()
   const [value, setValue] = useState('')
-  const [loading, setLoading] = useState(false)
+  /*const [loading, setLoading] = useState(false)*/
 
   useEffect(() => {
     setValue(startValue)
-  },[])
+  },[startValue])
 
   const save = (attr, value) => {
     if(sourceId) {
@@ -95,21 +95,21 @@ const OverviewEdit = withAuth(({source, views, user}) => {
           <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt className="text-sm font-medium text-gray-500">Versions</dt>
             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <ul role="list" className="border border-gray-200 rounded-md divide-y divide-gray-200">
+              <ul className="border border-gray-200 rounded-md divide-y divide-gray-200">
                 {views.map((v,i) => (
                   <li key={i} className="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
                     <div className="w-0 flex-1 flex items-center">
                       <span className="ml-2 flex-1 w-0 truncate">{v.version}</span>
                     </div>
                     <div className="ml-4 flex-shrink-0">
-                      <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
+                      <div className="font-medium text-indigo-600 hover:text-indigo-500">
                         Table
-                      </a>
+                      </div>
                     </div>
                     <div className="ml-4 flex-shrink-0">
-                      <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
+                      <div className="font-medium text-indigo-600 hover:text-indigo-500">
                         Download
-                      </a>
+                      </div>
                     </div>
                   </li>
                 ))}

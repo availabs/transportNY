@@ -38,7 +38,7 @@ const Source = () => {
       return data
     }
     fetchData()
-  }, [])
+  }, [falcor, sourceId])
 
   const views = useMemo(() => {
     return Object.values(get(falcorCache,["datamanager","sources","byId",sourceId,"views","byIndex",],{}))
@@ -53,7 +53,7 @@ const Source = () => {
        setPages(Pages) 
     }
     return attributes
-  },[falcorCache,sourceId])
+  },[falcorCache,sourceId, pages])
 
   return (
     <div className='max-w-6xl mx-auto'>

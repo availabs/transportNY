@@ -8,38 +8,31 @@ import * as d3scale from "d3-scale";
 
 import { ckmeans } from "simple-statistics";
 
-import {
-  ConflationSources,
-  ConflationLayers,
-  //ConflationLayerCase
-} from "./map-styles/conflation";
+// import {
+//   ConflationSources,
+//   ConflationLayers,
+//   //ConflationLayerCase
+// } from "./map-styles/conflation";
 
-import { NpmrdsSources, NpmrdsLayers } from "./map-styles/npmrds";
+// import { NpmrdsSources, NpmrdsLayers } from "./map-styles/npmrds";
 
-import {
-  TrafficSignalsSources,
-  TrafficSignalsLayers,
-} from "./map-styles/traffic_signals";
+// import {
+//   TrafficSignalsSources,
+//   TrafficSignalsLayers,
+// } from "./map-styles/traffic_signals";
 
 
 import { LayerContainer } from "modules/avl-map/src";
-import { F_SYSTEMS } from 'sites/tsmo/pages/Dashboards/components/metaData'
+import { F_SYSTEM_MAP } from 'sites/tsmo/pages/Dashboards/components/metaData'
+
+import {getTMCs, getCorridors} from '../data_processing'
 /* ---- To Do -----
 
    ---------------- */
 
- const F_SYSTEM_MAP = {
-   'All': F_SYSTEMS,
-   'Highways': [1, 2],
-   'State & Local': [3, 4, 5, 6, 7]
- }
-
 class CongestionLayer extends LayerContainer {
   name = "Congestion Layer";
   sources = [
-    ...ConflationSources,
-    ...NpmrdsSources,
-    ...TrafficSignalsSources,
     {
       id: "geo-boundaries-source",
       source: {
@@ -50,12 +43,18 @@ class CongestionLayer extends LayerContainer {
         },
       },
     },
+    {
+      id: "corridors-source",
+      source: {
+        type: "geojson",
+        data: {
+          type: "FeatureCollection",
+          features: [],
+        },
+      },
+    },
   ];
   layers = [
-    // ...ConflationLayerCase,
-    ...ConflationLayers,
-    ...NpmrdsLayers,
-    ...TrafficSignalsLayers,
     {
       id: "geo-boundaries",
       type: "line",
@@ -64,34 +63,42 @@ class CongestionLayer extends LayerContainer {
         "line-color": "#000",
       },
     },
+    {
+      id: "corridors-layer",
+      type: "line",
+      source: "corridors-source",
+      paint: {
+        'line-color': '#900',
+        'line-width': [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          0,
+          3,
+          13,
+          6,
+          18,
+          16
+        ],
+        'line-opacity': [
+          "case",
+          ["boolean", ["feature-state", "hover"], false],
+          0.4,
+          1
+        ],
+        'line-offset': {
+          base: 4,
+          stops: [[5, 2], [9, 4], [15, 9], [18, 18]]
+        }
+      }
+    },
   ];
 
   state = {
-    activeStation: null,
     zoom: 6.6,
-    progress: 0,
-    qaLevel: 0.3,
-    allMeasures: [],
-    risAttributes: [],
-    tmcAttributes: [],
-    currentData: [],
-    activeLayers: [],
-    infoBoxes: ["Measure Definition"],
   };
 
-  /*filters = {
-    geography: {
-      name: 'Geography',
-      type: 'select',
-      domain: [],
-      value: [],
-      searchable: true,
-      accessor: d => d.name,
-      valueAccessor: d => d.value,
-      multi: true,
-    }
-  }
-*/
+ 
   legend = {
     type: "quantile",
     domain: [0, 150],
@@ -109,10 +116,10 @@ class CongestionLayer extends LayerContainer {
   };
   onHover = {
     layers: [
-      ...ConflationLayers.map((d) => d.id),
-      ...NpmrdsLayers.map((d) => d.id),
-      "bottlnecks",
-      "incidents",
+      // ...ConflationLayers.map((d) => d.id),
+      // ...NpmrdsLayers.map((d) => d.id),
+      "corridors-layer"
+      
     ],
     // filterFunc: function(layer, features, point, latlng) {
     //   const key = 'tmc',
@@ -138,13 +145,13 @@ class CongestionLayer extends LayerContainer {
     }
   };
 
-  onClick = {
-    layers: [...ConflationLayers.map((d) => d.id)],
-    callback: (features, lngLat) => {
-      let feature = features[0];
-      console.log("click", feature, features);
-    },
-  };
+  // onClick = {
+  //   layers: [...ConflationLayers.map((d) => d.id)],
+  //   callback: (features, lngLat) => {
+  //     let feature = features[0];
+  //     console.log("click", feature, features);
+  //   },
+  // };
 
   zoomToGeography(geo) {
     if (!this.mapboxMap) return;
@@ -190,48 +197,33 @@ class CongestionLayer extends LayerContainer {
   }
 
   getTMCs (rawDelayData) {
-    console.time('getTMcs')
+    // console.time('getTMcs')
     const {region, month: tableDate} = this.props
-    const [year, month] = tableDate.split("-").map(Number)
+    const [year, month] = tableDate.split("-").map(Number),
+    pm = (month - 2 + 12) % 12 + 1,
+    prevYearMonth = `${ +pm === 12 ? year - 1 : year }-${ `0${ pm }`.slice(-2) }`;
 
     const f_systems = get(F_SYSTEM_MAP, this.props.fsystem, []);
+    return getTMCs(rawDelayData,year,month,region,f_systems,prevYearMonth)
 
-     let total = f_systems.reduce((out,fclass) => {
-      // console.log('tmcs get', rawDelayData, get(rawDelayData,`[${year}][${+month}][${region}][${fclass}].total.value`,[]))
-      get(rawDelayData,`[${year}][${+month}][${region}][${fclass}].total.value`,[])
-        .forEach(tmc => {
-          if(!out[tmc.tmc]){
-            out[tmc.tmc] = tmc
-          }
-        })
-      return out
-    },{})
-
-     f_systems.forEach((fclass) => {
-      // console.log('tmcs get', rawDelayData, get(rawDelayData,`[${year}][${+month}][${region}][${fclass}].total.value`,[]))
-      get(rawDelayData,`[${year}][${+month}][${region}][${fclass}].non_recurrent.value`,[])
-        .forEach(tmc => {
-          if(total[tmc.tmc]){
-            total[tmc.tmc].non_recurrent = tmc.value
-          }
-        })
-
-    },{})
-    console.timeEnd('getTMcs')
-    return Object.values(total)
   }
 
   getTMCMetaData (falcorCache,tmcs) {
     const { month: tableDate } = this.props
     const [year,] = tableDate.split("-").map(Number)
     return tmcs.reduce((a, c) => {
-      const d = get(falcorCache, ["tmc", c, "meta", year], null);
-      if (d) {
-        a[c] = d;
-      }
-
+      a[c] = [year].reduce((aa, cc) => {
+        const d = get(falcorCache, ["tmc", c, "meta", cc], null);
+        const geom = get(falcorCache, ['tmc',c,'year',cc,'geometries','value'], null)
+        if (d) {
+          aa[cc] = d;
+          aa[cc].geom = geom
+        }
+        return aa;
+      }, {});
       return a;
     }, {});
+    
   }
 
   getColorScale(domain) {
@@ -256,20 +248,39 @@ class CongestionLayer extends LayerContainer {
   }
 
   fetchData(falcor) {
-    const {region} = this.props
+    const falcorCache = this.falcor.getCache();
+    const {region, month: tableDate } = this.props
+    const [year,] = tableDate.split("-").map(Number)
     const [geolevel, value] = region.split('|')
+    const tmcs = this.getTMCs(this.props.rawDelayData)
 
-    // let request = []
-    ///let tmcs = this.getTMCs()
+    const tmcMetadata = this.getTMCMetaData(falcorCache,Object.values(tmcs).map(d => d.tmc))
+    const corridorsTmcs =  getCorridors(tmcMetadata,year,tmcs)
+      .filter((d,i) => i < 15)
+      .reduce((out,cor) => {
+         return [...out, ...Object.values(cor.tmcs)]
+         
+      },[])
 
-    return falcor.get(["geo", geolevel.toLowerCase(), value, "geometry"])
+    let requests = [["geo", geolevel.toLowerCase(), value, "geometry"]]
+    if(corridorsTmcs.length > 0) {
+      requests.push(
+        ['tmc',corridorsTmcs,'year',year,'geometries']
+      )
+    }
+    console.log('requests', requests)
+    return falcor.get(...requests)
+      // .then(d => {
+      //   console.log('got data', d)
+      // })
   }
 
   render(map,) {
     const falcorCache = this.falcor.getCache();
 
     // --- Set Boundary and Zoom to Regions
-    const {region} = this.props
+    const {region, month: tableDate } = this.props
+    const [year,] = tableDate.split("-").map(Number)
     const [geolevel, value] = region.split('|')
     const geom =  get(
       falcorCache,
@@ -286,27 +297,73 @@ class CongestionLayer extends LayerContainer {
         }]
     };
     map.getSource("geo-boundaries-source").setData(collection);
-    this.zoomToGeography(geom)
+    if(geom){
+      this.zoomToGeography(geom)
+    }
     // --- Process and Map Congestion Data
-    const tmcs = this.getTMCs(this.props.rawDelayData)
+    const tmcMap = this.getTMCs(this.props.rawDelayData)
+    const tmcs = Object.values(tmcMap)
+    // console.log('testing', tmcs)
     const tmcMetadata = this.getTMCMetaData(falcorCache,tmcs.map(d => d.tmc))
+    const corridors =  getCorridors(tmcMetadata,year,tmcMap)
+    const corridorsTmcs =  corridors.filter((d,i) => i < 15)
+      .reduce((out,cor) => {
+         return [...out, ...Object.values(cor.tmcs)]
+         
+      },[])
+
+    const corridorCollection = {
+      type: "FeatureCollection",
+      features: []
+    };
+    if(corridorsTmcs.length) {
+      console.log('corridorsTmcs to render', corridors, corridorsTmcs,tmcMetadata )
+      corridorCollection.features = corridorsTmcs.map((tmc,i) => {
+        let meta = get(tmcMetadata,`[${tmc}][${year}]`, {})
+        let data = get(tmcMap, `[${tmc}]`, {})
+        return {
+          type: "Feature",
+          id: i,
+          properties: {
+            tmc,
+            roadname: meta.roadname,
+            firstname: meta.firstname,
+            direction: meta.direction,
+            length: meta.length,
+            total_delay: data.total,
+            non_recurrent: data.non_recurrent
+          },
+          geometry: meta.geom
+        }
+      })
+      map.getSource("corridors-source").setData(corridorCollection);
+      console.log('corridorsTmcs to render', corridorCollection )
+      
+    }
+
     if(Object.keys(tmcMetadata).length) {
-      const scale = this.getColorScale(tmcs.map(d => (d.value / tmcMetadata[d.tmc].length)).sort((a, b) => a - b));
-      const colors = tmcs.reduce((a, c) => {
-        a[c.tmc] = scale((c.value / tmcMetadata[c.tmc].length));
+      let corridorTmcData = tmcs
+        .filter(d => corridorsTmcs.includes(d.tmc))
+      console.log('testing', corridorsTmcs, tmcMetadata)
+      
+      const scale = this.getColorScale(
+        corridorTmcData
+          .map(d => (d.total / tmcMetadata[d.tmc][year].length))
+          .sort((a, b) => a - b)
+      );
+      const colors = corridorTmcData.reduce((a, c) => {
+        a[c.tmc] = scale((c.total / tmcMetadata[c.tmc][year].length));
         return a;
       }, {});
       console.log("colors", colors);
-      NpmrdsLayers.map((d) => d.id)
-        .forEach((l) => {
-        //console.log('set paint', l, colors)
-        map.setPaintProperty(l, "line-color", [
-          "case",
-          ["has", ["to-string", ["get", 'tmc']], ["literal", colors]],
-          ["get", ["to-string", ["get", 'tmc']], ["literal", colors]],
-          "rgba(220, 220, 220,0.5)",
-        ]);
-      });
+     
+      map.setPaintProperty("corridors-layer", "line-color", [
+        "case",
+        ["has", ["to-string", ["get", 'tmc']], ["literal", colors]],
+        ["get", ["to-string", ["get", 'tmc']], ["literal", colors]],
+        "rgba(220, 220, 220,0.5)",
+      ]);
+     
     }
   }
 

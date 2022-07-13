@@ -1,28 +1,35 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useFalcor,SideNav, Input } from 'modules/avl-components/src'
+import React, { useEffect, useMemo, useState, useContext } from 'react';
+import { useFalcor,SideNav } from 'modules/avl-components/src'
 import get from 'lodash.get'
-import {getDomain,getSubdomain} from 'utils'
+//import {getDomain,getSubdomain} from 'utils'
 
 import Source from './Source'
 
-import {SourceAttributes, getAttributes} from 'pages/DataManager/components/attributes'
+import {SourceAttributes, getAttributes, getName} from 'pages/DataManager/components/attributes'
+
+import { LayerContext } from './FreightMap'
 
 
-const LayerManager = ({activeLayers,...rest}) => {
-	const SUBDOMAIN = getSubdomain(window.location.host)
+const LayerManager = ({activeLayers,MapActions,...rest}) => {
+	// const SUBDOMAIN = getSubdomain(window.location.host)
   	const {falcor,falcorCache} = useFalcor()
   	const [displayLayer, setDisplayLayer] = useState(null)
   	const [layerSearch, setLayerSearch] = useState('')
-  
-	useEffect(async () => {
-	    const lengthPath = ["datamanager", "sources", "length"];
-	    const resp = await falcor.get(lengthPath);
-	    return await falcor.get([
-	      "datamanager","sources","byIndex",
-	      {from:0, to:  get(resp.json, lengthPath, 0)-1},
-	      "attributes",Object.values(SourceAttributes),
-	    ])
-	}, [])
+  	const { layerList, toggleLayer } = useContext(LayerContext);
+
+  	
+	useEffect(() => {
+	   const fetchData = async () => {
+		   const lengthPath = ["datamanager", "sources", "length"];
+		    const resp = await falcor.get(lengthPath);
+		    return await falcor.get([
+		      "datamanager","sources","byIndex",
+		      {from:0, to:  get(resp.json, lengthPath, 0)-1},
+		      "attributes",Object.values(SourceAttributes),
+		    ])
+		}
+		fetchData()
+	}, [falcor])
 
 	const sources = useMemo(() => {
 	    return Object.values(get(falcorCache,['datamanager','sources','byIndex'],{}))
@@ -30,7 +37,7 @@ const LayerManager = ({activeLayers,...rest}) => {
 	},[falcorCache])
 
 	const current_site = 'Freight Atlas'
-	const current_filter = null
+	// const current_filter = null
 	let menuItems =  useMemo(() => { 
 	    return Object.values(sources
 	    .filter(d => d.categories.map(d => d[0]).includes(current_site))
@@ -50,26 +57,36 @@ const LayerManager = ({activeLayers,...rest}) => {
 	          	className: ' ',
 	          	name: (
 	          		<div className={`flex p-2 hover:bg-blue-100 border-r-4 ${b.id === displayLayer ? 'border-blue-600' : 'border-white'}`}>
-	          			<div className='flex-1 pl-6 cursor-pointer text-sm' onClick={() => setDisplayLayer(b.id)}>{b.name.split('/').pop().split('_').join(' ')}</div>
-	          			<div><i className='fa fa-plus text-xs text-blue-700 cursor-pointer rounded-sm py-1 px-1.5 hover:bg-blue-400 hover:text-white'/></div>
+	          			<div className='flex-1 pl-6 cursor-pointer text-sm' onClick={() => setDisplayLayer(b.id)}>{getName(b)}</div>
+	          			<div>
+	          				<i 
+	          					onClick={(e) => {
+	          					 	toggleLayer(b.id)
+	          					 	if(activeLayers.map(d => d.layer_id).includes(b.id)){
+	          					 		let removeLayer = activeLayers.filter(d => d.layer_id === b.id)[0]
+	          					 		MapActions.removeLayer(removeLayer)
+	          					 	}
+	          					}}
+	          					className={`${layerList.includes(+b.id) ? 'fa fa-minus' : 'fa fa-plus' } text-xs text-blue-700 cursor-pointer rounded-sm py-1 px-1.5 hover:bg-blue-400 hover:text-white`}/>
+	          			</div>
 	          		</div>
 	          	),
-	          	onClick: () => console.log('menu click', b.id, b.name)
+	          	//onClick: () => {}
 	          })
 	        }
 	      })
 	      return a
 	    },{}))
-	  },[sources,displayLayer,layerSearch])
+	  },[sources,displayLayer,layerSearch,layerList,activeLayers,MapActions,toggleLayer])
 
 	
     return (
         <div className=''>
-            <div className='px-4 py-2 border-b border-gray-300 font-medium text-lg'>Layer Manager</div>
+            <div className='px-4 py-2 border-b border-gray-300 font-medium text-lg'>Layer Manager {JSON.stringify(layerList)}</div>
             <div className='flex h-[32rem]'>
                 <div className='w-72 border-r border-gray-300 h-full pb-[54px]'>
                     <div className='p-1'>
-                    	<input 
+                     	<input
                     		className='w-full text-lg p-2 border border-gray-300 ' 
                     		placeholder='Search for Layers'
                     		value={layerSearch}

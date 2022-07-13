@@ -12,7 +12,6 @@ import { format as d3format } from "d3-format"
 
 
 import { LayerContainer } from "modules/avl-map/src";
-import { F_SYSTEMS } from 'sites/tsmo/pages/Dashboards/components/metaData'
 /* ---- To Do -----
 
 
@@ -24,22 +23,12 @@ const fFormat = d3format(",.2s")
 
 
 const duration2minutes = (dur) => {
-    if(!dur) return 0
-    let [days, time] = dur.split('-')
-    let [hours, minutes] = time.split(':')
-    let out = 1440 * (+days) + 60 * (+hours) + (+minutes)
-    return isNaN(out) ? 0 : out
-  }
-
-function timeConvert(n) {
-var num = n;
-var hours = (num / 60);
-var rhours = Math.floor(hours);
-var minutes = (hours - rhours) * 60;
-var rminutes = Math.round(minutes);
-return rhours + " hour(s) and " + rminutes + " minute(s).";
+  if(!dur) return 0
+  let [days, time] = dur.split('-')
+  let [hours, minutes] = time.split(':')
+  let out = 1440 * (+days) + 60 * (+hours) + (+minutes)
+  return isNaN(out) ? 0 : out
 }
-
 
 const HoverComp = ({ data, layer }) => {
   return (
@@ -169,7 +158,7 @@ class CongestionLayer extends LayerContainer {
     //   return ["in", key, value]; //["all", ["in", key, value], ["in", "dir", dir]];
     // },
     callback: (layerId, features, lngLat) => {
-      let feature = features[0];
+      // let feature = features[0];
 
 
       //console.log('hover', v)
@@ -264,7 +253,7 @@ class CongestionLayer extends LayerContainer {
   }
 
   fetchData(falcor) {
-    const {region,events} = this.props
+    const {region} = this.props
     const [geolevel, value] = region.split('|')
 
     // let request = []
@@ -294,7 +283,11 @@ class CongestionLayer extends LayerContainer {
         }]
     };
     map.getSource("geo-boundaries-source").setData(collection);
-    this.zoomToGeography(geom);
+    map.getSource("geo-boundaries-source").setData(collection);
+    if(geom){
+      console.log('going to zoom')
+      this.zoomToGeography(geom)
+    }
 
     if (hoveredEvent) {
       map.setPaintProperty("events-points", "circle-stroke-width",
@@ -326,12 +319,13 @@ class CongestionLayer extends LayerContainer {
               delay: +get(event, 'congestion_data.value.vehicleDelay', 0),
               duration: duration2minutes(event.event_duration),
               description: event.description,
-              color: get(this, ["props", "colorsForTypes", event.sub_category], "#009")
+              color: get(this, ["props", "colorsForTypes", event.nysdot_sub_category], "#009")
             },
             geometry: event.geom.value
           }
         })
     }
+    // console.log('eventsCollection', eventsCollection)
     map.getSource("events-source").setData(eventsCollection);
   }
 

@@ -1,15 +1,12 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useFalcor, Button } from 'modules/avl-components/src'
 import get from 'lodash.get'
-import { useParams } from 'react-router-dom'
+// import { useParams } from 'react-router-dom'
 import FreightAtlasLayer from './FreightAtlasLayer'
 import { AvlMap } from "modules/avl-map/src"
 import config from "config.json"
 
-
-
-
-import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
+// import { getAttributes } from 'pages/DataManager/components/attributes'
     
 const Map = ({layers}) => {
     
@@ -54,13 +51,13 @@ const Map = ({layers}) => {
 const Edit = ({startValue, attr, viewId, parentData, cancel=()=>{}}) => {
   const { falcor } = useFalcor()
   const [value, setValue] = useState('')
-  const [loading, setLoading] = useState(false)
+  /*const [loading, setLoading] = useState(false)*/
   const inputEl = useRef(null);
 
   useEffect(() => {
     setValue(startValue)
     inputEl.current.focus();
-  },[])
+  },[startValue])
 
   useEffect(() => {
     inputEl.current.style.height = 'inherit';
@@ -73,7 +70,7 @@ const Edit = ({startValue, attr, viewId, parentData, cancel=()=>{}}) => {
         let update = JSON.parse(value)
         let val = parentData
         val.tiles[attr] = update
-        console.log('testing',JSON.stringify(val), val)
+        // console.log('testing',JSON.stringify(val), val)
         let response = await falcor.set({
             paths: [
               ['datamanager','views','byId',viewId,'attributes', 'metadata' ]
@@ -120,30 +117,16 @@ const Edit = ({startValue, attr, viewId, parentData, cancel=()=>{}}) => {
 
 
 const MapPage = () => {
-  const {falcor,falcorCache} = useFalcor()
-  const { sourceId } = useParams()
-  const [ activeView, setActiveView ] = useState(null)
-  const [ mapData, setMapData ] = useState({})
+  // const { sourceId } = useParams()
+  const [ activeView /*, setActiveView*/ ] = useState(null)
+  const [ mapData /*, setMapData*/ ] = useState({})
   const [ editing, setEditing ] = React.useState(null)
 
-  const views = useMemo(() => {
-    let views = Object.values(get(falcorCache,["datamanager","sources","byId",sourceId,"views","byIndex",],{}))
-      .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
-      .sort((a,b) => {
-        return new Date(a.last_updated) - new Date(b.last_updated)
-      })
-
-    if(views[0]) {
-      setActiveView(views[0])
-      setMapData(get(views[0],'metadata.tiles',{}))
-    }
-
-
-  },[falcorCache,sourceId])
+ 
 
   return (
     <div> 
-      Map View {get(activeView,'id','')}
+      Map View {/*{get(activeView,'id','')}*/}
 
       <div className='w-ful h-[700px]'>
         <Map layers={[{name: "Test123", sources: get(mapData,'sources',[]), layers: get(mapData,'layers',[])}]}/>
@@ -194,7 +177,7 @@ const Table = ({source}) => {
   return <div> Table View </div>  
 }
 
-export default {
+const FreightAtlashShapefileConfig = {
   map: {
     name: 'Map',
     path: '/map',
@@ -206,3 +189,5 @@ export default {
     component: Table
   }
 }
+
+export default FreightAtlashShapefileConfig

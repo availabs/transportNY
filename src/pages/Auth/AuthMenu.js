@@ -5,7 +5,7 @@ import {Link} from 'react-router-dom'
 // import user from "@availabs/ams/dist/reducers/user";
 
 const UserMenu = ({user}) => {
-    const theme = useTheme()
+    // const theme = useTheme()
     return (
         <div className={`flex justify-column align-middle py-1 px-4`}>
             <div className='pt-[4px]'>

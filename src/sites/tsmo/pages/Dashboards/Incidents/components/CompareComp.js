@@ -29,7 +29,7 @@ export const CompareComp = ({ prev, curr, currPer=1, prevPer=1, perUnit='day', t
 export const HeroStatComp = ({data,stat,display=fraction, perUnit='day'}) => ( 
   <div className='text-gray-800 text-center '>
     {Object.keys(data.prevMonthByCat).map(cat => {
-      if(get(data, `currentMonthbyCat[${cat}].count`,0) < 5) return 
+      if(get(data, `currentMonthbyCat[${cat}].count`,0) < 5) return ''
       return (
       <div key={cat} className='border-b'>
         <div className='text-left w-full'>{cat}</div>
@@ -52,6 +52,44 @@ export const HeroStatComp = ({data,stat,display=fraction, perUnit='day'}) => (
               prevPer = {perUnit ? data.prevMonthDays.length : 1}
               curr={ get(data, `currentMonthbyCat[${cat}][${stat}]`,0)}
               currPer = {perUnit ? data.currentMonthDays.length : 1}
+              perUnit = {perUnit ? 'day' : null }
+              display={display}
+            />
+          </div>
+        </div>
+    )})}
+  </div>
+)
+
+export const CongestionStatComp = ({data,stat,display=fraction, perUnit='day'}) => ( 
+  <div className='text-gray-800 text-center '>
+    {['total', 'recurrent', 'non-recurrent','accident','construction'].map(cat => {
+      if(get(data, `currMonth[${cat}]`,0) < 5) return ''
+      return (
+      <div key={cat} className='border-b'>
+        <div className='text-left w-full'>{cat}</div>
+        <div className='flex'>
+          <div className='flex-1' > 
+            <div className='flex'>
+              <div className='w-10 h-10 shadow' style={{backgroundColor: data.colorsForTypes[cat]}} />
+                <div className='flex-1'>
+                  <div className='text-lg'>
+                    {display(get(data, `currMonth[${cat}]`,0))}
+                  </div>
+                 {/* <div className='text-xs'>
+                    {get(data, `currMonth[${cat}]`,0).toLocaleString()}
+                  </div>*/}
+                  <div className='text-xs text-gray-500 '>
+                    {display(get(data, `currMonth[${cat}]`,0),perUnit ? get(data,`currMonth.numDays`,1) : 1)}  {perUnit ? `/ ${perUnit}` : ''}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <CompareComp title="Prev. Month"
+              prev={ get(data, `prevMonth[${cat}]`,0) }
+              prevPer = {perUnit ? get(data,`prevMonth.numDays`, 1) : 1}
+              curr={ get(data, `currMonth[${cat}]`,0)}
+              currPer = {perUnit ? get(data,`currMonth.numDays`, 1) : 1}
               perUnit = {perUnit ? 'day' : null }
               display={display}
             />

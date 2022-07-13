@@ -247,9 +247,46 @@ class PointLayer extends LayerContainer {
   };
 }
 
-const Map = ({ tmcs, ways, year, point, eventData, showRaw }) => {
+const Map = ({ eventData, activeBranches, showRaw }) => {
 
   const [prevTmcs, setPrevTmcs] = React.useState([]);
+
+  const { tmcs, ways, year, point } = React.useMemo(() => {
+    let mData = {
+      tmcs: [],
+      ways: [],
+      year: null,
+      point: null,
+    };
+    if (!eventData) {
+      return mData;
+    }
+    const congestionData = get(eventData, ["congestion_data", "value"], null);
+    if (!congestionData) {
+      return mData;
+    }
+
+    const branchMap = congestionData.branches.reduce((a, c) => {
+      a[c.branch.join("|")] = c;
+      return a;
+    }, {})
+
+    const upBranch = get(branchMap, activeBranches[0], { branch: [], ways: [] });
+    const downBranch = get(branchMap, activeBranches[1], { branch: [], ways: [] });
+
+    // const upBranch = get(activeBranches, 0, { branch: [], ways: [] });
+    // const downBranch = get(activeBranches, 1, { branch: [], ways: [] });
+
+    mData.tmcs = [...new Set([...upBranch.branch, ...downBranch.branch])];
+    mData.ways = [...new Set([...upBranch.ways, ...downBranch.ways])].map((id) => +id);
+
+    const open_time = new Date(eventData.open_time);
+    mData.year = open_time.getFullYear();
+
+    mData.point = get(eventData, ["geom", "value"], null);
+
+    return mData;
+  }, [eventData, activeBranches]);
 
   const layers = React.useRef([new ConflationLayer(), new PointLayer()]);
   const layerProps = React.useMemo(() => {

@@ -14,7 +14,10 @@ const Routes = [
   IncidentView
 ]
 
-export default {
+
+const TSMOconfig = {
 	title: "TSMO",
 	Routes
 }
+
+export default TSMOconfig
