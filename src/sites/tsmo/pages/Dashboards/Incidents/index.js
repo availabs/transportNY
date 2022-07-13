@@ -116,15 +116,15 @@ const Incidents = props => {
           ])
         }
       })
-      .then((resp) => { 
-        setLoading(-1); 
+      .then((resp) => {
+        setLoading(-1);
       });
   },[falcor,requests, setLoading]);
 
 
 
   let data = React.useMemo(()=> {
-    
+
     const fSystems = F_SYSTEM_MAP[fsystem];
     let request = requests[0];
     let eventIds = get(falcorCache, ["transcom2", "eventsbyGeom", request, "value"], [])
@@ -140,6 +140,7 @@ const Incidents = props => {
 
     let data = eventIds.reduce((out, eventId) => {
       let event = get(falcorCache, ["transcom2", "eventsbyId", eventId],  null)
+console.log("EVENT:", event);
       // console.log('testing', event)
       // if(['incident'].includes(event.event_category)){
       if (event && (!fSystems.length || fSystems.includes(event.n))) {
@@ -217,7 +218,7 @@ const Incidents = props => {
         }
         return a
       }, {Total: {count: 0, duration: 0,v_delay: 0,top_20_v_delay: 0}});
-    
+
 
     // const prevYearIds = get(falcorCache, ["transcom2", "eventsbyGeom", requests[2], "value"], []);
     // const prevYear = prevYearIds.length;
@@ -228,7 +229,7 @@ const Incidents = props => {
     //       return a + duration2minutes(e.event_duration);
     //     }
     //     return a
-        
+
     //   }, 0);
 
     let pieData = events.reduce((out, event) => {
@@ -282,6 +283,7 @@ const Incidents = props => {
       }
     )
 
+console.log("KEYS:", keys)
     keys.sort((a, b) => a.localeCompare(b));
 
     const nc = theme.graphCategorical.length;
@@ -355,19 +357,19 @@ const Incidents = props => {
 
         <div className='bg-white shadow rounded p-4 col-span-4 md:col-span-2 lg:col-span-1 '>
           <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-1 '>Total Incident Delay Cost ( vs Prev Month/day )</div>
-          <HeroStatComp 
-            data={data} 
-            stat={'v_delay'} 
+          <HeroStatComp
+            data={data}
+            stat={'v_delay'}
             display={vehicleDelay2cost}
           />
         </div>
         <div className='bg-white shadow rounded p-4 col-span-4 md:col-span-2 lg:col-span-1'>
           <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-1 '>Top 20 Incident Delay Cost ( vs Prev Month/day )</div>
-          
 
-            <HeroStatComp 
-            data={data} 
-            stat={'top_20_v_delay'} 
+
+            <HeroStatComp
+            data={data}
+            stat={'top_20_v_delay'}
             display={vehicleDelay2cost}
             perUnit={false}
           />
@@ -394,15 +396,15 @@ const Incidents = props => {
           </span>
         </div>
         <div className='bg-white shadow rounded col-span-4 lg:col-span-2'>
-          
-          <IncidentTable 
-            events={data.events} 
+
+          <IncidentTable
+            events={data.events}
             setHoveredEvent={ setHoveredEvent }
           />
         </div>
 
         <div className='bg-white shadow rounded col-span-4 lg:col-span-2'>
-          <IncidentMap 
+          <IncidentMap
             colorsForTypes={ data.colorsForTypes }
             events={data.events}
             hoveredEvent={ hoveredEvent }
@@ -415,7 +417,7 @@ const Incidents = props => {
 }
 
 export default [
-  
+
   { name:'Incidents',
     title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
     icon: 'fa-duotone fa-truck-tow',
