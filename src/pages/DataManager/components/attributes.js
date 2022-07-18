@@ -40,3 +40,9 @@ export const getAttributes = (data) => {
       return out 
     },{})
 }
+
+export const getName = (source) => {
+  return source.display_name && source.display_name.length > 0 ? 
+  source.display_name : 
+  source.name.split('/').pop().split('_').join(' ')
+}

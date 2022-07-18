@@ -10,7 +10,6 @@ import {
   Table,
 } from "modules/avl-components/src"
 
-import { F_SYSTEMS } from 'sites/tsmo/pages/Dashboards/components/metaData'
 
 
 import {duration2minutes, timeConvert, vehicleDelay2cost} from './utils'

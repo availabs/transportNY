@@ -5,7 +5,7 @@ import { useHistory,useLocation } from 'react-router-dom'
 import get from 'lodash.get'
 
 import {
-  useTheme,
+  // useTheme,
   Select,
   ScalableLoading
 } from "modules/avl-components/src"

@@ -18,11 +18,6 @@ import {
   Table,
 } from "modules/avl-components/src"
 
-
-
-
-
-
 const fFormat = d3format(",.2f")
 const floatFormat = f => (f === null) || isNaN(f) ? "no data" : fFormat(f);
 
@@ -99,7 +94,7 @@ const getColumns = (prevMonth, prevYear, prevYearMonth) => {
 
 const CongestionSegmentTable = ({rawDelayData}) => {
 
-console.log("?????????????", rawDelayData)
+// console.log("?????????????", rawDelayData)
 
  // const theme = useTheme()
   const { month: tableDate, /*fsystem*/} = useSelector(state => state.dashboard)

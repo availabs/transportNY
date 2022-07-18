@@ -9,10 +9,9 @@ import * as d3scale from "d3-scale";
 import { ckmeans } from "simple-statistics";
 import { format as d3format } from "d3-format"
 
-
+import { Link } from "react-router-dom"
 
 import { LayerContainer } from "modules/avl-map/src";
-import { F_SYSTEMS } from 'sites/tsmo/pages/Dashboards/components/metaData'
 /* ---- To Do -----
 
 
@@ -24,46 +23,44 @@ const fFormat = d3format(",.2s")
 
 
 const duration2minutes = (dur) => {
-    if(!dur) return 0
-    let [days, time] = dur.split('-')
-    let [hours, minutes] = time.split(':')
-    let out = 1440 * (+days) + 60 * (+hours) + (+minutes)
-    return isNaN(out) ? 0 : out
-  }
-
-function timeConvert(n) {
-var num = n;
-var hours = (num / 60);
-var rhours = Math.floor(hours);
-var minutes = (hours - rhours) * 60;
-var rminutes = Math.round(minutes);
-return rhours + " hour(s) and " + rminutes + " minute(s).";
+  if(!dur) return 0
+  let [days, time] = dur.split('-')
+  let [hours, minutes] = time.split(':')
+  let out = 1440 * (+days) + 60 * (+hours) + (+minutes)
+  return isNaN(out) ? 0 : out
 }
-
 
 const HoverComp = ({ data, layer }) => {
   return (
-    <div className='bg-white p-4 w-72 grid grid-cols-1 gap-1'>
+    <div className='bg-white p-4 max-w-xs grid grid-cols-1 gap-1'>
 
-      { data.sort((a, b) => b.delay - a.delay).slice(0, 8)
+      { data.sort((a, b) => b.delay - a.delay).slice(0, 3)
           .map(d =>
             <div key={ d.id }>
-              <div className='text-base leading-4 font-bold'>
-                {d.facility} <span className='text-gray-600 text-base'>{d.type}</span>
+              <Link to={ `/incidents/${ d.id }`}>
+                <div className='font-bold border-b-2 border-current'>
+                  {d.facility}: {d.type} <i className="fa fa-arrow-up-right-from-square"/>
+                </div>
+              </Link>
+              <div>
+                <span className="font-semibold">Open Time:</span> { d.start }
               </div>
               <div className='flex'>
                 <div className='flex-1 text-center'>
-                  Cost
+                  <span className="font-semibold">Cost</span>
                   <div>${ fFormat(d.delay * 15) }</div>
                 </div>
                 <div className='flex-1 text-center'>
-                  Delay
+                  <span className="font-semibold">Delay</span>
                   <div>{ d.delay.toFixed(0) } min</div>
                 </div>
                 <div className='flex-1 text-center'>
-                  Dur.
+                  <span className="font-semibold">Dur.</span>
                   <div>{d.duration} min</div>
                 </div>
+              </div>
+              <div className="whitespace-pre-wrap">
+                { d.description }
               </div>
             </div>
           )
@@ -169,7 +166,7 @@ class CongestionLayer extends LayerContainer {
     //   return ["in", key, value]; //["all", ["in", key, value], ["in", "dir", dir]];
     // },
     callback: (layerId, features, lngLat) => {
-      let feature = features[0];
+      // let feature = features[0];
 
 
       //console.log('hover', v)
@@ -264,7 +261,7 @@ class CongestionLayer extends LayerContainer {
   }
 
   fetchData(falcor) {
-    const {region,events} = this.props
+    const {region} = this.props
     const [geolevel, value] = region.split('|')
 
     // let request = []
@@ -294,7 +291,12 @@ class CongestionLayer extends LayerContainer {
         }]
     };
     map.getSource("geo-boundaries-source").setData(collection);
-    this.zoomToGeography(geom);
+    map.getSource("geo-boundaries-source").setData(collection);
+    if(geom){
+      console.log('going to zoom')
+      this.doZoom = true;
+      this.zoomToGeography(geom)
+    }
 
     if (hoveredEvent) {
       map.setPaintProperty("events-points", "circle-stroke-width",
@@ -308,7 +310,7 @@ class CongestionLayer extends LayerContainer {
       map.setPaintProperty("events-points", "circle-stroke-width", 0)
     }
 
-// console.log('events', events)
+console.log('events', events)
 
     // --- Process and Map Event Data
     const eventsCollection = {
@@ -323,15 +325,17 @@ class CongestionLayer extends LayerContainer {
               id: event.event_id,
               facility: event.facility,
               type: event.event_type,
+              start: event.start_date_time,
               delay: +get(event, 'congestion_data.value.vehicleDelay', 0),
               duration: duration2minutes(event.event_duration),
               description: event.description,
-              color: get(this, ["props", "colorsForTypes", event.sub_category], "#009")
+              color: get(this, ["props", "colorsForTypes", event.nysdot_sub_category], "#009")
             },
             geometry: event.geom.value
           }
         })
     }
+    // console.log('eventsCollection', eventsCollection)
     map.getSource("events-source").setData(eventsCollection);
   }
 

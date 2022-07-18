@@ -1,7 +1,3 @@
-
-
-import get from "lodash.get";
-
 import { format as d3format } from "d3-format"
 
 const fFormat = d3format(",.2s")

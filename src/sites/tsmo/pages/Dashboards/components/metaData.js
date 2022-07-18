@@ -50,8 +50,9 @@ export const F_SYSTEMS = [1, 2, 3, 4, 5, 6, 7];
 
 
 export const F_SYSTEM_MAP = {
-  'All': [],
-  'Interstates and Limited Access': [1, 2],
+  'All': [1, 2, 3, 4, 5, 6, 7],
+  'Interstates ': [1],
+  'Limited Access' : [2],
   'Arterials and Local': [3, 4, 5, 6, 7]
 }
 const calcMonths = () => {

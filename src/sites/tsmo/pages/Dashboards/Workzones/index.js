@@ -5,7 +5,7 @@ import get from "lodash.get";
 import { useSelector } from 'react-redux';
 
 import {
-  PieGraph,
+  // PieGraph,
   BarGraph
 } from "modules/avl-graph/src"
 
@@ -24,7 +24,7 @@ import IncidentMap from '../Incidents/components/IncidentsMap'
 
 import DashboardLayout from 'sites/tsmo/pages/Dashboards/components/DashboardLayout'
 
-import { fraction, CompareComp, displayDuration, HeroStatComp } from "../Incidents/components/CompareComp"
+import { HeroStatComp } from "../Incidents/components/CompareComp"
 
 import {F_SYSTEM_MAP} from '../components/metaData'
 
@@ -110,8 +110,8 @@ const Incidents = props => {
              "event_duration",
              "event_type",
              "event_category",
-             "general_category",
-             "sub_category",
+             "nysdot_general_category",
+             "nysdot_sub_category",
              "geom"]
           ])
         }
@@ -131,8 +131,8 @@ const Incidents = props => {
     let eventIds = get(falcorCache, ["transcom2", "eventsbyGeom", request, "value"], [])
     let keys = []
     let events = []
-    let totalDuration = 0;
-    let totalVehicleDelay = 0
+    // let totalDuration = 0;
+    // let totalVehicleDelay = 0
     let currentMonthDays = []
     let prevMonthDays = []
 
@@ -146,21 +146,20 @@ const Incidents = props => {
       if (event && (!fSystems.length || fSystems.includes(event.n))) {
         //console.log('this is an event', event)
         let day = event.start_date_time.split(' ')[0]
-        totalDuration += duration2minutes(event.event_duration)
-        totalVehicleDelay += get(event,'congestion_data.value.vehicleDelay',0)
+        //totalVehicleDelay += get(event,'congestion_data.value.vehicleDelay',0)
         events.push(event)
-        if(!keys.includes(event.sub_category)){
-          keys.push(event.sub_category)
+        if(!keys.includes(event.nysdot_sub_category)){
+          keys.push(event.nysdot_sub_category)
         }
         if(!out[day]) {
           out[day] = { index: day }
         }
-        if(!out[day][event.sub_category]) {
-          out[day][event.sub_category] = 0
-          out[day][`${event.sub_category} duration`] = 0
+        if(!out[day][event.nysdot_sub_category]) {
+          out[day][event.nysdot_sub_category] = 0
+          out[day][`${event.nysdot_sub_category} duration`] = 0
         }
-        out[day][event.sub_category] += 1
-         out[day][`${event.sub_category} duration`] += duration2minutes(event.event_duration)
+        out[day][event.nysdot_sub_category] += 1
+         out[day][`${event.nysdot_sub_category} duration`] += duration2minutes(event.event_duration)
       }
       return out
     },{})
@@ -170,19 +169,19 @@ const Incidents = props => {
       .sort((a,b) => get(a,'congestion_data.value.vehicleDelay',0) - get(b,'congestion_data.value.vehicleDelay',0))
       .reduce((a, e, i) => {
         if (e && (!fSystems.length || fSystems.includes(e.n))) {
-          if(!a[e.sub_category]) {
-            a[e.sub_category] = {count: 0, duration: 0, v_delay: 0, top_20_v_delay: 0}
+          if(!a[e.nysdot_sub_category]) {
+            a[e.nysdot_sub_category] = {count: 0, duration: 0, v_delay: 0, top_20_v_delay: 0}
           }
           let day = get(e,'start_date_time','').split(' ')[0]
           if(!currentMonthDays.includes(day)) {
             currentMonthDays.push(day)
           }
-          a[e.sub_category].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+          a[e.nysdot_sub_category].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
           if(i < 20) {
-            a[e.sub_category].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+            a[e.nysdot_sub_category].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
           }
-          a[e.sub_category].duration += duration2minutes(e.event_duration);
-          a[e.sub_category].count += 1;
+          a[e.nysdot_sub_category].duration += duration2minutes(e.event_duration);
+          a[e.nysdot_sub_category].count += 1;
           a['Total'].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
           a['Total'].duration += duration2minutes(e.event_duration);
           a['Total'].count += 1;
@@ -196,19 +195,19 @@ const Incidents = props => {
       .sort((a,b) => get(a,'congestion_data.value.vehicleDelay',0) - get(b,'congestion_data.value.vehicleDelay',0))
       .reduce((a, e, i) => {
         if (e && (!fSystems.length || fSystems.includes(e.n))) {
-          if(!a[e.sub_category]) {
-            a[e.sub_category] = {count: 0, duration: 0, v_delay: 0, top_20_v_delay: 0}
+          if(!a[e.nysdot_sub_category]) {
+            a[e.nysdot_sub_category] = {count: 0, duration: 0, v_delay: 0, top_20_v_delay: 0}
           }
           let day = get(e,'start_date_time','').split(' ')[0]
           if(!prevMonthDays.includes(day)) {
             prevMonthDays.push(day)
           }
           if(i < 20) {
-            a[e.sub_category].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+            a[e.nysdot_sub_category].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
           }
-          a[e.sub_category].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
-          a[e.sub_category].duration += duration2minutes(e.event_duration);
-          a[e.sub_category].count += 1;
+          a[e.nysdot_sub_category].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+          a[e.nysdot_sub_category].duration += duration2minutes(e.event_duration);
+          a[e.nysdot_sub_category].count += 1;
           a['Total'].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
           a['Total'].duration += duration2minutes(e.event_duration);
           a['Total'].count += 1;
@@ -249,15 +248,12 @@ const Incidents = props => {
       prevMonthByCat,
       currentMonthDays,
       prevMonthDays,
-      // prevYear,
-      // prevYearDur,
-      // totalDuration,
       keys,
       colorsForTypes,
       data: Object.values(data),
     }
 
-  }, [falcorCache,requests,month, theme.graphCategorical,fsystem, loading])
+  }, [falcorCache,requests, theme.graphCategorical,fsystem ])
 
   const [hoveredEvent, setHoveredEvent] = React.useState(null);
   console.log('output', data)
@@ -325,7 +321,7 @@ const Incidents = props => {
 
 
 
-export default {
+const WorkzonesConfig =  {
   name: 'Work Zones',
   path: "/workzones",
   exact: true,
@@ -338,5 +334,6 @@ export default {
     size: 'micro'
   },
     component: Incidents,
-}
-;
+};
+
+export default WorkzonesConfig

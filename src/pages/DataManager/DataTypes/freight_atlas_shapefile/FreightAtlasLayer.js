@@ -1,6 +1,5 @@
-import React from "react";
-import get from "lodash.get";
-
+//import React from "react";
+// import get from "lodash.get";
 // import mapboxgl from "mapbox-gl";
 
 import { LayerContainer } from "modules/avl-map/src";
@@ -36,14 +35,14 @@ class FreightAtlasLayer extends LayerContainer {
   };
 
   init(map, falcor) {
-    console.log('----init----', this)
+    //console.log('----init----', this)
       // return falcor
       //   .get(["geo", "36", "geoLevels"])
   }
 
 
   render(map) {
-    console.log('render')
+    //console.log('render')
   }
    
 }

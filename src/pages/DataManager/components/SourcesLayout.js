@@ -12,7 +12,7 @@ import Breadcrumbs from './Breadcrumbs'
 
 
 const SourceThumb = ({source}) => {
-  const {falcor,falcorCache} = useFalcor()
+  const {falcor} = useFalcor()
   
   useEffect(() => {
     async function fetchData () {
@@ -26,7 +26,7 @@ const SourceThumb = ({source}) => {
       ])
     }
     fetchData()
-  }, [])
+  }, [falcor,source.id])
 
   // const views = useMemo(() => {
   //   return Object.values(get(falcorCache,["datamanager","sources","byId",source.id,"views","byIndex",],{}))
@@ -80,12 +80,11 @@ const SourcesLayout = ({children}) => {
   const current_site = get(domainFilters, `[${SUBDOMAIN}]`, '') //'Freight Atlas'
   
   let menuItems =  useMemo(() => { 
-      //console.log('what crashes', sources)
-      return Object.values(sources
-      .filter(d => get(d,`categories`,[]).map(d => d[0]).includes(current_site))
-      .filter(d => { 
-        return !layerSearch || d.name.split('/').pop().split('_').join(' ').toLowerCase().includes(layerSearch.toLowerCase()) 
-      })
+    let menu =  Object.values(sources
+        .filter(d => get(d,`categories`,[]).map(d => d[0]).includes(current_site))
+        .filter(d => { 
+          return !layerSearch || d.name.split('/').pop().split('_').join(' ').toLowerCase().includes(layerSearch.toLowerCase()) 
+        })
       .reduce((a,b) => {
         b.categories.forEach(cat => {
           if(cat[0] === current_site){
@@ -112,6 +111,8 @@ const SourcesLayout = ({children}) => {
         })
         return a
       },{}))
+      console.log('cacl menu', menu)
+      return menu
     },[sources,sourceId,layerSearch,current_site])
 
 

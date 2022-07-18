@@ -1,0 +1,83 @@
+[
+   {
+      "id": "class_3_v2016",
+      "type": "line",
+      "paint": {
+         "line-color": "hsl(185, 0%, 27%)",
+         "line-width": [
+            "interpolate",
+            [
+               "exponential",
+               1.5
+            ],
+            [
+               "zoom"
+            ],
+            5,
+            3,
+            8,
+            2,
+            18,
+            32
+         ],
+         "line-opacity": [
+            "case",
+            [
+               "boolean",
+               [
+                  "feature-state",
+                  "hover"
+               ],
+               false
+            ],
+            0.4,
+            1
+         ]
+      },
+      "source": "freight_atlas",
+      "source-layer": "class_3_v2016"
+   }
+]
+
+[{
+      "id": "class_3_v2016",
+      "type": "line",
+      "paint": {
+         "line-color": "#0080ff",
+         "line-width": 3
+      },
+      "source": "freight_atlas",
+      "source-layer": "class_3_v2016"
+}]
+
+[{
+   "id": "intermodal_facility_v2016",
+   "source": "freight_atlas",
+   "source-layer": "intermodal_facility_v2016",
+   "type": "circle",
+   "paint": {
+      "circle-radius": 6,
+      "circle-color": "#B42222"
+   }
+}]
+
+[{
+   "id": "intermodal_facility_v2016",
+   "source": "freight_atlas",
+   "source-layer": "intermodal_facility_v2016",
+   "type": "fill",
+   "paint": {
+      "fill-color": "#0080ff",
+      "fill-opacity": 0.5
+   }
+}]
+
+[
+   {
+      "id": "freight_atlas",
+      "source": {
+         "url": "https://tiles.availabs.org/data/nysdot_freight_atlas_terse_2016.json",
+         "type": "vector"
+      }
+   }
+]

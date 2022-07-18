@@ -275,27 +275,30 @@ const ppdaf = () => {
         },
 
     tabpanel: (opts = {}) => {
-            const {color = 'white', size = 'compact'} = opts
-            let colors = {
-                white: 'bg-white hover:bg-gray-100',
-                transparent: 'gray-100'
-            }
-
-            let sizes = {
-                compact: 'px-4 py-1',
-                full: 'px-10 py-5'
+            const { tabLocation = 'top' } = opts
+            
+             let tabLocations = {
+                top:  {
+                        tabpanelWrapper: 'flex-col',
+                        tabWrapper: 'flex-row',
+                        tab: `border-b-2`
+                },
+                left:  {
+                        tabpanelWrapper: 'flex-row',
+                        tabWrapper: 'flex-col',
+                        tab: `border-r-2`
+                }
             }
             return {
-                tabpanelWrapper: 'flex flex-row w-full h-full',
-                tabWrapper: 'flex flex-col',
-                tab: `px-4 py-2 hover:text-gray-800 cursor-pointer border-r-2  text-center text-gray-500`,
-                tabActive: `px-4 py-2 text-${accent}-500 border-r-2 border-blue-500 text-center`,
+                tabpanelWrapper: `flex ${tabLocations[tabLocation].tabpanelWrapper} w-full h-full`,
+                tabWrapper: `flex ${tabLocations[tabLocation].tabWrapper}`,
+                tab: `px-4 py-2 hover:text-gray-800 cursor-pointer   text-center text-gray-500`,
+                tabActive: `px-4 py-2 text-${accent}-500 ${tabLocations[tabLocation].tab} border-blue-500 text-center`,
                 icon: '',
                 tabName: '',
-                contentWrapper: 'bg-white p-4 flex-1 h-full',
+                contentWrapper: 'bg-white flex-1 h-full',
                 vars: {
-                    color: colors,
-                    size: sizes
+                    tabLocation: tabLocations
                 }
             }
         },

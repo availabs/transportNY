@@ -7,7 +7,7 @@ import config from "config.json"
 import { ThemeContext } from "@availabs/avl-components"
 import PPDAF_THEME from "theme"
 
-const Map = ({ rawDelayData }) => {
+const Map = ({ rawDelayData, hoveredTMCs }) => {
     const {region, month, fsystem} = useSelector(state => state.dashboard)
     const mapOptions =  {
         zoom: 8.5,
@@ -26,9 +26,9 @@ const Map = ({ rawDelayData }) => {
     const layers = React.useRef([MacroLayerFactory()]);
     const layerProps = React.useMemo(() => {
     return {
-      [layers.current[0].id]: { region, month, fsystem, rawDelayData }
+      [layers.current[0].id]: { region, month, fsystem, rawDelayData, hoveredTMCs }
     };
-  }, [region, month, rawDelayData, fsystem]);
+  }, [region, month, rawDelayData, fsystem, hoveredTMCs]);
 
     return (
 

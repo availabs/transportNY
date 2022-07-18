@@ -1,38 +1,28 @@
 import React from "react";
 
 import { useParams } from "react-router-dom";
-import {
-  range as d3range,
-  rollup as d3rollup,
-} from "d3-array";
+
 import { format as d3format } from "d3-format";
-import { scaleQuantile, scaleLinear } from "d3-scale";
+
 
 import get from "lodash.get";
 
 import {
-  ThemeContext,
   useFalcor,
   useTheme,
   Select,
-  GridTable,
   ScalableLoading,
   Button,
   getColorRange,
 } from "modules/avl-components/src";
 
-import THEME from "theme";
 
 import TmcMap from "./components/Map";
-
-import { GridGraph, generateTestGridData } from "modules/avl-graph/src";
-import { BarGraph, generateTestBarData } from "modules/avl-graph/src";
-import { LineGraph, generateTestLineData } from "modules/avl-graph/src";
+import IncidentGrid from './components/IncidentGrid'
 
 import {
   capitalize,
-  DelayFormat,
-  useComponentDidMount,
+  DelayFormat
 } from "./components/utils";
 
 const Columns = [
@@ -41,22 +31,113 @@ const Columns = [
 ];
 
 const rawDataKeys = [
-  "Description",
-  "Event Category",
-  "Event Type",
-  "Open Time",
-  "Close Time",
-  "Creation",
-  "Duration",
-  "Vehicle Delay",
+ "event_id",
+ "event_class",
+ "reporting_organization",
+ "start_date_time",
+ "end_date_time",
+ "last_updatedate",
+ "close_date",
+ "estimated_duration_mins",
+ "event_duration",
+ "facility",
+ "event_type",
+ "lanes_total_count",
+ "lanes_affected_count",
+ "lanes_detail",
+ "lanes_status",
+ "description",
+ "direction",
+ "county",
+ "city",
+ "city_article",
+ "primary_city",
+ "secondary_city",
+ "location_article",
+ "primary_marker",
+ "secondary_marker",
+ "primary_location",
+ "secondary_location",
+ "state",
+ "region_closed",
+ "point_datum",
+ "marker_units",
+ "marker_article",
+ "summary_description",
+ "eventstatus",
+ "is_highway",
+ "icon_file",
+ //"start_incident_occured",
+ "started_at_date_time_comment",
+ // "incident_reported",
+ "incident_reported_comment",
+ //"incident_verified",
+ "incident_verified_comment",
+ "response_identified_and_dispatched",
+ "response_identified_and_dispatched_comment",
+ "response_arrives_on_scene",
+ "response_arrives_on_scene_comment",
+ // "end_all_lanes_open_to_traffic",
+ "ended_at_date_time_comment",
+ "response_departs_scene",
+ "response_departs_scene_comment",
+ "time_to_return_to_normal_flow",
+ "time_to_return_to_normal_flow_comment",
+ "no_of_vehicle_involved",
+ "secondary_event",
+ "secondary_event_types",
+ "secondary_involvements",
+ "within_work_zone",
+ "truck_commercial_vehicle_involved",
+ "shoulder_available",
+ "injury_involved",
+ "fatality_involved",
+ "maintance_crew_involved",
+ "roadway_clearance",
+ "incident_clearance",
+ "time_to_return_to_normal_flow_duration",
+ "duration",
+ "associated_impact_ids",
+ "secondary_event_ids",
+ "is_transit",
+ "is_shoulder_lane",
+ "is_toll_lane",
+ "lanes_affected_detail",
+ "to_facility",
+ "to_state",
+ "to_direction",
+ "fatality_involved_associated_event_id",
+ "with_in_work_zone_associated_event_id",
+ "to_lat",
+ "to_lon",
+ "primary_direction",
+ "secondary_direction",
+ "is_both_direction",
+ "secondary_lanes_affected_count",
+ "secondary_lanes_detail",
+ "secondary_lanes_status",
+ "secondary_lanes_total_count",
+ "secondary_lanes_affected_detail",
+ "event_location_latitude",
+ "event_location_longitude",
+ "tripcnt",
+ "tmclist",
+ "recoverytime",
+ "year",
+ "datasource",
+ "datasourcevalue",
+ "day_of_week",
+ // "tmcs_arr",
+ // "event_interval",
+ "nysdot_display_in_incident_dashboard",
+ "nysdot_general_category",
+ "nysdot_sub_category",
+ "nysdot_detailed_category",
+ "nysdot_waze_category",
+ "nysdot_display_if_lane_closure",
+ "nysdot_duration_accurate",
+ 
 ];
-const rawDataSortValues = rawDataKeys.reduce((a, c, i) => {
-  a[c] = i;
-  return a;
-}, {});
-const rawDataSort = (a, b) => {
-  return rawDataSortValues[a.key] - rawDataSortValues[b.key];
-};
 
 const getTableValue = (key, eData) => {
   switch (key) {
@@ -81,7 +162,7 @@ const getTableValue = (key, eData) => {
   }
 };
 
-const ColorRange = getColorRange(7, "RdYlGn");
+
 
 const Weekdays = [
   "sunday",
@@ -129,7 +210,7 @@ const makeNpmrdsRequestKeys = (eventData) => {
       dow = mDate.getDay(),
       npmrdsDate = getNpmrdsDate(mDate);
 
-console.log("DATE:", date, mDate, dow , npmrdsDate);
+    // console.log("DATE:", date, mDate, dow , npmrdsDate);
 
     return [
       tmcArray,
@@ -163,74 +244,7 @@ console.log("DATE:", date, mDate, dow , npmrdsDate);
   return [keys, tmcArray, year];
 };
 
-const getFF = (tmc, year, falcorCache) => {
-  const fftt = get(
-    falcorCache,
-    ["pm3", "measuresByTmc", tmc, year, "freeflow_tt"],
-    {}
-  );
 
-  if (fftt) {
-    return fftt;
-  }
-
-  const { length, avg_speedlimit } = get(
-    falcorCache,
-    ["tmc", tmc, "meta", year],
-    {}
-  );
-
-  return (length / avg_speedlimit) * 3600;
-};
-
-const expandData = (tmcs, year, requestKeys, falcorCache) => {
-  return requestKeys.reduce((a, rk) => {
-    const data = [...get(falcorCache, ["routes", "data", rk, "value"], [])];
-
-    const tmcMap = d3rollup(
-      data,
-      (d) => d.pop(),
-      (d) => d.tmc,
-      (d) => +d.resolution
-    );
-
-    tmcMap.forEach((epochs, tmc) => {
-      const domain = [],
-        range = [];
-
-      for (let e = 0; e < 288; ++e) {
-        if (epochs.has(e)) {
-          domain.push(e);
-          range.push(epochs.get(e).value);
-        } else if (e === 0 || e === 287) {
-          const ff = getFF(tmc, year, falcorCache);
-          if (ff) {
-            domain.push(e);
-            range.push(ff);
-          }
-        }
-      }
-      const scale = scaleLinear()
-        .domain(domain)
-        .range(range);
-
-      for (let e = 0; e < 288; ++e) {
-        if (!epochs.has(e)) {
-          const row = {
-            tmc,
-            resolution: e,
-            value: scale(e),
-            interpolated: true,
-          };
-          data.push(row);
-        }
-      }
-    });
-
-    a[rk] = data;
-    return a;
-  }, {});
-};
 
 const branchSort = ((a, b) => {
   if (a.branch.length === b.branch.length) {
@@ -239,13 +253,6 @@ const branchSort = ((a, b) => {
   return b.branch.length - a.branch.length;
 })
 
-const changeFormat = d3format("+,.1%")
-const gridValueFormat1 = (v) =>
-  isNaN(String(v)) ? "No Data"
-    : `${ Math.round(v) } MPH`;
-const gridValueFormat2 = (v) =>
-  isNaN(String(v)) ? "No Data"
-    : changeFormat(v);
 
 const IncidentViewNew = ({}) => {
   const { event_id } = useParams(),
@@ -260,56 +267,38 @@ const IncidentViewNew = ({}) => {
   }, []);
 
   const [requestKeys, setRequestKeys] = React.useState([]);
-
-  const MOUNTED = useComponentDidMount();
-
-  const [loading, setLoading] = React.useState(0);
-  const loadingStart = React.useCallback(() => {
-    MOUNTED && setLoading(prev => prev + 1);
-  }, [MOUNTED]);
-  const loadingStop = React.useCallback(() => {
-    MOUNTED && setLoading(prev => prev - 1);
-  }, [MOUNTED]);
-
+  const [loading, setLoading] = React.useState(false);
   const [showRaw, setShowRaw] = React.useState(true);
-  const toggleRaw = React.useCallback(() => {
-    setShowRaw(prev => !prev);
-  }, []);
+  
 
   React.useEffect(() => {
-    loadingStart();
+    setLoading(true)
+  
     falcor.get([
-      "transcom",
-      "historical",
-      "events",
+      "transcom2",
+      "eventsbyId",
       event_id,
       [
-        "event_id",
-        "congestion_data",
-        "open_time",
+        ...rawDataKeys,
         "geom",
-        "duration",
-        "creation",
-        "close_time",
-        "description",
-        "event_category",
-        "event_type",
-      ],
-    ]).then(() => loadingStop());
-    // .then(res => console.log("RES:", res))
-    // .catch(e => console.log("ERROR:", e));
-  }, [event_id, loadingStart, loadingStop]);
+        "congestion_data"
+      ]
+    ]).then((d) => {
+      console.log('got data', d)
+      return setLoading(false)
+    });
+  }, [event_id, setLoading]);
 
   React.useEffect(() => {
     const eventData = get(
       falcorCache,
-      ["transcom", "historical", "events", event_id],
+      ["transcom2", "eventsbyId", event_id],
       {}
     );
     const [requestKeys, tmcs, year] = makeNpmrdsRequestKeys(eventData);
     setRequestKeys(requestKeys);
     if (requestKeys.length) {
-      loadingStart();
+      
       falcor
         .get(
           ["routes", "data", requestKeys],
@@ -318,27 +307,29 @@ const IncidentViewNew = ({}) => {
           ],
           ["pm3", "measuresByTmc", tmcs, year, "freeflow_tt"]
         )
-        .then(() => loadingStop());
+        // .then(() => loadingStop());
     }
-  }, [falcorCache, event_id, loadingStart, loadingStop]);
+  }, [falcorCache, event_id]);
 
-  const [eventData, rawData, calculatedData] = React.useMemo(() => {
+  const [eventData, rawData] = React.useMemo(() => {
     const eData = get(
       falcorCache,
-      ["transcom", "historical", "events", event_id],
+      ["transcom2", "eventsbyId", event_id],
       {}
     );
 
     const rData = Object.keys(eData)
-      .filter((key) => rawDataKeys.includes(capitalize(key)))
-      .map((key) => ({
-        key: capitalize(key),
-        value: getTableValue(key, eData),
-      }))
-      .sort(rawDataSort);
+      .filter((key) => rawDataKeys.includes(key))
+      .map((key) => {
+        console.log('key')
+        return {
+          key: capitalize(key),
+          value: getTableValue(key, eData),
+        }
+      })
+      
 
-    const cData = [];
-
+    
     const dKey = showRaw ? "rawDelay" : "delay";
     const vdKey = showRaw ? "rawVehicleDelay" : "vehicleDelay";
 
@@ -346,42 +337,11 @@ const IncidentViewNew = ({}) => {
       delay = DelayFormat(get(conData, dKey, "No Data")),
       vDelay = DelayFormat(get(conData, vdKey, "No Data"));
 
-    cData.push({
-      key: "Vehicle Delay",
-      value: (
-        <div className="font-mono grid grid-cols-3 gap-1">
-          <div className="text-right">{vDelay}</div>
-          <div>(hh:mm:ss)</div>
-        </div>
-      ),
-    });
-    cData.push({
-      key: "Delay",
-      value: (
-        <div className="font-mono grid grid-cols-3 gap-1">
-          <div className="text-right">{delay}</div>
-          <div>(hh:mm:ss)</div>
-        </div>
-      ),
-    });
 
     const { eventTmcs = [], startTime, endTime, dates = [""] } = conData;
 
-    cData.push({
-      key: "Event TMCs",
-      value: <EventTmcs tmcs={eventTmcs} year={dates[0].slice(0, 4)} />,
-    });
-
-    // cData.push({
-    //   key: "Start Time",
-    //   value: `${ epochFormat(startTime) } (epoch ${ startTime })`
-    // })
-    // cData.push({
-    //   key: "End Time",
-    //   value: `${ epochFormat(endTime) } (epoch ${ endTime })`
-    // })
-
-    return [eData, rData, cData];
+    
+    return [eData, rData];
   }, [event_id, falcorCache, showRaw]);
 
   const [upstreamBranches, downstreamBranches] = React.useMemo(() => {
@@ -439,324 +399,11 @@ const IncidentViewNew = ({}) => {
     }
   }, [upstreamBranches, downstreamBranches, activeBranches]);
 
-  const gridData = React.useMemo(() => {
-
-    const cData = get(eventData, ["congestion_data", "value"], null);
-    if (!cData) {
-      return [];
-    }
-
-    const { dates, branches = [], tmcDelayData = {}, eventTmcs = [] } = cData;
-
-    const year = dates[0].slice(0, 4);
-
-    const branchMap = branches.reduce((a, c) => {
-      a[c.branch.join("|")] = c;
-      return a;
-    }, {})
-
-    const upBranch = get(branchMap, activeBranches[0], { branch: [] });
-    const downBranch = get(branchMap, activeBranches[1], { branch: [] });
-
-    const tmcs = new Set([
-      ...upBranch.branch,//.filter(tmc => Boolean(tmcDelayData[tmc])),
-      ...downBranch.branch//.filter(tmc => Boolean(tmcDelayData[tmc]))
-    ])
-
-    const tmcMap = new Map();
-
-    upBranch.branch.forEach((tmc) => {
-      if (!tmcMap.has(tmc)) {
-        tmcMap.set(tmc, -tmcMap.size);
-      }
-    });
-    downBranch.branch.forEach((tmc) => {
-      if (!tmcMap.has(tmc)) {
-        tmcMap.set(tmc, tmcMap.size);
-      }
-    });
-
-    const expandedData = expandData(tmcs, year, requestKeys, falcorCache);
-
-    const dataDomain = requestKeys.reduce((a, c) => {
-      const data = get(expandedData, c, [])
-        .filter(({ tmc }) => tmcs.has(tmc))
-        .map((d) => {
-          const { tmc, value } = d;
-          const length = get(falcorCache, ["tmc", tmc, "meta", year, "length"]);
-          return length * (3600.0 / value);
-        });
-      a.push(...data);
-      return a;
-    }, []);
-
-    // const _colors = scaleQuantize()
-    //   .domain([33, d3extent(dataDomain)[1]])
-    //   .range(ColorRange);
-
-    const _colors = scaleQuantile()
-      .domain(dataDomain)
-      .range(ColorRange);
-
-    const colors = (v, i, d, x) => {
-      const c = _colors(v);
-      return d.interpolated.includes(x) ? `${c}88` : c;
-    };
-
-    const keys1 = dates.reduce((a, c) => {
-      d3range(288).forEach(e => a.push(`${ c }|${ e }`));
-      return a;
-    }, []);
-
-    const tmcLengths = [...tmcs].reduce((a, c) => {
-      a[c] = get(falcorCache, ["tmc", c, "meta", year, "length"], 1);
-      return a;
-    }, {})
-
-    const grid1 = [...tmcs].reduce((a, tmc) => {
-
-      const length = get(tmcLengths, tmc, 1);
-
-      const tmcData = requestKeys.slice(0, -1).reduce((aa, rk, i) => {
-        const data = get(expandedData, rk, []).filter(d => d.tmc === tmc);
-        aa.push(...data.map(d => ({
-          ...d,
-          value: length * (3600.0 / d.value),
-          key: `${ dates[i] }|${ d.resolution }`
-        })));
-        return aa;
-      }, [])
-
-      a.data.push({
-        index: tmc,
-        roadname: get(
-          falcorCache,
-          ["tmc", tmc, "meta", year, "roadname"],
-          ""
-        ),
-        height: length,
-        interpolated: tmcData.reduce((a, c) => {
-          if (c.interpolated) {
-            a.push(c.key);
-          }
-          return a;
-        }, []),
-        ...tmcData.reduce((a, c) => {
-          a[c.key] = c.value;
-          return a;
-        }, {})
-      })
-
-      return a;
-    }, { data: [], keys: keys1, colors });
-
-    grid1.data.sort((a, b) => tmcMap.get(a.index) - tmcMap.get(b.index))
-
-
-    const keys2 = d3range(288).map(e => `${ year }|${ e }`);
-
-    const grid2 = [...tmcs].reduce((a, tmc) => {
-
-      const length = get(tmcLengths, tmc, 1);
-
-      const tmcData = requestKeys.slice(-1).reduce((aa, rk, i) => {
-        const data = get(expandedData, rk, []).filter(d => d.tmc === tmc);
-        aa.push(...data.map(d => ({
-          ...d,
-          value: length * (3600.0 / d.value),
-          key: `${ year }|${ d.resolution }`
-        })));
-        return aa;
-      }, [])
-
-      a.data.push({
-        index: tmc,
-        roadname: get(
-          falcorCache,
-          ["tmc", tmc, "meta", year, "roadname"],
-          ""
-        ),
-        height: length,
-        interpolated: tmcData.reduce((a, c) => {
-          if (c.interpolated) {
-            a.push(c.key);
-          }
-          return a;
-        }, []),
-        ...tmcData.reduce((a, c) => {
-          a[c.key] = c.value;
-          return a;
-        }, {})
-      })
-
-      return a;
-    }, { data: [], keys: keys2, colors });
-
-    grid2.data.sort((a, b) => tmcMap.get(a.index) - tmcMap.get(b.index))
-
-
-    const diffData = { keys: keys1, data: [] },
-      indexMap = new Map(),
-      keySets = [],
-      diffDomain = [];
-
-    grid1.data.forEach(({ index, height, ...rest }, i) => {
-      indexMap.set(index, i);
-      const dData = { index, height };
-      keySets.push(new Set());
-      keys1.forEach((k) => {
-        if (k in rest) {
-          keySets[i].add(k);
-          dData[k] = rest[k];
-        }
-      });
-      diffData.data.push(dData);
-    });
-
-    grid2.data.forEach(({ index, height, ...rest }) => {
-      if (!indexMap.has(index)) return;
-      const i = indexMap.get(index);
-      keys1.forEach((k1, ii) => {
-        const k2 = keys2[ii % 288];
-        if ((k2 in rest) && keySets[i].has(k1)) {
-          keySets[i].delete(k1);
-          diffData.data[i][k1] = (diffData.data[i][k1] - rest[k2]) / rest[k2];
-          diffDomain.push(diffData.data[i][k1]);
-        }
-      });
-    });
-
-    keySets.forEach((set, i) => {
-      set.forEach((k) => delete diffData.data[i][k]);
-    });
-
-    diffData.colors = scaleQuantile()
-      .domain(diffDomain)
-      .range(ColorRange);
-
-    const gData = [grid1, grid2, diffData];
-
-    return gData.map((gData, i) => ({
-      gData,
-      label:
-        i === 0
-          ? "Event Speeds"
-          : i === 1
-          ? "Yearly Avg. Speeds"
-          : "Speed Differences",
-    }));
-  }, [requestKeys, eventData, falcorCache, activeBranches]);
-
-  const points = React.useMemo(() => {
-    const cData = get(eventData, ["congestion_data", "value"], null);
-    if (!cData) {
-      return [[], []];
-    }
-    const { startTime, endTime, eventTmcs, dates } = cData;
-
-    return [
-      [...eventTmcs.map((tmc) => ({
-        index: tmc,
-        key: `${ dates[0] }|${ startTime }`,
-        spanTo: `${ dates[dates.length - 1] }|${ endTime }`,
-        strokeWidth: 2,
-        stroke: "#0cf",
-      })),
-      ...eventTmcs.map((tmc) => ({
-        index: tmc,
-        key: `${ dates[dates.length - 1] }|${ endTime }`,
-        strokeWidth: 2,
-        stroke: "#0cf",
-      }))],
-      [/*...eventTmcs.map((tmc) => ({
-        index: tmc,
-        key: `${ dates[0].slice(0, 4) }|${ startTime }`,
-        spanTo: `${ dates[0].slice(0, 4) }|${ endTime }`,
-        strokeWidth: 2,
-        stroke: "#0cf",
-      })),
-      ...eventTmcs.map((tmc) => ({
-        index: tmc,
-        key: `${ dates[0].slice(0, 4) }|${ endTime }`,
-        strokeWidth: 2,
-        stroke: "#0cf",
-      }))*/]
-    ];
-  }, [eventData]);
-
-  const bounds = React.useMemo(() => {
-    const cData = get(eventData, ["congestion_data", "value"], null);
-    if (!cData) {
-      return [[], []];
-    }
-    const { tmcBounds } = cData;
-
-    const bounds1 = [], bounds2 = [];
-
-    for (const tmc in tmcBounds) {
-      bounds1.push({
-        index: tmc,
-        bounds: tmcBounds[tmc].map(b => b.join("|")),
-        strokeWidth: 2,
-        stroke: "#0cf",
-      });
-      // bounds2.push({
-      //   index: tmc,
-      //   bounds: tmcBounds[tmc].map(b => [b[0].slice(0, 4), b[1]].join("|")),
-      //   strokeWidth: 2,
-      //   stroke: "#0cf",
-      // });
-    }
-
-    return [bounds1, bounds2];
-  }, [eventData]);
-
-  const mapData = React.useMemo(() => {
-    let mData = {
-      tmcs: [],
-      ways: [],
-      year: null,
-      point: null,
-      eventData,
-    };
-    if (!eventData) {
-      return mData;
-    }
-    const congestionData = get(eventData, ["congestion_data", "value"], null);
-    if (!congestionData) {
-      return mData;
-    }
-
-    const branchMap = congestionData.branches.reduce((a, c) => {
-      a[c.branch.join("|")] = c;
-      return a;
-    }, {})
-
-    const upBranch = get(branchMap, activeBranches[0], { branch: [], ways: [] });
-    const downBranch = get(branchMap, activeBranches[1], { branch: [], ways: [] });
-
-    // const upBranch = get(activeBranches, 0, { branch: [], ways: [] });
-    // const downBranch = get(activeBranches, 1, { branch: [], ways: [] });
-
-    mData.tmcs = [...new Set([...upBranch.branch, ...downBranch.branch])];
-    mData.ways = [...new Set([...upBranch.ways, ...downBranch.ways])].map((id) => +id);
-
-    const open_time = new Date(eventData.open_time);
-    mData.year = open_time.getFullYear();
-
-    mData.point = get(eventData, ["geom", "value"], null);
-
-    return mData;
-  }, [eventData, activeBranches]);
-
-  const axisLeftFormat = React.useCallback(tmc => {
-    const year = get(eventData, ["congestion_data", "value", "dates", 0], "").slice(0, 4);
-    return get(falcorCache, ["tmc", tmc, "meta", year, "roadname"]);
-  }, [falcorCache, eventData])
+  
 
   return (
-    <ThemeContext.Provider value={THEME}>
-      <div className={`py-6 ${THEME.bg} min-h-screen`}>
+    <div className='w-full'>
+      <div className={`max-w-7xl mx-auto mb-8`}>
         <div
           className={`
           fixed left-0 top-0 right-0 bottom-0 ${loading ? "flex" : "hidden"}
@@ -766,15 +413,14 @@ const IncidentViewNew = ({}) => {
           <ScalableLoading />
         </div>
 
-        <div className={`mx-8 p-4 bg-white shadow ${THEME.text}`}>
+        <div className={` `}>
           <div className="grid grid-cols-2 gap-4">
             <div className="text-3xl font-bold border-b-4 col-span-2">
               TRANSCOM EVENT ID: {event_id}
             </div>
 
-            <div>
+            <div className='bg-white shadow rounded p-4'>
               <div className="grid col-spans-1 gap-2">
-                <div className="font-bold text-2xl border-b-2">Event Data</div>
                 <div className="grid grid-cols-4 gap-2 text-lg">
                   {rawData.map(({ key, value }) => (
                     <React.Fragment key={key}>
@@ -789,28 +435,14 @@ const IncidentViewNew = ({}) => {
                     Calculated Data ({ showRaw ? "unfilled" : "filled" })
                   </div>
                   <div className="col-span-1">
-                    <Button block onClick={ toggleRaw }>
+                    {/*<Button block onClick={ () => setShowRaw(!showRaw) }>
                       Toggle Data
-                    </Button>
+                    </Button>*/}
                   </div>
                 </div>
-                <div className="grid grid-cols-4 gap-2 text-lg">
-                  {calculatedData.map(({ key, value }) => (
-                    <React.Fragment key={key}>
-                      <div className="col-span-1 font-bold">{key}</div>
-                      <div className="col-span-3">{value}</div>
-                    </React.Fragment>
-                  ))}
-                </div>
+                
               </div>
-            </div>
-
-            <div style={{ minHeight: "40rem" }}>
-              <TmcMap {...mapData} showRaw={ showRaw }/>
-            </div>
-
-            <div className="col-span-1">
-              <div className="font-bold text-xl border-b-2 mb-1">
+               <div className="font-bold text-xl border-b-2 mb-1">
                 Up Stream Branches
               </div>
               <Select options={ upstreamBranches }
@@ -818,8 +450,7 @@ const IncidentViewNew = ({}) => {
                 accessor={ d => d.names }
                 valueAccessor={ d => d.key }
                 onChange={ setUpstreamBranch }/>
-            </div>
-            <div className="col-span-1">
+           
               <div className="font-bold text-xl border-b-2 mb-1">
                 Down Stream Branches
               </div>
@@ -829,54 +460,32 @@ const IncidentViewNew = ({}) => {
                 valueAccessor={ d => d.key }
                 onChange={ setDownstreamBranch }/>
             </div>
-
-            {!gridData.length ? null
-              : gridData.map(({ gData, label }, i) => (
-                  <div
-                    key={i}
-                    className={`
-                  col-span-2
-                `}
-                  >
-                    <div className="font-bold text-2xl border-b-2 mb-1">
-                      {label}
-                    </div>
-                    <div
-                      style={{
-                        height: `${Math.max(gData.data.length * 1.25, 20)}rem`,
-                      }}
-                    >
-                      <GridGraph
-                        {...gData}
-                        showAnimations={false}
-                        margin={{ top: 5, right: 5, bottom: 25, left: 150 }}
-                        axisBottom={{
-                          format: epochFormat,
-                          tickDensity: 0.5,
-                        }}
-                        points={ points[i % 2] }
-                        bounds={ bounds[i % 2] }
-                        axisLeft={ {
-                          format: axisLeftFormat
-                        } }
-                        hoverComp={ {
-                          HoverComp: GridHoverComp,
-                          valueFormat: i === 2 ? gridValueFormat2 : gridValueFormat1,
-                          keyFormat: epochFormat,
-                        } }
-                      />
-                    </div>
-                  </div>
-                ))}
           </div>
         </div>
       </div>
-    </ThemeContext.Provider>
+      <div className='max-w-7xl mx-auto flex'>
+        <div className='w-1/3 py-10' style={{ minHeight: "40rem" }} >
+             
+          <TmcMap 
+            eventData={eventData} 
+            activeBranches={activeBranches} 
+            showRaw={ showRaw }/>
+        </div>
+
+        <div className="flex-1 ">
+          <IncidentGrid
+            eventData={eventData}
+            requestKeys={requestKeys}
+            activeBranches={activeBranches}
+
+          />
+        </div>
+
+      </div>
+    </div>
   );
 };
-// const mapStateToProps = (state) => ({});
-//
-// const IncidentView = connect(mapStateToProps)(IncidentViewNew);
+
 
 const EventTmcs = ({ tmcs, year }) => {
   return (
@@ -941,65 +550,9 @@ const EventTmc = ({ tmc, year }) => {
   );
 };
 
-const epochFormat = (de) => {
-  const [d, e] = de.split("|");
-  const m = e * 5;
-  let hour = Math.floor(m / 60);
-  const am = hour < 12 ? "am" : "pm";
-  if (hour === 0) {
-    hour = 12;
-  } else if (hour > 12) {
-    hour -= 12;
-  }
-  return `${ d } ${hour}:${`0${m % 60}`.slice(-2)}${am}`;
-};
 
-const GridHoverComp = ({ data, indexFormat, keyFormat, valueFormat }) => {
-  const theme = useTheme();
-  const indexes = get(data, "indexes", []);
-  const cols = Math.max(2, Math.ceil(indexes.length / 20));
-  return (
-    <div
-      className={`
-        grid grid-cols-${cols}
-        grid-flow-col gap-1 px-2 pt-1 pb-2 rounded
-        ${theme.accent1}
-      `}
-      style={{
-        gridTemplateRows: `repeat(${Math.ceil(indexes.length / cols) +
-          1}, minmax(0, 1fr))`,
-      }}
-    >
-      <div
-        className={`
-        font-bold text-lg leading-6 border-b-2 pl-2 col-span-${cols}
-      `}
-      >
-        {keyFormat(get(data, "key", null))}
-      </div>
-      {indexes.map((i) => (
-        <div
-          key={i}
-          className={`
-            flex items-center px-2 rounded transition
-          `}
-        >
-          <div
-            className="mr-2 rounded-sm color-square w-5 h-5"
-            style={{
-              backgroundColor: get(data, ["indexData", i, "color"], null),
-              opacity: data.index === i ? 1 : 0.2,
-            }}
-          />
-          <div className="mr-4">{indexFormat(i)}:</div>
-          <div className="text-right flex-1">
-            {valueFormat(get(data, ["indexData", i, "value"], 0))}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
+
+
 
 const config = {
   name: "Incident View",

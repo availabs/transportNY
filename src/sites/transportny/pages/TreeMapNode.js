@@ -1,8 +1,8 @@
 import { memo } from 'react'
-import { animated, to,SpringValue } from '@react-spring/web'
+import { animated, to,/*SpringValue*/ } from '@react-spring/web'
 import { useTheme } from '@nivo/core'
 // import { NodeProps } from './types'
-//import { svgNodeTransform, svgLabelTransform } from './transitions'
+// import { svgNodeTransform, svgLabelTransform } from './transitions'
 
 
 

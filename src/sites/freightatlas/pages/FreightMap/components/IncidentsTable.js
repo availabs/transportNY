@@ -10,7 +10,6 @@ import {
   Table,
 } from "modules/avl-components/src"
 
-import { F_SYSTEMS } from 'pages/Dashboards/components//metaData'
 
 const fFormat = d3format(",.2s")
 

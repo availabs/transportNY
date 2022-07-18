@@ -2,6 +2,8 @@ import React from "react"
 
 import get from "lodash.get";
 
+import { format as d3format } from "d3-format"
+
 import { useSelector } from 'react-redux';
 
 import {
@@ -24,7 +26,7 @@ import IncidentMap from './components/IncidentsMap'
 
 import DashboardLayout from 'sites/tsmo/pages/Dashboards/components/DashboardLayout'
 
-import { fraction, CompareComp, displayDuration, HeroStatComp } from "./components/CompareComp"
+import { HeroStatComp } from "./components/CompareComp"
 
 import {F_SYSTEM_MAP} from '../components/metaData'
 
@@ -110,8 +112,9 @@ const Incidents = props => {
              "event_duration",
              "event_type",
              "event_category",
-             "general_category",
-             "sub_category",
+             "nysdot_general_category",
+             "nysdot_sub_category",
+             "start_date_time",
              "geom"]
           ])
         }
@@ -130,8 +133,8 @@ const Incidents = props => {
     let eventIds = get(falcorCache, ["transcom2", "eventsbyGeom", request, "value"], [])
     let keys = []
     let events = []
-    let totalDuration = 0;
-    let totalVehicleDelay = 0
+    // let totalDuration = 0;
+    // let totalVehicleDelay = 0
     let currentMonthDays = []
     let prevMonthDays = []
 
@@ -140,27 +143,26 @@ const Incidents = props => {
 
     let data = eventIds.reduce((out, eventId) => {
       let event = get(falcorCache, ["transcom2", "eventsbyId", eventId],  null)
-console.log("EVENT:", event);
       // console.log('testing', event)
       // if(['incident'].includes(event.event_category)){
       if (event && (!fSystems.length || fSystems.includes(event.n))) {
         //console.log('this is an event', event)
         let day = event.start_date_time.split(' ')[0]
-        totalDuration += duration2minutes(event.event_duration)
-        totalVehicleDelay += get(event,'congestion_data.value.vehicleDelay',0)
+        // totalDuration += duration2minutes(event.event_duration)
+        // totalVehicleDelay += get(event,'congestion_data.value.vehicleDelay',0)
         events.push(event)
-        if(!keys.includes(event.sub_category)){
-          keys.push(event.sub_category)
+        if(!keys.includes(event.nysdot_sub_category)){
+          keys.push(event.nysdot_sub_category)
         }
         if(!out[day]) {
           out[day] = { index: day }
         }
-        if(!out[day][event.sub_category]) {
-          out[day][event.sub_category] = 0
-          out[day][`${event.sub_category} duration`] = 0
+        if(!out[day][event.nysdot_sub_category]) {
+          out[day][event.nysdot_sub_category] = 0
+          out[day][`${event.nysdot_sub_category} duration`] = 0
         }
-        out[day][event.sub_category] += 1
-         out[day][`${event.sub_category} duration`] += duration2minutes(event.event_duration)
+        out[day][event.nysdot_sub_category] += 1
+         out[day][`${event.nysdot_sub_category} duration`] += duration2minutes(event.event_duration)
       }
       return out
     },{})
@@ -170,20 +172,20 @@ console.log("EVENT:", event);
       .sort((a,b) => get(b,'congestion_data.value.vehicleDelay',0) - get(a,'congestion_data.value.vehicleDelay',0))
       .reduce((a, e, i) => {
         if (e && (!fSystems.length || fSystems.includes(e.n))) {
-          if(!a[e.sub_category]) {
-            a[e.sub_category] = {count: 0, duration: 0, v_delay: 0, top_20_v_delay: 0}
+          if(!a[e.nysdot_sub_category]) {
+            a[e.nysdot_sub_category] = {count: 0, duration: 0, v_delay: 0, top_20_v_delay: 0}
           }
           let day = get(e,'start_date_time','').split(' ')[0]
           if(!currentMonthDays.includes(day)) {
             currentMonthDays.push(day)
           }
-          a[e.sub_category].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+          a[e.nysdot_sub_category].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
           if(i < 20) {
-            a[e.sub_category].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+            a[e.nysdot_sub_category].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
             a['Total'].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
           }
-          a[e.sub_category].duration += duration2minutes(e.event_duration);
-          a[e.sub_category].count += 1;
+          a[e.nysdot_sub_category].duration += duration2minutes(e.event_duration);
+          a[e.nysdot_sub_category].count += 1;
           a['Total'].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
           a['Total'].duration += duration2minutes(e.event_duration);
           a['Total'].count += 1;
@@ -197,20 +199,20 @@ console.log("EVENT:", event);
       .sort((a,b) => get(b,'congestion_data.value.vehicleDelay',0) - get(a,'congestion_data.value.vehicleDelay',0))
       .reduce((a, e, i) => {
         if (e && (!fSystems.length || fSystems.includes(e.n))) {
-          if(!a[e.sub_category]) {
-            a[e.sub_category] = {count: 0, duration: 0, v_delay: 0, top_20_v_delay: 0}
+          if(!a[e.nysdot_sub_category]) {
+            a[e.nysdot_sub_category] = {count: 0, duration: 0, v_delay: 0, top_20_v_delay: 0}
           }
           let day = get(e,'start_date_time','').split(' ')[0]
           if(!prevMonthDays.includes(day)) {
             prevMonthDays.push(day)
           }
           if(i < 20) {
-            a[e.sub_category].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+            a[e.nysdot_sub_category].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
             a['Total'].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
           }
-          a[e.sub_category].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
-          a[e.sub_category].duration += duration2minutes(e.event_duration);
-          a[e.sub_category].count += 1;
+          a[e.nysdot_sub_category].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+          a[e.nysdot_sub_category].duration += duration2minutes(e.event_duration);
+          a[e.nysdot_sub_category].count += 1;
           a['Total'].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
           a['Total'].duration += duration2minutes(e.event_duration);
           a['Total'].count += 1;
@@ -234,15 +236,15 @@ console.log("EVENT:", event);
 
     let pieData = events.reduce((out, event) => {
 
-    let day = event.start_date_time.split(' ')[0]
+    // let day = event.start_date_time.split(' ')[0]
 
-        if(!out[event.sub_category]) {
-          out[event.sub_category] = 0
+        if(!out[event.nysdot_sub_category]) {
+          out[event.nysdot_sub_category] = 0
 
-          out[`${event.sub_category} duration`] = 0
+          out[`${event.nysdot_sub_category} duration`] = 0
         }
-        out[event.sub_category] += 1
-        out[`${event.sub_category} duration`] += duration2minutes(event.event_duration)
+        out[event.nysdot_sub_category] += 1
+        out[`${event.nysdot_sub_category} duration`] += duration2minutes(event.event_duration)
 
       return out
 
@@ -253,7 +255,7 @@ console.log("EVENT:", event);
 
         let duration = duration2minutes(e.event_duration)
         let cats = Object.keys(out)
-        let event_cat = e.sub_category
+        let event_cat = e.nysdot_sub_category
         if(!out[cats[0]][event_cat]) {
           cats.forEach(cat => out[cat][event_cat]=0)
         }
@@ -283,7 +285,6 @@ console.log("EVENT:", event);
       }
     )
 
-console.log("KEYS:", keys)
     keys.sort((a, b) => a.localeCompare(b));
 
     const nc = theme.graphCategorical.length;
@@ -292,7 +293,7 @@ console.log("KEYS:", keys)
       return a;
     }, {})
 
-    //console.log('data', events)
+    //console.log('colorsForTypes', colorsForTypes)
     return {
       events: events
         .sort((a,b) => get(b,'congestion_data.value.vehicleDelay',0) - get(a,'congestion_data.value.vehicleDelay',0))
@@ -312,7 +313,7 @@ console.log("KEYS:", keys)
       pieData: [pieData]
     }
 
-  }, [falcorCache,requests,month, theme.graphCategorical,fsystem, loading])
+  }, [falcorCache,requests,month, theme.graphCategorical,fsystem])
 
   const [hoveredEvent, setHoveredEvent] = React.useState(null);
   //console.log('output', data)
@@ -332,7 +333,8 @@ console.log("KEYS:", keys)
                 data={get(data,'pieData',[])}
                 colors={theme.graphCategorical}
                 hoverComp={ {
-                  valueFormat: ","
+                  valueFormat: ",",
+                  HoverComp: PieHoverComp
                 } }
             />
           </div>
@@ -416,7 +418,7 @@ console.log("KEYS:", keys)
   )
 }
 
-export default [
+const IncidentsPageConfig =  [
 
   { name:'Incidents',
     title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
@@ -432,3 +434,60 @@ export default [
     component: Incidents,
   }
 ];
+export default IncidentsPageConfig;
+
+const precentFormat = d3format(",.1%")
+
+const PieHoverComp = ({ data, keys, indexFormat, keyFormat, valueFormat, ...rest }) => {
+  const theme = useTheme();
+  const total = keys.reduce((a, c) => a + get(data, ["data", c], 0), 0);
+  return (
+    <div style={ { width: "22rem" } }
+      className={ `
+        px-2 py-1 rounded grid grid-cols-12 gap-1
+        ${ theme.accent1 }
+      ` }>
+      <div className="font-bold text-lg leading-5 border-current border-b-2 col-span-12">
+        { indexFormat(get(data, "index", null)) }
+      </div>
+
+        { keys.map(key => (
+            <div key={ key }
+              className={ `
+                col-span-12 px-1
+                grid grid-cols-12 items-center
+                border-2 rounded transition
+                ${ data.key === key ? "border-current" : "border-transparent" }
+              `}>
+              <div className="col-span-1">
+                <div className="rounded-sm color-square w-5 h-5"
+                  style={ {
+                    backgroundColor: get(data, ["colorMap", data.index, key], null),
+                    opacity: data.key === key ? 1 : 0.2
+                  } }/>
+              </div>
+              <div className="col-span-7">
+                { keyFormat(key) }:
+              </div>
+              <div className="col-span-2 text-right">
+                { valueFormat(get(data, ["data", key], 0)) }
+              </div>
+              <div className="col-span-2 text-right">
+                { precentFormat(get(data, ["data", key], 0) / total) }
+              </div>
+            </div>
+          ))
+        }
+
+      <div className="col-span-12 grid grid-cols-12 px-1">
+        <div className="col-span-1"/>
+        <div className="col-span-7">
+          Total:
+        </div>
+        <div className="col-span-2 text-right">
+          {  valueFormat(total) }
+        </div>
+      </div>
+    </div>
+  )
+}

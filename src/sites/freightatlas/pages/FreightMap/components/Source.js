@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useFalcor,TopNav } from 'modules/avl-components/src'
+import React, { useEffect, useMemo } from 'react';
+import { useFalcor } from 'modules/avl-components/src'
 import get from 'lodash.get'
-import { useParams } from 'react-router-dom'
+// import { useParams } from 'react-router-dom'
 
 import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
 
@@ -103,21 +103,24 @@ const Metadata = ({source}) => {
 const Source = ({sourceId}) => {
   const {falcor,falcorCache} = useFalcor()
   
-  useEffect(async () => {
-    const lengthPath = ["datamanager","sources","byId",sourceId,"views","length"]
-    const resp = await falcor.get(lengthPath);
-    return await falcor.get(
-      [
-        "datamanager","sources","byId",sourceId,"views","byIndex",
-        {from:0, to:  get(resp.json, lengthPath, 0)-1},
-        "attributes",Object.values(ViewAttributes)
-      ],
-      [
-        "datamanager","sources","byId",sourceId,
-        "attributes",Object.values(SourceAttributes)
-      ]
-    )
-  }, [])
+  useEffect( () => {
+    const fetchData = async () => { 
+      const lengthPath = ["datamanager","sources","byId",sourceId,"views","length"]
+      const resp = await falcor.get(lengthPath);
+      return await falcor.get(
+        [
+          "datamanager","sources","byId",sourceId,"views","byIndex",
+          {from:0, to:  get(resp.json, lengthPath, 0)-1},
+          "attributes",Object.values(ViewAttributes)
+        ],
+        [
+          "datamanager","sources","byId",sourceId,
+          "attributes",Object.values(SourceAttributes)
+        ]
+      )
+    }
+    fetchData()
+  }, [falcor, sourceId])
 
   const views = useMemo(() => {
     return Object.values(get(falcorCache,["datamanager","sources","byId",sourceId,"views","byIndex",],{}))

@@ -1,11 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom'
 
-
-
-
-
-export default ({ email, password, update, canSubmit, handleSubmit }) => {
+const LoginComp = ({ email, password, update, canSubmit, handleSubmit }) => {
   return (
     <div className="h-full bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 ">
       
@@ -92,3 +88,5 @@ export default ({ email, password, update, canSubmit, handleSubmit }) => {
     </div>
   )
 }
+
+export default LoginComp
