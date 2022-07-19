@@ -59,7 +59,11 @@ const calcMonths = () => {
   var date = new Date()
   let dates = []
   while(date > new Date(2015,12,31)) {
-    dates.push(`${ date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}`)
+
+    dates.push({
+        value: `${ date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}`,
+        name: date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+    })
     date.setMonth(date.getMonth() - 1);
   }
   return dates

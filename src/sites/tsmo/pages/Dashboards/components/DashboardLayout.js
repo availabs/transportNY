@@ -67,7 +67,10 @@ const Layout = ({
         </div>
         <div className="col-span-2 md:col-span-1">
             <span className="">MONTH</span>
-            <Select options={ MONTHS }
+            <Select 
+              options={ MONTHS }
+               accessor={ v => v.name }
+              valueAccessor={ v => v.value }
               value={ month }
               onChange={ (v) => dispatch(setMonth(v)) }
               className = 'font-bold py-3.5 '

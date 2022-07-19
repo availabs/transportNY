@@ -1,5 +1,12 @@
 import React, {useContext} from "react"
-import { /*Select,*/ useTheme, CollapsibleSidebar, TabPanel, Modal, DndList } from "modules/avl-components/src"
+import { /*Select,*/ 
+    useTheme, 
+    CollapsibleSidebar, 
+    TabPanel, 
+    Modal, 
+    DndList,
+    useSidebarContext
+} from "modules/avl-components/src"
 import { LayerContext } from './FreightMap'
 import LayerManager from './LayerManager'
 // import get from 'lodash.get'
@@ -24,7 +31,7 @@ export const Icon = ({
   );
 };
 
-const StylesTab = ({ mapStyles, styleIndex, MapActions, mapboxMap }) => {
+const MapStylesTab = ({ mapStyles, styleIndex, MapActions, mapboxMap }) => {
 
   const theme = useTheme();
 
@@ -73,17 +80,79 @@ const StylesTab = ({ mapStyles, styleIndex, MapActions, mapboxMap }) => {
   )
 }
 
+const DefaultLayerPanel = ({layer,rect}) => {
+  const LayerTabs = [
+        {
+            icon: "fa fa-layer-group",
+            Component: LayerListTab
+        },
+        {
+            icon: "fa fa-map",
+            Component: MapStylesTab
+        }
+    ]
+
+  return (
+    <div className='pl-[4px] w-full bg-white' style={{height: rect.height - 15}}>
+      <div className='w-full h-full  border-l border-gray-200'>
+        <div className='border-b border-gray-200 flex justify-between p-3'>
+          <div className='text-lg text-bold flex-1'>  {layer.name} </div>
+          <div className='p-1 hover:bg-blue-50 cursor-pointer'> <span className ='fad fa-download text-blue-500' alt='download' />  </div>
+          </div>
+        <div>
+          
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const LayerControl = ({ layer, setActiveLayer, activeLayer, MapActions }) => {
   //const theme = useTheme();
   const { /*layerList,*/ toggleLayer } = useContext(LayerContext);
+  const {
+    extendSidebar,
+    passCompProps,
+    closeExtension,
+    sidebarRef,
+    open,
+  } = useSidebarContext();
+
+  React.useEffect(() => {
+    if(open === 1 && activeLayer === layer.layer_id) {
+      setActiveLayer(null)
+    }
+  }, [open])
+
+  const onClick = React.useCallback(
+    (e) => {
+      if (activeLayer === layer.layer_id) {
+        setActiveLayer(null)
+        return closeExtension();
+      }
+
+      const rect = sidebarRef.current.getBoundingClientRect();
+      setActiveLayer(layer.layer_id)
+      const compProps = { layer, rect };
+      extendSidebar({
+        Comp: DefaultLayerPanel,
+        compProps,
+        top: `calc(${rect.top}px + 0.5rem)`,
+        
+      });
+    },
+    [
+      sidebarRef,
+      extendSidebar,
+      closeExtension,
+      activeLayer,
+      layer
+    ]
+  );
+
   return (
     <div
-      onClick={e => {
-        if(activeLayer === layer.layer_id) {
-          setActiveLayer(null)
-        }
-        setActiveLayer(layer.layer_id)
-      }} 
+      onClick={onClick} 
       className={` flex flex-col border-b border-gray-100 hover:bg-blue-50 cursor-pointer`}>
       <div className={`${activeLayer === layer.layer_id ? 'border-r-4 border-blue-500': ''} pl-2 py-2 pr-1 flex items-center group`}>
         <Icon className="cursor-move">
@@ -110,7 +179,7 @@ const LayerControl = ({ layer, setActiveLayer, activeLayer, MapActions }) => {
 };
 
 
-const LayersTab = ({activeLayers,MapActions,...rest},) => {
+const LayerListTab = ({activeLayers,MapActions,...rest},) => {
     const theme = useTheme()
     const [modalOpen, modalToggle] = React.useState()
     const [activeLayer, setActiveLayer] = React.useState(null)
@@ -171,19 +240,20 @@ const LayersTab = ({activeLayers,MapActions,...rest},) => {
 }
 
 const CustomSidebar = (props) => {
+    
     const SidebarTabs = [
         {
-            icon: "fa fa-layer-group",
-            Component: LayersTab
+            icon: "fad fa-layer-group",
+            Component: LayerListTab
         },
         {
-            icon: "fa fa-map",
-            Component: StylesTab
+            icon: "fad fa-map",
+            Component: MapStylesTab
         }
     ]
     return (
         <CollapsibleSidebar>
-            <div className='relative w-full h-full bg-gray-100  z-10 shadow-lg overflow-hidden'> 
+            <div  className='relative w-full h-full bg-gray-100  z-10 shadow-lg overflow-hidden'> 
                 {/*<div className='py-2 px-4 font-medium'> Freight Layers</div>*/}
                 <TabPanel 
                   tabs={SidebarTabs} 
@@ -195,7 +265,7 @@ const CustomSidebar = (props) => {
     )
 }
 export {
-  StylesTab,
-  LayersTab,
+  MapStylesTab,
+  LayerListTab,
   CustomSidebar
 }

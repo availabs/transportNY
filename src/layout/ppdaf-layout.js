@@ -3,13 +3,14 @@ import { useTheme, TopNav, SideNav, FlyoutMenu } from "modules/avl-components/sr
 import { Link } from "react-router-dom";
 import AuthMenu from "pages/Auth/AuthMenu"
 import {getDomain} from "utils"
+import get from 'lodash.get'
 
 
 
 
 const Logo = ({sideNav}) => {
 	const theme = useTheme()
-	const themeOptions = {size: sideNav.size || 'compact',color: sideNav.color || 'dark'}
+	const themeOptions = {size: get(sideNav, 'size','micro') ,color: get(sideNav, 'color','dark')}
 	return (
 		<>
 		<Link to="/" className={`${theme.sidenav(themeOptions).logoWrapper} flex flex-col items-center justify-center`}>
@@ -25,7 +26,7 @@ const Logo = ({sideNav}) => {
 
 const Layout = ({ children, menus, sideNav, title, site }) => {
 	const theme = useTheme()
-	const themeOptions = {size: sideNav.size || 'compact',color: sideNav.color || 'dark'}
+	const themeOptions = {size: get(sideNav, 'size','micro') ,color: get(sideNav, 'color','dark')}
 	const [flyoutOpen, setFlyoutOpen] = React.useState(false)
 
 	const PROJECT_HOST = getDomain(window.location.host)//psl.parse(window.location.host).domain
@@ -77,7 +78,7 @@ const Layout = ({ children, menus, sideNav, title, site }) => {
 						leftMenu={
 							<>
 								<div className='flex items-center justify-center h-12'>
-									<Link to="/" className={`${sideNav.size === 'none' ? '' : 'md:hidden'}` }>
+									<Link to="/" className={`${themeOptions.size === 'none' ? '' : 'md:hidden'}` }>
 										<div>
 											<img src='/nys_logo_blue.svg' className='w-full h-12' alt='New York State Logo' />
 										</div>
