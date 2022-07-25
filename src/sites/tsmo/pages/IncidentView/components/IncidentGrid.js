@@ -1,7 +1,6 @@
 import React from 'react'
 import {
   useFalcor,
-  Select,
   getColorRange,
   useTheme
 } from "modules/avl-components/src";
@@ -14,6 +13,8 @@ import { scaleQuantile, scaleLinear } from "d3-scale";
 
 import { GridGraph,/* BarGraph, LineGraph*/} from "modules/avl-graph/src";
 import get from "lodash.get";
+import { congestionController } from './CongestionInfo'
+import {  makeNpmrdsRequestKeys } from './utils'
 
 const ColorRange = getColorRange(7, "RdYlGn");
 
@@ -39,9 +40,30 @@ const gridValueFormat2 = (v) =>
     : changeFormat(v);
 
 
-const IncidentGrid = ({eventData,requestKeys,activeBranches}) => {
+const IncidentGrid = ({
+	event_id, 
+  year,
+  tmcs,
+  corridors,
+  tmcMetaData,
+  congestionData,
+  activeBranch
+},...rest) => {
 	const {falcor, falcorCache} = useFalcor();
 	const [activeGrid, setActiveGrid] = React.useState('Speed Differences')
+	const [requestKeys, setRequestKeys] = React.useState([]);
+
+	React.useEffect(() => {
+    const [requestKeys, tmcs, year] = makeNpmrdsRequestKeys(congestionData);
+    setRequestKeys(requestKeys);
+    if (requestKeys.length) {
+      falcor
+        .get(
+          ["routes", "data", requestKeys],
+          ["pm3", "measuresByTmc", tmcs, year, "freeflow_tt"]
+        )
+    }
+  }, [falcor,falcorCache, congestionData]);
 	
 	const getFF = (tmc, year, falcorCache) => {
 	  const fftt = get(
@@ -64,6 +86,7 @@ const IncidentGrid = ({eventData,requestKeys,activeBranches}) => {
 	};
 
 	const expandData = (tmcs, year, requestKeys, falcorCache) => {
+
 	  return requestKeys.reduce((a, rk) => {
 	    const data = [...get(falcorCache, ["routes", "data", rk, "value"], [])];
 
@@ -113,38 +136,21 @@ const IncidentGrid = ({eventData,requestKeys,activeBranches}) => {
 	};
 
 	const gridData = React.useMemo(() => {
-	    const cData = get(eventData, ["congestion_data", "value"], null);
-	    if (!cData) {
-	      return [];
-	    }
+	   	
+	    const { dates } = congestionData;
+	    if(!dates) return []
+	  	console.log('dates', dates)
 
-	    const { dates, branches = [], tmcDelayData = {}, eventTmcs = [] } = cData;
+	    let corridorTmcs = Object.values(
+	      get(corridors.filter(c => c.corridor === activeBranch),'[0].tmcs',{})
+	    )
 
-	    const year = dates[0].slice(0, 4);
-
-	    const branchMap = branches.reduce((a, c) => {
-	      a[c.branch.join("|")] = c;
-	      return a;
-	    }, {})
-
-	    const upBranch = get(branchMap, activeBranches[0], { branch: [] });
-	    const downBranch = get(branchMap, activeBranches[1], { branch: [] });
-
-	    const tmcs = new Set([
-	      ...upBranch.branch,//.filter(tmc => Boolean(tmcDelayData[tmc])),
-	      ...downBranch.branch//.filter(tmc => Boolean(tmcDelayData[tmc]))
-	    ])
-
+	    const tmcs =  new Set([...Object.values(corridorTmcs)])
 	    const tmcMap = new Map();
 
-	    upBranch.branch.forEach((tmc) => {
-	      if (!tmcMap.has(tmc)) {
-	        tmcMap.set(tmc, -tmcMap.size);
-	      }
-	    });
-	    downBranch.branch.forEach((tmc) => {
-	      if (!tmcMap.has(tmc)) {
-	        tmcMap.set(tmc, tmcMap.size);
+	    Object.keys(corridorTmcs).forEach((orderKey) => {
+	      if (!tmcMap.has(corridorTmcs[orderKey])) {
+	        tmcMap.set(corridorTmcs[orderKey], -1 * orderKey);
 	      }
 	    });
 
@@ -317,14 +323,12 @@ const IncidentGrid = ({eventData,requestKeys,activeBranches}) => {
 	          ? "Yearly Avg. Speeds"
 	          : "Speed Differences",
 	    }));
-  	}, [requestKeys, eventData, falcorCache, activeBranches]);
+  	}, [requestKeys, falcorCache,activeBranch, corridors, congestionData,year]);
 
 	const points = React.useMemo(() => {
-	    const cData = get(eventData, ["congestion_data", "value"], null);
-	    if (!cData) {
-	      return [[], []];
-	    }
-	    const { startTime, endTime, eventTmcs, dates } = cData;
+	    
+	    const { startTime, endTime, eventTmcs, dates } = congestionData;
+	    if(!dates) return []
 
 	    return [
 	      [...eventTmcs.map((tmc) => ({
@@ -342,14 +346,13 @@ const IncidentGrid = ({eventData,requestKeys,activeBranches}) => {
 	      }))],
 	      
 	    ];
-	}, [eventData]);
+	}, [congestionData]);
 
 	const bounds = React.useMemo(() => {
-	    const cData = get(eventData, ["congestion_data", "value"], null);
-	    if (!cData) {
+	    if (!congestionData.tmcBounds) {
 	      return [[], []];
 	    }
-	    const { tmcBounds } = cData;
+	    const { tmcBounds } = congestionData;
 
 	    const bounds1 = [], bounds2 = [];
 
@@ -362,69 +365,90 @@ const IncidentGrid = ({eventData,requestKeys,activeBranches}) => {
 	      });
 	     
 	    }
-
 	    return [bounds1, bounds2];
-	}, [eventData]);
+	}, [congestionData]);
 
 	const axisLeftFormat = React.useCallback(tmc => {
-	    const year = get(eventData, ["congestion_data", "value", "dates", 0], "").slice(0, 4);
-	    return get(falcorCache, ["tmc", tmc, "meta", year, "roadname"]);
-	}, [falcorCache, eventData])
+			return get(falcorCache, ["tmc", tmc, "meta", year, "firstname"]);
+	}, [falcorCache, year])
 
+	const corridorName = React.useMemo(() => {
+		return `${get(corridors.filter(c => c.corridor === activeBranch),'[0].roadname','')} ${get(corridors.filter(c => c.corridor === activeBranch),'[0].direction','')}` 
+	},
+	[corridors, activeBranch])
+	    	
 	return (
-		<div>
-			 {!gridData.length ? null
-              : gridData
-              	.filter(({gData,label},i) => {
-              		return label === activeGrid
-              	})
-                .map(({ gData, label }, i) => (
-                  <div
-                    key={i}
-                    className={``}
-                  >
-                    <div className="font-bold  border-b-2 mb-1">
-                      <select 
-                      	value={activeGrid} 
-                      	onChange={(e) => setActiveGrid(e.target.value)}
-                      	className={'bg-gray-100 p-2 text-2xl'}
-                      >
-                      	{gridData.map(({gData,label},i) => <option key={i} value={label}>{label}</option>)}
-                      </select>
+		<div className ='flex w-full'>
+			<div className='w-10'>
+				<div className='  flex content-center justify-center h-full flex-col'>
+					<div  className='flex-1' />
+					<div className=' rotate-[270deg] text-2xl w-[400px] relative -left-[170px] text-center'>
+						<div>
+						{corridorName}
+						</div>
+						<div className='-mt-2'>
+							<i className="fad fa-arrow-right-long"/>
+						</div>
+					</div>
+					<div  className='flex-1' />
+				</div>
+			</div>
+			<div className='flex-1'>
 
-                    </div>
-                    <div
-                      style={{
-                        height: `${Math.max(gData.data.length * 4, 36)}rem`,
-                      }}
-                    >
-                      <GridGraph
-                        {...gData}
-                        showAnimations={false}
-                        margin={{ top: 5, right: 5, bottom: 25, left: 150 }}
-                        axisBottom={{
-                          format: epochFormat,
-                          tickDensity: 0.5,
-                        }}
-                        points={ points[i % 2] }
-                        bounds={ bounds[i % 2] }
-                        axisLeft={ {
-                          format: axisLeftFormat
-                        } }
-                        hoverComp={ {
-                          HoverComp: GridHoverComp,
-                          valueFormat: i === 2 ? gridValueFormat2 : gridValueFormat1,
-                          keyFormat: epochFormat,
-                        } }
-                      />
-                    </div>
-                  </div>
-                ))}
+			 {!gridData.length ? null
+      	: gridData
+      	.filter(({gData,label},i) => {
+      		return label === activeGrid
+      	})
+        .map(({ gData, label }, i) => (
+          <div
+            key={i}
+            className={``}
+          >
+            <div className="font-bold  border-b-2 mb-1">
+              <select 
+              	value={activeGrid} 
+              	onChange={(e) => setActiveGrid(e.target.value)}
+              	className={'bg-gray-100 p-2 text-2xl'}
+              >
+              	{gridData.map(({gData,label},i) => <option key={i} value={label}>{label}</option>)}
+              </select>
+
+            </div>
+            <div
+              style={{
+                height: `${Math.max(gData.data.length * 4, 36)}rem`,
+              }}
+            >
+              <GridGraph
+                {...gData}
+                showAnimations={false}
+                margin={{ top: 5, right: 5, bottom: 25, left: 120 }}
+                axisBottom={{
+                  format: epochFormat,
+                  tickDensity: 0.5,
+                }}
+                points={ points[i % 2] }
+                bounds={ bounds[i % 2] }
+                axisLeft={ {
+                  format: axisLeftFormat,
+                  rotate: 60
+                }}
+                hoverComp={ {
+                  HoverComp: GridHoverComp,
+                  valueFormat: i === 2 ? gridValueFormat2 : gridValueFormat1,
+                  keyFormat: epochFormat,
+                } }
+              />
+            </div>
+          </div>
+        ))}
+      </div>
 		</div>
 	)
 }
 
-export default IncidentGrid
+export default congestionController(IncidentGrid)
 
 const GridHoverComp = ({ data, indexFormat, keyFormat, valueFormat }) => {
   const theme = useTheme();

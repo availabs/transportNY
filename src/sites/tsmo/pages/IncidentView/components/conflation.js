@@ -1,7 +1,7 @@
 import flatten from 'lodash.flatten'
 
 const conflationVersion = '0_6_0'
-const years =['2016', '2017', '2018', '2019', '2020', '2021']
+const years =['2016', '2017', '2018', '2019', '2020', '2021','2022']
 const ConflationSources = years.map(year => {
 	return { id: `conflation_map_${year}_${conflationVersion}`,
 	  source: {
@@ -15,7 +15,7 @@ const lineColors = [
   "hsl(185, 0%, 27%)",
   "hsl(185, 0%, 12%)",
   'white',
-  'yellow',
+  '#dfde4e',
   '#e021a3',
   '#ed985c',
   '#93a012',
@@ -32,7 +32,7 @@ const lineColors = [
 // }
 
 let  networkLevels = {
-  'major-link': (year) => {
+  'major-link': (year,color,size=0) => {
     return{
       "source-layer": `major`,
       "minzoom": 10,
@@ -58,17 +58,17 @@ let  networkLevels = {
               ["exponential", 1.5],
               ["zoom"],
               12,
-              0.5,
+              0.5 + size,
               14,
-              2,
+              2 + size * 2,
               18,
-              18
+              18 + size * 3
           ],
-          "line-color": lineColors[0]
+          "line-color": color
       }
     }
   },
-  'road-street': (year) => {
+  'road-street': (year,color,size) => {
     return{
       "source-layer": `local`,
       "minzoom": 11,
@@ -89,7 +89,7 @@ let  networkLevels = {
           "line-join": ["step", ["zoom"], "miter", 14, "round"]
       },
       paint: {
-        'line-color': lineColors[0],//["match", ["get", "dir"], 1, 'red', 5, 'green', 3, 'blue', 7, 'yellow', 'pink'],//lineColors[5],
+        'line-color': color,//["match", ["get", "dir"], 1, 'red', 5, 'green', 3, 'blue', 7, 'yellow', 'pink'],//lineColors[5],
         'line-opacity': [
           "case",
           ["boolean", ["feature-state", "hover"], false],
@@ -101,11 +101,11 @@ let  networkLevels = {
           ["exponential", 1.5],
           ["zoom"],
           11,
-          0.1,
+          0.1+size,
           14,
-          1.2,
+          1.2+size*2,
           18,
-          8
+          8+size*3
         ],
         'line-width': [
           "interpolate",
@@ -121,7 +121,7 @@ let  networkLevels = {
       }
     }
   },
-  'secondary-tertiary': (year) => {
+  'secondary-tertiary': (year,color,size=0) => {
     return{
       "source-layer": `major`,
       "minzoom": 8,
@@ -142,7 +142,7 @@ let  networkLevels = {
           "line-join": ["step", ["zoom"], "miter", 14, "round"]
       },
       paint: {
-        'line-color': lineColors[0],
+        'line-color': color,
         'line-opacity': [
           "case",
           ["boolean", ["feature-state", "hover"], false],
@@ -164,14 +164,14 @@ let  networkLevels = {
           ["exponential", 1.5],
           ["zoom"],
           8,
-          .5,
+          .5 + (size * 1),
           18,
-          14
+          14 + (size * 6)
         ]
       }
     }
   },
-  'primary': (year) => {
+  'primary': (year,color,size=0) => {
     return{
       "source-layer": `major`,
       "minzoom": 7,
@@ -186,7 +186,7 @@ let  networkLevels = {
           "line-join": ["step", ["zoom"], "miter", 14, "round"]
       },
       paint: {
-        'line-color': lineColors[0],
+        'line-color': color,
         'line-opacity': [
           "case",
           ["boolean", ["feature-state", "hover"], false],
@@ -198,11 +198,11 @@ let  networkLevels = {
           ["exponential", 1.5],
           ["zoom"],
           5,
-          0.1,
+          0.1 +(size * 0.5),
           10,
-          1.25,
+          1 + (size * 1.5),
           18,
-          22
+          22 + (size * 8)
         ],
         'line-offset': [
           "interpolate",
@@ -218,7 +218,7 @@ let  networkLevels = {
       }
     }
   },
-  'motorway-trunk': (year) => {
+  'motorway-trunk': (year,color,size=0) => {
     return {
       "source-layer": `major`,
       "layout": {
@@ -232,7 +232,7 @@ let  networkLevels = {
           ["==", ["geometry-type"], "LineString"]
       ],
       paint: {
-        'line-color': lineColors[0],
+        'line-color': color,
         'line-opacity': [
           "case",
           ["boolean", ["feature-state", "hover"], false],
@@ -244,11 +244,11 @@ let  networkLevels = {
           ["exponential", 1.5],
           ["zoom"],
           5,
-          .2,
+          .2 + size *2, 
           10,
-          2,
+          2 + size * 4,
           18,
-          36
+          36 + size * 6
         ],
         'line-offset': [
           "interpolate",
@@ -274,177 +274,30 @@ const ConflationYears = years.map(year => {
             "type": "line",
             source: `conflation_map_${year}_${conflationVersion}`,
             beneath: 'road-label',
-            ...networkLevels[level](year)
+            ...networkLevels[level](year,lineColors[0])
+      }
+  })
+})
+
+const ConflationCaseYears = years.map(year => {
+  return Object.keys(networkLevels).map(level => {
+    return {
+            "id": `concase-${year}-${level}`,
+            "type": "line",
+            source: `conflation_map_${year}_${conflationVersion}`,
+            beneath: `con-${year}-${level}`,
+            ...networkLevels[level](year,lineColors[2],1)
       }
   })
 })
 
 
 const ConflationLayers = flatten(ConflationYears)
+const ConflationCaseLayers = flatten(ConflationCaseYears)
 
 
-
-
-/*const ConflationLayerCase = [
-  {
-      id: `con-2019-secondary-tertiary-case`,
-      type: 'line',
-      source: `conflation_map_${conflationVersion}`,
-      beneath: 'road-label',
-      'source-layer': 'major',
-      "minzoom": 8,
-      "filter": [
-          "all",
-          [
-              "match",
-              ["get", "h"],
-              ["secondary", "tertiary"],
-              true,
-              false
-          ],
-          ["==", ["geometry-type"], "LineString"]
-      ],
-      "layout": {
-          'visibility': 'none',
-          "line-cap": ["step", ["zoom"], "butt", 14, "round"],
-          "line-join": ["step", ["zoom"], "miter", 14, "round"]
-      },
-      paint: {
-        'line-color': lineColors[1],
-        "line-width": [
-          "interpolate",
-          ["exponential", 1.5],
-          ["zoom"],
-          10,
-          0.25,
-          18,
-          1.5
-        ],
-        "line-color": lineColors[1],
-        'line-offset': [
-          "interpolate",
-            ["exponential", 1.5],
-            ["zoom"],
-            8,
-            0.75,
-            18,
-            7
-        ],
-        "line-gap-width": [
-            "interpolate",
-            ["exponential", 1.5],
-            ["zoom"],
-            5,
-            0.1,
-            18,
-            12
-        ],
-        //"line-opacity": ["step", ["zoom"], 0.1, 10, 1]
-      }
-    },
-    {
-      id: `con-2019-primary-case`,
-      type: 'line',
-      source: `conflation_map_${conflationVersion}`,
-      beneath: 'road-label',
-      'source-layer': 'major',
-      "layout": {
-          'visibility': 'none',
-          "line-cap": ["step", ["zoom"], "butt", 13, "round"],
-          "line-join": ["step", ["zoom"], "miter", 13, "round"]
-      },
-      "filter": [
-          "all",
-          ["==", ["get", "h"], "primary"],
-          ["==", ["geometry-type"], "LineString"]
-      ],
-      minzoom:8,
-      paint: {
-        'line-color': lineColors[1],
-        "line-width": [
-            "interpolate",
-            ["exponential", 1.5],
-            ["zoom"],
-            10,
-            .5,
-            18,
-            2
-        ],
-        // "line-color": "hsl(185, 0%, 16%)",
-        "line-gap-width": [
-            "interpolate",
-            ["exponential", 1.5],
-            ["zoom"],
-            5,
-            1,
-            18,
-            14
-        ],
-        'line-offset': [
-          "interpolate",
-            ["exponential", 1.5],
-            ["zoom"],
-            5,
-            1.5,
-            18,
-            14
-        ],
-        //"line-opacity": ["step", ["zoom"], 0.1,  10, 1]
-
-      }
-    },
-    {
-      id: `con-2019-interstate-case`,
-      type: 'line',
-      source: `conflation_map_${conflationVersion}`,
-      beneath: 'road-label',
-      'source-layer': 'major',
-      "layout": {
-          'visibility': 'none',
-          "line-cap": ["step", ["zoom"], "butt", 13, "round"],
-          "line-join": ["step", ["zoom"], "miter", 13, "round"]
-      },
-      "filter": [
-          "all",
-          ["match", ["get", "h"], ["motorway", "trunk"], true, false],
-          ["==", ["geometry-type"], "LineString"]
-      ],
-      minzoom:8,
-      paint: {
-        "line-width": [
-            "interpolate",
-            ["exponential", 1.5],
-            ["zoom"],
-            5,
-            .5,
-            18,
-            6
-        ],
-        "line-color": lineColors[1],
-        "line-gap-width": [
-            "interpolate",
-            ["exponential", 1.5],
-            ["zoom"],
-            5,
-            0.4,
-            18,
-            36
-        ],
-        'line-offset': [
-          "interpolate",
-            ["exponential", 1.5],
-            ["zoom"],
-            5,
-            0.2,
-            18,
-            9
-        ],
-        //"line-dasharray": [3, 3]
-    }
-  },
-]
-*/
 export {
 	ConflationSources,
-  ConflationLayers
+  ConflationLayers,
+  ConflationCaseLayers
 }

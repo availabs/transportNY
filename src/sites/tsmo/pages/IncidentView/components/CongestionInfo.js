@@ -7,79 +7,28 @@ import get from 'lodash.get'
 import { timeConvert } from 'sites/tsmo/pages/Dashboards/Incidents/components/utils'
 //import {getTMCs, getCorridors} from 'sites/tsmo/pages/Dashboards/Congestion/components/data_processing'
 
-
-const getCorridors = (tmcMetaData,year,tmcs,congestionData) => { 
-  let corridors = tmcs.reduce((corridors,tmcId) => {
-      let tmc = tmcMetaData[tmcId]
-
-      let tmcLinear = get(tmc, `[${year}].tmclinear`, false)
-      let county_code = get(tmc, `[${year}].county_code`, false)
-      let direction = get(tmc, `[${year}].direction`, false)
-
-      let corridor = `${county_code}_${tmcLinear}_${direction}`
-
-      if(tmcLinear) {
-        if(!corridors[corridor]) {
-          corridors[corridor] = {
-            corridor: corridor,
-            roadnames: [],
-            directions: [],
-            fsystems: [],
-            length: 0,
-            tmcs: {},           
-            total_delay: 0,
-          }
-        }
-        corridors[corridor].length += tmc[year].length
-        if(!corridors[corridor].roadnames.includes(tmc[year].roadname)){
-          corridors[corridor].roadnames.push(tmc[year].roadname)
-        }
-        if(!corridors[corridor].directions.includes(tmc[year].direction)){
-          corridors[corridor].directions.push(tmc[year].direction)
-        }
-        if(get(tmcs,`[${tmcId}].fsystem`,false) && !corridors[corridor].fsystems.includes(tmcs[tmcId].fsystem)){
-          corridors[corridor].fsystems.push(tmcs[tmcId].fsystem)
-        }
-        // console.log(get(tmcs,`[${tmcId}].total`,0), tmcId)
-        corridors[corridor].tmcs[tmc[year].road_order*10] = tmcId
-        corridors[corridor].total_delay += get(congestionData,`[${tmcId}]`,0)
-        
-
-      }
-      return corridors
-    },{})
-
-    //console.log('corridors corridors', corridors)
-  
-    return Object.values(corridors).map((c,i) => {
-      c.roadname = c.roadnames.join(',')
-      c.direction = c.directions.join(',')
-      c.fsystem = c.fsystems.join(',')
-      c.from = tmcMetaData[Object.values(c.tmcs)[0]][year].firstname
-      c.to = tmcMetaData[Object.values(c.tmcs)[Object.values(c.tmcs).length-1]][year].firstname
-      return c
-    })
-    .filter(d => d.total_delay > 0)
-    
-}
+import { getCorridors } from './utils'
 
 
 
-const CongestionInfo = ({event_id}) => {
-	const { falcor, falcorCache } = useFalcor();
+export const congestionController = (Component) => (props) => {
+  const { falcor, falcorCache } = useFalcor();
+  const { event_id } = props;
 
-	React.useEffect(() => {
+  React.useEffect(() => {
     falcor.get([
       "transcom2",
       "eventsbyId",
       event_id,
       [
-        "congestion_data"
+        "congestion_data",
+        "start_date_time",
+        "geom"
       ]
     ])
-  }, [event_id]);
+  }, [falcor,event_id]);
 
-	const congestionData = React.useMemo(() => {
+  const congestionData = React.useMemo(() => {
     return get(
       falcorCache,
       ["transcom2", "eventsbyId", event_id, "congestion_data", "value"],
@@ -87,20 +36,27 @@ const CongestionInfo = ({event_id}) => {
     );
   }, [event_id, falcorCache]);
 
-	const tmcs = React.useMemo(() => Object.keys(get(congestionData, 'rawTmcDelayData', {}))
-		,[congestionData])
+  const tmcs = React.useMemo(() => Object.keys(get(congestionData, 'rawTmcDelayData', {}))
+    ,[congestionData])
 
-	const year = React.useMemo(() => 2022
-		,[congestionData])
+  const year = React.useMemo(() => {
+    const start_date = get(
+      falcorCache,
+      ["transcom2", "eventsbyId", event_id, "start_date_time"],
+      new Date().toISOString() //if no date, use now 
+    );
+    return  new Date(start_date).getFullYear();
+  }, [event_id, falcorCache]);
+  
 
   React.useEffect(() => {
     if (tmcs.length === 0 ) return
-   	falcor.get(
+    falcor.get(
         [
-        "tmc",tmcs, "meta", year, ["length", "roadname", "tmclinear","road_order","county_code", "firstname", "direction"]
+        "tmc",tmcs, "meta", year, ["length", "roadname", "tmclinear","road_order","county_code", "firstname", "direction", "avg_speedlimit"]
         ]
     );
-  }, [tmcs,year]);
+  }, [falcor,tmcs,year]);
 
   const [tmcMetaData, setTmcMetaData] = React.useState({});
   React.useEffect(() => {
@@ -119,9 +75,51 @@ const CongestionInfo = ({event_id}) => {
 
 
   const corridors = React.useMemo(() => getCorridors(tmcMetaData,year,tmcs,get(congestionData,'rawTmcDelayData',{}))
-  ,[tmcMetaData,year,tmcs])
+  ,[tmcMetaData,year,tmcs,congestionData])
 
-  
+
+  //console.log('congestionController', Component, corridors)
+
+  return (
+    <Component
+      {...props}
+      year={year}
+      tmcs={tmcs}
+      corridors={corridors}
+      tmcMetaData={tmcMetaData}
+      congestionData={congestionData}
+    />
+  );
+} 
+
+
+
+const CongestionInfo = ({
+  event_id, 
+  year,
+  tmcs,
+  corridors,
+  tmcMetaData,
+  congestionData,
+  activeBranch,
+  setActiveBranch
+}) => {
+
+  React.useEffect(() => {
+   let eventTmc = get(congestionData, 'eventTmcs[0]', null)
+    if(!activeBranch) {
+      let activeBranch = null
+      corridors.forEach(c => {
+        if(Object.values(c.tmcs).includes(eventTmc)) {
+          activeBranch = c.corridor
+        } 
+      })
+      // console.log('activeBranch', activeBranch, eventTmc, congestionData)
+      if(activeBranch) {
+        setActiveBranch(activeBranch)
+      }
+    }
+  },[corridors,congestionData,activeBranch,setActiveBranch])
 
   
 	return (
@@ -135,11 +133,11 @@ const CongestionInfo = ({event_id}) => {
 			    	<div className='flex-1'>Branch</div>
 			    	<div> Delay </div>
 			    </div>
-			    {corridors.map(cor => {
+			    {corridors.map((cor,i) => {
 			    	return (
-			    		<div className='flex flex-1 border-b border-gray-100'>
+			    		<div onClick={(e) => setActiveBranch(cor.corridor) }className={`flex flex-1 hover:bg-blue-100 cursor-pointer  ${cor.corridor === activeBranch ? 'border-blue-600 border-b-2' :  'border-gray-100 border-b-2'}`} key={i}>
 					    	<div className='flex-1'>
-					    		<div className='text-xl'>{cor.roadname} {cor.direction} {Object.keys(cor.tmcs).length}</div>
+					    		<div className='text-xl'>{cor.roadname} {cor.direction} </div>
 					    		<div className='text-xs'>
 					    			{cor.from}
 					    		</div>
@@ -155,9 +153,9 @@ const CongestionInfo = ({event_id}) => {
 
 		    </div>
 		   {/* <pre>{JSON.stringify(corridors,null,3)}</pre>*/}
-	    	{/*<pre>{JSON.stringify(congestionData,null,3)}</pre>*/}
+	    {/*	<pre>{JSON.stringify(congestionData,null,3)}</pre>*/}
 	  </div>
 	)
 }
 
-export default CongestionInfo
+export default congestionController(CongestionInfo)
