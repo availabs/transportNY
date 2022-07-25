@@ -87,10 +87,10 @@ const Edit = ({startValue, attr, viewId, parentData, cancel=()=>{}}) => {
               }
             }
         })
-        console.log('set run', response)
+        // console.log('set run', response)
         cancel()
       } catch (error) {
-        console.log('error stuff',error,value, parentData);
+        // console.log('error stuff',error,value, parentData);
       }
     }
   }

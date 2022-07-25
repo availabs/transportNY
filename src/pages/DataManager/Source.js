@@ -11,17 +11,17 @@ import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager
 
 
 const Source = () => {
-  const {falcor,falcorCache} = useFalcor()
-  const { sourceId,page } = useParams()
+  const {falcor, falcorCache} = useFalcor()
+  const { sourceId, page } = useParams()
   const [ pages, setPages] = useState(Pages)
   const Page = useMemo(() => {
-    // console.log('page', page, pages)
     return page ? get(pages,`[${page}].component`,Pages['overview'].component)  : Pages['overview'].component
   },[page,pages])
   useEffect(() => {
     async function fetchData () {
       console.time('fetch data')
       const lengthPath = ["datamanager","sources","byId",sourceId,"views","length"]
+      console.log('source ', lengthPath)
       const resp = await falcor.get(lengthPath);
       let data =  await falcor.get(
         [
@@ -35,10 +35,11 @@ const Source = () => {
         ]
       )
       console.timeEnd('fetch data')
+      console.log(data)
       return data
     }
     fetchData()
-  }, [falcor, sourceId])
+  }, [sourceId])
 
   const views = useMemo(() => {
     return Object.values(get(falcorCache,["datamanager","sources","byId",sourceId,"views","byIndex",],{}))
@@ -47,13 +48,13 @@ const Source = () => {
 
   const source = useMemo(() => {
     let attributes =  getAttributes(get(falcorCache,['datamanager','sources','byId', sourceId],{'attributes': {}})['attributes']) 
-    if(DataTypes[attributes.type]){
-      setPages({...pages,...DataTypes[attributes.type]})  
+    if(DataTypes[attributes.type] ){
+      setPages({...Pages,...DataTypes[attributes.type]})  
     } else {
        setPages(Pages) 
     }
     return attributes
-  },[falcorCache,sourceId, pages])
+  },[falcorCache, sourceId])
 
   return (
     <div className='max-w-6xl mx-auto'>
