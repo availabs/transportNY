@@ -84,15 +84,18 @@ const Map = ({ event_id, activeBranch }) => {
     };
   }, [tmcs, year, point, congestionData, activeBranch]);
 
-  return (
-    <AvlMap
-      accessToken={MAPBOX_TOKEN}
-      navigationControl={false}
-      layers={layers.current}
-      layerProps={layerProps}
-      sidebar={false}
-    />
-  );
+  return congestionData ? 
+    <div className='bg-white p-2' style={{ minHeight: "50rem" }} >
+      <AvlMap
+        accessToken={MAPBOX_TOKEN}
+        navigationControl={false}
+        layers={layers.current}
+        layerProps={layerProps}
+        sidebar={false}
+      />
+    </div>
+     : <span />
+  
 };
 export default Map;
 
