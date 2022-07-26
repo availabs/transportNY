@@ -122,7 +122,7 @@ const CongestionInfo = ({
   },[corridors,congestionData,activeBranch,setActiveBranch])
 
   
-	return (
+	return !congestionData ? <div className='p-24 bg-white shadow font-medium'>Speed / Congestion data is not yet available for this incident. Check back next month.</div> : (
 		<div className="p-4 bg-white shadow">
 				<div className='leading-8 flex-1'>
 		    	<div className='text-sm font-bold'>Total Delay (vehicle hours)</div>

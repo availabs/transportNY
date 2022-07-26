@@ -53,10 +53,13 @@ const IncidentGrid = ({
 	const [activeGrid, setActiveGrid] = React.useState('Event Speeds')
 	const [requestKeys, setRequestKeys] = React.useState([]);
 
+
 	React.useEffect(() => {
-    const [requestKeys, tmcs, year] = makeNpmrdsRequestKeys(congestionData);
-    setRequestKeys(requestKeys);
-    if (requestKeys.length) {
+		if(congestionData && congestionData.dates) { 
+     	const [requestKeys, tmcs, year] = makeNpmrdsRequestKeys(congestionData);
+    	setRequestKeys(requestKeys);
+   	}
+    if (requestKeys.length && tmcs.length && year) {
       falcor
         .get(
           ["routes", "data", requestKeys],
@@ -136,9 +139,9 @@ const IncidentGrid = ({
 	};
 
 	const gridData = React.useMemo(() => {
-	   	
+	   	if(!congestionData || !congestionData.dates) return []
 	    const { startTime, endTime, dates } = congestionData;
-	    if(!dates) return []
+	    
 
 	    
 
@@ -338,9 +341,9 @@ const IncidentGrid = ({
   	}, [requestKeys, falcorCache,activeBranch, corridors, congestionData,year]);
 
 	const points = React.useMemo(() => {
-	    
+	    if(!congestionData || !congestionData.dates) return []
 	    const { startTime, endTime, eventTmcs, dates } = congestionData;
-	    if(!dates) return []
+	   
 
 	    return [
 	      [...eventTmcs.map((tmc) => ({
@@ -361,7 +364,7 @@ const IncidentGrid = ({
 	}, [congestionData]);
 
 	const bounds = React.useMemo(() => {
-	    if (!congestionData.tmcBounds) {
+	    if (!congestionData || !congestionData.tmcBounds) {
 	      return [[], []];
 	    }
 	    const { tmcBounds } = congestionData;
@@ -390,8 +393,8 @@ const IncidentGrid = ({
 	[corridors, activeBranch])
 
 	    	
-	return (
-		<div className ='flex w-full'>
+	return !congestionData ? <span /> : (
+		<div className ='flex w-full bg-white p-2'>
 			<div className='w-10'>
 				<div className='  flex content-center justify-center h-full flex-col'>
 					<div  className='flex-1' />

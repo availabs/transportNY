@@ -6,14 +6,15 @@ import { useParams } from "react-router-dom";
 import TmcMap from "./components/Map";
 import IncidentGrid from './components/IncidentGrid'
 import IncidentInfo, { IncidentTitle } from './components/IncidentInfo'
-import CongestionInfo from './components/CongestionInfo'
+import CongestionInfo, {congestionController} from './components/CongestionInfo'
 
 
-const IncidentViewNew = () => {
+const IncidentViewNew = (props) => {
   const { event_id } = useParams(); 
 
   const [activeBranch, setActiveBranch] = React.useState(null)
   const [showRaw, setShowRaw] = React.useState(true);
+  
   
   return (
     <div className='w-full'>
@@ -27,26 +28,27 @@ const IncidentViewNew = () => {
             
             <IncidentInfo event_id={event_id} />
             
-            <CongestionInfo 
-              event_id={event_id}
-              activeBranch={activeBranch}
-              setActiveBranch={setActiveBranch}
-              showRaw={showRaw}
-              setShowRaw={setShowRaw}
-            />
+            
+              <CongestionInfo 
+                event_id={event_id}
+                activeBranch={activeBranch}
+                setActiveBranch={setActiveBranch}
+                showRaw={showRaw}
+                setShowRaw={setShowRaw}
+              /> 
           </div>
         </div>
       </div>
       <div className='max-w-7xl mx-auto grid grid-cols-3 gap-4 px-4 mb-8'>
-        <div className='bg-white p-2' style={{ minHeight: "50rem" }} >
+        
           <TmcMap
             event_id={event_id}
             activeBranch={activeBranch}
             showRaw={showRaw}
           />
-        </div>
+        
 
-        <div className="flex-1 bg-white p-2 col-span-2">
+        <div className="col-span-2">
           <IncidentGrid
             event_id={event_id}
             activeBranch={activeBranch}
@@ -69,7 +71,7 @@ const config = {
     color: 'dark',
     size: 'micro'
   },
-  component: IncidentViewNew
+  component: congestionController(IncidentViewNew)
 }
 
 export default config;
