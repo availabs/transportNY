@@ -2,14 +2,15 @@ import React from 'react'
 import {
   useFalcor,
   getColorRange,
-  useTheme
+  useTheme,
+  Legend
 } from "modules/avl-components/src";
 import {
   range as d3range,
   rollup as d3rollup,
 } from "d3-array";
 import { format as d3format } from "d3-format";
-import { scaleQuantile, scaleLinear } from "d3-scale";
+import { scaleQuantile, scaleLinear, scaleThreshold } from "d3-scale";
 
 import { GridGraph,/* BarGraph, LineGraph*/} from "modules/avl-graph/src";
 import get from "lodash.get";
@@ -17,6 +18,7 @@ import { congestionController } from './CongestionInfo'
 import {  makeNpmrdsRequestKeys } from './utils'
 
 const ColorRange = getColorRange(7, "RdYlGn");
+const DiffColorRange = getColorRange(8, "YlOrBr", true);
 
 const epochFormat = (de) => {
   const [d, e] = de.split("|");
@@ -28,17 +30,15 @@ const epochFormat = (de) => {
   } else if (hour > 12) {
     hour -= 12;
   }
-  return `${ d } ${hour}:${`0${m % 60}`.slice(-2)}${am}`;
+  return ` ${hour}:${`0${m % 60}`.slice(-2)}${am}`;
 };
 
-const changeFormat = d3format("+,.1%")
-const gridValueFormat1 = (v) =>
-  isNaN(String(v)) ? "No Data"
-    : `${ Math.round(v) } MPH`;
-const gridValueFormat2 = (v) =>
-  isNaN(String(v)) ? "No Data"
-    : changeFormat(v);
+const displayFormats  = {
+	"diff": d3format("+,.0%"),
+	"mph" : (v) => isNaN(String(v)) ? "No Data" : `${ Math.round(v) } MPH`,
+	"round" : (v) => `${ Math.round(v) }`
 
+}
 
 const IncidentGrid = ({
 	event_id, 
@@ -50,7 +50,7 @@ const IncidentGrid = ({
   activeBranch
 },...rest) => {
 	const {falcor, falcorCache} = useFalcor();
-	const [activeGrid, setActiveGrid] = React.useState('Speed Differences')
+	const [activeGrid, setActiveGrid] = React.useState('Event Speeds')
 	const [requestKeys, setRequestKeys] = React.useState([]);
 
 	React.useEffect(() => {
@@ -60,7 +60,7 @@ const IncidentGrid = ({
       falcor
         .get(
           ["routes", "data", requestKeys],
-          ["pm3", "measuresByTmc", tmcs, year, "freeflow_tt"]
+          ["pm3", "measuresByTmc", tmcs, Math.max(year-1, 2016), "freeflow_tt"]
         )
     }
   }, [falcor,falcorCache, congestionData]);
@@ -68,7 +68,7 @@ const IncidentGrid = ({
 	const getFF = (tmc, year, falcorCache) => {
 	  const fftt = get(
 	    falcorCache,
-	    ["pm3", "measuresByTmc", tmc, year, "freeflow_tt"],
+	    ["pm3", "measuresByTmc", tmc, Math.max(year-1, 2016), "freeflow_tt"],
 	    {}
 	  );
 
@@ -137,9 +137,10 @@ const IncidentGrid = ({
 
 	const gridData = React.useMemo(() => {
 	   	
-	    const { dates } = congestionData;
+	    const { startTime, endTime, dates } = congestionData;
 	    if(!dates) return []
-	  	console.log('dates', dates)
+
+	    
 
 	    let corridorTmcs = Object.values(
 	      get(corridors.filter(c => c.corridor === activeBranch),'[0].tmcs',{})
@@ -172,17 +173,10 @@ const IncidentGrid = ({
 	    //   .domain([33, d3extent(dataDomain)[1]])
 	    //   .range(ColorRange);
 
-	    const _colors = scaleQuantile()
-	      .domain(dataDomain)
-	      .range(ColorRange);
-
-	    const colors = (v, i, d, x) => {
-	      const c = _colors(v);
-	      return d.interpolated.includes(x) ? `${c}88` : c;
-	    };
+	   	let timeRange = [Math.max(startTime-24, 0),Math.min(endTime +24, 288)]
 
 	    const keys1 = dates.reduce((a, c) => {
-	      d3range(288).forEach(e => a.push(`${ c }|${ e }`));
+	      d3range(...timeRange).forEach(e => a.push(`${ c }|${ e }`));
 	      return a;
 	    }, []);
 
@@ -190,6 +184,21 @@ const IncidentGrid = ({
 	      a[c] = get(falcorCache, ["tmc", c, "meta", year, "length"], 1);
 	      return a;
 	    }, {})
+
+	    let avgFF = Math.round([...tmcs].reduce((a,b) =>  {
+	    	return a + (get(tmcLengths, b, 1) * (3600.0 / getFF(b,year,falcorCache)))
+	    },0) / [...tmcs].length)
+	    
+
+	     const _colors = scaleThreshold()
+	      .domain([avgFF-20,avgFF-15,avgFF-8,avgFF-5, avgFF-2, avgFF-1, avgFF ])
+	      .range(ColorRange);
+
+	    const colors = (v, i, d, x) => {
+	      const c = _colors(v);
+	      return d.interpolated.includes(x) ? `${c}88` : c;
+	    };
+
 
 	    const grid1 = [...tmcs].reduce((a, tmc) => {
 
@@ -212,6 +221,7 @@ const IncidentGrid = ({
 	          ["tmc", tmc, "meta", year, "roadname"],
 	          ""
 	        ),
+	        //freeflow: ,
 	        height: length,
 	        interpolated: tmcData.reduce((a, c) => {
 	          if (c.interpolated) {
@@ -226,12 +236,14 @@ const IncidentGrid = ({
 	      })
 
 	      return a;
-	    }, { data: [], keys: keys1, colors });
+	    }, { data: [], keys: keys1, colors, _colors});
+
+
 
 	    grid1.data.sort((a, b) => tmcMap.get(a.index) - tmcMap.get(b.index))
 
 
-	    const keys2 = d3range(288).map(e => `${ year }|${ e }`);
+	    const keys2 = d3range(...timeRange).map(e => `${ year }|${ e }`);
 
 	    const grid2 = [...tmcs].reduce((a, tmc) => {
 
@@ -268,7 +280,7 @@ const IncidentGrid = ({
 	      })
 
 	      return a;
-	    }, { data: [], keys: keys2, colors });
+	    }, { data: [], keys: keys2, colors, _colors });
 
 	    grid2.data.sort((a, b) => tmcMap.get(a.index) - tmcMap.get(b.index))
 
@@ -298,7 +310,7 @@ const IncidentGrid = ({
 	        const k2 = keys2[ii % 288];
 	        if ((k2 in rest) && keySets[i].has(k1)) {
 	          keySets[i].delete(k1);
-	          diffData.data[i][k1] = (diffData.data[i][k1] - rest[k2]) / rest[k2];
+	          diffData.data[i][k1] = ((diffData.data[i][k1] - rest[k2]) / rest[k2]) ;
 	          diffDomain.push(diffData.data[i][k1]);
 	        }
 	      });
@@ -308,9 +320,9 @@ const IncidentGrid = ({
 	      set.forEach((k) => delete diffData.data[i][k]);
 	    });
 
-	    diffData.colors = scaleQuantile()
-	      .domain(diffDomain)
-	      .range(ColorRange);
+	    diffData.colors = scaleThreshold()
+	      .domain([-1,-0.8,-0.6,-0.4,-0.3,-0.2,-0.1,0,.1])
+	      .range(DiffColorRange);
 
 	    const gData = [grid1, grid2, diffData];
 
@@ -376,18 +388,19 @@ const IncidentGrid = ({
 		return `${get(corridors.filter(c => c.corridor === activeBranch),'[0].roadname','')} ${get(corridors.filter(c => c.corridor === activeBranch),'[0].direction','')}` 
 	},
 	[corridors, activeBranch])
+
 	    	
 	return (
 		<div className ='flex w-full'>
 			<div className='w-10'>
 				<div className='  flex content-center justify-center h-full flex-col'>
 					<div  className='flex-1' />
-					<div className=' rotate-[270deg] text-2xl w-[400px] relative -left-[170px] text-center'>
+					<div className=' rotate-[270deg] text-3xl text-gray-600 font-bold w-[400px] relative -left-[160px] text-center'>
 						<div>
 						{corridorName}
 						</div>
 						<div className='-mt-2'>
-							<i className="fad fa-arrow-right-long"/>
+							<i className="fad fa-arrow-right-long text-5xl"/>
 						</div>
 					</div>
 					<div  className='flex-1' />
@@ -405,19 +418,30 @@ const IncidentGrid = ({
             key={i}
             className={``}
           >
-            <div className="font-bold  border-b-2 mb-1">
-              <select 
-              	value={activeGrid} 
-              	onChange={(e) => setActiveGrid(e.target.value)}
-              	className={'bg-gray-100 p-2 text-2xl'}
-              >
-              	{gridData.map(({gData,label},i) => <option key={i} value={label}>{label}</option>)}
-              </select>
-
-            </div>
+            <div className='flex pb-1 -ml-10'>
+	            <div className="">
+	            	<div className='text-xs'>Grid Display</div>
+	              <select 
+	              	value={activeGrid} 
+	              	onChange={(e) => setActiveGrid(e.target.value)}
+	              	className={'bg-gray-100 p-2 text-lg border border-gray-300'}
+	              >
+	              	{gridData.map(({gData,label},i) => <option key={i} value={label}>{label}</option>)}
+	              </select>
+	            	
+	            </div>
+	            <div className='flex-1'>
+	            	<GridLegend 
+	            		scale={label === 'Speed Differences' ? gData.colors : gData._colors}
+		            	format={label === 'Speed Differences' ? displayFormats['diff'] : displayFormats['round']}
+		            	title={label === 'Speed Differences' ? 'Speed Difference (%)' : 'Speed (mph)'}
+		            />
+	            	
+	          	</div>
+	          </div>
             <div
               style={{
-                height: `${Math.max(gData.data.length * 4, 36)}rem`,
+                height: `${Math.max(gData.data.length * 4, 46)}rem`,
               }}
             >
               <GridGraph
@@ -436,7 +460,7 @@ const IncidentGrid = ({
                 }}
                 hoverComp={ {
                   HoverComp: GridHoverComp,
-                  valueFormat: i === 2 ? gridValueFormat2 : gridValueFormat1,
+                  valueFormat: label === 'Speed Differences' ? displayFormats['diff'] : displayFormats['mph'],
                   keyFormat: epochFormat,
                 } }
               />
@@ -449,6 +473,15 @@ const IncidentGrid = ({
 }
 
 export default congestionController(IncidentGrid)
+
+const GridLegend = ({scale, format, title}) => {
+	return <div className='px-4'>
+			<div className='text-xs'>{title}</div>
+			<div>
+				<Legend  domain={scale.domain()} range={scale.range()} type='threshold' format={format} />
+			</div>
+		</div>
+}
 
 const GridHoverComp = ({ data, indexFormat, keyFormat, valueFormat }) => {
   const theme = useTheme();

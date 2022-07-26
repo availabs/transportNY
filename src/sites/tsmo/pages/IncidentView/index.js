@@ -17,7 +17,7 @@ const IncidentViewNew = () => {
   
   return (
     <div className='w-full'>
-      <div className={`max-w-7xl mx-auto mb-8 px-4`}>
+      <div className={`max-w-7xl mx-auto pb-4 px-4`}>
         <div>
           <div className="grid grid-cols-2 gap-4">
             
@@ -37,8 +37,8 @@ const IncidentViewNew = () => {
           </div>
         </div>
       </div>
-      <div className='max-w-7xl mx-auto flex px-5'>
-        <div className='w-1/3 py-10' style={{ minHeight: "40rem" }} >
+      <div className='max-w-7xl mx-auto grid grid-cols-3 gap-4 px-4 mb-8'>
+        <div className='bg-white p-2' style={{ minHeight: "50rem" }} >
           <TmcMap
             event_id={event_id}
             activeBranch={activeBranch}
@@ -46,7 +46,7 @@ const IncidentViewNew = () => {
           />
         </div>
 
-        <div className="flex-1 ">
+        <div className="flex-1 bg-white p-2 col-span-2">
           <IncidentGrid
             event_id={event_id}
             activeBranch={activeBranch}
