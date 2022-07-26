@@ -125,8 +125,9 @@ const CongestionInfo = ({
 	return !congestionData ? <div className='p-24 bg-white shadow font-medium'>Speed / Congestion data is not yet available for this incident. Check back next month.</div> : (
 		<div className="p-4 bg-white shadow">
 				<div className='leading-8 flex-1'>
-		    	<div className='text-sm font-bold'>Total Delay (vehicle hours)</div>
-		    	<div className='px-4 text-2xl'>{timeConvert(get(congestionData, 'rawVehicleDelay', 0))}</div>
+          <div className='font-medium text-gray-500'>Congestion Totals by Branch</div>
+		    	<div className='text-xs text-blue-400'>Click branch to view on map / grid.</div>
+		    	
 		    </div>
 		    <div className=''>
 		    	<div className='flex'>
@@ -135,7 +136,7 @@ const CongestionInfo = ({
 			    </div>
 			    {corridors.map((cor,i) => {
 			    	return (
-			    		<div onClick={(e) => setActiveBranch(cor.corridor) }className={`flex flex-1 hover:bg-blue-100 cursor-pointer  ${cor.corridor === activeBranch ? 'border-blue-600 border-b-2' :  'border-gray-100 border-b-2'}`} key={i}>
+			    		<div onClick={(e) => setActiveBranch(cor.corridor) }className={`flex flex-1 hover:bg-blue-100 cursor-pointer  ${cor.corridor === activeBranch ? 'border-blue-600 border-b-2 bg-blue-100' :  'border-gray-100 border-b-2'}`} key={i}>
 					    	<div className='flex-1'>
 					    		<div className='text-xl'>{cor.roadname} {cor.direction} </div>
 					    		<div className='text-xs'>
