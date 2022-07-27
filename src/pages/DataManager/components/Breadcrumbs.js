@@ -25,12 +25,15 @@ export default function BreadCrumbs () {
     if(!get(attr, 'categories[0]', false)) { 
       return [{name:'',to:''}]
     }
-    let cats =  attr.categories[0].map(d => {
-      return {
-        name: d,
-        to: ''
-      }
-    })
+
+    let catList = get(attr ,'categories[0]', [])
+    let cats = typeof catList !== 'object' ? [] 
+      : catList.map(d => {
+        return {
+          name: d,
+          to: ''
+        }
+      })
     cats.push({name:attr.name.split('/').pop().split('_').join(' ')})
     return cats
 

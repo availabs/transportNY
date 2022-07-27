@@ -1,0 +1,1667 @@
+New Variable Categories,New Variable Subject,Unique,Variable Tables,Variable Subject,Collapse Category,Mother Variable Survey Origin,Mother - Variable,Mother - Label,Smartphone Pilot - Variable,Smartphone Pilot - Label,Smartphone-HH,Smartphone-Person,Smartphone-Vehicle,Smartphone-Day,Smartphone-Trip,Smartphone Pilot - Location,NYCDOT Mobility - Variable,NYCDOT Mobility - Label,NYCDOT-HH,NYCDOT-Person,NYCDOT-Vehicle,NYCDOT-Day,NYCDOT-Trip,NHTS - Variable,NHTS - Label,NHTS - HH,NHTS - PER,NHTS - VEH,NHTS - TRIP,RHTS - Variable,RHTS - Label,RHTS - HH_DELIV,RHTS - PER_DELIV,RHTS - VEH_DELIV,RHTS - PLACE_DELIV,RHTS - LINKEDTRIPS,RHTS - UNLINKEDTRIPS,RHTS - TOUR,RHTS - SUBTOUR
+Demographics,Ability (and Health),In 3 Surveys,Person-Level,Person characteristics,Ability,Smartphone Pilot,disability,Disability or illness that affects ability to travel,disability,Disability or illness that affects ability to travel,,1,,,,,disability_hearing | disability_seeing | disability_walking | disability_mobility | disability_dressing | disability_concentrating | disability_none,"Disability: I am deaf or have difficulty hearing | Disability: I am blind or have difficulty seeing | Disability: I have serious difficulty walking or climbing stairs | Disability: I have limited mobility and can't walk, Disability: I have difficulty dressing or bathing | Disability: I have difficulty concentrating, remembering, or making decisions because of a physical,  mental, or emotional condition | Disability: None of the above",,2,,,,,,,,,,"DISAB | 
+DTYPE1 | 
+DTYPE2 | 
+DTYPE3 | 
+DTYPE4 | 
+O_DTYPE |","Disability | 
+Disability Type1 | 
+Disability Type2 | 
+Disability Type3 | 
+Disability Type4 | 
+Other, Disability Type |",,1,,,,,,
+Demographics,Ability (and Health),In 3 Surveys,Person-Level,Person characteristics,Ability,Smartphone Pilot,license,Has a valid driver's license or permit,license,Has a valid driver's license or permit,,1,,,,,license,Has a valid driver's license or permit,,1,,,,,,,,,,LIC,License,,1,,,,,,
+Trip Information,Tour/Day Information,In 2 Surveys,Day-Level,General day characteristics,Destination Location,Smartphone Pilot,end_day,Day end location,end_day,Day end location,,,,,,1,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Destination,Smartphone Pilot,Trip-Level,General trip characteristics,Destination Location,Smartphone Pilot,destination_location,Destination Location,"d_lat |
+d_lat |
+d_lon |
+d_bg |
+d_county |
+d_state |
+d_puma |
+d_in_region |","Destination latitude |
+Destination longitude |
+Destination block group |
+Destination county (fips code) |
+Destination state (fips code) |
+Destination Public Use Microdata | Area (PUMA) |
+Destination in study region |",,,,,1,,"d_location_type |
+d_cms_zone |","Imputed location type for trip destination |
+Destination CMS zone |",,,,,1,,,,,,1,"DTAZ |
+DXCORD |
+DYCORD |
+DTRACT |
+DMCD |
+DZIP |
+DNYC |
+DMPO |
+DCOUNTY |
+GEO_GROUP1_D |
+GEO_GROUP2_D |
+GEO_GROUP3_D |
+DHOME |
+DEST_HOME |
+DTYPE |
+DPRIOR |
+PRIM_TAZ |
+PRIM_TRACT | 
+PCOUNTY |
+PRIM_DXCORD |
+PRIM_DYCORD |
+GEO_GROUP1_P |
+GEO_GROUP2_P |
+GEO_GROUP3_P |
+PRIM_NYC |
+PRIM_MPO |","Destination TAZ (WGS84) |
+Destination Geocoded Longitude (in WGS 84) |
+Destination Geocoded Latitude (in WGS 84) |
+Destination Tract 2010 (WGS84) |
+Destination MCD |
+Destination Zip |
+1 if destination is in NYC |
+Destination MPO | 
+Destination County |
+Geo group 1 for destination |
+Geo group 2 for destination |
+Geo group 3 for destination |
+1 If Home is destination |
+If Home is destination |
+Destination Type Code |
+Priority of Destination |
+Primary Tour Destination TAZ (NYMTC) |
+Primary Tour Destination Census Tract 2010 |
+Prime Destination County |
+Primary Destination X Coord |
+Primary Destination Y Coord |
+Geo group 1 for Primary Destination |
+Geo group 2 for Primary Destination |
+Geo group 3 for Primary Destination |
+1 if Prime Destination is in NYC |
+Prime destination's MPO |",,,,,1,1,1,
+Trip Information,Route/Path,Smartphone Pilot,Trip-Level,General trip characteristics,Destination Location,Smartphone Pilot,google_alighting_station,Google suggested alighting station,google_alighting_station,Google suggested alighting station,,,,,1,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Destination,NYCDOT Mobility Survery,Trip-Level,General trip characteristics,Destination Location,NYCDOT Mobility Survery,d_congestion,Did the trip end in the congestion pricing zone south of 60th Street in Manhattan?,,,,,,,,,d_congestion,Did the trip end in the congestion pricing zone south of 60th Street in Manhattan?,,,,,1,,,,,,,,,,,,,,,,
+Demographics,Location-Area Demographics,NHTS,Trip-Level,General trip characteristics,Destination Location,NHTS,d_census_cats,Destination Census Variable Categories,,,,,,,,,,,,,,,,"DBHTNRNT |
+DBPPOPDN |
+DBRESDN |
+DTEEMPDN |
+DTHTNRNT |
+DTPPOPDN |
+DTRESDN |
+DBHUR","Category of the percent of renter-occupied housing in the census block group of the trip destination's location |
+Category of population density (persons per square mile) in the census block group of the trip destination's location |
+Category of housing units per square mile in the census block group of the trip destination's location |
+Category of workers per square mile in the census tract of the trip destination's location |
+Category of the percent of renter-occupied housing in the census tract of the trip destination's location |
+Category of population density (persons per square mile) in the census tract of the trip destination's location |
+Category of housing units per square mile in the census tract of the trip destination's location |
+Urban / Rural indicator - Trip Destination Block group",,,,1,,,,,,,,,,
+Trip Information,Destination,RHTS,Trip-Level,Identifier,Destination Location,RHTS,PLSAM,Place Unique Identifier,,,,,,,,,,,,,,,,,,,,,,PLSAM,Place Unique Identifier,,,,1,1,1,,
+Trip Information,Destination,RHTS,Trip-Level,Identifier,Destination Location,RHTS,PLLOC,Place Location,"lat |
+lon |","Latitude |
+Longitude |",,,,,1,,,,,,,,,,,,,,,"PLANO |
+PNAME |
+ADDR |
+CITY | CITY_PL |CITY_MCD |
+CITY_PL |
+CITY_MCD |
+STATE |
+ZIP |
+YCORD |
+XCORD |
+IMPUTED |
+TAZ |
+TRACT |
+CTFIP |","Place Number |
+Place Name |
+Address |
+City (TB) |City (Place Name) | City (MCD Place Name) |
+City (Place Name) |
+City (MCD Place Name) |
+State |
+Zip Code |
+Y Latitude (in WGS 84) |
+X Longitude (in WGS 84) |
+Location Imputed by NYMTC/NJTPA |
+Location TAZ (NYMTC Provided) |
+Location Census Tract 2010 (NYMTC Provided) |
+County FIPS |",,,,1,1,1,,
+Trip Information,Tour/Day Information,RHTS,Trip-Level,General trip characteristics,Destination Location,RHTS,SUBT_AREA,Subtour Area Type,,,,,,,,,,,,,,,,,,,,,,"SUBT_TAZ |
+SUBT_TRACT |","subtour TAZ (NYMTC) |
+Subtour Census Tract 2010 |",,,,,1,,,
+Trip Information,Stops,RHTS,Trip-Level,General trip characteristics,Destination Location,RHTS,OB_TRACTTAZ,Census Tract or TAZ for Outbound Stops,,,,,,,,,,,,,,,,,,,,,,"OB_S1TRACT |
+OB_S1TAZ |
+OB_S2TRACT|
+OB_S2TAZ |
+OB_S3TRACT |
+OB_S3TAZ |
+OB_S4TRACT |
+OB_S4TAZ |
+IB_S1TRACT |
+IB_S1TAZ |
+IB_S2TRACT |
+IB_S2TAZ |
+IB_S3TRACT |
+IB_S3TAZ |
+IB_S4TRACT |
+IB_S4TAZ |
+SUBT_DTRPNO |
+SUBT_DTAZ |
+SUBT_DTRACT |","Census Tract 2010 for Outbound Stop 1 |
+TAZ (NYMTC) for Outbound Stop 1 |
+Census Tract 2010 for Outbound Stop 2 |
+TAZ (NYMTC) for Outbound Stop 2 |
+Census Tract 2010 for Outbound Stop 3 |
+TAZ (NYMTC) for Outbound Stop 3 |
+Census Tract 2010 for Outbound Stop 4 |
+TAZ (NYMTC) for Outbound Stop 4 |
+Census Tract 2010 for Inbound Stop 1 |
+TAZ (NYMTC) for Inbound Stop 1 |
+Census Tract 2010 for Inbound Stop 2 |
+TAZ (NYMTC) for Inbound Stop 2 |
+Census Tract 2010 for Inbound Stop 3 |
+TAZ (NYMTC) for Inbound Stop 3 |
+Census Tract 2010 for Inbound Stop 4 |
+TAZ (NYMTC) for Inbound Stop 4 |
+Trip No. for Subtour Destination |
+Subtour Destination TAZ (NYMTC) |
+Subtour Destination Census Tract 2010 |",,,,,,,1,1
+Trip Information,Stops,RHTS,Trip-Level,General trip characteristics,Destination Location,RHTS,IB_TRACTTAZ,Census Tract or TAZ for Inbound Stops,,,,,,,,,,,,,,,,,,,,,,"IB_S1TRACT |
+IB_S1TAZ |
+IB_S2TRACT |
+IB_S2TAZ |
+IB_S3TRACT |
+IB_S3TAZ |
+IB_S4TRACT |
+IB_S4TAZ |","Census Tract 2010 for Inbound Stop 1 |
+TAZ (NYMTC) for Inbound Stop 1 |
+Census Tract 2010 for Inbound Stop 2 |
+TAZ (NYMTC) for Inbound Stop 2 |
+Census Tract 2010 for Inbound Stop 3 |
+TAZ (NYMTC) for Inbound Stop 3 |
+Census Tract 2010 for Inbound Stop 4 |
+TAZ (NYMTC) for Inbound Stop 4 |",,,,,,,1,1
+Trip Information,Destination,RHTS,Trip-Level,General trip characteristics,Destination Location,RHTS,HEND,1 if Tour Ended at Home,,,,,,,,,,,,,,,,,,,,,,HEND,1 if Tour Ended at Home,,,,,,,1,
+Trip Information,Purpose,In 4 Surveys,Trip-Level,General trip characteristics,Destination Purpose,Smartphone Pilot,destination_purp,Destination purpose,"d_purpose |
+d_purpose_other_specify |
+d_purpose_category |","Destination purpose |
+Destination purpose, other specify |
+Destination purpose category |",,,,,1,1,"d_purpose |
+d_purpose_category |
+d_purpose_imputed |
+d_purpose_category_imputed |","Destination purpose (recommend using imputed purpose) |
+Destination purpose category (recommend using imputed purpose) |
+Imputed activity at trip destination (recommend using this version of destination trip purpose) |
+Imputed category of activity at destination origin (recommend using this version of destination trip purpose category) |",,,,,1,"TRIPPURP |
+WHYTO","Generalized purpose of trip, home-based and non-home based |
+Trip Destination Purpose |",,,,1,"DTPURP |
+DTPURP_AGG |
+DTPUR2 |
+SUBT_DPRIOR","Destination Primary Trip Purpose [RETR] |
+Destination Purpose (Aggregate) |
+Secondary Destination Purpose Code [RETR] |
+Priority for Subtour Destination |",,,,1,1,1,,
+Trip Information,Purpose,RHTS,Trip-Level,General trip characteristics,Leg-Purpose,RHTS,TPURP,Trip Purpose,,,,,,,,,,,,,,,,,,,,,,"TPURP| 
+TPUR2 | 
+O_TPURP |
+PRIM_PURP |
+SUBT_PURP |
+TOUR_PURP","Trip Purpose | 
+Secondary Trip Purpose | 
+Other Trip Purpose |
+Tour Purpose |
+Subtour Purpose |
+Tour Purpose |",,,,,,,1,1
+Trip Information,Stops,RHTS,Trip-Level,General trip characteristics,Leg-stop,RHTS,TRIP_PRIORS_PURP,Priority and Purpose of Trip Stops,,,,,,,,,,,,,,,,,,,,,,"OB_S1PRIOR |
+OB_S2PRIOR |
+OB_S3PRIOR |
+OB_S4PRIOR |
+OB_S1PURP |
+OB_S2PURP |
+OB_S3PURP |
+OB_S4PURP |
+IB_S1PRIOR |
+IB_S2PRIOR |
+IB_S3PRIOR |
+IB_S4PRIOR |
+IB_S1PURP |
+IB_S2PURP |
+IB_S3PURP |
+IB_S4PURP |","Priority of Outbound Stop 1 |
+Priority of Outbound Stop 2 |
+Priority of Outbound Stop 3 |
+Priority of Outbound Stop 4 |
+Purpose for Outbound Stop 1 |
+Purpose for Outbound Stop 2 |
+Purpose for Outbound Stop 3 |
+Purpose for Outbound Stop 4 |
+Priority of Inbound Stop 1 |
+Priority of Inbound Stop 2 |
+Priority of Inbound Stop 3 |
+Priority of Inbound Stop 4 |
+Purpose for Inbound Stop 1 |
+Purpose for Inbound Stop 2 |
+Purpose for Inbound Stop 3 |
+Purpose for Inbound Stop 4 |",,,,,,,1,1
+Trip Information,Stops,RHTS,Trip-Level,General trip characteristics,Leg-stop,RHTS,TRPNOS,TripNo for Stops,,,,,,,,,,,,,,,,,,,,,,"OB_S1TRPNO |
+OB_S2TRPNO |
+OB_S3TRPNO |
+OB_S4TRPNO |
+IB_S1TRPNO |
+IB_S2TRPNO |
+IB_S3TRPNO |
+IB_S4TRPNO |","TripNo for Outbound Stop 1 |
+TripNo for Outbound Stop 2 |
+TripNo for Outbound Stop 3 |
+TripNo for Outbound Stop 4 |
+TripNo of Inbound Stop 1 |
+TripNo of Inbound Stop 2 |
+TripNo of Inbound Stop 3 |
+TripNo of Inbound Stop 4 |",,,,,,,1,1
+Demographics,Employment,In 4 Surveys,Person-Level,Work-related,Employment,Smartphone Pilot,employment,Employment status,employment,Employment status,,1,,,,,worker,Employment status,,1,,,,WORKER,Worker status,,1,,1,EMPLY,Employed,,1,,,,,,
+Demographics,Employment,In 4 Surveys,Person-Level,Work-related,Employment,Smartphone Pilot,num_jobs,Number of jobs,num_jobs,Number of jobs,,1,,,,,jobs_count,Number of jobs,,1,,,,GT1JBLWK,More than One Job,,2,,,JOBS,Number of Jobs,,1,,,,,,
+Demographics,Employment,In 4 Surveys,Person-Level,Work-related,Employment,Smartphone Pilot,industry,industry,industry | industry_other,"industry | Industry, other specify",,1,,,,,industry,Work industry,,1,,,,OCCAT,Job Category,,1,,,INDUS | O_INDUS,"Industry | Other, Industry",,1,,,,,,
+Demographics,Mode Preference,NHTS,Household-Level,Household Characteristics,Fuel Cost,NHTS,GASCOST,Cost of Gasoline,,,,,,,,,,,,,,,,"PRICE |
+GASPRICE |
+GSCOST |
+GSTOTCST |","Price of Gasoline Affects Travel |
+Price of gasoline, in cents, on respondent's travel day |
+Price of gasoline, in cents, on respondent's travel day |
+Annualized fuel cost in US dollars per equivalent gallon |
+Annual fuel expenditures in US dollars |",1,,1,1,,,,,,,,,,
+Demographics,Mode Preference,NHTS,Vehicle-Level,Vehicle-related,Fuel Cost,NHTS,GSYRGAL,Annual fuel consumption in US gallons,,,,,,,,,,,,,,,,GSYRGAL,Annual fuel consumption in US gallons,,,1,,,,,,,,,,,
+Demographics,Mode Preference,NHTS,Person-Level,Vehicle-related,Fuel Cost,NHTS,HFUEL,Type of Hybrid Vehicle,,,,,,,,,,,,,,,,HFUEL,Type of Hybrid Vehicle,,,1,,,,,,,,,,,
+Locations,Home,Smartphone Pilot,Household-Level,Survey-related,Home location,Smartphone Pilot,sample_home_loc,Sample home location,"sample_home_lat |
+sample_home_lon |
+sample_home_bg |
+sample_home_county |
+sample_home_state |","Sample home latitude |
+Sample home longitude |
+Sample home block group |
+Sample home county (fips code) |
+Sample home state (fips code) |",1,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Locations,Home,In 2 Surveys,Household-Level,Household Characteristics,Home location,Smartphone Pilot,home_loc,Home Location,"home_puma |
+home_lat |
+home_lon |
+home_bg |
+home_county |
+home_state |
+home_in_region |","Reported home location Public Use Microdata Area (PUMA) |
+Reported home latitude |
+Reported home longitude |
+Reported home block group |
+Reported home county (fips code) |
+Reported home state (fips code) |
+Reported home in region |",1,,,,,,"cms_zone, home_cms_zone, reported_home_cms_zone, Reported home CMS zone","Reported home CMS zone, Home CMS zone",1,1,1,1,1,"CENSUS_D |
+CENSUS_R |
+HHSTATE |
+HHSTFIPS |
+HH_CBSA |
+MSACAT |","2010 Census division classification for the respondent's home address |
+Census region classification for home address |
+Household state |
+State FIPS for household address |
+Core Based Statistical Area (CBSA) FIPS code for the respondent's home address |
+Metropolitan Statistical Area (MSA) category for the household's home address, based on household's home geocode and TIGER/Line Shapefiles. |",1,1,1,1,"HADDR |
+HYCORD |
+HXCORD |
+HCOUNTY |
+HSTATE |
+HCITY |
+HCITY_PL |
+HCITY_MCD |
+HZIP |
+HTRACT |
+HTAZ |
+HMPO |","Home Address |
+Home Y Latitude (in WGS 84) |
+Home X Longitude (in WGS 84) |
+Home County |
+Home State |
+Home City (TB) |
+Home City (Place Name) |
+Home City (MCD Place Name) |
+Home Zip Code |
+Home Census Tract 2010 |
+Home TAZ (NYMTC) |
+Residence MPO |",1,,,,1,1,1,1
+Locations,Home,NHTS,Household-Level,Household Characteristics,Home location,NHTS,home_loc_census_demographics,Home Location Census Demographics,,,,,,,,,,,,,,,,"CDIVMSAR |
+HBHTNRNT |
+HBHUR |
+HBPPOPDN |
+HBRESDN |
+HTEEMPDN |
+HTHTNRNT |
+HTPPOPDN |
+HTRESDN |
+MSASIZE |
+URBAN |
+URBANSIZE |
+URBRUR |
+RAIL |","Grouping of household by combination of census division, MSA status, and presence of a subway system when population greater than 1 million |
+Category of the percent of renter-occupied housing in the census block group of the household's home location |
+Urban / Rural indicator - Block group |
+Category of population density (persons per square mile) in the census block group of the household's home location |
+Category of housing units per square mile in the census block group of the household's home location |
+Category of workers per square mile in the census tract of the household's home location |
+Category of the percent of renter-occupied housing in the census tract of the household's home location |
+Category of population density (persons per square mile) in the census tract of the household's home location |
+Category of housing units per square mile in the census tract of the household's home location |
+Population size category of the Metropolitan Statistical Area (MSA), from the 2010-2014 five-year American Community Survey (ACS) API. |
+Household's urban area classification, based on home address and 2014 TIGER/Line Shapefile |
+Urban area size where home address is located |
+Household in urban/rural area |
+MSA heavy rail status for household |",1,1,1,1,,,,,,,,,,
+Locations,Home,RHTS,Household-Level,Identifier,Home location,RHTS,HH1,Domain,,,,,,,,,,,,,,,,,,,,,,HH1,Domain,1,1,1,1,1,1,1,1
+Locations,Home,RHTS,Household-Level,Household Characteristics,Home location,RHTS,GEO_GROUPS,County/Regional/Political Groups,,,,,,,,,,,,,,,,,,,,,,"GEO_GROUP1 |
+GEO_GROUP2 |
+GEO_GROUP3 |","County Group: Level 1 |
+Regional Boundaries: Level 2 |
+Political Boundaries: Level 3 |",1,1,,1,,,,
+Locations,Home,RHTS,Trip-Level,Household Characteristics,Home location,RHTS,HNYC,1 if Home is in NYC,,,,,,,,,,,,,,,,,,,,,,HNYC,1 if Home is in NYC,,,,,1,1,1,1
+Demographics,Income,In 4 Surveys,Household-Level,Household Characteristics,Household Income,Smartphone Pilot,income_detailed,Household income (detailed categories),income_detailed,Household income (detailed categories),1,,,,,,income_detailed,Household's total annual income: detailed categories,1,,,,,HHFAMINC,Household income,2,2,2,2,INCOM,Household Income,2,,,,,,,
+Demographics,Income,In 2 Surveys,Household-Level,Household Characteristics,Household Income,Smartphone Pilot,income_aggregate,Household income (aggregate categories),income_aggregate,Household income (aggregate categories),1,,,,,,income_aggregate,Household's total annual income: aggregate categories,1,,,,,,,,,,,,,,,,,,,,
+Trip Information,Distance,In 4 Surveys,Trip-Level,General trip characteristics,Leg-distance,Smartphone Pilot,trip_distances,Trip distance,distance_miles,Trip distance (miles),,,,,1,,trip_distance,Trip distance (miles),,,,,1,"TRPMILES | TRPMILAD
+VMT_MILE |","Trip distance in miles, derived from route geometry returned by Google Maps API, or from reported loop-trip distance | Trip distance in miles, adjusted for comparability to past surveys |
+Trip distance in miles for personally driven vehicle trips, derived from route geometry returned by Google Maps API |",,,,1,"TRIPDIST |
+TRPDIST_HN |","Trip Distance (Miles) |
+Trip Distance (Miles) - Hwy Network (Midday) |",,,,1,1,1,,
+Trip Information,Distance,NYCDOT Mobility Survery,Trip-Level,General trip characteristics,Leg-distance,NYCDOT Mobility Survery,d_distance_home,Distance from trip end to imputed home location in meters,,,,,,,,,d_distance_home,Distance from trip end to imputed home location in meters,,,,,1,,,,,,,,,,,,,,,,
+Trip Information,Distance,NYCDOT Mobility Survery,Trip-Level,General trip characteristics,Leg-distance,NYCDOT Mobility Survery,d_distance_work,Distance from trip end to imputed work location in meters,,,,,,,,,d_distance_work,Distance from trip end to imputed work location in meters,,,,,1,,,,,,,,,,,,,,,,
+Trip Information,Distance,NYCDOT Mobility Survery,Trip-Level,General trip characteristics,Leg-distance,NYCDOT Mobility Survery,d_distance_school,Distance from trip end to imputed school location in meters,,,,,,,,,d_distance_school,Distance from trip end to imputed school location in meters,,,,,1,,,,,,,,,,,,,,,,
+Locations,Work,NHTS,Person-Level,Work-related,Leg-distance,NHTS,GCDWORK,"Minimum geodesic (Great Circle) distance between home location and work location in meters, using WGS84 coordinate system",,,,,,,,,,,,,,,,GCDWORK,"Minimum geodesic (Great Circle) distance between home location and work location in meters, using WGS84 coordinate system",,1,,,,,,,,,,,,
+Trip Information,Timestamp,In 4 Surveys,Trip-Level,General trip characteristics,Leg-duration,NYCDOT Mobility Survery,depart_time,Time departed from origin (EST),"depart_hour |
+depart_minute |
+depart_second |
+depart_date |","Depart hour |
+Depart minute |
+Depart seconds |
+Depart date |",,,,,1,,depart_time,Time departed from origin (EST),,,,,1,STRTTIME,Trip Start Time (HHMM),,,,1,"DEP_HR | DEP_MIN
+TRP_DEP_MIN |
+TRP_DEP_HR |
+TRP_DEP |
+IB_LDEPHBT |
+OB_LDEPS1 |
+OB_LDEPS2 |
+OB_LDEPS3 |
+OB_LDEPS4 |
+IB_LDEPS1 |
+IB_LDEPS2 |
+IB_LDEPS3 |
+IB_LDEPS4 |
+OB_LDEPHBT |
+IN_LDEPHB |
+OB_LDEPSUBT |
+IN_LDEPSUBT |","Departure Hour | Departure Minute |
+Trip Departure Minutes |
+Trip Departure Hours, 1 and 2 represents 1 AM and 2 AM respectively |
+Trip Departure Time |
+Departure Time for Inbound Leg |
+Departure Time for Stop 1 on OB Leg |
+Departure Time for Stop 2 on OB Leg |
+Departure Time for Stop 3 on OB Leg |
+Departure Time for Stop 4 on OB Leg |
+Departure Time for Stop 1 on IB Leg |
+Departure Time for Stop 2 on IB Leg |
+Departure Time for Stop 3 on IB Leg |
+Departure Time for Stop 4 on IB Leg |
+Departure Time for Outbound Leg of Main HB Tour |
+Departure Time for Inbound Leg of Main HB Tour |
+Departure Time for Outbound Leg of subtour |
+Departure Time for Inbound Leg of subtour |",,,,2,2,2,1,1
+Trip Information,Timestamp,In 4 Surveys,Trip-Level,General trip characteristics,Leg-duration,NYCDOT Mobility Survery,arrive_time,Time arrived at destination (EST),"arrive_hour |
+arrive_minute |
+arrive_second |
+arrive_date |","Arrive hour |
+Arrive minute |
+Arrive seconds |
+Arrive date |",,,,,1,,arrive_time,Time arrived at destination (EST),,,,,1,"ENDTIME |
+WRKTIME |","Trip End Time (HHMM) | 
+Arrival Time at Work",,1,,1,"ARR_HR | ARR_MIN |
+TRP_ARR_HR |
+TRP_ARR_MIN |
+TRP_ARR |
+IB_LARRHBT
+OB_LARRS1 |
+OB_LARRS2 |
+OB_LARRS3 |
+OB_LARRS4 |
+IB_LARRS1 |
+IB_LARRS2 |
+IB_LARRS3 |
+IB_LARRS4 |
+OB_LARRHBT |
+IN_LARRHB |
+OB_LARRSUBT |
+IN_LARRSUBT |","Arrival Hour | Arrival Minute |
+Trip Arrival Hours, 1 and 2 represents 1 AM and 2 AM respectively |
+Trip Arrival Minutes |
+Trip Arrival Time |
+Arrival Time for Inbound Leg
+Arrival Time for Stop 1 on OB Leg |
+Arrival Time for Stop 2 on OB Leg |
+Arrival Time for Stop 3 on OB Leg |
+Arrival Time for Stop 4 on OB Leg |
+Arrival Time for  Stop 1 on IB Leg |
+Arrival Time for  Stop 2 on IB Leg |
+Arrival Time for  Stop 3 on IB Leg |
+Arrival Time for  Stop 4 on IB Leg |
+Arrival Time for Outbound Leg of Main HB Tour |
+Arrival Time for Inbound Leg of Main HB Tour |
+Arrival Time for Outbound Leg of subtour |
+Arrival Time for Inbound Leg of subtour |",,,,2,2,2,1,1
+Trip Information,Duration,In 4 Surveys,Trip-Level,General trip characteristics,Leg-duration,Smartphone Pilot,duration_minutes,Trip duration (minutes),duration_minutes,Trip duration (minutes),,,,,1,,trip_duration,Trip duration (minutes),,,,,1,TRVLCMIN,Trip Duration in Minutes,,,,1,"TRPDUR | TRPDUR_C |
+TRPDUR_HN |","Trip Duration (Minutes) | Trip Duration (minutes) - PB |
+Trip Duration (Minutes) - Hwy Network (Midday) |",,,,1,1,1,,
+Trip Information,Duration,Smartphone Pilot,Trip-Level,General trip characteristics,Leg-duration,Smartphone Pilot,dwell_minutes,Dwell time at destination (minutes),dwell_minutes,Dwell time at destination (minutes),,,,,1,,,,,,,,,DWELTIME,Time at destination,,,,1,"ACTDUR | 
+ACTDUR_C","Activity Duration| 
+Activity Duration (minutes) - PB",,,,2,2,2,,
+Locations,Work,In 2 Surveys,Person-Level,Work-related,Leg-duration,NHTS,TIMETOWK,Trip Time to Work in Minutes,,,,,,,,,,,,,,,,"TIMETOWK |
+NOCONG |","Trip Time to Work in Minutes |
+Trip Time in Minutes to Work without Traffic |",,1,,,TTTWS,Typical Travel Time to Work,,1,,,,,,
+Trip Information,Duration,NHTS,Trip-Level,Transit-related,Leg-duration,NHTS,TRACCTM,Trip Time to Transit Station in Minutes,,,,,,,,,,,,,,,,TRACCTM,Trip Time to Transit Station in Minutes,,,,1,,,,,,,,,,
+Trip Information,Duration,NHTS,Trip-Level,Transit-related,Leg-duration,NHTS,TREGRTM,Time to Destination from Transit in Minutes,,,,,,,,,,,,,,,,TREGRTM,Time to Destination from Transit in Minutes,,,,1,,,,,,,,,,
+Trip Information,Duration,NHTS,Trip-Level,Transit-related,Leg-duration,NHTS,TRWAITTM,Transit wait time in minutes,,,,,,,,,,,,,,,,TRWAITTM,Transit wait time in minutes,,,,1,,,,,,,,,,
+Demographics,Education,RHTS,Person-Level,School-related,Leg-duration,RHTS,TTTSS,Typical Travel Time to School,,,,,,,,,,,,,,,,,,,,,,TTTSS,Typical Travel Time to School,,1,,,,,,
+Trip Information,Mode,In 4 Surveys,Person-Level,Work-related,Leg-Mode,NHTS,WRKTRANS,Mode to Work,"work_mode_broad_walk |
+work_mode_broad_own |
+work_mode_broad_auto |
+work_mode_broad_taxi |
+work_mode_broad_bus |
+work_mode_broad_rail |
+work_mode_broad_ferry |
+work_mode_broad_bike |
+work_mode_broad_micromobility |
+work_mode_broad_other |
+work_mode_own |
+work_mode_auto |
+work_mode_taxi |
+work_mode_bus |
+work_mode_rail |
+work_mode_bike |
+work_mode_micromobility","Work mode once COVID-19 measures have ended: Walk (or jog/wheelchair) |
+Work mode once COVID-19 measures have ended: Household vehicle (or motorcycle) |
+Work mode once COVID-19 measures have ended: Other vehicle (e.g., friend’s car, rental, carshare, work car) |
+Work mode once COVID-19 measures have ended: Uber/Lyft, taxi, or car service |
+Work mode once COVID-19 measures have ended: Bus, shuttle, or Commuter Van (dollar van) |
+Work mode once COVID-19 measures have ended: Rail (e.g., train, subway) |
+Work mode once COVID-19 measures have ended: Ferry |
+Work mode once COVID-19 measures have ended: Bicycle or e-bicycle |
+Work mode once COVID-19 measures have ended: Micromobility (e.g., scooter, moped, skateboard) |
+Work mode once COVID-19 measures have ended: Other |
+Household vehicle used for commuting once COVID-19 measures have ended |
+Other vehicle used for commuting once COVID-19 measures have ended |
+Taxi or ride service used for commuting once COVID-19 measures have ended |
+Bus used for commuting once COVID-19 measures have ended |
+Rail used for commuting once COVID-19 measures have ended |
+Bicycle used for commuting once COVID-19 measures have ended |
+Micromobility device used for commuting once COVID-19 measures have ended |",,,,,,,"work_mode |
+work_mode_own |
+work_mode_auto |
+work_mode_taxi |
+work_mode_bus |
+work_mode_rail |
+work_mode_ferry |
+work_mode_bike |
+work_mode_scooter |","Typical mode to work |
+Household vehicle typically taken to and from work |
+Other vehicle typically taken to and from work |
+Taxi or ride service typically taken to and from work |
+Bus typically taken to and from work |
+Train/rail typically taken to and from work |
+Ferry typically taken to and from work |
+Bicycle typically taken to and from work |",,1,,,,WRKTRANS,Mode to Work,,1,,,WMODE | O_WMODE,"Mode of Transport to Work | Other, Mode of Transport to Work",,1,,,,,,
+Trip Information,Mode,In 4 Surveys,Person-Level,School-related,Leg-Mode,Smartphone Pilot,mode_to_school,Mode to school,school_mode_primary | school_mode_auto | school_mode_bus |school_mode_rail | school_mode_ferry | school_mode_taxi | school_mode_bike | school_mode_other | school_mode_school_bus | school_mode_walk | school_mode_own | school_mode_micromobility,"Primary school mode | School mode: Other vehicle (e.g., friend’s car, rental, carshare, work car) | School mode: Bus, shuttle, or vanpool | School mode: Rail (e.g., train, subway) | School mode: Ferry | School mode: Uber/Lyft, taxi, or car service | School mode: Bicycle or e-bicycle | School mode: Micromobility (e.g., scooter, moped, skateboard) | School mode: School bus | School mode: Walk (or jog/wheelchair) | School mode: Household vehicle (or motorcycle) | School mode: Other",,1,,,,,"school_mode | 
+school_mode_auto | 
+school_mode_bus | 
+school_mode_rail | 
+school_mode_ferry | 
+school_mode_taxi | 
+school_mode_bike | 
+school_mode_scooter | 
+school_mode_own |
+school_access |
+school_egress |","Typical mode to school | 
+Other vehicle typically taken to and from school | 
+Bus typically taken to and from school | 
+Train/rail typically taken to and from school | 
+Ferry typically taken to and from school | 
+Taxi or ride service typically taken to and from school | 
+Bicycle typically taken to and from school | 
+Moped or scooter typically taken to and from school | 
+Household vehicle typically taken to and from school | 
+School access mode |
+School egress mode |",,1,,,,"SCHTRN1 |
+SCHTRN2 |","Mode to School |
+Mode from School",,1,,,SMODE | O_SMODE,"Mode of Transport to School | Other, Mode of Transport to School",,1,,,,,,
+Trip Information,Mode,In 4 Surveys,Trip-Level,General trip characteristics,Leg-Mode,Smartphone Pilot,trip_mode,Trip mode type,"mode_type |
+mode_1 |
+mode_2 |
+mode_3 |
+mode_4 |
+mode_other_specify","Trip mode type |
+Trip mode 1 |
+Trip mode 2 |
+Trip mode 3 |
+Trip mode 4 |
+Trip mode, other specify |",,,,,,1,"mode_type |
+mode_type_detailed |
+mode_1 |
+mode_2 |
+mode_3 |
+mode_4","Mode type (If participant selected multiple modes for the trip, this is the primary mode used, grouped into mode categories) |
+Detailed mode type (If participant selected multiple modes for the trip, this is the primary mode used) |
+1st of modes selected |
+2nd of modes selected |
+3rd of modes selected |
+4th of modes selected |",,,,,1,TRPTRANS,"Trip Mode, derived",,,,1,"MODE | 
+O_MODE |
+ULTMODE |
+MODEOUT |
+MODEINB |
+TOURMODE |
+OB_LMODE |
+IB_LMODE |","Transportation Mode | 
+Other, Transportation Mode |
+Unlinked Trip Mode |
+Mode for Outbound Leg |
+Mode for Inbound Leg |
+Tour Mode |
+Mode for Outbound Leg |
+Mode for Inbound Leg |",,,,1,,,,
+Trip Information,Mode,In 2 Surveys,Trip-Level,Vehicle-related,Leg-Mode,NHTS,TRPHHVEH,Household Vehicle Used on Trip,,,,,,,,,,,,,,,,TRPHHVEH,Household Vehicle Used on Trip,,,,1,CNTV,Vehicle Used,,,,1,,,,
+Trip Information,Mode,In 2 Surveys,Trip-Level,Bike-related,Leg-Mode,Smartphone Pilot,bikeshare_service,Bikeshare services used,"bikeshare_citi_bike |
+bikeshare_jump |
+bikeshare_lime |
+bikeshare_none","Bikeshare services used: Citi Bike |
+Bikeshare services used: Jump |
+Bikeshare services used: Lime |
+Bikeshare services used: None",,1,,,,,bike_share_citi_bike,Has ever used a bikeshare service: Citi Bike,,1,,,,,,,,,,,,,,,,,,,
+Trip Information,Travelers,NHTS,Trip-Level,General trip characteristics,Leg-Mode,NHTS,HHMEMDRV,Household member drove on trip,,,,,,,,,,,,,,,,HHMEMDRV,Household member drove on trip,,,,1,,,,,,,,,,
+Trip Information,Network Attribute,NHTS,Trip-Level,General trip characteristics,Leg-Mode,NHTS,NUMTRANS,Count of Transfers,,,,,,,,,,,,,,,,NUMTRANS,Count of Transfers,,,,1,,,,,,,,,,
+Trip Information,Mode,NHTS,Trip-Level,Transit-related,Leg-Mode,NHTS,TRACCMODE,Mode used to get to public transit?,,,,,,,,,,,,,,,,"TRACC_BUS |
+TRACC_CRL |
+TRACC_OTH |
+TRACC_POV |
+TRACC_SUB |
+TRACC_WLK |
+TREGR_BUS |
+TREGR_CRL |
+TREGR_OTH |
+TREGR_POV |
+TREGR_SUB |
+TREGR_WLK","Bus as mode used to get to public transit? |
+Rail as mode used to get to public transit? |
+Other mode used to get to public transit? |
+POV as mode used to get to public transit? |
+Subway as mode used to get to public transit? |
+Walk as mode used to get to public transit? |
+Bus as mode used to get from public transit? |
+Rail as mode used to get from public transit? |
+Other mode used to get from public transit? |
+POV as mode used to get from public transit? |
+Subway as mode used to get from public transit? |
+Walk as mode used to get from public transit? |",,,,1,,,,,,,,,,
+Trip Information,Tour/Day Information,NHTS,Person-Level,Transit-related,Leg-Mode,NHTS,USEPUBTR,"Public Transit Usage on Travel Date, derived",,,,,,,,,,,,,,,,USEPUBTR,"Public Transit Usage on Travel Date, derived",,1,,,,,,,,,,,,
+Survey ID/Flag,ID,In 2 Surveys,Trip-Level,General trip characteristics,Leg-Purpose,NHTS,WHYTRP1S,Trip purpose summary,,,,,,,,,,,,,,,,WHYTRP1S,Trip purpose summary,,,,1,OTPURP,Origin Primary Trip Purpose [RETR],,,,,2,2,,
+Trip Information,Purpose,NHTS,Trip-Level,General trip characteristics,Leg-Purpose,NHTS,WHYTRP90,Travel day trip purpose consistent with 1990 NPTS design.,,,,,,,,,,,,,,,,WHYTRP90,Travel day trip purpose consistent with 1990 NPTS design.,,,,1,,,,,,,,,,
+Survey ID/Flag,ID,In 3 Surveys,Trip-Level,Survey-related,Leg-stop,Smartphone Pilot,trip_id,Trip ID,trip_id,Trip ID,,,,,1,,trip_id,Trip ID,,,,,1,TDCASEID,Unique identifier for every trip record in the file,,,,1,,,,,,,,,,
+Trip Information,Tour/Day Information,In 3 Surveys,Trip-Level,Survey-related,Leg-stop,Smartphone Pilot,trip_num,Trip number within travel period,trip_num,Trip number within travel period,,,,,1,,trip_num,Trip number,,,,,1,TDTRPNUM,"Incrementing travel day trip number, starting at 1 for each person in the file",,,,1,,,,,,,,,,
+Trip Information,Tour/Day Information,In 2 Surveys,Trip-Level,Survey-related,Leg-stop,Smartphone Pilot,trip_survey_complete,Trip survey is complete,trip_survey_complete,Trip survey is complete,,,,,1,,survey_complete,Trip survey completion status,,,,,1,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,In 2 Surveys,Trip-Level,Survey-related,Leg-stop,Smartphone Pilot,unlinked_split,Trip is unlinked,unlinked_split,Trip is unlinked,,,,,1,,unlinked_trip,Trip was unlinked in data processing ,,,,,1,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,Smartphone Pilot,Trip-Level,Survey-related,Leg-stop,Smartphone Pilot,linked_trip_id,Trip ID for linked trip,linked_trip_id,Trip ID for linked trip,,,,,1,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,In 2 Surveys,Trip-Level,Survey-related,Leg-stop,Smartphone Pilot,leg_num,Leg number along linked trip,leg_num,Leg number along linked trip,,,,,1,,leg_num,Trip leg number,,,,,1,,,,,,,,,,,,,,,,
+Trip Information,Route/Path,Smartphone Pilot,Trip-Level,General trip characteristics,Leg-stop,Smartphone Pilot,is_egress,Trip flagged as access leg,is_egress,Trip flagged as access leg,,,,,1,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Route/Path,Smartphone Pilot,Trip-Level,General trip characteristics,Leg-stop,Smartphone Pilot,is_access,Trip flagged as egress leg ,is_access,Trip flagged as egress leg ,,,,,1,,,,,,,,,,,,,,,,,,,,,,,,
+Locations,Parking,Smartphone Pilot,Trip-Level,General trip characteristics,Leg-stop,Smartphone Pilot,micromobility_park_location,Micromobility device park location,micromobility_park_location,Micromobility device park location,,,,,1,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Stops,NHTS,Trip-Level,General trip characteristics,Leg-stop,NHTS,DROP_PRK,Parked or Dropped Off at Station,,,,,,,,,,,,,,,,DROP_PRK,Parked or Dropped Off at Station,,,,1,,,,,,,,,,
+Trip Information,Stops,RHTS,Trip-Level,General trip characteristics,Leg-stop,RHTS,ESCORT_LSTOPS,# Escorting_Non_Escorting Stops on OB-IB leg,,,,,,,,,,,,,,,,,,,,,,"OB_LSTOPS |
+OB_LESCORT |
+IB_LSTOPS |
+IB_LESCORT |","# Non_Escorting Stops on OB leg |
+#Escorting Stops on OB leg |
+# Non_Escorting  on IB leg |
+#Escorting Stops on IB leg |",,,,,,,1,1
+Trip Information,Travelers,In 4 Surveys,Trip-Level,General trip characteristics,Leg-Travelers,Smartphone Pilot,num_hh_travelers,Number of household member travelers,num_hh_travelers,Number of household member travelers,,,,,,1,num_hh_travelers,Number of household members on trip,,,,,1,HH_ONTD,Number of household members on trip including respondent,,,,1,HHMEM,Number of HH Members traveling with,,,,1,1,1,,
+Trip Information,Travelers,In 4 Surveys,Trip-Level,General trip characteristics,Leg-Travelers,Smartphone Pilot,num_non_hh_travelers,Number of non-household member travelers,num_non_hh_travelers,Number of non-household member travelers,,,,,,1,num_non_hh_travelers,Number of non-household members on trip,,,,,1,NONHHCNT,Number of non-household members on trip,,,,1,NONHH,Number of Non-HH Members in group,,,,1,1,1,,
+Trip Information,Travelers,In 3 Surveys,Trip-Level,General trip characteristics,Leg-Travelers,Smartphone Pilot,driver,Driver or passenger on trip,driver,Driver or passenger on trip,,,,,,1,driver,Driver or passenger on trip,,,,,1,WHOMAIN,Vehicle Main Driver,,,1,,,,,,,,,,,
+Trip Information,Travelers,In 4 Surveys,Trip-Level,General trip characteristics,Leg-Travelers,Smartphone Pilot,num_travelers,Number of travelers,num_travelers,Number of travelers,,,,,1,,num_travelers,Number of people in travel party,,,,,1,"NUMONTRP, TRPACCMP, TRPHHACC","Number of people on trip including respondent, Count of People on Trip, Count of Household Members on Trip",,,,1,TOTTR, Total Number of Persons on the Trip,,,,,1,1,1,1
+Demographics,Employment,In 4 Surveys,Household-Level,Household Characteristics,,Smartphone Pilot,num_workers,Number of workers in household,num_workers,Number of workers in household,1,,,,,,num_workers,Number of workers in household,1,,,,,WRKCOUNT,Number of workers in household,1,1,1,1,HHWRK,Number of Household Workers (Computed),1,,,,,,,
+Survey ID/Flag,ID,In 2 Surveys,Person-Level,Identifier,,Smartphone Pilot,person_num,Person number within household,person_num,Person number within household,,1,,1,1,,person_num,Person number in household,,1,,1,1,,,,,,,,,,,,,,,,
+Trip Information,Travelers,In 4 Surveys,Trip-Level,General trip characteristics,Leg-Travelers,Smartphone Pilot,hh_member_on_trip,HH Member was on trip,"hh_member_1 |
+hh_member_2 |
+hh_member_3 |
+hh_member_4 |
+hh_member_5 |
+hh_member_6 |
+hh_member_7","Member 1 was on trip |
+Member 2 was on trip |
+Member 3 was on trip |
+Member 4 was on trip |
+Member 5 was on trip |
+Member 6 was on trip |
+Member 7 was on trip",,,,,1,,"hh_member_1 |
+hh_member_2 |
+hh_member_3 |
+hh_member_4 |
+hh_member_5 |
+hh_member_6 |
+hh_member_7 |
+hh_member_8 |
+hh_member_9 |
+hh_member_10 |
+hh_member_11 ","Member 1 was on trip |
+Member 2 was on trip |
+Member 3 was on trip |
+Member 4 was on trip |
+Member 5 was on trip |
+Member 6 was on trip |
+Member 7 was on trip |
+Member 8 was on trip |
+Member 9 was on trip |
+Member 10 was on trip |
+Member 11 was on trip",,,,,1,"ONTD_P1 |
+ONTD_P2 |
+ONTD_P3 |
+ONTD_P4 |
+ONTD_P5 |
+ONTD_P6 |
+ONTD_P7 |
+ONTD_P8 |
+ONTD_P9 |
+ONTD_P10 |
+ONTD_P11 |
+ONTD_P12 |
+ONTD_P13 |","Household Person Identifier on Trip: 1 |
+Household Person Identifier on Trip: 2 |
+Household Person Identifier on Trip: 3 |
+Household Person Identifier on Trip: 4 |
+Household Person Identifier on Trip: 5 |
+Household Person Identifier on Trip: 6 |
+Household Person Identifier on Trip: 7 |
+Household Person Identifier on Trip: 8 |
+Household Person Identifier on Trip: 9 |
+Household Person Identifier on Trip: 10 |
+Household Person Identifier on Trip: 11 |
+Household Person Identifier on Trip: 12 |
+Household Person Identifier on Trip: 13 |",,,,1,"PER1 |
+PER2 |
+PER3 |
+PER4 |
+PER5 ","Person Number on Trip |
+Person Number on Trip |
+Person Number on Trip |
+Person Number on Trip |
+Person Number on Trip",,,,1,2,2,,
+Trip Information,Mode,NHTS,Trip-Level,Person characteristics,Leg-Travelers,NHTS,DRIVER,"Driver status, derived",,,,,,,,,,,,,,,,DRIVER,"Driver status, derived",,1,,1,,,,,,,,,,
+Trip Information,Mode,NHTS,Trip-Level,General trip characteristics,Leg-Travelers,NHTS,DRVR_FLG,Respondent drove on trip,,,,,,,,,,,,,,,,DRVR_FLG,Respondent drove on trip,,,,1,,,,,,,,,,
+Trip Information,Travelers,NHTS,Trip-Level,Identifier,Leg-Travelers,NHTS,WHODROVE,Person Identifier Who Drove on Trip,,,,,,,,,,,,,,,,WHODROVE,Person Identifier Who Drove on Trip,,,,1,,,,,,,,,,
+Survey ID/Flag,ID,NHTS,Person-Level,Identifier,Leg-Travelers,NHTS,WHOPROXY,Household Person Identifier Responsible for Trip Reporting,,,,,,,,,,,,,,,,WHOPROXY,Household Person Identifier Responsible for Trip Reporting,,1,,,,,,,,,,,,
+Trip Information,Stops,RHTS,Trip-Level,General trip characteristics,Location unspecified,RHTS,ADJ_COUNTY,Adjacent County flags,,,,,,,,,,,,,,,,,,,,,,ADJ_COUNTY,Adjacent County flags,,,,,1,1,1,1
+Trip Information,Tour/Day Information,In 3 Surveys,Day-Level,General day characteristics,Origin location,Smartphone Pilot,begin_day,Day begin location,begin_day,Day begin location,,,,,,1,,,,,,,,FRSTHM17,Travel day began at home location,,1,,,,,,,,,,,,
+Trip Information,Origin,Smartphone Pilot,Trip-Level,General trip characteristics,Origin Location,Smartphone Pilot,o_lat,Origin latitude,"o_lat |
+o_lon |
+o_bg |
+o_county |
+o_state |
+o_puma |
+o_in_region |","Origin latitude |
+Origin longitude |
+Origin block group |
+Origin county (fips code) |
+Origin state (fips code) |
+Origin Public Use Microdata Area (PUMA) |
+Origin in study region |",,,,,1,,"o_cms_zone |
+o_location_type |
+o_congestion |","Origin CMS zone |
+Imputed location type for trip origin |
+Did the trip start in the congestion pricing zone south of 60th Street in Manhattan? |",,,,,1,,,,,,,"
+ORIG_HOME |
+OTAZ |
+OXCORD |
+OYCORD |
+OTRACT |
+OMCD |
+OZIP |
+ONYC |
+OMPO |
+HSTART |
+GEO_GROUP1_O |
+GEO_GROUP2_O |
+GEO_GROUP3_O |
+OCOUNTY |","
+1 If Home is origin |
+Origin TAZ (WGS84) |
+Origin Geocoded Longitude (in WGS 84) |
+Origin Geocoded Latitude (in WGS 84) |
+Origin Tract 2010 (WGS84) |
+Origin MCD |
+Origin Zip |
+1 if Origin is in NYC |
+Origin MPO |
+1 if Tour Started at Home |
+Geo group 1 for origin |
+Geo group 2 for origin |
+Geo group 3 for origin |
+Origin County |",1,,,1,1,1,1,1
+Trip Information,Route/Path,Smartphone Pilot,Trip-Level,General trip characteristics,Origin Location,Smartphone Pilot,google_boarding_station,Google suggested boarding station,google_boarding_station,Google suggested boarding station,,,,,1,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Destination,NHTS,Trip-Level,General trip characteristics,Origin Location,NHTS,LOOP_TRIP,Trip origin and destination at identical location,,,,,,,,,,,,,,,,LOOP_TRIP,Trip origin and destination at identical location,,,,1,,,,,,,,,,
+Trip Information,Origin,NHTS,Trip-Level,General trip characteristics,Origin Location,NHTS,OBHTNRNT,Category of the percent of renter-occupied housing in the census block group of the trip origin's location,,,,,,,,,,,,,,,,"OBHTNRNT |
+OBHUR |
+OBPPOPDN |
+OBRESDN |
+OTEEMPDN |
+OTHTNRNT |
+OTPPOPDN |
+OTRESDN |","Category of the percent of renter-occupied housing in the census block group of the trip origin's location |
+Urban / Rural indicator - Trip Origin Block group |
+Category of population density (persons per square mile) in the census block group of the trip origin's location |
+Category of housing units per square mile in the census block group of the trip origin's location |
+Category of workers per square mile in the census tract of the trip origin's location |
+Category of the percent of renter-occupied housing in the census tract of the trip origin's location |
+Category of population density (persons per square mile) in the census tract of the trip origin's location |
+Category of housing units per square mile in the census tract of the trip origin's location |",,,,1,,,,,,,,,,
+Trip Information,Origin,In 3 Surveys,Trip-Level,General trip characteristics,Origin Purpose,Smartphone Pilot,o_purpose,Origin purpose,"o_purpose |
+o_purpose_category |","Origin purpose |
+Origin purpose category",,,,,1,,"o_purpose |
+o_purpose_category |
+o_purpose_imputed |
+o_purpose_category_imputed |","Origin purpose (recommend using imputed purpose) |
+Origin purpose category (recommend using imputed purpose) |
+Imputed activity at trip origin (recommend using this version of origin trip purpose) |
+Imputed category of activity at trip origin (recommend using this version of origin trip purpose category) |",,,,,1,WHYFROM,Trip Origin Purpose,,,,1,OTPURP_AGG,Origin Purpose (Aggregate),,,,,1,1,,
+Locations,Parking,NYCDOT Mobility Survery,Person-Level,School-related,Park Cost,NYCDOT Mobility Survery,school_park_amount_day | school_park_amount_month | school_park_amount_week | school_park_amount_year,Amount paid to park at school per day | Amount paid to park at school per week | Amount paid to park at school per month | Amount paid to park at school per year,,,,,,,,,school_park_amount_day | school_park_amount_month | school_park_amount_week | school_park_amount_year,Amount paid to park at school per day | Amount paid to park at school per week | Amount paid to park at school per month | Amount paid to park at school per year,,1,,,,,,,,,,,,,,,,,,,
+Locations,Parking,In 2 Surveys,Vehicle-Level,Parking-related,Park Cost,NYCDOT Mobility Survery,park_cost,Cost of Parking,,,,,,,,,park_cost,Cost of Parking,,,,,1,,,,,,,PKAMT,Pay to Park Amount,,,,1,1,1,,
+Locations,Parking,In 2 Surveys,Vehicle-Level,Parking-related,Park Cost,Smartphone Pilot,home_park_cost,"Cost to park vehicle at home |
+Amount paid to park vehicle at home per day |
+Amount paid to park vehicle at home per week |
+Amount paid to park vehicle at home per month |
+Amount paid to park vehicle at home per year","home_park_cost |
+home_park_amount_day |
+home_park_amount_week |
+home_park_amount_month |
+home_park_amount_year","Cost to park vehicle at home |
+Amount paid to park vehicle at home per day |
+Amount paid to park vehicle at home per week |
+Amount paid to park vehicle at home per month |
+Amount paid to park vehicle at home per year",,,1,,,1,"home_park_amount_day |
+home_park_amount_month |
+home_park_amount_week |
+home_park_amount_year","Home parking permit/pass payment amount per day |
+Home parking permit/pass payment amount per month |
+Home parking permit/pass payment amount per week |
+Home parking permit/pass payment amount per year",,,1,,1,,,,,,,,,,,,1,1,1,,
+Locations,Parking,Smartphone Pilot,Trip-Level,Vehicle-related,Park Cost,Smartphone Pilot,park_type,Vehicle parking payment method,park_type,Vehicle parking payment method,,,1,,,1,park_pay,How the respondent paid for parking,,,1,,1,,,,,,,,,,,,,,,,
+Locations,Parking,In 2 Surveys,Person-Level,Work-related,Park Cost,Smartphone Pilot,work_park_pay,Payment method for parking vehicle at work,work_park_pay,Payment method for parking vehicle at work,,1,,,,,work_park_pay,Typical way of paying for parking at work,,1,,,,,,,,,,,,,,,,,,,
+Locations,Parking,In 2 Surveys,Person-Level,Work-related,Park Cost,Smartphone Pilot,work_park_cost,Cost to park vehicle at work,"work_park_cost |
+work_park_amount_day |
+work_park_amount_week |
+work_park_amount_month |
+work_park_amount_year","Cost to park vehicle at work |
+Amount paid to park vehicle at work per day |
+Amount paid to park vehicle at work per week |
+Amount paid to park vehicle at work per month |
+Amount paid to park vehicle at work per year",,1,,,,,"work_park_amount_day |
+work_park_amount_week |
+work_park_amount_month |
+work_park_amount_year","Amount paid to park at work per day |
+Amount paid to park at work per week |
+Amount paid to park at work per month |
+Amount paid to park at work per year",,1,,,,,,,,,,,,,,,,,,,
+Locations,Parking,In 3 Surveys,Vehicle-Level,Parking-related,Park location,Smartphone Pilot,home_park_pay,Pays to park vehicle at home,home_park_pay,Pays to park vehicle at home,,,1,,,,,,,,,,,,,,,,,PAYPK,Pay to Park,,,,1,,,,
+Locations,Parking,In 3 Surveys,Vehicle-Level,Parking-related,Park location,Smartphone Pilot,park_location,Vehicle Parking Location,park_location,Vehicle Parking Location,,,1,,,,park_location,Vehicle parking location,,,,1,,,,,,,,"PRKTY | 
+O_PRKTY | 
+PLOC |
+PXSTR |","Parking Description | 
+Other, Parking Description | 
+Vehicle Park Location |
+Parking Cross Streets |",,,,1,1,1,,
+Locations,Parking,Smartphone Pilot,Person-Level,Work-related,Park location,Smartphone Pilot,work_park_location,Parking location at work once COVID-19 measures have ended,work_park_location,Parking location at work once COVID-19 measures have ended,,1,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,NYCDOT Mobility Survery,home_park,Vehicle Parking Location at Home,,,,,,,,,home_park,Parking location at home,,,1,,,,,,,,,,,,,,,,,,
+Locations,Parking,NYCDOT Mobility Survery,Vehicle-Level,Parking-related,Park location,NYCDOT Mobility Survery,work_park_location,Vehicle parking location at work,,,,,,,,,work_park_location,Vehicle parking location at work,,1,,,,,,,,,,,,,,,1,,,,
+Locations,Parking,NYCDOT Mobility Survery,Person-Level,School-related,Park location,NYCDOT Mobility Survery,school_scooter_park,Moped or scooter parking location at school,,,,,,,,,school_scooter_park,Moped or scooter parking location at school,,1,,,,,,,,,,,,,,,,,,,
+Locations,Parking,NYCDOT Mobility Survery,Person-Level,School-related,Park location,NYCDOT Mobility Survery,school_park_location,Vehicle parking location at school,,,,,,,,,school_park_location,Vehicle parking location at school,,1,,,,,,,,,,,,,,,,,,,
+Locations,Parking,Smartphone Pilot,Vehicle-Level,Vehicle-related,Park location,Smartphone Pilot,ev_outlet,Parks electric vehicle within 20 feet of an electric outlet,ev_outlet,Parks electric vehicle within 20 feet of an electric outlet,,,,,,1,,,,,,,,,,,,,,,,,,,,,,,
+Locations,Parking,Smartphone Pilot,Trip-Level,Vehicle-related,Park location,Smartphone Pilot,ev_charge_station,Electric vehicle charging station at destination,ev_charge_station,Electric vehicle charging station at destination,,,,,,1,,,,,,,,,,,,,,,,,,,,,,,
+Locations,Parking,Smartphone Pilot,Trip-Level,Vehicle-related,Park location,Smartphone Pilot,ev_charge_station_level,Charging station level,ev_charge_station_level,Charging station level,,,,,,1,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Stops,Smartphone Pilot,Trip-Level,Vehicle-related,Park location,Smartphone Pilot,ev_charge_station_decision,Decided to stop at destination because there were electric vehicle charging stations,ev_charge_station_decision,Decided to stop at destination because there were electric vehicle charging stations,,,,,,1,,,,,,,,,,,,,,,,,,,,,,,
+Locations,Parking,In 2 Surveys,Trip-Level,Bike-related,Park location,Smartphone Pilot,bike_park_location,Bike park location,bike_park_location,Bike park location,,,,,1,,bike_park_location,Bicycle parking location,,,,,1,,,,,,,,,,,,,,,,
+Locations,Parking,NYCDOT Mobility Survery,Trip-Level,Micromobility-related,Park location,NYCDOT Mobility Survery,scooter_park_location,Moped or scooter parking location at school,,,,,,,,,scooter_park_location,Moped or scooter parking location at school,,,,,1,,,,,,,,,,,,,,,,
+Locations,Parking,NYCDOT Mobility Survery,Person-Level,Parking-related,Park location,NYCDOT Mobility Survery,work_vehicle_pass_period,Work vehicle parking pass period,,,,,,,,,work_vehicle_pass_period,Work vehicle parking pass period,,1,,,,,,,,,,,,,,,,,,,
+Locations,Parking,NYCDOT Mobility Survery,Person-Level,Parking-related,Park location,NYCDOT Mobility Survery,work_scooter_park,Moped or scooter parking location at work,,,,,,,,,work_scooter_park,Moped or scooter parking location at work,,1,,,,,,,,,,,,,,,,,,,
+Locations,Parking,NYCDOT Mobility Survery,Person-Level,Parking-related,Park location,NYCDOT Mobility Survery,school_bike_park,Bicycle parking location at school,,,,,,,,,school_bike_park,Bicycle parking location at school,,1,,,,,,,,,,,,,,,,,,,
+Locations,Parking,Smartphone Pilot,Vehicle-Level,Vehicle-related,Park location,Smartphone Pilot,ev_typical_charge,Typical Charge location in the last 3 months,"ev_typical_charge_home |
+ev_typical_charge_work |
+ev_typical_charge_commute |
+ev_typical_charge_shopping |
+ev_typical_charge_public |
+ev_typical_charge_hotel |
+ev_typical_charge_other","Typical charge location in the last 3 months: At or near home |
+Typical charge location in the last 3 months: At work |
+Typical charge location in the last 3 months: At a commute location (e.g., Park and Ride lot, parking garage) |
+Typical charge location in the last 3 months: At a shopping location (e.g., grocery store, shopping mall) |
+Typical charge location in the last 3 months: At a public location (e.g., hospital, library, government building) |
+Typical charge location in the last 3 months: At a hotel/inn |
+Typical charge location in the last 3 months: Other",,,1,,,,,,,,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,In 2 Surveys,Vehicle-Level,Bike-related,Park location,Smartphone Pilot,bike_store,Bicycle storage location,"bike_store_inside |
+bike_store_rack |
+bike_store_locker |
+bike_store_room |
+bike_store_locked |
+bike_store_lot |
+bike_store_unlocked |
+bike_store_other","Bicycle storage location: Inside house/apartment (includes garage, porch, storage area) |
+Bicycle storage location: Bike rack |
+Bicycle storage location: Bike locker |
+Bicycle storage location: Secured bike room |
+Bicycle storage location: Locked to other object (e.g., post, tree) |
+Bicycle storage location: In a parking garage/lot |
+Bicycle storage location: Unlocked on-street |
+Bicycle storage location: Other",1,,,,,,"bicycle_store_house |
+bicycle_store_rack |
+bicycle_store_locker |
+bicycle_store_secured_bike_room |
+bicycle_store_object |
+bicycle_store_garage |
+bicycle_store_street |
+bicycle_store_other |
+bicycle_store_docking_station |","Where bicycle is stored: In my house/apartment (includes garage, porch, storage area) |
+Where bicycle is stored: Bike rack |
+Where bicycle is stored: Bike locker |
+Where bicycle is stored: Secured bike room |
+Where bicycle is stored: Locked to other object (e.g., sign post, fence, tree) |
+Where bicycle is stored: In a parking garage/lot |
+Where bicycle is stored: Unlocked on-street (e.g., dockless) |
+Bicycle storage type: Other |
+Where bicycle is stored: Bike-share designated docking station |",1,,,,,,,,,,,,,,,,,,,,
+Demographics,Race,In 4 Surveys,Person-Level,Person characteristics,Race/Ethnicity,RHTS,race,race of respondent,race_afam | race_american_indian | race_asian | race_native_hawaiian | race_white | race_other | race_other_specify,Race: African American or Black | Race: American Indian or Alaska Native | Race: Asian | Race: Native Hawaiian or other Pacific Islander | Race: White | Race: Other | Race: Specify,,2,,,,,race_american_indian | race_asian | race_black | race_native_hawaiian | race_white | race_other,"Race: American Indian or Alaska Native, Race: Asian, Race: Black or African American, Race: Native Hawaiian or other Pacific Islander, Race: White, Race: other",,2,,,,R_RACE | HH_RACE,Race | Race of household respondent,1,1,1,1,RACE | O_RACE,Race/Ethnicity | Other Race/Ethnicity,,2,,,,,,
+Demographics,Ethnicity,In 4 Surveys,Person-Level,Person characteristics,Race/Ethnicity,NHTS,ethnicity,ethnicity of respondent,ethnicity_not_hispanic | ethnicity_mexican | ethnicity_puerto_rican | ethnicity_cuban | ethnicity_other_hispanic | ethnicity_other_specify,"Ethnicity: Not of Hispanic, Latino, or Spanish origin | Ethnicity: Mexican, Mexican American, Chicano | Ethnicity: Puerto Rican, Ethnicity: Cuban | Ethnicity: Another Hispanic, Latino, or Spanish origin | Ethnicity: Specify",,2,,,,,ethnicity,Ethnicity,,2,,,,R_HISP | HH_HISP,Hispanic or Latino Origin | Hispanic status of household respondent,1,1,1,1,HISP,Hispanic Origin,,1,,,,,,
+Locations,School,RHTS,Person-Level,School-related,School location,RHTS,SLOC,School Location (Home Schooled),"school_state |
+school_lon |
+school_lat |
+school_county |
+school_puma |
+school_in_region |
+school_bg |","School state (fips code) |
+School longitude |
+School latitude |
+School county (fips code) |
+School Public Use Microdata Area (PUMA) |
+School in study region |
+School block group |",,1,,,,,school_cms_zone,School CMS zone,,1,,,,,,,,,,"SLOC |
+SNAME |
+SADDR |
+SXSTR |
+SCITY |
+SCITY_PL |
+SCITY_MCD |
+SSTAT |
+SZIP |
+SXCORD |
+SYCORD |
+STAZ |
+STRACT |
+SFIPS |","School Location (Home Schooled) |
+School Name |
+School Address |
+School Cross Streets |
+School City (TB) |
+School City (Place Name) |
+School City (MCD Place Name) |
+School State |
+School Zip |
+School X Longitude (in WGS 84) |
+School Y Latitude (in WGS 84) |
+School Location TAZ (NYMTC) |
+School Location Census Tract 2010 |
+School Location County |",,1,,1,,,,
+Locations,School,Smartphone Pilot,Person-Level,School-related,School location,Smartphone Pilot,student,Adult student status and location,student,Adult student status and location,,1,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Locations,School,NYCDOT Mobility Survery,Person-Level,Survey-related,School location,NYCDOT Mobility Survery,missing_data,Missing data,,,,,,,,,"missing_school_location |
+missing_work_location |
+missing_home_location |","Missing school location |
+Missing work location |
+Missing home location |",1,1,,,,,,,,,,"MISSTRAN |
+No_TAZ |","Missing Transit Information |
+No TAZ flag for origin and destination |",,,,1,1,1,,
+Trip Information,Network Attribute,NHTS,Person-Level,School-related,School location,NHTS,DISTTOSC17,"Road network distance, in miles, between respondent's home location and school location, sourced using Google Distance Matrix API (https://maps.googleapis.com/maps/api/distancematrix/)",,,,,,,,,,,,,,,,DISTTOSC17,"Road network distance, in miles, between respondent's home location and school location, sourced using Google Distance Matrix API (https://maps.googleapis.com/maps/api/distancematrix/)",,1,,,,,,,,,,,,
+Demographics,Mode Preference,In 2 Surveys,Person-Level,Work-related,Telecommute,Smartphone Pilot,telework_freq,Typical telecommute frequency once COVID-19 measures have ended (instead of commuting to work that day),telework_freq,Typical telecommute frequency once COVID-19 measures have ended (instead of commuting to work that day),,,,,,,telework_freq,Telework frequency,,1,,,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,In 3 Surveys,Person-Level,Work-related,Telecommute,NYCDOT Mobility Survery,telecommute_time,Hours worked for pay yesterday from a remote location that is not at home,,,,,,,,,telecommute_time,Hours worked for pay yesterday from a remote location that is not at home,,,,1,,WRK_HOME,Work from Home,,2,,,TCHRS,Telecommute Hours,,,,,,,,
+Trip Information,Purpose,Smartphone Pilot,Day-Level,General trip characteristics,Telecommute,Smartphone Pilot,telecommute_time,Time spent working at home or teleworking from anywhere for pay on travel day,telecommute_time,Time spent working at home or teleworking from anywhere for pay on travel day,,,,1,,,,,,,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,Smartphone Pilot,Person-Level,Work-related,Telecommute,Smartphone Pilot,remote_work_freq,"Number of days teleworked last week from a location that was NOT home or typical workplace (e.g., coworking space, library, coffee shop)",remote_work_freq,"Number of days teleworked last week from a location that was NOT home or typical workplace (e.g., coworking space, library, coffee shop)",,1,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Locations,Work,In 2 Surveys,Person-Level,Work-related,Work location,Smartphone Pilot,work_location_comb,Work location variables,"work_location_type |
+work_lon |
+work_lat |
+work_location_type_current |
+work_bg |
+work_county |
+work_state |
+work_puma |
+work_in_region |","Work location once COVID-19 measures have ended |
+Work longitude |
+Work latitude |
+Current work location |
+Work block group |
+Work county (fips code) |
+Work state (fips code) |
+Work Public Use Microdata Area (PUMA) |
+Work in study region |",,1,,,,,"job_type |
+WSTATE |
+work_cms_zone |","Usual work location |
+Work State |
+Work CMS zone |",,1,,,,WKSTFIPS,The state FIPS code for the respondent's geocoded work address. The state FIPS codes were identified using United States Census Bureau 2016 TIGER/Line Shapefiles.,,1,,,"WLOC |
+WXCORD |
+WYCORD |
+WFIPS |
+EMPLR | O_EMPLR |
+WNAME |
+WADDR |
+WXSTR |
+WCITY |
+WCITY_PL |
+WCITY_MCD |
+WZIP |
+WTAZ |
+WTRACT |","Work Location |
+Work X Longitude (in WGS 84) |
+Work Y Latitude (in WGS 84) |
+Work Location |
+Work X Longitude (in WGS 84) |
+Work Y Latitude (in WGS 84) |
+Work Location |
+Work X Longitude (in WGS 84) |
+Work Y Latitude (in WGS 84) |
+Work Location County |
+Employer | Other, Employer |
+Name of Employer |
+Work Address |
+Work Cross Streets |
+Work City (TB) |
+Work City (Place Name) |
+Work City (MCD Place Name) |
+Work Zip |
+Work Location TAZ (NYMTC) |
+Work Location Census Tract (2010) |",,1,,,1,,,
+Trip Information,Network Attribute,NHTS,Person-Level,Work-related,Work location,NHTS,DISTTOWK17,"Road network distance, in miles, between respondent's home location and work location, sourced using Google Distance Matrix API (https://maps.googleapis.com/maps/api/distancematrix/)",,,,,,,,,,,,,,,,DISTTOWK17,"Road network distance, in miles, between respondent's home location and work location, sourced using Google Distance Matrix API (https://maps.googleapis.com/maps/api/distancematrix/)",,1,,,,,,,,,,,,
+Locations,Work,NHTS,Person-Level,Work-related,Work location,NHTS,WKFMHMXX,Count of Days Worked From Home in Last Month,,,,,,,,,,,,,,,,WKFMHMXX,Count of Days Worked From Home in Last Month,,1,,,,,,,,,,,,
+Locations,Work,NHTS,Person-Level,Work-related,Work location,NHTS,WKRMHM,Option of Working from Home,,,,,,,,,,,,,,,,WKRMHM,Option of Working from Home,,1,,,,,,,,,,,,
+Survey ID/Flag,ID,In 4 Surveys,Household-Level,Identifier,,Smartphone Pilot,hh_id,Household ID,hh_id,Household ID,1,1,1,1,1,,hh_id,Household ID,1,1,1,1,1,HOUSEID,Household Identifier,,,,,SAMPN,Household Identifier,1,1,1,1,1,1,1,1
+Demographics,Household Size,In 4 Surveys,Household-Level,Household Characteristics,,Smartphone Pilot,num_people,Number of people in household,num_people,Number of people in household,1,,,,,,num_people,Household size,1,,,,,HHSIZE,Count of household members,1,1,1,1,HHSIZ,Household Size,1,,,,1,1,,
+Demographics,Household Size,In 3 Surveys,Household-Level,Household Characteristics,,Smartphone Pilot,num_adults,Number of adults in household,num_adults,Number of adults in household,1,,,,,,num_adults,Number of adults in household,1,,,,,NUMADLT,Count of adult household members at least 18 years old,1,1,1,1,,,,,,,,,,
+Demographics,Household Size,In 3 Surveys,Household-Level,Household Characteristics,,NYCDOT Mobility Survery,num_kids,Number of children in household,,,,,,,,,num_kids,Number of children in household,1,,,,,YOUNGCHILD,Count of persons with an age between 0 and 4 in household,2,,,,HHCHD,Number of Household Children (Computed),1,,,,,,,
+Demographics,Mode Preference,In 4 Surveys,Household-Level,Household Characteristics,,Smartphone Pilot,vehicle_num,Vehicle number in household,vehicle_num,Vehicle number in household,,,1,,,,num_vehicles,Number of household vehicles,1,,,,,HHVEHCNT,Count of household vehicles,1,1,1,1,"VEHNO, HHVEH","Vehicle Number, Number of Household Vehicles",1,,1,1,1,1,,
+Demographics,Mode Preference,In 2 Surveys,Household-Level,Household Characteristics,,Smartphone Pilot,num_bicycles,Number of bicycles in household,num_bicycles,Number of bicycles in household,1,,,,,,num_bicycles,Number of bicycles in household,1,,,,,,,,,,,,,,,,,,,,
+Locations,Home,In 3 Surveys,Household-Level,Household Characteristics,,Smartphone Pilot,residence_type,Residence type,residence_type,Residence type,1,,,,,,res_type,Residence type,1,,,,,,,,,,,RESTY | O_RESTY,"Residence Type, ""Other, Residence Type""",1,,,,,,,
+Locations,Home,In 3 Surveys,Household-Level,Household Characteristics,,Smartphone Pilot,residence_rent_own,residence_rent_own,residence_rent_own,Residence ownership status ,1,,,,,,rent_own,Home ownership status,1,,,,,HOMEOWN,Home Ownership,1,1,1,1,,,,,,,,,,
+Demographics,Mode Preference,NYCDOT Mobility Survery,Household-Level,Household Characteristics,,NYCDOT Mobility Survery,vehicle_change,Change in number of household vehicles in the past year,,,,,,,,,vehicle_change,Change in number of household vehicles in the past year,1,,,,,,,,,,,,,,,,,,,,
+Survey ID/Flag,ID,In 4 Surveys,Person-Level,Identifier,,Smartphone Pilot,person_id,Person ID,person_id,Person ID,,1,,1,1,,person_id,Person ID,,,,1,1,HHRESP | PERSONID,Person identifier of household respondent | Person Identifier,1,1,1,1,"PSAMP, PERNO",Unique Person Identifier | Person Identifier,,1,,1,1,1,1,1
+Demographics,Age,In 4 Surveys,Person-Level,Person characteristics,,Smartphone Pilot,age,Age,age,Age,,1,,,,,age,Age,,1,,,,R_AGE | R_AGE_IMP,Age | Age (imputed),,1,,1,AGE | AAGE,Age | Approximate Age,,1,,,,,,
+Demographics,Gender,In 4 Surveys,Person-Level,Person characteristics,,Smartphone Pilot,gender,Gender,gender,Gender,,,,,,,gender,Gender,,,,,,R_SEX | R_SEX_IMP,Gender | Gender (imputed),,1,,1,GENDER,Gender,,1,,,,,,
+Demographics,Education,In 3 Surveys,Person-Level,Person characteristics,,Smartphone Pilot,education,Highest level of education completed,education,Highest level of education completed,,1,,,,,education,Highest level of education completed,,1,,,,EDUC,Educational Attainment,,1,,1,,,,,,,,,,
+Demographics,Relationships,In 4 Surveys,Person-Level,Person characteristics,,Smartphone Pilot,relationship,Relationship to household person number 1,relationship,Relationship to household person number 1,,1,,,,,relationship,Relationship to survey participant,,1,,,,R_RELAT,Relationship,,,,,RELAT,Relationship,,1,,,,,,
+Demographics,School,In 4 Surveys,Person-Level,School-related,,Smartphone Pilot,student_status,Student status,student_status,Student status,,1,,,,,student,Student status,,1,,,,SCHTYP,Student Status,,1,,,STUDE,Student Status,,1,,,,,,
+Demographics,Education,In 2 Surveys,Person-Level,School-related,,NYCDOT Mobility Survery,school_type,Type of school attends,,,,,,,,,school_type,Type of school attends,,1,,,,,,,,,,SCHOL | O_SCHOL,"Level of School | Other, Level of School",,1,,,,,,
+Demographics,Mode Preference,NYCDOT Mobility Survery,Person-Level,School-related,,NYCDOT Mobility Survery,kid_accompany,Parent or guardian accompanies child/ren on their trip to school or daycare,,,,,,,,,kid_accompany,Parent or guardian accompanies child/ren on their trip to school or daycare,,1,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,Smartphone Pilot,Person-Level,Typical travel behavior,,Smartphone Pilot,transit_pay,Method for paying for transit,transit_pay,Method for paying for transit,,1,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,NYCDOT Mobility Survery,Person-Level,Typical travel behavior,,NYCDOT Mobility Survery,vehicle,Vehicle driven most often,,,,,,,,,vehicle,Vehicle driven most often,,1,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,In 3 Surveys,Person-Level,Typical travel behavior,,Smartphone Pilot,share_services,Shared services used,"share_tnc |
+share_carshare |
+share_rental |
+share_bikeshare |
+share_commuter_van |
+share_scooter |
+share_moped |
+share_none","Shared services used: Uber, Lyft, or other smartphone-app ride service |
+Shared services used: Carshare (e.g., ZipCar) |
+Shared services used: Peer-to-peer car rental (e.g., Turo) |
+Shared services used: Bikeshare |
+Shared services used: Commuter Van (dollar van) |
+Shared services used: Scooter share (e.g., Bird, Lime) |
+Shared services used: Moped share (e.g., Scoot) |
+Shared services used: None",,1,,,,,"tnc_user |
+car_share_user | 
+car_share_zipcar | 
+car_share_car2go |  
+car_share_enterprise | 
+car_share_other | 
+car_share_none |
+bike_share_user","Smartphone-app Ride Service User |
+Car Share Service User | Member of a carsharing service: ZipCar | Member of a carsharing service: car2go | 
+Member of a carsharing service: Enterprise Carshare | 
+Member of a carsharing service: Other | 
+Member of a carsharing service: None of the above | 
+Bike Share Service User",,1,,,,BIKESHARE,Count of Bike Share Program Usage,1,,,,,,,,,,,,,
+Demographics,Mode Preference,In 4 Surveys,Household-Level,Typical travel behavior,,NHTS,MODE_FREQ,Frequency of mode type,"carshare_freq |
+transit_freq |","Frequency of using carshare (e.g., ZipCar) |
+Transit use frequency |
+Bicycle use frequency |
+Frequency of using a bicycle from a bikeshare program |
+Frequency of using Uber, Lyft, or similar app-based ride services |",,1,,,,,"bike_freq |
+tnc_freq |
+citi_bike_freq |
+jump_freq |
+lime_freq |","Frequency of riding a bicycle in one of the five boroughs of New York City in the past 12 months |
+How often uses smartphone-app ride services (e.g., Lyft, Uber) |
+How frequently uses Citi Bike |
+How frequently uses Jump |
+How frequently uses Lime |",,1,,,,"BUS |
+CAR |
+PARA | 
+TRAIN |
+WALK |
+BIKE |
+TAXI |","Frequency of Bus Use for Travel |
+Frequency of Personal Vehicle Use for Travel |
+Frequency of Paratransit Use for Travel |
+Frequency of Train Use for Travel |
+Frequency of Walking for Travel |
+Frequency of Bicycle Use for Travel |
+Frequency of Taxi Service or Rideshare Use for Travel |",1,,,,"FBKTS, FBKTW",Frequency of Bike Travel,,1,,,,,,
+Demographics,Mode Preference,In 3 Surveys,Person-Level,Taxi/Smartphone-app ride service-related,,Smartphone Pilot,RIDESHARE,Count of Rideshare App Usage,,,,,,,,,,,,,,,,RIDESHARE,Count of Rideshare App Usage,1,,,,,,,,,,,,,
+Demographics,Mode Preference,NYCDOT Mobility Survery,Person-Level,Taxi/Smartphone-app ride service-related,,NYCDOT Mobility Survery,tnc_use_uber | tnc_use_lyft | tnc_use_via | tnc_use_juno | tnc_use_none,Smartphone-app ride services used,,,,,,,,,tnc_use_uber | tnc_use_lyft | tnc_use_via | tnc_use_juno | tnc_use_none,"Smartphone-app ride services used: Uber | 
+Smartphone-app ride services used: Lyft | 
+Smartphone-app ride services used: Via | 
+Smartphone-app ride services used: Juno | 
+Smartphone-app ride services used: None of the above",,1,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,In 2 Surveys,Person-Level,Taxi/Smartphone-app ride service-related,,Smartphone Pilot,tnc_purp,Most common purpose of smartphone-app ride hailing trips,"tnc_purp | 
+tnc_purp_other","Most common purpose of smartphone-app ride hailing trips | 
+Most common purpose of smartphone-app ride hailing trips, other specify",,1,,,,,tnc_purpose,Most common purpose of trips made using smartphone-app ride services,,1,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,NYCDOT Mobility Survery,Person-Level,Taxi/Smartphone-app ride service-related,,NYCDOT Mobility Survery,tnc_mode,Mode used before began using smartphone-app ride services,,,,,,,,,"tnc_mode | 
+tnc_mode_auto | 
+tnc_mode_scooter | 
+""tnc_mode_taxi |
+tnc_mode_bus |
+tnc_mode_rail |
+tnc_mode_ferry |
+tnc_mode_bike","Primary mode used before began using smartphone-app ride services | 
+Other vehicle used before began using smartphone-app ride services |
+Moped or scooter used before began using smartphone-app ride services |
+Taxi used before began using smartphone-app ride services |
+Bus used before began using smartphone-app ride services |
+Rail used before began using smartphone-app ride services |
+Ferry used before began using smartphone-app ride services |
+Bicycle used before began using smartphone-app ride services",,1,,,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,In 4 Surveys,Person-Level,Trip replacement behavior,,Smartphone Pilot,no_travel,Reason for no travel on travel day,"no_travel_made_trips |
+no_travel_work |
+no_travel_telework |
+no_travel_home |
+no_travel_weather |
+no_travel_sick |
+no_travel_delivery |
+no_travel_remote_school |
+no_travel_school_vacation |
+no_travel_transportation |
+no_travel_other | no_travel_made_trips","Reason for no travel on travel day: Did make trips on travel day | 
+Reason for no travel on travel day: Not scheduled to work/took day off |
+Reason for no travel on travel day: Worked at home for pay (e.g., telework, self-employed) |
+Reason for no travel on travel day: Hung out around home |
+Reason for no travel on travel day: Weather conditions (e.g., storm) |
+Reason for no travel on travel day: Sick or quarantining (self or others) |
+Reason for no travel on travel day: Waited for visitor/delivery (e.g., plumber) |
+Reason for no travel on travel day: Kids attended school online/remotely or were homeschooled |
+Reason for no travel on travel day: School was scheduled to be closed (e.g., vacation, holiday) |
+Reason for no travel on travel day: No available transportation (no car or bus) |
+Reason for no travel on travel day: Other reason |
+Reason for no travel on travel day: Did make trips on travel day",,,,1,,,"no_travel_capture |
+no_travel_no_work |
+no_travel_telework |
+no_travel_housework |
+no_travel_weather |
+no_travel_sick |
+no_travel_delivery |
+no_travel_homeschool |
+no_travel_kids_break |
+no_travel_no_transport |
+no_travel_other |
+no_travel_capture","Reason for no travel on travel day: Reason for no travel on travel day I did, but rMove didn't capture the trip(s) | 
+Reason for no travel on travel day: Not scheduled to work/took day off | 
+Reason for no travel on travel day: Worked at home for pay (e.g., telework, self-employed) |
+Reason for no travel on travel day: Hung out or worked around home (unpaid) |
+Reason for no travel on travel day: Weather conditions (e.g., storm) |
+Reason for no travel on travel day: Was sick or was caring for another person |
+Reason for no travel on travel day: Waited for a visitor or delivery (e.g., plumber) |
+Reason for no travel on travel day: Kids were home-schooled |
+Reason for no travel on travel day: Kids were on school vacation/break |
+Reason for no travel on travel day: No available transportation (e.g., no car, no bus) |
+Reason for no travel on travel day: Other reason |
+Reason for no travel on travel day: Reason for no travel on travel day I did, but rMove didn't capture the trip(s)",,,,1,,SAMEPLC,Reason for No Trips,,1,,,"NOGO |
+O_NOGO","Reason for No Trips | 
+Other Reason for No Trips",,1,,,,,,
+Demographics,Income,NYCDOT Mobility Survery,Person-Level,Person characteristics,,NYCDOT Mobility Survery,congestion,Opinion on congestion pricing,,,,,,,,,congestion,Opinion on congestion pricing,,1,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,In 2 Surveys,Person-Level,Typical travel behavior,,Smartphone Pilot,drive_cbd_freq,Frequency of driving vehicle into or within the area of Manhattan south of 60th street,drive_cbd_freq,Frequency of driving vehicle into or within the area of Manhattan south of 60th street,,1,,,,,drive_cbd_freq,Frequency of driving vehicle into or within the area of Manhattan south of 60th Street,,1,,,,,,,,,,,,,,,,,,,
+Survey ID/Flag,ID,In 3 Surveys,Vehicle-Level,Identifier,,NYCDOT Mobility Survery,vehicle_id,Unique ID assigned the provided vehicle.,,,,,,,,,vehicle_id,Unique ID assigned the provided vehicle.,,,1,,,VEHID,Household Vehicle Identifier Used on Trip,,,,,VSAMP,Vehicle Unique Identifier,,,1,,,,,
+Demographics,Mode Preference,In 4 Surveys,Vehicle-Level,Vehicle-related,,Smartphone Pilot,vehic_char,Vehicle Characteristics,"year |
+make |
+model |
+fuel_type |
+vehicle_other_specify |
+transponder |","Vehicle year |
+Vehicle make |
+Vehicle Model |
+Fuel type |
+Vehicle make and model, other specify |
+Vehicle has toll transponder |",,,1,,,,year,Model year of vehicle,,,1,,,"VEHYEAR |
+MAKE | O_MAKE |
+MODEL |
+FUELTYPE |
+FEGEMPGA |
+FEGEMPGF |
+OD_READ |
+HYBRID |
+VEHAGE |
+VEHOWNED |
+VEHTYPE |
+FEGEMPG |","Vehicle Year |
+Vehicle Make | Other, Make of Vehicle |
+Vehicle Model |
+Type of Fuel |
+Fuel Economy.gov 55/45 alternative fuel economy |
+Flag for FEGEMPG |
+Odometer Reading |
+Hybrid vehicle |
+Age of vehicle, based on model year |
+Owned Vehicle Longer than a Year |
+Vehicle Type |
+Fuel Economy.gov EIA-Derived 55/45 fuel economy |",,,1,,"YEAR |
+MAKE |
+MODEL |
+FUEL | O_FUEL |
+BODY | O_BODY |","Year of Vehicle |
+Make of Vehicle |
+Model of Vehicle |
+Type of Fuel | Other, Type of Fuel |
+Body of Vehicle |Other, Body of Vehicle",,,1,,,,,
+Locations,Parking,Smartphone Pilot,Vehicle-Level,Vehicle-related,,Smartphone Pilot,ev_outlet_share,Shares electric outlet with others who don't live in household,ev_outlet_share,Shares electric outlet with others who don't live in household,,,,,,1,,,,,,,,,,,,,,,,,,,,,,,
+Locations,Parking,Smartphone Pilot,Vehicle-Level,Vehicle-related,,Smartphone Pilot,ev_charge,Electric vehicle(s) in household charged on travel day,ev_charge,Electric vehicle(s) in household charged on travel day,,,,,,1,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Mode,In 2 Surveys,Trip-Level,Taxi/Smartphone-app ride service-related,,Smartphone Pilot,tnc_type,Smartphone-app ride service used on trip,tnc_type,Smartphone-app ride service used on trip,,,,,,1,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Mode,In 3 Surveys,Trip-Level,Taxi/Smartphone-app ride service-related,,Smartphone Pilot,taxi_pay,Taxi fare,taxi_pay,Taxi fare,,,,,,1,taxi_cost,Respondent knows cost of taxi fare,,,,,1,,,,,,,BPFAR,Transit Pass Cost,,,,1,1,1,,
+Trip Information,Mode,In 2 Surveys,Trip-Level,Transit-related,,Smartphone Pilot,transit_access,Transit access mode,transit_access,Transit access mode,,,,,1,,transit_access,Access mode,,,,,1,,,,,,,,,,,,,,,,
+Trip Information,Mode,In 2 Surveys,Trip-Level,Transit-related,,Smartphone Pilot,transit_egress,Transit egress mode,transit_egress,Transit egress mode,,,,,1,,transit_egress,Egress mode,,,,,1,,,,,,,,,,,,,,,,
+Trip Information,Mode,In 3 Surveys,Trip-Level,Transit-related,,NYCDOT Mobility Survery,sustainable_mode,"Mode type is a sustainable mode (walk, bicycle, scooter/moped, or transit)",,,,,,,,,sustainable_mode,"Mode type is a sustainable mode (walk, bicycle, scooter/moped, or transit)",,,,,1,PUBTRANS,Public transportation used on trip,,,,1,O_SERVC | SERVC,"Other, Transit Service | Transit services",,,,1,1,1,,
+Trip Information,Mode,Smartphone Pilot,Trip-Level,Micromobility-related,,Smartphone Pilot,micromobility_devices_scooter,Micromobility devices used by household: Scooter,micromobility_devices_scooter,Micromobility devices used by household: Scooter,1,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Route/Path,Smartphone Pilot,Trip-Level,General trip characteristics,,Smartphone Pilot,accuracy,Accuracy ,accuracy,Accuracy ,,,,,1,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Route/Path,Smartphone Pilot,Trip-Level,General trip characteristics,,Smartphone Pilot,bearing,Bearing,bearing,Bearing,,,,,1,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Timestamp,In 2 Surveys,Trip-Level,General trip characteristics,,Smartphone Pilot,collect_time,Timestamp collected at (US/Eastern time),collect_time,Timestamp collected at (US/Eastern time),,,,,1,,survey_complete_date,Date and Time Survey Completed,2,,,,,,,,,,,,,,,,,,,,
+Trip Information,Mode,In 3 Surveys,Trip-Level,General trip characteristics,,Smartphone Pilot,speed_mph,Speed (mph),speed_mph,Speed (mph),,,,,1,,high_speed_flag,"Unusually high speed, given mode",,,,,2,,,,,,,SPEEDFLAG,Speed Check Flag,,,,2,,,,
+Trip Information,Travelers,Smartphone Pilot,Trip-Level,General trip characteristics,,Smartphone Pilot,taxi_type,Who paid for trip,taxi_type,Who paid for trip,,,,,1,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Mode,In 2 Surveys,Trip-Level,General trip characteristics,,Smartphone Pilot,taxi_cost,Taxi fare amount,taxi_cost,Taxi fare amount,,,,,1,,taxi_cost_amount,Total taxi fare: Amount,,,,,1,,,,,,,,,,,,,,,,
+Trip Information,Mode,Smartphone Pilot,Trip-Level,General trip characteristics,,Smartphone Pilot,transit_type,Transit fare payment method,transit_type,Transit fare payment method,,,,,1,,,,,,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,In 2 Surveys,Vehicle-Level,Vehicle-related,,Smartphone Pilot,vehicle_ownership,Vehicle ownership status,vehicle_ownership,Vehicle ownership status,,,1,,,,,,,,,,,VEHOWNMO,Months of Vehicle Ownership,,,2,2,,,,,,,,,,
+Locations,Parking,Smartphone Pilot,Vehicle-Level,Vehicle-related,,Smartphone Pilot,ev_network,EV charging networks subscribed to,"ev_network_chargepoint |
+ev_network_tesla |
+ev_network_blink |
+ev_network_evgo |
+ev_network_semaconnect |
+ev_network_greenlots |
+ev_network_none |
+ev_network_other","EV charging networks subscribed to: ChargePoint |
+EV charging networks subscribed to: Tesla |
+EV charging networks subscribed to: Blink |
+EV charging networks subscribed to: EVgo |
+EV charging networks subscribed to: SemaConnect |
+EV charging networks subscribed to: Greenlots |
+EV charging networks subscribed to: None |
+EV charging networks subscribed to: Other",,,1,,,,,,,,,,,,,,,,,,,,,,,,,,
+Survey ID/Flag,Timestamp,In 2 Surveys,Household-Level,Survey-related,,Smartphone Pilot,first_travel_date,Travel period start,first_travel_date,Travel period start,1,,,,,,first_travel_date,First travel date,1,1,,,,,,,,,,,,,,,,,,,
+Survey ID/Flag,Timestamp,In 2 Surveys,Household-Level,Survey-related,,Smartphone Pilot,last_travel_date,Travel period end,last_travel_date,Travel period end,1,,,,,,last_travel_date,Last travel date,1,1,,,,,,,,,,,,,,,,,,,
+Locations,Home,In 3 Surveys,Household-Level,Survey-related,,Smartphone Pilot,sample_segment,Sampling segment,sample_segment,Sampling segment,1,,,,,,,,,,,,,SAMPSTRAT,Primary Sampling Stratum Assignment,1,,,,BIN,Sampling Bin,1,,,,,,,
+Trip Information,Tour/Day Information,Smartphone Pilot,Household-Level,Survey-related,,Smartphone Pilot,complete_day,Day completion status,"complete_mon |
+complete_tue |
+complete_wed |
+complete_thu |
+complete_fri |
+complete_sat |
+complete_sun","Monday completion status |
+Tuesday completion status |
+Wednesday completion status |
+Thursday completion status |
+Friday completion status |
+Saturday completion status |
+Sunday completion status",1,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,In 2 Surveys,Vehicle-Level,Bike-related,,Smartphone Pilot,bike_type,Bicycle type,"bike_type_standard |
+bike_type_electric |
+bike_type_other","Bicycle type: Standard bicycle |
+Bicycle type: Electric bicycle |
+Bicycle type: Other bicycle",1,,,,,,"bicycle_type_standard |
+bicycle_type_electric |
+bicycle_type_other","Bicycle type: Standard bicycle |
+Bicycle type: Pedal-assist electric bicycle |
+Bicycle type: Other",1,,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,NYCDOT Mobility Survery,Person-Level,Bike-related,,NYCDOT Mobility Survery,bike_stolen,Has had a bicycle stolen in New York City in the past year,,,,,,,,,bike_stolen,Has had a bicycle stolen in New York City in the past year,,1,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,Smartphone Pilot,Vehicle-Level,Micromobility-related,,Smartphone Pilot,micromobility_devices,Micromobility devices used by household,"micromobility_devices_skateboard |
+micromobility_devices_segway |
+micromobility_devices_other |
+micromobility_devices_none","Micromobility devices used by household: Skateboard or rollerblades |
+Micromobility devices used by household: Segway |
+Micromobility devices used by household: Other |
+Micromobility devices used by household: None",1,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Survey ID/Flag,Timestamp,In 2 Surveys,Day-Level,General day characteristics,,Smartphone Pilot,day_num,Day number within travel period,day_num,Day number within travel period,,,,1,1,,day_num,Day number in a respondent's assigned travel period,,,,1,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,In 2 Surveys,Day-Level,General day characteristics,,Smartphone Pilot,travel_day,Travel day for respondent,travel_day,Travel day for respondent,,,,1,1,,,,,,,,,,,,,,,ASSN,Assigned Travel Day,2,,,,,,,
+Trip Information,Tour/Day Information,In 3 Surveys,Day-Level,General day characteristics,,Smartphone Pilot,travel_date,Travel date,travel_date,Travel date,,,,1,1,,travel_date,Date of travel,,,,1,,TDAYDATE,Date of travel day (YYYYMM),1,1,1,1,,,,,,,,,,
+Trip Information,Tour/Day Information,In 4 Surveys,Day-Level,General day characteristics,,Smartphone Pilot,travel_dow,Day of week,travel_dow,Day of week,,,,1,1,,travel_date_dow,Day of week,,,,1,,TRAVDAY,Travel day - day of week,1,1,1,1,DOW,Day of Week,1,,,,1,1,,
+Trip Information,Tour/Day Information,In 2 Surveys,Day-Level,Survey-related,,Smartphone Pilot,num_complete_trip_surveys,Number of complete trip surveys on travel day,num_complete_trip_surveys,Number of complete trip surveys on travel day,,,,1,1,,num_complete_trip_surveys,Number of complete trip surveys,,,,1,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,In 2 Surveys,Day-Level,Survey-related,,Smartphone Pilot,day_survey_complete,Daily survey complete,day_survey_complete,Daily survey complete,,,,1,1,,day_is_complete,Respondent completed all survey questions for that day,,,,1,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,Smartphone Pilot,Day-Level,Survey-related,,Smartphone Pilot,day_complete,Person day is complete,day_complete,Person day is complete,,,,1,1,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,Smartphone Pilot,Day-Level,Survey-related,,Smartphone Pilot,hh_day_complete,Household day is complete,hh_day_complete,Household day is complete,,,,1,1,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,Smartphone Pilot,Day-Level,Vehicle-related,,Smartphone Pilot,ev_charge_start_time,Time plugged in electric vehicle to start charging,ev_charge_start_time,Time plugged in electric vehicle to start charging,,,,1,,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,Smartphone Pilot,Day-Level,Vehicle-related,,Smartphone Pilot,ev_charge_duration,Electric vehicle charge duration,ev_charge_duration,Electric vehicle charge duration,,,,1,,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,Smartphone Pilot,Day-Level,School-related,,Smartphone Pilot,attend_school,Traveled to school or daycare on travel day,attend_school,Traveled to school or daycare on travel day,,,,1,,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Purpose,Smartphone Pilot,Day-Level,Trip replacement behavior,,Smartphone Pilot,attend_school_no,Reason for not attending school or day care on travel day,"attend_school_no_sick |
+attend_school_no_online_home |
+attend_school_no_online_other |
+attend_school_no_school_vacation |
+attend_school_no_weather |
+attend_school_no_other","Reason for not attending school or day care on travel day: Was sick or quarantining |
+Reason for not attending school or day care on travel day: Attended class online from home |
+Reason for not attending school or day care on travel day: Attended class online from another location (e.g., friend’s) |
+Reason for not attending school or day care on travel day: School was scheduled to be closed (e.g., vacation, holiday) |
+Reason for not attending school or day care on travel day: School was closed or adjusted due to weather event (e.g., snow delay) |
+Reason for not attending school or day care on travel day: Other",,,,1,,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,In 2 Surveys,Day-Level,General trip characteristics,,Smartphone Pilot,made_travel,Made trips on travel day,made_travel,Made trips on travel day,,,,1,,,made_trips,Did the respondent make any trips on this day?,,1,,1,,,,,,,,,,,,,,,,,
+Trip Information,Purpose,In 2 Surveys,Day-Level,Delivery-related,,Smartphone Pilot,shop_online,Purchased anything online on travel day,shop_online,Purchased anything online on travel day,,,,1,,,shop_online,Personally purchased anything online on travel day,,,,1,,,,,,,,,,,,,,,,,
+Trip Information,Purpose,In 2 Surveys,Day-Level,Delivery-related,,Smartphone Pilot,delivery,Delivery on travel day,"delivery_packages_home |
+delivery_packages_work |
+delivery_packages_other |
+delivery_takeout |
+delivery_groceries |
+delivery_service |
+delivery_other |
+delivery_none","Delivery on travel day: Received packages at home |
+Delivery on travel day: Received personal packages at work |
+Delivery on travel day: Received packages at another location (e.g., Amazon locker, package pick-up point) |
+Delivery on travel day: Prepared food delivered to home (e.g., take-out) |
+Delivery on travel day: Groceries delivered to home |
+Delivery on travel day: Someone came to do work at home (e.g., babysitter, housecleaning, lawn) |
+Delivery on travel day: Other item delivered to home (e.g., appliance) |
+Delivery on travel day: None",,,,1,,,"deliver_package_home |
+deliver_package_work |
+deliver_package_locker |
+deliver_prepared |
+deliver_food |
+deliver_service |
+deliver_other |
+deliver_none","Travel day delivery: Received packages at home (e.g., FedEx, UPS, USPS) |
+Travel day delivery: Received personal packages at work (e.g., FedEx, UPS, USPS) |
+Travel day delivery: Received packages at another location (e.g., Amazon locker, Package pick-up point) |
+Travel day delivery: Prepared food was delivered to home (e.g., take-out) |
+Travel day delivery: Food was delivered to home (e.g., groceries) |
+Travel day delivery: Someone came to home to do work (e.g., landscaping, plumber, housecleaning) |
+Travel day delivery: Other item delivered to home |
+Travel day delivery: None",,,,1,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,Smartphone Pilot,Person-Level,Survey-related,,Smartphone Pilot,person_complete,Person completion status,person_complete,Person completion status,,1,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,In 2 Surveys,Person-Level,Survey-related,,Smartphone Pilot,num_days_complete,Number of complete days,num_days_complete,Number of complete days,1,1,,,,,"num_days_complete |
+num_complete_weekend_days |
+num_complete_weekdays |","Number of complete days |
+Number of complete weekend days |
+Number of complete weekdays |",1,1,,,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,In 2 Surveys,Household-Level,Survey-related,,Smartphone Pilot,hh_complete,Household is complete,hh_complete,Household is complete,,1,,,,,is_complete,Completion status,1,,,,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,In 2 Surveys,Day-Level,Survey-related,,Smartphone Pilot,num_days,Number of travel days,num_days,Number of travel days,,1,,,,,num_days,Number of days of data collection,,1,,,,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,In 3 Surveys,Day-Level,Survey-related,,Smartphone Pilot,num_trips,Number of trips,num_trips,Number of trips,1,1,,1,,,"num_trips, CNTTDHH, CNTTDTR","Number of trips taken, Count of household trips on travel day, Count of person trips on travel day",2,2,,1,,,,,,,,"HTRIPS, PTRIPS","Total Number of Trips (Computed), Number of Trips",1,1,,,,,,
+Demographics,Mode Preference,Smartphone Pilot,Person-Level,Person characteristics,,Smartphone Pilot,second_home,"Regularly spends the night at a second home (e.g., another parent or grandparent’s house, partner or spouse’s home, or a vacation home)",second_home,"Regularly spends the night at a second home (e.g., another parent or grandparent’s house, partner or spouse’s home, or a vacation home)",,1,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Locations,School,Smartphone Pilot,Person-Level,School-related,,Smartphone Pilot,class_structure,Structure of in-person classes,class_structure,Structure of in-person classes,,1,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Locations,School,Smartphone Pilot,Person-Level,School-related,,Smartphone Pilot,remote_class_freq,"Number of days attended classes online last week from a location that was NOT home or school (e.g., friend’s home, mom’s work, library, coffee shop)",remote_class_freq,"Number of days attended classes online last week from a location that was NOT home or school (e.g., friend’s home, mom’s work, library, coffee shop)",,1,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Locations,School,Smartphone Pilot,Person-Level,Typical travel behavior,,Smartphone Pilot,school_freq,Number of days traveled to school last week,school_freq,Number of days traveled to school last week,,1,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Demographics,Employment,In 2 Surveys,Person-Level,Person characteristics,,Smartphone Pilot,occupation,Occupation,occupation,Occupation,,1,,,,,,,,,,,,,,,,,,"OCCUP, O_OCCUP","Occupation, ""Other, Occupation""",,,,,,,,
+Locations,Parking,In 2 Surveys,Person-Level,Work-related,,Smartphone Pilot,work_bike_park,Bicycle park location at work,work_bike_park,Bicycle park location at work,,1,,,,,work_bike_park,Bicycle parking location at work,,1,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,NHTS,Person-Level,Taxi/Smartphone-app ride service-related,,NHTS,CARSHARE,Count of Car Share Program Usage,,,,,,,,,,,,,,,,CARSHARE,Count of Car Share Program Usage,,1,,,,,,,,,,,,
+Demographics,Mode Preference,Smartphone Pilot,Person-Level,Taxi/Smartphone-app ride service-related,,Smartphone Pilot,share_work,For-hire services done for pay or credit,"share_work_tnc |
+share_work_deliver_packages |
+share_work_deliver_food |
+share_work_rent_vehicle |
+share_work_redistribute_bikes |
+share_work_redistribute_scooters |
+share_work_none","For-hire services done for pay or credit: Drive passengers for Uber, Lyft, or another smartphone-app ride service |
+For-hire services done for pay or credit: Deliver packages for a smartphone-app service (e.g., AmazonFlex) |
+For-hire services done for pay or credit: Deliver food/groceries for a smartphone-app service (e.g., DoorDash, UberEats) |
+For-hire services done for pay or credit: Rent personal vehicle for money (e.g., Turo) |
+For-hire services done for pay or credit: Redistribute bicycles for a bikeshare company |
+For-hire services done for pay or credit: Redistribute scooters for a scooter share company |
+For-hire services done for pay or credit: None",,1,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,Smartphone Pilot,Person-Level,Taxi/Smartphone-app ride service-related,,Smartphone Pilot,tnc_work_hours,Average hours per week drives for smartphone-app ride services,tnc_work_hours,Average hours per week drives for smartphone-app ride services,,1,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Survey ID/Flag,Flag,In 2 Surveys,Person-Level,Survey-related,,Smartphone Pilot,participate,Willing to participate in future transportation surveys,participate,Willing to participate in future transportation surveys,,1,,,,,,,,,,,,,,,,,,FUTUR,"If Contacted, Willingness to Participate Any Future Surveys",1,,,,,,,
+Demographics,Ability (and Health),In 3 Surveys,Household-Level,Survey-related,,NYCDOT Mobility Survery,weights,Weights,,,,,,,,,"weight | 
+trip_weight | 
+day_weight |","Household-person weight | 
+Trip weight | 
+Day weight |",1,1,1,1,,"WTHHFIN | WTPERFIN |
+WTTRDFIN |","Final HH weight | Final Person weight |
+Final trip weight|",1,1,1,1,"HH_WHT2 |
+WHT_FAC3","Level 2 Weights |
+Final Weight |",2,,2,2,2,2,2,2
+Survey ID/Flag,Flag,NYCDOT Mobility Survery,Day-Level,Survey-related,,NYCDOT Mobility Survery,survey_mode,The method in which the survey was taken,,,,,,,,,survey_mode,The method in which the survey was taken,1,1,1,1,1,,,,,,,,,,,,,,,,
+Trip Information,Tour/Day Information,In 2 Surveys,Trip-Level,Survey-related,,NYCDOT Mobility Survery,linked_trip_num,Linked trip number,,,,,,,,,linked_trip_num,Linked trip number,,,,,1,,,,,,,LTRIPNO,Linked trip Number,,,,,1,1,,
+Survey ID/Flag,Flag,NYCDOT Mobility Survery,Trip-Level,Survey-related,,NYCDOT Mobility Survery,trip_edit,Trip edited by analyst or by user,,,,,,,,,"analyst_split |
+analyst_merge |
+analyst_split_loop |
+user_merged |
+user_split |
+added_trip |
+num_deleted_trips |","Analyst split trip |
+Analyst merged trip |
+Trip split due to loop |
+User merged trip |
+User split trip |
+Added trip |
+Number of deleted trips",,,,,1,,,,,,,,,,,,,,,,
+Survey ID/Flag,Flag,NYCDOT Mobility Survery,Trip-Level,Survey-related,,NYCDOT Mobility Survery,long_distance_flag,"Unusually long distance, given mode",,,,,,,,,long_distance_flag,"Unusually long distance, given mode",,,,,1,,,,,,,,,,,,,,,,
+Survey ID/Flag,Flag,NYCDOT Mobility Survery,Trip-Level,Survey-related,,NYCDOT Mobility Survery,invalid_purpose_flag,Non-worker / non-student has a work/school trip purpose,,,,,,,,,invalid_purpose_flag,Non-worker / non-student has a work/school trip purpose,,,,,1,,,,,,,,,,,,,,,,
+Survey ID/Flag,Flag,NYCDOT Mobility Survery,Person-Level,Survey-related,,NYCDOT Mobility Survery,is_participant,Person is survey participant,,,,,,,,,is_participant,Person is survey participant,,1,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,In 2 Surveys,Person-Level,Typical travel behavior,,NYCDOT Mobility Survery,num_mode_trips,Number of trips by mode,,,,,,,,,"num_walk_trips |
+num_transit_trips |
+num_bike_trips |
+num_taxi_trips |
+num_tnc_trips |","Number of walk trips |
+Number of transit trips |
+Number of bike trips |
+Number of taxi trips |
+Number of for-hire vehicle trips |",1,1,,,,"NWALKTRP |
+PTUSED |
+NBIKETRP |
+BIKE4EX |
+MCUSED |","Count of Walk Trips |
+Count of Public Transit Usage |
+Count of Bike Trips |
+Count of Bike Trips for Exercise |
+Count of Motorcycle or Moped Trips |",,1,,,,,,,,,,,,
+Demographics,Employment,In 2 Surveys,Person-Level,Work-related,,NYCDOT Mobility Survery,employment,Primary type of employment,,,,,,,,,employment,Primary type of employment,,1,,,,WKFTPT,Full-Time or Part-Time Worker,,2,,,,,,,,,,,,
+Demographics,Mode Preference,NYCDOT Mobility Survery,Person-Level,Person characteristics,,NYCDOT Mobility Survery,planning_apps,"Frequency of using trip planning apps, such as Google Maps, MTA Trip Planner, or Transit App to plan trips",,,,,,,,,planning_apps,"Frequency of using trip planning apps, such as Google Maps, MTA Trip Planner, or Transit App to plan trips",,1,,,,,,,,,,,,,,,,,,,
+Survey ID/Flag,Flag,NYCDOT Mobility Survery,Person-Level,Parking-related,,NYCDOT Mobility Survery,school_vehicle_pass_period,School vehicle parking pass time period,,,,,,,,,school_vehicle_pass_period,School vehicle parking pass time period,,1,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,NYCDOT Mobility Survery,Person-Level,Bike-related,,NYCDOT Mobility Survery,bike_num_days,Number of days have ridden a bike to get to and from places during the past 7 days,,,,,,,,,bike_num_days,Number of days have ridden a bike to get to and from places during the past 7 days,,1,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,In 2 Surveys,Person-Level,Bike-related,,NYCDOT Mobility Survery,bike_purpose,Reason for riding a bicycle,,,,,,,,,"bike_purpose_errands |
+bike_purpose_transit |
+bike_purpose_recreation |
+bike_purpose_commute |
+bike_purpose_appointment |
+bike_purpose_other |
+no_bike_nyc_bike_lanes |
+no_bike_nyc_paving |
+no_bike_nyc_storage |
+no_bike_nyc_long_trips |
+no_bike_nyc_showers |
+no_bike_nyc_modes |
+no_bike_nyc_unable |
+no_bike_nyc_other |","Reason for riding a bicycle: To run errands |
+Reason for riding a bicycle: To connect to/from public transportation |
+Reason for riding a bicycle: For recreation/exercise |
+Reason for riding a bicycle: To commute to work or school |
+Reason for riding a bicycle: To get to an appointment (e.g. doctor, meeting, conference) |
+Reason for riding a bicycle: Other |
+Reason for not riding a bicycle in New York City: I don't feel safe due to lack of bike lanes |
+Reason for not riding a bicycle in New York City: I don't feel safe due to poor street paving |
+Reason for not riding a bicycle in New York City: I have nowhere to store my bike |
+Reason for not riding a bicycle in New York City: The trips I take are too long for a bike |
+Reason for not riding a bicycle in New York City: There aren't showers or lockers to use at my destination |
+Reason for not riding a bicycle in New York City: I prefer using other modes |
+Reason for not riding a bicycle in New York City: I am physically unable to ride a bike |
+Reason for not riding a bicycle in New York City: Other |",,1,,,,BIKE_DFR,Reason for Not Biking More: Infrastructure,,2,,,,,,,,,,,,
+Demographics,Mode Preference,NYCDOT Mobility Survery,Person-Level,Bike-related,,NYCDOT Mobility Survery,no_bike_share,Reason for not using a bikeshare service,,,,,,,,,"no_bike_share_unfamiliar |
+no_bike_share_expensive |
+no_bike_share_neighborhood |
+no_bike_share_stations |
+no_bike_share_personal_bike |
+no_bike_share_docks |
+no_bike_share_uncomfortable |
+no_bike_share_other","Reason for not using a bikeshare service: I do not know what bike share services are |
+Reason for not using a bikeshare service: Too expensive |
+Reason for not using a bikeshare service: Not in my neighborhood |
+Reason for not using a bikeshare service: Stations are too far from where I want to go |
+Reason for not using a bikeshare service: Prefer to use my personal bicycle |
+Reason for not using a bikeshare service: Docks are too often full or empty |
+Reason for not using a bikeshare service: Do not feel comfortable biking |
+Reason for not using a bikeshare service: Other",,1,,,,,,,,,,,,,,,,,,,
+Locations,Shopping,NYCDOT Mobility Survery,Person-Level,Delivery-related,,NYCDOT Mobility Survery,packages,Package delivery location when not at home to receive them,,,,,,,,,packages,Package delivery location when not at home to receive them,,1,,,,,,,,,,,,,,,,,,,
+Locations,Shopping,NYCDOT Mobility Survery,Person-Level,Delivery-related,,NYCDOT Mobility Survery,packages_distance,Distance willing to travel to pick up packages,,,,,,,,,packages_distance,Distance willing to travel to pick up packages,,1,,,,,,,,,,,,,,,,,,,
+Demographics,Experience,NYCDOT Mobility Survery,Person-Level,Travel experience-related,,NYCDOT Mobility Survery,harassment,"Seen and/or experienced visual, verbal, or physical harassment/violence when traveling in the past week",,,,,,,,,harassment,"Seen and/or experienced visual, verbal, or physical harassment/violence when traveling in the past week",,1,,,,,,,,,,,,,,,,,,,
+Demographics,Experience,NYCDOT Mobility Survery,Person-Level,Travel experience-related,,NYCDOT Mobility Survery,harassment_influence,How harassment has influenced travel behavior,,,,,,,,,"harassment_trip |
+harassment_time |
+harassment_route |
+harassment_transit |
+harassment_mode |
+harassment_neighborhood |
+harassment_private_car |
+harassment_alone |
+harassment_attention |
+harassment_defense |
+harassment_other |
+harassment_none","How harassment has influenced travel behavior: They have affected my decision to make a trip |
+How harassment has influenced travel behavior: I have changed my travel times and/or avoid traveling at night |
+How harassment has influenced travel behavior: I have changed my route and/or avoid walking on certain streets |
+How harassment has influenced travel behavior: I have reduced my use of public transport |
+How harassment has influenced travel behavior: I have changed my mode of transport (e.g., bus, train, taxi, public or own bicycle, walking) |
+How harassment has influenced travel behavior: I travel mainly within my neighborhood, where I know people and am known |
+How harassment has influenced travel behavior: I prefer to travel in a private car |
+How harassment has influenced travel behavior: I avoid traveling alone |
+How harassment has influenced travel behavior: I pay more attention to my surroundings and other passengers |
+How harassment has influenced travel behavior: I carry a personal defense weapon (e.g., pepper spray, sharp object) |
+How harassment has influenced travel behavior: Other |
+How harassment has influenced travel behavior: They have had no influence",,1,,,,,,,,,,,,,,,,,,,
+Demographics,Language,NYCDOT Mobility Survery,Person-Level,Person characteristics,,NYCDOT Mobility Survery,english_proficiency,English language proficiency,,,,,,,,,english_proficiency,English language proficiency,,1,,,,,,,,,,,,,,,,,,,
+Demographics,Language,In 2 Surveys,Person-Level,Survey-related,,NYCDOT Mobility Survery,survey_language,Language survey was taken in ,,,,,,,,,survey_language,Language survey was taken in ,1,,,,,,,,,,,ILANG,Code Language of Interview,2,,,,,,,
+Demographics,Mode Preference,NYCDOT Mobility Survery,Household-Level,Household Characteristics,,NYCDOT Mobility Survery,reduced_vehicles_reason,Reason for reducing number of household vehicles,,,,,,,,,"reduced_vehicle_cost |
+reduced_vehicle_parking |
+reduced_vehicle_no_need |
+reduced_vehicle_ridehailing |
+reduced_vehicle_carshare |
+reduced_vehicle_transit |
+reduced_vehicle_nyc_driving |
+reduced_vehicle_other","Reason for reducing number of household vehicles: Car ownership was expensive |
+Reason for reducing number of household vehicles: Parking was difficult or expensive |
+Reason for reducing number of household vehicles: I no longer needed a car on a frequent basis |
+Reason for reducing number of household vehicles: I started using a smartphone-app ride service such as Lyft/Uber |
+Reason for reducing number of household vehicles: I started using a carshare service such as Zipcar or Car2go |
+Reason for reducing number of household vehicles: I started using public transit |
+Reason for reducing number of household vehicles: I didn't feel comfortable driving in New York City |
+Reason for reducing number of household vehicles: Other",1,,,,,,,,,,,,,,,,,,,,
+Demographics,Mode Preference,NYCDOT Mobility Survery,Household-Level,Household Characteristics,,NYCDOT Mobility Survery,increased_vehicle_reason,Reason for increasing the number of household vehicles,,,,,,,,,"increased_vehicle_new_driver |
+increased_vehicle_transport_hh_member |
+increased_vehicle_moved |
+increased_vehicle_job |
+increased_vehicle_unreliable |
+increased_vehicle_flexibility |
+increased_vehicle_other","Reason for increasing the number of household vehicles: New driver in household (e.g. grown child or spouse) |
+Reason for increasing the number of household vehicles: I needed a car to transport a household member (i.e. spouse, relative, child, or other) |
+Reason for increasing the number of household vehicles: I moved into an area where I felt I needed a car |
+Reason for increasing the number of household vehicles: I got a new job that was not easily accessible by transit |
+Reason for increasing the number of household vehicles: I found other transportation options were unreliable |
+Reason for increasing the number of household vehicles: I wanted the flexibility and convenience of having a car |
+Reason for increasing the number of household vehicles: Other",1,,,,,,,,,,,,,,,,,,,,
+Demographics,Household Size,NYCDOT Mobility Survery,Household-Level,Household Characteristics,,NYCDOT Mobility Survery,num_participants,Number of participants,,,,,,,,,num_participants,Number of participants,1,,,,,,,,,,,,,,,,,,,,
+Demographics,Household Size,In 2 Surveys,Household-Level,Household Characteristics,,NYCDOT Mobility Survery,num_students,Number of students in household,,,,,,,,,num_students,Number of students in household,1,,,,,,,,,,,HHSTU,Number of Household Students (Computed),1,,,,,,,
+Demographics,Mode Preference,NHTS,Household-Level,Bike-related,,NHTS,MODE2SAVE,Purpose of Mode to Reduce Financial Burden of Travel,,,,,,,,,,,,,,,,"BIKE2SAVE |
+WALK2SAVE |
+PTRANS |","Bicycle to Reduce Financial Burden of Travel |
+Walk to Reduce Financial Burden of Travel |
+Public Transportation to Reduce Financial Burden of Travel |",1,,,,,,,,,,,,,
+Demographics,Mode Preference,In 2 Surveys,Household-Level,Household Characteristics,,NHTS,DRVRCNT,Number of drivers in household,,,,,,,,,,,,,,,,DRVRCNT,Number of drivers in household,1,1,1,1,HHLIC,Number of Household License Holders (Computed),2,,,,,,,
+Demographics,Relationships,NHTS,Household-Level,Household Characteristics,,NHTS,HHRELATD,At least two household persons are related,,,,,,,,,,,,,,,,HHRELATD,At least two household persons are related,1,,,,,,,,,,,,,
+Locations,Home,NHTS,Household-Level,Household Characteristics,,NHTS,LIF_CYC,"Life Cycle classification for the household, derived by attributes pertaining to age, relationship, and work status.",,,,,,,,,,,,,,,,LIF_CYC,"Life Cycle classification for the household, derived by attributes pertaining to age, relationship, and work status.",1,1,1,1,,,,,,,,,,
+Demographics,Technology,NHTS,Household-Level,Household Characteristics,,NHTS,INT,Frequency of Access the Internet by Device,,,,,,,,,,,,,,,,"PC |
+SPHONE |
+TAB |","Frequency of Desktop or Laptop Computer Use to Access the Internet |
+Frequency of Smartphone Use to Access the Internet |
+Frequency of Tablet Use to Access the Internet |",1,,,,CTELE,Cellular Telephone,,2,,,,,,
+Demographics,Mode Preference,NHTS,Household-Level,Household Characteristics,,NHTS,PLACE,Travel is a Financial Burden,,,,,,,,,,,,,,,,PLACE,Travel is a Financial Burden,1,,,,,,,,,,,,,
+Demographics,Household Size,In 2 Surveys,Household-Level,Household Characteristics,,NHTS,RESP_CNT,Count of responding persons per household,,,,,,,,,,,,,,,,RESP_CNT,Count of responding persons per household,1,,,,INTRV,Person Number Reporting Data,,1,,,,,,
+,,NHTS,Household-Level,Identifier,,NHTS,SCRESP,"Person identifier of mail screener respondent, always 1 to roster self first",,,,,,,,,,,,,,,,SCRESP,"Person identifier of mail screener respondent, always 1 to roster self first",1,,,,,,,,,,,,,
+Demographics,Technology,NHTS,Household-Level,Household Characteristics,,NHTS,WEBUSE17,Frequency of internet use,,,,,,,,,,,,,,,,WEBUSE17,Frequency of internet use,1,,,,,,,,,,,,,
+Demographics,Mode Preference,NHTS,Person-Level,Person characteristics,,NHTS,ALT_Transportation,Alternative Mode of Transportation,,,,,,,,,,,,,,,,"ALT_16 |
+ALT_23 |
+ALT_45","Alternative Mode of Transportation: Public Transportation or Taxi |
+Alternative Mode of Transportation: Passenger to Friend/Family Member or Rental Car |
+Alternative Mode of Transportation: Bicycle or Walk",,1,,,,,,,,,,,,
+Demographics,Technology,NYCDOT Mobility Survery,Person-Level,Person characteristics,,NYCDOT Mobility Survery,smartphone_type,Have/has a smartphone,,,,,,,,,smartphone_type,Have/has a smartphone,,1,,,,,,,,,,CTELE,Cellular Telephone,,2,,,,,,
+Demographics,Mode Preference,NHTS,Vehicle-Level,Vehicle-related,,NHTS,ANNMILES,Self-reported annualized mile estimate,,,,,,,,,,,,,,,,"ANNMILES |
+BESTMILE |
+BEST_EDT |
+BEST_FLG |
+BEST_OUT |","Self-reported annualized mile estimate |
+Best estimate of annual miles |
+Flag any edits/adjustments to BESTMILE |
+How BESTMILE was computed |
+Flag identifying BESTMILE outlier values |",,,1,,,,,,,,,,,
+Demographics,Citizenship,NHTS,Person-Level,Person characteristics,,NHTS,CITIZEN,"Born in United States |
+Year of Arrival in United States |",,,,,,,,,,,,,,,,"BORNINUS |
+YRTOUS |","Born in United States |
+Year of Arrival in United States |",,1,,,,,,,,,,,,
+Demographics,Mode Preference,NHTS,Person-Level,Person characteristics,,NHTS,CARRODE,Count of People in Vehicle to Work,,,,,,,,,,,,,,,,CARRODE,Count of People in Vehicle to Work,,1,,,,,,,,,,,,
+Demographics,Ability (and Health),NHTS,Person-Level,Person characteristics,,NHTS,MEDCONDRES,Medical Condition that results in a change of travel behavior.,,,,,,,,,,,,,,,,"CONDNIGH |
+CONDPUB |
+CONDRIDE |
+CONDRIVE |
+CONDSPEC |
+CONDTAX |
+CONDTRAV |
+MCUSED |
+MEDCOND |
+MEDCOND6 |
+HEALTH |
+PHYACT |
+LPACT |
+VPACT |
+WALK4EX |","Medical Condition Results in Limiting Driving to Daytime |
+Medical Condition Results in Using Bus or Subway Less Frequently |
+Medical Condition Results in Asking Others for Rides |
+Medical Condition Results in Giving up Driving |
+Medical Condition Results in Using Special Transportation Services |
+Medical Condition Results in Using a Reduced Fare Taxi |
+Medical Condition Results in Reduced Day-to-Day Travel |
+Medical Condition |
+Medical Condition, How Long |
+Opinion of Health |
+Level of Physical Activity |
+Count of Times of Light or Moderate Physical Activity in Past Week |
+Count of Times of Vigorous Physical Activity in Past Week |
+Count of Walk Trips for Exercise |",,1,,,,,,,,,,,,
+Locations,Shopping,NHTS,Person-Level,Delivery-related,,NHTS,DELIVER,Count of Times Purchased Online for Delivery in Last 30 Days,,,,,,,,,,,,,,,,DELIVER,Count of Times Purchased Online for Delivery in Last 30 Days,,1,,,,,,,,,,,,
+Trip Information,Tour/Day Information,In 2 Surveys,Person-Level,Survey-related,,NHTS,DIARY,Travel Diary completion status,,,,,,,,,,,,,,,,DIARY,Travel Diary completion status,,1,,,"CMPLG | 
+HVLOG","Completed Diary | 
+Have Completed Diary",,1,,,,,,
+Survey ID/Flag,Flag,NHTS,Person-Level,Person characteristics,,NHTS,OUTCNTRY,Respondent was out of the country on travel day.,,,,,,,,,,,,,,,,"OUTCNTRY |
+OUTOFTWN |","Respondent was out of the country on travel day. |
+Away from home for entire travel day |",,1,,,,,,,,,,,,
+Demographics,Employment,NHTS,Person-Level,Person characteristics,,NHTS,PAYPROF,Work for Pay in Previous Week,,,,,,,,,,,,,,,,PAYPROF,Work for Pay in Previous Week,,1,,,,,,,,,,,,
+Demographics,Mode Preference,NHTS,Person-Level,Person characteristics,,NHTS,PRMACT,Primary Activity in Previous Week,,,,,,,,,,,,,,,,PRMACT,Primary Activity in Previous Week,,1,,1,,,,,,,,,,
+Survey ID/Flag,Flag,In 2 Surveys,Trip-Level,Survey-related,,NHTS,PROXY,Trip info from respondent or proxy,,,,,,,,,,,,,,,,PROXY,Trip info from respondent or proxy,,1,,1,PROXY,Proxy Flag,,2,,,,,,
+Trip Information,Travelers,NHTS,Trip-Level,Survey-related,,NHTS,PSGR_FLG,Respondent was passenger on trip,,,,,,,,,,,,,,,,PSGR_FLG,Respondent was passenger on trip,,,,1,,,,,,,,,,
+Trip Information,Timestamp,NHTS,Trip-Level,General trip characteristics,,NHTS,TDWKND,Weekend trip,,,,,,,,,,,,,,,,TDWKND,Weekend trip,,,,1,,,,,,,,,,
+Demographics,Mode Preference,NHTS,Person-Level,Walk-related,,NHTS,WALK_DEF,Reason for Not Walking More: Infrastructure,,,,,,,,,,,,,,,,"WALK_DEF |
+WALK_GKQ |","Reason for Not Walking More: Infrastructure |
+Reason for Not Walking More: Safety",,1,,,,,,,,,,,,
+Demographics,Ability (and Health),NHTS,Person-Level,Person characteristics,,NHTS,MEDDVCUSED,Medical Device Used,,,,,,,,,,,,,,,,"W_CANE |
+W_CHAIR |
+W_CRUTCH |
+W_DOG |
+W_MTRCHR |
+W_NONE |
+W_SCOOTR |
+W_WHCANE |
+W_WLKR","Medical Device Used: Cane |
+Medical Device Used: Wheelchair |
+Medical Device Used: Crutches |
+Medical Device Used: Dog Assistance |
+Medical Device Used: Motorized Wheelchair |
+Medical Device Used: None |
+Medical Device Used: Motorized Scooter |
+Medical Device Used: White Cane |
+Medical Device Used: Walker",,1,,,,,,,,,,,,
+Demographics,Mode Preference,NHTS,Person-Level,Person characteristics,,NHTS,YEARMILE,Miles Personally Driven in all Vehicles,,,,,,,,,,,,,,,,YEARMILE,Miles Personally Driven in all Vehicles,,1,,,,,,,,,,,,
+Demographics,Mode Preference,NHTS,Vehicle-Level,Vehicle-related,,NHTS,FLEXTIME,Flex Time,,,,,,,,,,,,,,,,FLEXTIME,Flex Time,,1,,,,,,,,,,,,
+Demographics,Mode Preference,NHTS,Person-Level,Person characteristics,,NHTS,LSTTRDAY17,Last trip before travel day,,,,,,,,,,,,,,,,LSTTRDAY17,Last trip before travel day,,1,,,,,,,,,,,,
+Survey ID/Flag,Flag,RHTS,Household-Level,Survey-related,,RHTS,RECMode,Recruit Mode,,,,,,,,,,,,,,,,,,,,,,RECMode,Recruit Mode,1,,,,,,,
+Survey ID/Flag,Flag,RHTS,Household-Level,Survey-related,,RHTS,RETMode,Retrieval Mode,,,,,,,,,,,,,,,,,,,,,,RETMode,Retrieval Mode,1,,,,,,,
+Survey ID/Flag,Flag,In 2 Surveys,Household-Level,Survey-related,,NHTS,SMPLSRCE,Sample where the case originated,,,,,,,,,,,,,,,,SMPLSRCE,Sample where the case originated,1,1,1,1,STYPE,Sample Type,1,,,,,,,
+Survey ID/Flag,Flag,RHTS,Household-Level,Survey-related,,RHTS,GTYPE,GPS Type,,,,,,,,,,,,,,,,,,,,,,GTYPE,GPS Type,1,,,,1,1,1,
+Survey ID/Flag,Flag,RHTS,Household-Level,Survey-related,,RHTS,LTELE,Land-Based Telephone Service,,,,,,,,,,,,,,,,,,,,,,LTELE,Land-Based Telephone Service,1,,,,,,,
+Demographics,Language,RHTS,Household-Level,Household Characteristics,,RHTS,HHLNG | O_HHLNG,"Household Language | Other, Household Language",,,,,,,,,,,,,,,,,,,,,,HHLNG | O_HHLNG,"Household Language | Other, Household Language",1,,,,,,,
+Survey ID/Flag,Flag,RHTS,Household-Level,Survey-related,,RHTS,PARTIAL,Flag for Partially Completed Households,,,,,,,,,,,,,,,,,,,,,,PARTIAL,Flag for Partially Completed Households,1,1,,,,,,
+Demographics,Employment,RHTS,Person-Level,Person characteristics,,RHTS,VOLUN,Volunteer,,,,,,,,,,,,,,,,,,,,,,VOLUN,Volunteer,,1,,,,,,
+Demographics,Employment,RHTS,Person-Level,Person characteristics,,RHTS,WKSTAT,Unemployment Status,,,,,,,,,,,,,,,,,,,,,,WKSTAT,Unemployment Status,,1,,,,,,
+Demographics,Employment,RHTS,Person-Level,Work-related,,RHTS,WDAYS,Work Days,,,,,,,,,,,,,,,,,,,,,,WDAYS,Work Days,,1,,,,,,
+Demographics,Employment,RHTS,Person-Level,Work-related,,RHTS,COMPR | O_COMPR,"Compressed Work Week | Other, Compressed Work Week",,,,,,,,,,,,,,,,,,,,,,COMPR | O_COMPR,"Compressed Work Week | Other, Compressed Work Week",,1,,,,,,
+Demographics,Employment,RHTS,Person-Level,Work-related,,RHTS,CDRIV,Commercial Driving,,,,,,,,,,,,,,,,,,,,,,CDRIV,Commercial Driving,,1,,,,,,
+Demographics,Employment,RHTS,Person-Level,Work-related,,RHTS,CVEH,Vehicle Number Driven Commercially,,,,,,,,,,,,,,,,,,,,,,CVEH,Vehicle Number Driven Commercially,,1,,,,,,
+Demographics,Employment,RHTS,Person-Level,Work-related,,RHTS,ESUB_BEN,Employer-Transportation Benefits,,,,,,,,,,,,,,,,,,,,,,"ESUB_1 |
+ESUB_2 |
+ESUB_3 |
+O_ESUB |","Employer-Transportation Benefit 1 |
+Employer-Transportation Benefit 2 |
+Employer-Transportation Benefit 3 |
+Other, Employer-Transportation Benefit |",,1,,,,,,
+Demographics,Employment,RHTS,Person-Level,Work-related,,RHTS,WTIMESTAMP,Work Timestamp,,,,,,,,,,,,,,,,,,,,,,"WSTRT |
+WEND |
+SCHED |
+HRS1 |
+HRS2 |
+HRS3 |
+STRVR |
+O_STRVR |
+ENDVR |
+O_ENDVR |","Work Start Time |
+Work End Time |
+Work Schedule |
+Job #1 Hours |
+Job #2 Hours |
+Job #3 Hours |
+Start Time Variation |
+Other, Start Time Variation |
+End Time Variation |
+Other, End Time Variation |",,1,,,,,,
+Survey ID/Flag,Flag,RHTS,Vehicle-Level,Vehicle characteristics,,RHTS,O_CNTV,Reason Not Used,,,,,,,,,,,,,,,,,,,,,,O_CNTV,Reason Not Used,,,1,,,,,
+Trip Information,Stops,RHTS,Trip-Level,Vehicle-related,,RHTS,DYGOV,Exit Vehicle,,,,,,,,,,,,,,,,,,,,,,DYGOV,Exit Vehicle,,,,1,1,1,,
+Trip Information,Network Attribute,RHTS,Trip-Level,Parking-related,,RHTS,PKUNT,Pay Unit,,,,,,,,,,,,,,,,,,,,,,PKUNT,Pay Unit,,,,1,1,1,,
+Trip Information,Network Attribute,RHTS,Trip-Level,Travel experience-related,,RHTS,TOLFT,Paid Fee for a Toll Road or Bridge/Tunnel on your Trip,,,,,,,,,,,,,,,,,,,,,,TOLFT,Paid Fee for a Toll Road or Bridge/Tunnel on your Trip,,,,1,1,1,,
+Trip Information,Network Attribute,RHTS,Trip-Level,Travel experience-related,,RHTS,TLONB,Number of Toll Facilities Used,,,,,,,,,,,,,,,,,,,,,,TLONB,Number of Toll Facilities Used,,,,1,1,1,,
+Trip Information,Route/Path,RHTS,Trip-Level,Travel experience-related,,RHTS,TLFC1,Toll Road or Bridge/Tunnel,,,,,,,,,,,,,,,,,,,,,,TLFC1,Toll Road or Bridge/Tunnel,,,,1,1,1,,
+Trip Information,Network Attribute,RHTS,Trip-Level,Travel experience-related,,RHTS,TOLLFACNAME,Name of Toll Facility,,,,,,,,,,,,,,,,,,,,,,"TOPN1 |
+TOPN2 |
+TOPN3",Name of Toll Facility,,,,1,1,1,,
+Trip Information,Route/Path,RHTS,Trip-Level,Travel experience-related,,RHTS,TOLLINTCHGENTEXT,Interchange Used to Enter/Exit Facility,,,,,,,,,,,,,,,,,,,,,,"TOLE1 |
+TOLE2 |
+TOLE3 |
+TOLX1 |
+TOLX2 |
+TOLX3 |","Interchange Used to Enter Facility |
+Interchange Used to Exit Facility |",,,,1,1,1,,
+Trip Information,Network Attribute,RHTS,Trip-Level,Travel experience-related,,RHTS,TOLLFEEAMT,Amount of Toll Fee Paid,,,,,,,,,,,,,,,,,,,,,,"TLLC1 |
+TLLC2 |
+TLLC3",Amount of Toll Fee Paid,,,,1,1,1,,
+Trip Information,Network Attribute,RHTS,Trip-Level,Travel experience-related,,RHTS,TOLLPAYMETHOD,"Toll Payment Method |
+Other, Toll Payment Method",,,,,,,,,,,,,,,,,,,,,,"TLFR1 |
+TLFR2 |
+TLFR3 |
+O_TLFR1 |
+O_TLFR2 |
+O_TLFR3 |
+EZPAS |","Toll Payment Method |
+Other, Toll Payment Method |
+E-ZPass Tag",,,,1,1,1,,
+Trip Information,Route/Path,RHTS,Trip-Level,Travel experience-related,,RHTS,TOLLRDBRDGTNNL,Toll Road or Bridge/Tunnel,,,,,,,,,,,,,,,,,,,,,,"TLFC2 |
+TLFC3",Toll Road or Bridge/Tunnel,,,,1,1,1,,
+Trip Information,Route/Path,RHTS,Trip-Level,Transit-related,,RHTS,ROUTE,Route/Line Number for Transit Trips,,,,,,,,,,,,,,,,,,,,,,ROUTE,Route/Line Number for Transit Trips,,,,1,1,1,,
+Trip Information,Network Attribute,RHTS,Trip-Level,Transit-related,,RHTS,FAREC,Transit Fare Cash,,,,,,,,,,,,,,,,,,,,,,FAREC,Transit Fare Cash,,,,1,1,1,,
+Trip Information,Network Attribute,RHTS,Trip-Level,Transit-related,,RHTS,BUSPS | O_BUSPS,"Transit Pass Type | Other, Transit Pass Type ",,,,,,,,,,,,,,,,,,,,,,BUSPS | O_BUSPS,"Transit Pass Type | Other, Transit Pass Type ",,,,1,1,1,,
+Trip Information,Network Attribute,RHTS,Trip-Level,Transit-related,,RHTS,MTABP | O_MTABP,"Type of Unlimited Ride Metrocard | Other, Type of MetroCard",,,,,,,,,,,,,,,,,,,,,,MTABP | O_MTABP,"Type of Unlimited Ride Metrocard | Other, Type of MetroCard",,,,1,1,1,,
+Trip Information,Network Attribute,RHTS,Trip-Level,Transit-related,,RHTS,FRBAS | O_FRBAS,"Transit Pass Unit | Other, Transit Pass Unit",,,,,,,,,,,,,,,,,,,,,,FRBAS | O_FRBAS,"Transit Pass Unit | Other, Transit Pass Unit",,,,1,1,1,,
+Trip Information,Duration,RHTS,Trip-Level,Survey-related,,RHTS,LONGTRIP,Flag for Long Trip Duration,,,,,,,,,,,,,,,,,,,,,,LONGTRIP,Flag for Long Trip Duration,,,,1,,,,
+Survey ID/Flag,Flag,RHTS,Trip-Level,Survey-related,,RHTS,NOTE,Note from NYMTC/NJTPA Data Review,,,,,,,,,,,,,,,,,,,,,,NOTE,Note from NYMTC/NJTPA Data Review,,,,1,,,,
+Survey ID/Flag,Flag,RHTS,Trip-Level,Survey-related,,RHTS,CHANGED,Flag Indicating Record was changed during data QC,,,,,,,,,,,,,,,,,,,,,,CHANGED,Flag Indicating Record was changed during data QC,,,,1,,,,
+Trip Information,Tour/Day Information,RHTS,Trip-Level,Survey-related,,RHTS,TRIPNO,Unlinked Trip Number (segment),,,,,,,,,,,,,,,,,,,,,,TRIPNO,Unlinked Trip Number (segment),,,,,1,,,
+Trip Information,Tour/Day Information,RHTS,Trip-Level,Survey-related,,RHTS,LINKFLAG,Linked Trip Flag (1 if true),,,,,,,,,,,,,,,,,,,,,,LINKFLAG,Linked Trip Flag (1 if true),,,,,1,,,
+Trip Information,Tour/Day Information,RHTS,Trip-Level,Survey-related,,RHTS,TOUR_ID,Tour ID,,,,,,,,,,,,,,,,,,,,,,TOUR_ID,Tour ID,,,,,1,1,1,1
+Trip Information,Mode,RHTS,Trip-Level,Survey-related,,RHTS,LTMODE_AGG,Aggregate Linked Trip Mode,,,,,,,,,,,,,,,,,,,,,,LTMODE_AGG,Aggregate Linked Trip Mode,,,,,1,1,,
+Trip Information,Mode,RHTS,Trip-Level,Survey-related,,RHTS,MODE_SAMP,Linked Trip Mode Code (as used for Sampling),,,,,,,,,,,,,,,,,,,,,,MODE_SAMP,Linked Trip Mode Code (as used for Sampling),,,,,1,1,,
+Trip Information,Network Attribute,RHTS,Trip-Level,Transit-related,,RHTS,FARE,Transit Fare Type,,,,,,,,,,,,,,,,,,,,,,FARE,Transit Fare Type,,,,1,1,1,,
+Survey ID/Flag,ID,RHTS,Trip-Level,Survey-related,,RHTS,UNIQUEID1,UID for Unlinked Trips,,,,,,,,,,,,,,,,,,,,,,UNIQUEID1,UID for Unlinked Trips,,,,,,1,,
+Survey ID/Flag,ID,RHTS,Trip-Level,Survey-related,,RHTS,UNIQUEID2,UID for linkedtrips (use to merge with Linked Trip File),,,,,,,,,,,,,,,,,,,,,,UNIQUEID2,UID for linkedtrips (use to merge with Linked Trip File),,,,,1,1,,
+Survey ID/Flag,ID,RHTS,Trip-Level,Identifier,,RHTS,PERTYPE,Person Type Code,,,,,,,,,,,,,,,,,,,,,,PERTYPE,Person Type Code,,,,,1,,1,
+Survey ID/Flag,ID,RHTS,Trip-Level,Identifier,,RHTS,SUBT_ID,Subtour ID,,,,,,,,,,,,,,,,,,,,,,SUBT_ID,Subtour ID,,,,,1,,,1
+Trip Information,Tour/Day Information,RHTS,Trip-Level,Survey-related,,RHTS,PRIM_TRP1,Tripno for 1st Trip to Primary Dest,,,,,,,,,,,,,,,,,,,,,,"PRIM_TRP1 |
+PRIM_TRP2 |
+PRIM_TRP3 |
+PRIM_TRP4 |","Tripno for 1st Trip to Primary Dest |
+Tripno for 2nd Trip to Primary Dest |
+Tripno for 3rd Trip to Primary Dest |
+Tripno for 4th Trip to Primary Dest |",,,,,,,1,
+Trip Information,Tour/Day Information,RHTS,Trip-Level,Survey-related,,RHTS,TRIP_NUM,Number of Trips on the tour,,,,,,,,,,,,,,,,,,,,,,TRIP_NUM,Number of Trips on the tour,,,,,,,1,
+Trip Information,Tour/Day Information,RHTS,Trip-Level,Survey-related,,RHTS,SUBTOURS,Number of Subtours,,,,,,,,,,,,,,,,,,,,,,SUBTOURS,Number of Subtours,,,,,,,1,1
+Survey ID/Flag,ID,RHTS,Trip-Level,Survey-related,,RHTS,UNIQUEID3,Unique ID for Tours (use to merge with Tour File),,,,,,,,,,,,,,,,,,,,,,UNIQUEID3,Unique ID for Tours (use to merge with Tour File),,,,,,1,1,1
+Survey ID/Flag,ID,RHTS,Trip-Level,Survey-related,,RHTS,UNIQUEID4,Unique ID for SubTours (use to merge with Linked Trip File),,,,,,,,,,,,,,,,,,,,,,UNIQUEID4,Unique ID for SubTours (use to merge with Linked Trip File),,,,,1,,,1
+Trip Information,Tour/Day Information,RHTS,Trip-Level,Survey-related,,RHTS,TOURFAC,Tour correction factor,,,,,,,,,,,,,,,,,,,,,,TOURFAC,Tour correction factor,,,,,1,1,1,1

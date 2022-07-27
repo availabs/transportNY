@@ -14,25 +14,25 @@ const Home = () => {
   const transportNYItems = [
     {
       title: 'Incidents Dashboard',
-      description: loremIpmsum[1],
+      description: `Dashboard showing the number, duration, impact of incidents by Region by month.`,
       to: `/incidents`,
       icon: 'fa-duotone fa-truck-tow',
     },
     {
       title: 'Workzones Dashboard',
-      description: loremIpmsum[0],
+      description: `Dashboard showing the number, duration, impact of workzones & construction by Region by month.`,
       to: `/workzones`,
       icon: 'fa-duotone fa-truck-container',
     },
     {
       title: 'Congestion Dashboard',
-      description: loremIpmsum[0],
+      description: `Dashboard showing the cost and type of congestion, top congested corridors by Region by month.`,
       to: `/congestion`,
       icon: 'fa-duotone fa-traffic-light',
     },
     {
-      title: 'Reliability Dashboard',
-      description: loremIpmsum[1],
+      title: 'Reliability Dashboard  (Anticipated)',
+      description: `Dashboard showing the reliability metrics by corridors by Region by month.`,
       to: `Reliability`,
       icon: '',
     }
@@ -41,8 +41,12 @@ const Home = () => {
 
   return (
     <div className='max-w-6xl mx-auto'>
-      <div className='mt-8 md:mt-32 mx-2 md:mx-0 '>
-        <div className='text-lg'>TSMO Dashboards</div>
+      <div className='mt-8 md:mt-12 mx-2 md:mx-0 '>
+        <div className='text-3xl font-bold text-grey-700'>Transportation Systems Management and Operations Performance Dashboards</div>
+        <div className='p-1 my-4 text-xl text-gray-700 font-thin leading-8'>
+          A set of performance dashboards that are intended to provide an at-a-glance view of critical aspects of Transportation Systems Management and Operations. The dashboards provide a monthly view of performance and conditions by NYSDOT Region.  The contents and data supporting the dashboards are continually evolving and new features, capabilities and measures will be added over time based on feedback.  New dashboard areas will also be added over time to cover other aspects of TSMO like weather, arterial management, and travel demand management. 
+
+        </div>
         <div className="rounded-lg overflow-hidden shadow divide-y divide-gray-200 sm:divide-y-0 sm:grid sm:grid-cols-2 sm:gap-px">
           {transportNYItems.map((action, actionIdx) => (
             <div
@@ -73,7 +77,7 @@ const Home = () => {
                     {action.title}
                   </Link>
                 </h3>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2  text-gray-500">
                  {action.description}
                 </p>
               </div>
