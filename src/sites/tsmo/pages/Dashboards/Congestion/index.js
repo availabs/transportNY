@@ -27,6 +27,8 @@ import { CongestionStatComp/*, displayDuration*/ } from "sites/tsmo/pages/Dashbo
 
 import {/*duration2minutes*/  vehicleDelay2cost} from 'sites/tsmo/pages/Dashboards/Incidents/components/utils'
 
+import { calcCost } from "./components/data_processing"
+
 function getDaysInMonth(year, month) {
   return new Date(year, month, 0).getDate();
 }
@@ -54,6 +56,23 @@ const useComponentDidMount = () => {
   return mounted;
 };
 
+const calculateCosts = (tmcDelayData, tmcMetaData) => {
+	const costs = {
+		total: 0,
+		accident: 0,
+		construction: 0,
+		"non-recurrent": 0,
+		recurrent: 0
+	}
+console.log("calculateCosts:", tmcDelayData, tmcMetaData)
+	for (const tmc in tmcDelayData) {
+		for (const key in costs) {
+			costs[key] += calcCost(tmcDelayData[tmc][key], get(tmcMetaData, tmc, {}))
+		}
+	}
+	return costs
+}
+
 const RecurrentDelay = props => {
   //const theme = useTheme()
   const MOUNTED = useComponentDidMount();
@@ -71,12 +90,11 @@ const RecurrentDelay = props => {
     [MOUNTED]
   );
 
-
   const { falcor, falcorCache } = useFalcor();
 
   React.useEffect(() => {
-
     if (!region) return;
+
     setLoading(1);
 
     falcor
@@ -88,8 +106,130 @@ const RecurrentDelay = props => {
         ],
         // ["excessive", "delay", "top", "fsystems",topFsystemsKey]
       )
+      // .then(res => console.log("RES:", res))
       .then(() => setLoading(-1));
   }, [falcor, setLoading, region, year, fsystem]);
+
+  const TMCs = React.useMemo(() => {
+    const tmcMap = F_SYSTEM_MAP[fsystem].reduce((a, c) => {
+      const data = get(falcorCache, ["delay", year, month, region, c, "delay", "value"], []);
+      const tmcs = data.filter(d => d.total).map(d => d.tmc);
+      return tmcs.reduce((aa, cc) => { aa[cc] = true; return aa; }, a);
+    }, {});
+    return Object.keys(tmcMap);
+  }, [falcorCache, year, month, region, fsystem]);
+
+  React.useEffect(() => {
+    if (TMCs.length) {
+      falcor.chunk(["tmc", TMCs, "meta", [year - 1, year], ["aadt", "aadt_combi", "aadt_singl"]])
+    }
+  }, [falcor, TMCs]);
+
+  const compareData = React.useMemo(() => {
+    const py = year - 1,
+      pm = (month - 2 + 12) % 12 + 1;
+    const dates = {
+      curr: [year, month],
+      pm: [pm === 12 ? py : year, pm],
+      py: [py, month]
+    }
+    const currDelayData = F_SYSTEM_MAP[fsystem].reduce((a, c) => {
+      const d = get(falcorCache, ["delay", ...dates.curr, region, c, "delay", "value"], []);
+      return d.reduce((aa, { tmc, ...rest }) => {
+        if (!aa[tmc]) {
+          aa[tmc] = {
+            index: `${ dates.curr[0] }-${ `0${ dates.curr[1] }`.slice(-1) }`,
+            total: 0,
+            accident: 0,
+            construction: 0,
+            "non-recurrent": 0,
+            recurrent: 0
+          }
+        }
+        aa[tmc].total += rest.total;
+        aa[tmc].accident += rest.accident;
+        aa[tmc].construction += rest.construction;
+        aa[tmc]["non-recurrent"] += (rest.non_recurrent - rest.accident - rest.construction);
+        aa[tmc].recurrent += (rest.total - rest.non_recurrent);
+        return aa;
+      }, a)
+    }, {});
+    const currTmcMetaData = TMCs.reduce((a, tmc) => {
+      a[tmc] = get(falcorCache, ["tmc", tmc, "meta", dates.curr[0]], {});
+      return a;
+    }, {});
+    const currMonth = calculateCosts(currDelayData, currTmcMetaData);
+
+    const pmDelayData = F_SYSTEM_MAP[fsystem].reduce((a, c) => {
+      const d = get(falcorCache, ["delay", ...dates.pm, region, c, "delay", "value"], []);
+      return d.reduce((aa, { tmc, ...rest }) => {
+        if (!aa[tmc]) {
+          aa[tmc] = {
+            index: `${ dates.pm[0] }-${ `0${ dates.pm[1] }`.slice(-1) }`,
+            total: 0,
+            accident: 0,
+            construction: 0,
+            "non-recurrent": 0,
+            recurrent: 0
+          }
+        }
+        aa[tmc].total += rest.total;
+        aa[tmc].accident += rest.accident;
+        aa[tmc].construction += rest.construction;
+        aa[tmc]["non-recurrent"] += (rest.non_recurrent - rest.accident - rest.construction);
+        aa[tmc].recurrent += (rest.total - rest.non_recurrent);
+        return aa;
+      }, a)
+    }, {});
+    const pmTmcMetaData = TMCs.reduce((a, tmc) => {
+      a[tmc] = get(falcorCache, ["tmc", tmc, "meta", dates.pm[0]], {})
+      return a;
+    }, {});
+    const prevMonth = calculateCosts(pmDelayData, pmTmcMetaData);
+
+    const pyDelayData = F_SYSTEM_MAP[fsystem].reduce((a, c) => {
+      const d = get(falcorCache, ["delay", ...dates.py, region, c, "delay", "value"], []);
+      return d.reduce((aa, { tmc, ...rest }) => {
+        if (!aa[tmc]) {
+          aa[tmc] = {
+            index: `${ dates.py[0] }-${ `0${ dates.py[1] }`.slice(-1) }`,
+            total: 0,
+            accident: 0,
+            construction: 0,
+            "non-recurrent": 0,
+            recurrent: 0
+          }
+        }
+        aa[tmc].total += rest.total;
+        aa[tmc].accident += rest.accident;
+        aa[tmc].construction += rest.construction;
+        aa[tmc]["non-recurrent"] += (rest.non_recurrent - rest.accident - rest.construction);
+        aa[tmc].recurrent += (rest.total - rest.non_recurrent);
+        return aa;
+      }, a)
+    }, {});
+    const pyTmcMetaData = TMCs.reduce((a, tmc) => {
+      a[tmc] = get(falcorCache, ["tmc", tmc, "meta", dates.py[0]], {})
+      return a;
+    }, {});
+    const prevYear = calculateCosts(pyDelayData, pyTmcMetaData);
+
+    return {
+      colorsForTypes,
+      currMonth,
+      prevMonth,
+      prevYear
+    }
+
+  }, [falcorCache, TMCs, year, month, region, fsystem])
+
+  // React.useEffect(() => {
+  //   F_SYSTEM_MAP[fsystem].forEach(fsys => {
+  //     const data = get(falcorCache, ["delay", year, month, region, fsys, "delay", "value"], []);
+  //
+  //     console.log("DATA:", year, month, region, fsys, data.filter(d => d.total));
+  //   })
+  // }, [falcorCache, year, month, region, fsystem])
 
 
    const [fullDelayData, setFullDelayData] = React.useState({});
@@ -148,42 +288,42 @@ const RecurrentDelay = props => {
     // const currentMonth = get(get(pieData,'data',[]).filter(d => d.index === tableDate),'[0]',{recurrent: 0, "non-recurrent": 0})
     // const currentMonthTotal = (currentMonth['recurrent'] + currentMonth['non-recurrent'])
 
-    const compareData = React.useMemo(() => {
-      const py = year - 1,
-        pm = (month - 2 + 12) % 12 + 1,
-        prevMonth = `${+pm === 12 ? year - 1 : year }-${ `0${ pm }`.slice(-2) }`,
-        prevYear = `${ py }-${ `0${ month }`.slice(-2) }`;
-      return {
-        colorsForTypes,
-        currMonth: pieData.data.reduce((a, c) => {
-            if (c.index === tableDate) {
-              return {
-                ...c,
-                numDays: getDaysInMonth(year,month)
-              };
-            }
-            return a;
-          }, 0),
-        prevMonth: pieData.data.reduce((a, c) => {
-            if (c.index === prevMonth) {
-              return {
-                ...c,
-                numDays: getDaysInMonth(year,pm)
-              };
-            }
-            return a;
-          }, 0),
-        prevYear: pieData.data.reduce((a, c) => {
-            if (c.index === prevYear) {
-              return {
-                ...c,
-                numDays: getDaysInMonth(py,month)
-              };
-            }
-            return a;
-          }, 0),
-      }
-    }, [pieData, tableDate, year, month]);
+    // const compareDataOld = React.useMemo(() => {
+    //   const py = year - 1,
+    //     pm = (month - 2 + 12) % 12 + 1,
+    //     prevMonth = `${+pm === 12 ? py : year }-${ `0${ pm }`.slice(-2) }`,
+    //     prevYear = `${ py }-${ `0${ month }`.slice(-2) }`;
+    //   return {
+    //     colorsForTypes,
+    //     currMonth: pieData.data.reduce((a, c) => {
+    //         if (c.index === tableDate) {
+    //           return {
+    //             ...c,
+    //             numDays: getDaysInMonth(year,month)
+    //           };
+    //         }
+    //         return a;
+    //       }, 0),
+    //     prevMonth: pieData.data.reduce((a, c) => {
+    //         if (c.index === prevMonth) {
+    //           return {
+    //             ...c,
+    //             numDays: getDaysInMonth(year,pm)
+    //           };
+    //         }
+    //         return a;
+    //       }, 0),
+    //     prevYear: pieData.data.reduce((a, c) => {
+    //         if (c.index === prevYear) {
+    //           return {
+    //             ...c,
+    //             numDays: getDaysInMonth(py,month)
+    //           };
+    //         }
+    //         return a;
+    //       }, 0),
+    //   }
+    // }, [pieData, tableDate, year, month]);
 
   const [hoveredTMCs, setHoveredTMCs] = React.useState([]);
 
@@ -191,6 +331,7 @@ const RecurrentDelay = props => {
       <DashboardLayout
         loading={loading}>
         <div className='bg-white shadow rounded p-4 col-span-4 md:col-span-2 lg:col-span-1'>
+
           <div className='w-full font-medium text-blue-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '>
             Total Congestion Cost ( vs Prev Month/day )
           </div>
@@ -199,12 +340,13 @@ const RecurrentDelay = props => {
             data={compareData}
             display={vehicleDelay2cost}
           />
+
         </div>
-        <div className='bg-white shadow rounded p-4 col-span-4 md:col-span-2 lg:col-span-1'>
+        <div className='flex flex-col bg-white shadow rounded p-4 col-span-4 md:col-span-2 lg:col-span-1'>
           <div className='w-full font-medium text-blue-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '>
             Congestion by Type
           </div>
-          <div className='w-full h-64'>
+          <div className="flex-1">
             <PieGraph
               keys={pieData.keys}
               data={get(pieData,'data',[]).filter(d => d.index === tableDate)}
@@ -214,7 +356,6 @@ const RecurrentDelay = props => {
                 HoverComp: PieHoverComp
               }}/>
           </div>
-
         </div>
         <div className='bg-white shadow rounded p-4 col-span-2 col-span-4 lg:col-span-2'>
           <div className='w-full font-medium text-blue-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '>

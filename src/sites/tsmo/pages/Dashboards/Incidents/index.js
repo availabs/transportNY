@@ -32,6 +32,10 @@ import {F_SYSTEM_MAP} from '../components/metaData'
 
 import {duration2minutes,  vehicleDelay2cost} from './components/utils'
 
+import { calcCost } from "sites/tsmo/pages/Dashboards/Congestion/components/data_processing"
+
+const siFormat = d3format(".3s")
+
 const Incidents = props => {
 
   const theme = useTheme()
@@ -81,50 +85,82 @@ const Incidents = props => {
     ];
   }, [geographies, geography, month])
 
+  const [eventIds, setEventIds] = React.useState([]);
+
   React.useEffect(() => {
+    if (!requests.length) return;
 
-    if(!requests.length) return
-
-    setLoading(1)
+    setLoading(1);
 
     falcor.get(["transcom2", "eventsbyGeom", requests])
-      .then(res => {
+      .then(() => setLoading(-1));
+  }, [falcor, requests, setLoading]);
 
-        //console.log('use effect', res, requests)
-        const eventIds = requests.reduce((a, c) => {
-          const ids = get(res, ["json", "transcom2", "eventsbyGeom", c], []);
-          a.push(...ids);
-          return a;
-        }, []);
+  React.useEffect(() => {
+    const eventIds = requests.reduce((a, c) => {
+      const ids = get(falcorCache, ["transcom2", "eventsbyGeom", c, "value"], []);
+      a.push(...ids);
+      return a;
+    }, []);
+    if (eventIds.length) {
+      setEventIds(eventIds);
+    }
+  }, [falcorCache, requests]);
 
-        console.log('eventids', res)
+  React.useEffect(() => {
+    if (!eventIds.length) return;
 
-        if (eventIds.length) {
-          //console.log('request some geoms', eventIds)
-          return falcor.chunk([
-            "transcom2", "eventsbyId", eventIds,
-            ["event_id",
-             "n",
-             "congestion_data",
-             "facility",
-             "description",
-             "start_date_time",
-             "event_duration",
-             "event_type",
-             "event_category",
-             "nysdot_general_category",
-             "nysdot_sub_category",
-             "start_date_time",
-             "geom"]
-          ])
+    setLoading(1);
+
+    falcor.chunk([
+      "transcom2", "eventsbyId", eventIds,
+      ["event_id",
+       "n",
+       "congestion_data",
+       "facility",
+       "description",
+       "start_date_time",
+       "event_duration",
+       "event_type",
+       "event_category",
+       "nysdot_general_category",
+       "nysdot_sub_category",
+       "start_date_time",
+       "geom"]
+    ]).then(() => setLoading(-1));
+  }, [falcor, eventIds]);
+
+  const [TMCs, setTMCs] = React.useState([]);
+
+  React.useEffect(() => {
+    if (!eventIds.length) return;
+
+    const tmcSet = eventIds.reduce((a, c) => {
+      const d = get(falcorCache, ["transcom2", "eventsbyId", c, "congestion_data", "value", "tmcDelayData"], {});
+      for (const tmc in d) {
+        if (d[tmc]) {
+          a.add(tmc);
         }
-      })
-      .then((resp) => {
-        setLoading(-1);
-      });
-  },[falcor,requests, setLoading]);
+      };
+      return a;
+    }, new Set());
 
+    if (tmcSet.size) {
+      setTMCs([...tmcSet]);
+    }
+  }, [falcorCache, eventIds]);
 
+  React.useEffect(() => {
+    const [y1, m] = month.split("-");
+    const y2 = new Date(y1, m - 1, 0).getFullYear();
+
+    if (TMCs.length) {
+      falcor.chunk([
+        "tmc", TMCs, "meta", [...new Set([+y1, +y2])],
+        ["aadt", "aadt_combi", "aadt_singl"]
+      ]);
+    }
+  }, [falcor, month, TMCs]);
 
   let data = React.useMemo(()=> {
 
@@ -137,9 +173,6 @@ const Incidents = props => {
     // let totalVehicleDelay = 0
     let currentMonthDays = []
     let prevMonthDays = []
-
-    //console.log('getting data', eventIds,falcorCache)
-
 
     let data = eventIds.reduce((out, eventId) => {
       let event = get(falcorCache, ["transcom2", "eventsbyId", eventId],  null)
@@ -167,6 +200,9 @@ const Incidents = props => {
       return out
     },{})
 
+    const [y1, m] = month.split("-");
+    const y2 = new Date(y1, m - 1, 0).getFullYear();
+
     const currentMonthbyCat = get(falcorCache, ["transcom2", "eventsbyGeom", requests[0], "value"], [])
       .map(c => get(falcorCache, ["transcom2", "eventsbyId", c], {}))
       .sort((a,b) => get(b,'congestion_data.value.vehicleDelay',0) - get(a,'congestion_data.value.vehicleDelay',0))
@@ -175,18 +211,33 @@ const Incidents = props => {
           if(!a[e.nysdot_sub_category]) {
             a[e.nysdot_sub_category] = {count: 0, duration: 0, v_delay: 0, top_20_v_delay: 0}
           }
-          let day = get(e,'start_date_time','').split(' ')[0]
-          if(!currentMonthDays.includes(day)) {
-            currentMonthDays.push(day)
+          let date = get(e,'start_date_time','').slice(0, 10)
+          if(!currentMonthDays.includes(date)) {
+            currentMonthDays.push(date)
           }
-          a[e.nysdot_sub_category].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+
+          let cost = 0;
+          const tmcDD = get(e, ["congestion_data", "value", "tmcDelayData"], {});
+          for (const tmc in tmcDD) {
+            const tmcMeta = get(falcorCache, ["tmc", tmc, "meta", y1], {})
+            const c = calcCost(tmcDD[tmc], tmcMeta);
+            cost += c;
+          }
+
+          // a[e.nysdot_sub_category].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+          a[e.nysdot_sub_category].v_delay += cost
+
           if(i < 20) {
-            a[e.nysdot_sub_category].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
-            a['Total'].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+            // a[e.nysdot_sub_category].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+            a[e.nysdot_sub_category].top_20_v_delay += cost;
+            // a['Total'].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+            a['Total'].top_20_v_delay += cost;
           }
           a[e.nysdot_sub_category].duration += duration2minutes(e.event_duration);
           a[e.nysdot_sub_category].count += 1;
-          a['Total'].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+          // a['Total'].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+          a['Total'].v_delay += cost;
+
           a['Total'].duration += duration2minutes(e.event_duration);
           a['Total'].count += 1;
           return a
@@ -202,18 +253,31 @@ const Incidents = props => {
           if(!a[e.nysdot_sub_category]) {
             a[e.nysdot_sub_category] = {count: 0, duration: 0, v_delay: 0, top_20_v_delay: 0}
           }
-          let day = get(e,'start_date_time','').split(' ')[0]
-          if(!prevMonthDays.includes(day)) {
-            prevMonthDays.push(day)
+          let date = get(e,'start_date_time','').slice(0, 10)
+          if(!prevMonthDays.includes(date)) {
+            prevMonthDays.push(date)
           }
+
+          let cost = 0;
+          const tmcDD = get(e, ["congestion_data", "value", "tmcDelayData"], {});
+          for (const tmc in tmcDD) {
+            const tmcMeta = get(falcorCache, ["tmc", tmc, "meta", y2], {})
+            const c = calcCost(tmcDD[tmc], tmcMeta);
+            cost += c;
+          }
+
           if(i < 20) {
-            a[e.nysdot_sub_category].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
-            a['Total'].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+            // a[e.nysdot_sub_category].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+            // a['Total'].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+            a[e.nysdot_sub_category].top_20_v_delay += cost
+            a['Total'].top_20_v_delay += cost
           }
-          a[e.nysdot_sub_category].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+          // a[e.nysdot_sub_category].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+          a[e.nysdot_sub_category].v_delay += cost
           a[e.nysdot_sub_category].duration += duration2minutes(e.event_duration);
           a[e.nysdot_sub_category].count += 1;
-          a['Total'].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+          // a['Total'].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+          a['Total'].v_delay += cost
           a['Total'].duration += duration2minutes(e.event_duration);
           a['Total'].count += 1;
           return a
@@ -358,21 +422,23 @@ const Incidents = props => {
         </div>
 
         <div className='bg-white shadow rounded p-4 col-span-4 md:col-span-2 lg:col-span-1 '>
-          <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-1 '>Total Incident Delay Cost ( vs Prev Month/day )</div>
+          <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-1 '>
+            Total Incident Delay Cost ( vs Prev Month/day )
+          </div>
           <HeroStatComp
             data={data}
             stat={'v_delay'}
-            display={vehicleDelay2cost}
+            display={siFormat}
           />
         </div>
         <div className='bg-white shadow rounded p-4 col-span-4 md:col-span-2 lg:col-span-1'>
-          <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-1 '>Top 20 Incident Delay Cost ( vs Prev Month/day )</div>
-
-
-            <HeroStatComp
+          <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-1 '>
+            Top 20 Incident Delay Cost ( vs Prev Month/day )
+          </div>
+          <HeroStatComp
             data={data}
             stat={'top_20_v_delay'}
-            display={vehicleDelay2cost}
+            display={siFormat}
             perUnit={false}
           />
         </div>
@@ -394,11 +460,10 @@ const Incidents = props => {
         </div>
         <div className='pt-4 pb-2 px-2 col-span-4'>
           <span className='text-xl font-medium uppercase text-gray-700'>
-             Top 20 Incidents by Cost {month}
+             Top 20 Incidents by Cost for {month}
           </span>
         </div>
         <div className='bg-white shadow rounded col-span-4 lg:col-span-2'>
-
           <IncidentTable
             events={data.events}
             setHoveredEvent={ setHoveredEvent }

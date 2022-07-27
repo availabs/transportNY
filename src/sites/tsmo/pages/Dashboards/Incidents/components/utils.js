@@ -1,6 +1,6 @@
 import { format as d3format } from "d3-format"
 
-const fFormat = d3format(",.2s")
+const fFormat = d3format(",.3s")
 
 export const duration2minutes = (dur) => {
     if(!dur) return 0
@@ -24,5 +24,3 @@ export const vehicleDelay2cost = (delay,perUnit=1) => {
 
   return `$${fFormat((delay/perUnit)*15)}`
 }
-
- 

@@ -23,7 +23,7 @@ export const getTMCs = (rawDelayData,year,month,region,f_systems,prevYearMonth) 
     return total
 }
 
-export const getCorridors = (tmcMetaData,year,tmcs) => { 
+export const getCorridors = (tmcMetaData,year,tmcs) => {
   let corridors = Object.keys(tmcMetaData).reduce((corridors,tmcId) => {
       let tmc = tmcMetaData[tmcId]
 
@@ -70,7 +70,7 @@ export const getCorridors = (tmcMetaData,year,tmcs) => {
     },{})
 
     //console.log('corridors corridors', corridors)
-  
+
     return Object.values(corridors).map((c,i) => {
       c.roadname = c.roadnames.join(',')
       c.direction = c.directions.join(',')
@@ -94,4 +94,10 @@ export const getCorridors = (tmcMetaData,year,tmcs) => {
       cor.rank = i+1
       return cor
     })
+}
+
+export const calcCost = (delay, { aadt, aadt_combi, aadt_singl }) => {
+	if (!delay || !aadt) return 0;
+	return (aadt - aadt_combi - aadt_singl) / aadt * delay * 1.66 * 17 +
+					(aadt_combi + aadt_singl) / aadt * delay * 33
 }
