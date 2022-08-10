@@ -23,6 +23,12 @@ const isLeapYear = year => {
 const daysInYearear = year => {
   return isLeapYear(year) ? 366 : 365;
 }
+const DirectionMap = {
+  N: "North",
+  S: "South",
+  E: "East",
+  W: "West"
+}
 
 const GridColors = getColorRange(5, "RdYlGn")
 
@@ -35,6 +41,7 @@ const YearGrid = ({}) => {
     return id || "unknown";
   }, [geo])
   const [tmclinear, setTmcLinear] = React.useState(212);
+  const [direction, setDirection] = React.useState("N");
 
   const [TMCs, setTMCs] = React.useState([]);
 
@@ -56,11 +63,11 @@ const YearGrid = ({}) => {
     if (params.year) {
       setYear(params.year);
     }
-    if (params.geo) {
-      setGeo(params.geo);
-    }
     if (params.tmclinear) {
+      const [geoid, tmclinear, direction] = params.tmclinear.split("_");
+      setGeo(`COUNTY|${ geoid }`);
       setTmcLinear(params.tmclinear);
+      setDirection(direction.toUpperCase());
     }
   }, [params]);
 
@@ -78,16 +85,16 @@ const YearGrid = ({}) => {
 
   React.useEffect(() => {
     loadingStart();
-    falcor.get(["tmc", "tmclinear", year, geo, tmclinear])
+    falcor.get(["tmc", "tmclinear", year, geo, tmclinear, direction])
       .then(() => loadingStop());
-  }, [falcor, year, geo, tmclinear, loadingStart, loadingStop]);
+  }, [falcor, year, geo, tmclinear, direction, loadingStart, loadingStop]);
 
   React.useEffect(() => {
-    const tmcs = get(falcorCache, ["tmc", "tmclinear", year, geo, tmclinear, "value"], []);
+    const tmcs = get(falcorCache, ["tmc", "tmclinear", year, geo, tmclinear, direction, "value"], []);
     if (tmcs.length) {
       setTMCs(tmcs.sort((a, b) => +a.road_order - +b.road_order).map(t => t.tmc));
     }
-  }, [falcorCache, year, geo, tmclinear]);
+  }, [falcorCache, year, geo, tmclinear, direction]);
 
   React.useEffect(() => {
     if (TMCs.length) {
@@ -149,7 +156,10 @@ const YearGrid = ({}) => {
         <ScalableLoading />
       </div>
       <div className="px-12 py-4 text-xl">
-        <b>Geography:</b> { name }<br /><b>Year:</b> { year }<br /><b>TMC Linear:</b> { tmclinear }
+        <b>Geography:</b> { name }<br />
+        <b>Year:</b> { year }<br />
+        <b>TMC Linear:</b> { tmclinear }<br />
+        <b>Direction:</b> { DirectionMap[direction] }
       </div>
       { gridData.map(([month, gd]) => {
           return (
@@ -264,7 +274,7 @@ const GridHoverComp = ({ data, indexFormat, keyFormat, valueFormat }) => {
 
 const config = [
   { name:'Year Grid',
-    path: "/yeargrid/:year/:geo/:tmclinear",
+    path: "/yeargrid/:tmclinear/:year",
     showInBlocks: false,
     exact: true,
     auth: false,
