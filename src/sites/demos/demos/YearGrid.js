@@ -203,7 +203,7 @@ const GridTracker = ({ month, ...props }) => {
     return new Date(y, m, 0).getDate();
   }, [month]);
   return (
-    <div style={ { height: `${ days * 48 }px`}}>
+    <div style={ { height: `${ days * 24 }px`}}>
       <TrackVisibility once partialVisibility className="h-full relative">
         <GridComp { ...props }/>
       </TrackVisibility>
