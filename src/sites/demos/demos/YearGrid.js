@@ -66,7 +66,7 @@ const YearGrid = ({}) => {
     if (params.tmclinear) {
       const [geoid, tmclinear, direction] = params.tmclinear.split("_");
       setGeo(`COUNTY|${ geoid }`);
-      setTmcLinear(params.tmclinear);
+      setTmcLinear(tmclinear);
       setDirection(direction.toUpperCase());
     }
   }, [params]);
