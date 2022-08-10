@@ -17,13 +17,15 @@ import tsmo from 'sites/tsmo'
 import freightatlas from 'sites/freightatlas'
 import npmrds from 'sites/npmrds'
 import transit from 'sites/transit'
+import demos from 'sites/demos'
 
 const Sites = {
   'transportNY': transportNY,
   'tsmo': tsmo,
   'freightatlas' : freightatlas,
   'npmrds': npmrds,
-  'transit': transit
+  'transit': transit,
+  'demos': demos
 }
 
 const App = (props) => {
@@ -44,11 +46,11 @@ const App = (props) => {
       {/*<div>{SUBDOMAIN} {site.title} {PROJECT_HOST}</div>*/}
       <Switch>
         { Routes.map((route, i) =>
-            <DefaultLayout 
-              site={site.title} 
-              layout={Layout} 
-              key={ i } 
-              { ...route } 
+            <DefaultLayout
+              site={site.title}
+              layout={Layout}
+              key={ i }
+              { ...route }
               { ...props }
               menus={ Routes.filter(r => r.mainNav) }/>
           )
