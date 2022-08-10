@@ -6,7 +6,7 @@ import { useParams } from "react-router-dom"
 
 import get from "lodash.get"
 import { groups as d3groups } from "d3-array"
-import { scaleQuantile } from "d3-scale"
+import { scaleQuantile, scaleThreshold } from "d3-scale"
 
 import {
   useFalcor,
@@ -30,7 +30,7 @@ const DirectionMap = {
   W: "West"
 }
 
-const GridColors = getColorRange(5, "RdYlGn")
+const GridColors = getColorRange(7, "RdYlGn")
 
 const YearGrid = ({}) => {
 
@@ -101,7 +101,7 @@ const YearGrid = ({}) => {
       loadingStart();
       falcor.get(
         ["tmc", TMCs, "data", year, "by", "hour"],
-        ["tmc", TMCs, "meta", year, "length"]
+        ["tmc", TMCs, "meta", year, "length", "avg_speedlimit"]
       )
       .then(() => loadingStop());
     }
@@ -118,16 +118,36 @@ const YearGrid = ({}) => {
       return a;
     }, []);
 
-    const scl = scaleQuantile()
-      .domain(data.map(d => d.speed))
-      .range(GridColors);
-
-    setScale(() => scl);
 
     const widths = TMCs.reduce((a, c) => {
       a[c] = get(falcorCache, ["tmc", c, "meta", year, "length"], 1);
       return a;
     }, {})
+
+
+    let avgSL = Math.round(TMCs.reduce((a,c) =>  {
+        return a + (get(widths, c, 1) * (3600.0 / get(falcorCache, ["tmc", c, "meta", year, "avg_speedlimit"], 35)))
+    },0) / TMCs.length)
+
+    console.log('avgSL', avgSL)
+
+    const scl = scaleThreshold()
+        .domain([avgSL-25,avgSL-20, avgSL-15, avgSL-10, avgSL -5 , avgSL, avgSL+2 ])
+        .range(GridColors);
+
+    // const scl = scaleQuantile()
+    //   .domain(data.map(d => d.speed))
+    //   .range(GridColors);
+
+    setScale(() => scl);
+
+    
+
+   
+
+    
+
+
 
     setTmcWidths(widths);
 
@@ -183,7 +203,7 @@ const GridTracker = ({ month, ...props }) => {
     return new Date(y, m, 0).getDate();
   }, [month]);
   return (
-    <div style={ { height: `${ days * 24 }px`}}>
+    <div style={ { height: `${ days * 48 }px`}}>
       <TrackVisibility once partialVisibility className="h-full relative">
         <GridComp { ...props }/>
       </TrackVisibility>
