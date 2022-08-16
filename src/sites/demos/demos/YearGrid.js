@@ -17,6 +17,8 @@ import {
 
 import { GridGraph } from "modules/avl-graph/src"
 
+import GridComp from "./components/GridComponent"
+
 const isLeapYear = year => {
   return (year % 400 === 0) || ((year % 100 !== 0) && (year % 4 === 0));
 }
@@ -185,89 +187,8 @@ const GridTracker = ({ month, ...props }) => {
   return (
     <div style={ { height: `${ days * 24 }px`}}>
       <TrackVisibility once partialVisibility className="h-full relative">
-        <GridComp { ...props }/>
+        <GridComp { ...props } month={ month }/>
       </TrackVisibility>
-    </div>
-  )
-}
-
-const indexFormat = index => {
-  let [date, hour] = index.split(":");
-  const ampm = +hour < 12 ? "am" : "pm";
-  hour = +hour % 12 === 0 ? 12 : +hour % 12;
-  return `${ date } ${ hour }${ ampm }`;
-}
-const leftAxisFormat = index => {
-  return index.slice(0, 10);
-}
-
-const GridComp = ({ data, ttToSpeed, TMCs, tmcWidths, scale, isVisible }) => {
-  const tickValues = React.useMemo(() => {
-    return data.filter(d => d.index.split(":")[1] == 12).map(d => d.index)
-  }, [data])
-  return !isVisible ? null : (
-    <GridGraph
-      showAnimations={ false }
-      colors={ scale }
-      data={ data }
-      keys={ TMCs }
-      keyWidths={ tmcWidths }
-      margin={ { top: 0, right: 60, bottom: 60, left: 120 } }
-      axisBottom={ { tickDensity: 1 } }
-      axisLeft={ {
-        format: leftAxisFormat,
-        tickValues
-      } }
-      hoverComp={ {
-        HoverComp: GridHoverComp,
-        valueFormat: ",.2f",
-        indexFormat
-      } }
-    />
-  )
-}
-
-const GridHoverComp = ({ data, indexFormat, keyFormat, valueFormat }) => {
-
-  const indexes = get(data, "indexes", []);
-  const index = get(data, "index", null);
-
-  const [l, h] = React.useMemo(() => {
-    const i = indexes.indexOf(index);
-    const range = 5;
-    const l = i + range < indexes.length ? Math.max(0, i - range) : indexes.length - range * 2 - 1;
-    const h = i >= range ? i + range : range * 2;
-    return [l, h];
-  }, [indexes, index]);
-
-  const theme = useTheme();
-
-  return (
-    <div className={ `
-      grid grid-cols-1 gap-1 px-2 pt-1 pb-2 rounded
-      ${ theme.accent1 }
-    ` }>
-      <div className="font-bold text-lg leading-6 border-b-2 pl-2">
-        { keyFormat(get(data, "key", null)) }
-      </div>
-      { indexes.slice(l, h + 1).map(i => (
-          <div key={ i } className={ `
-            flex items-center px-2 rounded transition
-          `}>
-            <div className="mr-2 rounded-sm color-square w-5 h-5"
-              style={ {
-                backgroundColor: get(data, ["indexData", i, "color"], null),
-                opacity: index === i ? 1 : 0.2
-              } }/>
-            <div className="mr-4">
-              { indexFormat(i) }:
-            </div>
-            <div className="text-right flex-1">
-              { valueFormat(get(data, ["indexData", i, "value"], 0)) }
-            </div>
-          </div>
-        ))
-      }
     </div>
   )
 }
