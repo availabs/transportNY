@@ -126,6 +126,7 @@ const YearGrid = ({}) => {
 
 
     let avgSL = Math.round(TMCs.reduce((a,c) =>  {
+        console.log(get(falcorCache, ["tmc", c, "meta", year, "avg_speedlimit"], 'na'))
         return a + (get(widths, c, 1) * get(falcorCache, ["tmc", c, "meta", year, "avg_speedlimit"], 35))
     },0) / Object.values(widths).reduce((a,b) => a+b,0))
 
