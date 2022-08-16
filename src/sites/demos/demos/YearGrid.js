@@ -6,7 +6,7 @@ import { useParams } from "react-router-dom"
 
 import get from "lodash.get"
 import { groups as d3groups } from "d3-array"
-import { scaleQuantile } from "d3-scale"
+import { scaleQuantile, scaleThreshold } from "d3-scale"
 
 import {
   useFalcor,
@@ -32,7 +32,7 @@ const DirectionMap = {
   W: "West"
 }
 
-const GridColors = getColorRange(5, "RdYlGn")
+const GridColors = getColorRange(9, "RdYlGn")
 
 const YearGrid = ({}) => {
 
@@ -103,7 +103,7 @@ const YearGrid = ({}) => {
       loadingStart();
       falcor.get(
         ["tmc", TMCs, "data", year, "by", "hour"],
-        ["tmc", TMCs, "meta", year, "length"]
+        ["tmc", TMCs, "meta", year, ["length", "avg_speedlimit"]]
       )
       .then(() => loadingStop());
     }
@@ -120,16 +120,36 @@ const YearGrid = ({}) => {
       return a;
     }, []);
 
-    const scl = scaleQuantile()
-      .domain(data.map(d => d.speed))
-      .range(GridColors);
-
-    setScale(() => scl);
 
     const widths = TMCs.reduce((a, c) => {
       a[c] = get(falcorCache, ["tmc", c, "meta", year, "length"], 1);
       return a;
     }, {})
+
+
+    let avgSL = Math.round(TMCs.reduce((a,c) =>  {
+        return a + (get(widths, c, 1) * get(falcorCache, ["tmc", c, "meta", year, "avg_speedlimit"], 35))
+    },0) / Object.values(widths).reduce((a,b) => a+b,0))
+
+    console.log('avgSL', avgSL)
+
+    const scl = scaleThreshold()
+        .domain([avgSL-20,avgSL-15, avgSL-10, avgSL-5, avgSL -2 , avgSL, avgSL+5 ])
+        .range(GridColors);
+
+    // const scl = scaleQuantile()
+    //   .domain(data.map(d => d.speed))
+    //   .range(GridColors);
+
+    setScale(() => scl);
+
+    
+
+   
+
+    
+
+
 
     setTmcWidths(widths);
 
