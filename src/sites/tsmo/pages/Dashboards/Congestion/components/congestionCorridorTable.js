@@ -2,6 +2,7 @@ import React from "react"
 
 import get from "lodash.get";
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom'
 
 import { format as d3format } from "d3-format"
 
@@ -30,7 +31,7 @@ const TableColumns = [
           change = rank - pm_rank
 
       return (
-        <div>
+        <Link to={`/corridor/${d.row.original.corridor}/${d.row.original.year}`}>
           {rank}
           <span className='pl-2 text-sm w-full text-center'>
           {change === 0 ?
@@ -40,7 +41,7 @@ const TableColumns = [
             <span><i className="fas fa-arrow-up"/> {Math.abs(change)}</span>
           }
           </span>
-        </div>
+        </Link>
       )
     }
   },
@@ -140,6 +141,8 @@ const CongestionSegmentTable = ({ rawDelayData, setHoveredTMCs }) => {
   const onRowLeave = React.useCallback((e, { original }) => {
     setHoveredTMCs([]);
   }, [setHoveredTMCs]);
+
+  console.log('corridors', corridors)
 
   return (
     <div>

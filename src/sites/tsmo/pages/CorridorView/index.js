@@ -103,7 +103,7 @@ const YearGrid = ({}) => {
       loadingStart();
       falcor.get(
         ["tmc", TMCs, "data", year, "by", "hour"],
-        ["tmc", TMCs, "meta", year, ["length", "avg_speedlimit", "firstname"]]
+        ["tmc", TMCs, "meta", year, ["length", "avg_speedlimit", 'firstname']]
       )
       .then(() => loadingStop());
     }
@@ -132,7 +132,7 @@ const YearGrid = ({}) => {
         return a + (get(widths, c, 1) * get(falcorCache, ["tmc", c, "meta", year, "avg_speedlimit"], 35))
     },0) / Object.values(widths).reduce((a,b) => a+b,0))
 
-    
+    console.log('avgSL', avgSL)
 
     const scl = scaleThreshold()
         .domain([avgSL-20,avgSL-15, avgSL-10, avgSL-5, avgSL -2 , avgSL, avgSL+5 ])
@@ -207,7 +207,7 @@ const GridTracker = ({ month, ...props }) => {
 
 const config = [
   { name:'Year Grid',
-    path: "/yeargrid/:tmclinear/:year",
+    path: "/corridor/:tmclinear/:year",
     showInBlocks: false,
     exact: true,
     auth: false,
@@ -219,7 +219,7 @@ const config = [
     component: YearGrid
   },
   { name:'Year Grid',
-    path: "/yeargrid",
+    path: "/corridor",
     exact: true,
     auth: false,
     mainNav: false,

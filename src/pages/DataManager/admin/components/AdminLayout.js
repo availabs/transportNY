@@ -36,7 +36,7 @@ const SourceThumb = ({source}) => {
   return (
     <div className='w-full p-4 bg-white my-1'>
       <div className='text-xl font-medium'>
-        <Link to={`/datasources/source/${source.id}`}>{source.name}</Link>
+        <Link to={`/datamanager/source/${source.id}`}>{source.name}</Link>
       </div>
       <div className='py-2'>
         {source.description}
@@ -79,41 +79,7 @@ const SourcesLayout = ({children}) => {
 
   const current_site = get(domainFilters, `[${SUBDOMAIN}]`, '') //'Freight Atlas'
   
-  let menuItems =  useMemo(() => { 
-    let menu =  Object.values(sources
-        .filter(d => get(d,`categories`,[]).map(d => d[0]).includes(current_site))
-        .filter(d => { 
-          return !layerSearch || d.name.split('/').pop().split('_').join(' ').toLowerCase().includes(layerSearch.toLowerCase()) 
-        })
-      .reduce((a,b) => {
-        b.categories.forEach(cat => {
-          if(cat[0] === current_site){
-            if(!a[cat[1]]){
-              a[cat[1]] = {
-                name: <div className='font-bold'>{cat[1]}</div>,
-                subMenus: []
-              }
-            }
-            a[cat[1]].subMenus.push({
-              className: ' ',
-              name: (
-                <div className={`flex p-2 hover:bg-blue-100 border-r-4 ${b.id === +sourceId ? 'border-blue-600 text-blue-600' : 'border-neutral-100'}`}>
-                  <Link 
-                    to={`/datasources/source/${b.id}`} 
-                    className='flex-1 pl-6 cursor-pointer text-sm'>
-                      {b.name.split('/').pop().split('_').join(' ')}
-                  </Link>
-                </div>
-              ),
-              
-            })
-          }
-        })
-        return a
-      },{}))
-      console.log('cacl menu', menu)
-      return menu
-    },[sources,sourceId,layerSearch,current_site])
+  
 
 
   return (
@@ -122,8 +88,8 @@ const SourcesLayout = ({children}) => {
         <Breadcrumbs />
       </div>
       <div className='flex'>
-        <div className='w-72  shadow h-full sticky top-0 '>
-          <div className='pt-1 pb-4 px-1'>
+        <div className='flex-1 pl-4 '>
+          <div>
             <input 
               className='w-full text-lg p-2 border border-gray-300 ' 
               placeholder='Search for Layers'
@@ -131,17 +97,12 @@ const SourcesLayout = ({children}) => {
               onChange={(e) => setLayerSearch(e.target.value)}
             />
           </div>
-          <div className = 'h-full overflow-y-scroll scrollbar-xs overflow-x-hidden max-h-screen'>
-            <SideNav
-              menuItems={menuItems}
-              themeOptions={{size:'full',responsive: 'none',color: 'transparent'}}
-            />
-          </div>
-        </div>
-        <div className='flex-1 pl-4 '>
             {children ? 
               children : 
                 sources
+                .filter(d => { 
+                  return !layerSearch || d.name.toLowerCase().includes(layerSearch.toLowerCase()) 
+                })
                 .map((s,i) => <SourceThumb key={i} source={s} />)
             }
           

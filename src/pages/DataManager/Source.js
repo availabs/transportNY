@@ -105,6 +105,30 @@ const config = [{
     size: 'micro'
   },
   component: Source
+},
+{
+  name:'View Source',
+  path: "/datamanager/source/:sourceId",
+  exact: true,
+  auth: false,
+  mainNav: false,
+  sideNav: {
+    color: 'dark',
+    size: 'micro'
+  },
+  component: Source
+},
+{
+  name:'View Source',
+  path: "/datamanager/source/:sourceId/:page",
+  exact: true,
+  auth: false,
+  mainNav: false,
+  sideNav: {
+    color: 'dark',
+    size: 'micro'
+  },
+  component: Source
 }]
 
 export default config;
