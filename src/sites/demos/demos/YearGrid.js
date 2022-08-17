@@ -198,7 +198,7 @@ const GridTracker = ({ month, ...props }) => {
   }, [month]);
   return (
     <div style={ { height: `${ days * 24 }px`}}>
-      <TrackVisibility once offset={ 500 } className="h-full relative">
+      <TrackVisibility offset={ days * 12 } className="h-full relative">
         <GridComp { ...props } month={ month }/>
       </TrackVisibility>
     </div>
