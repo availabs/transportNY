@@ -22,6 +22,32 @@ const leftAxisFormat = index => {
   return index.slice(0, 10);
 }
 
+const InitialState = {
+  loading: 0,
+  incidentsLoaded: false,
+  numEvents: 0,
+  points: [],
+}
+const Reducer = (state, action) => {
+  const { type, ...payload } = action;
+  switch (type) {
+    case "loading-start":
+      return {
+        ...state,
+        loading: state.loading + 1
+      }
+    case "loading-stop":
+      return {
+        ...state,
+        loading: state.loading - 1
+      }
+    case "update-state":
+      return { ...state, ...payload };
+    default:
+      return state;
+  }
+}
+
 const GridComponent = ({ month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisible }) => {
 
   const tickValues = React.useMemo(() => {
@@ -30,13 +56,17 @@ const GridComponent = ({ month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisib
 
   const MOUNTED = useComponentDidMount();
 
-  const [loading, setLoading] = React.useState(0);
+  const [state, dispatch] = React.useReducer(Reducer, InitialState);
+
+  const { loading, numEvents, points, incidentsLoaded } = state;
 
   const startLoading = React.useCallback(() => {
-    MOUNTED && setLoading(l => l + 1);
+    if (!MOUNTED) return;
+    dispatch({ type: "loading-start" });
   }, [MOUNTED]);
   const stopLoading = React.useCallback(() => {
-    MOUNTED && setLoading(l => l - 1);
+    if (!MOUNTED) return;
+    dispatch({ type: "loading-stop" });
   }, [MOUNTED]);
 
   const { falcor, falcorCache } = useFalcor();
@@ -45,14 +75,25 @@ const GridComponent = ({ month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisib
     if (!isVisible) return;
     startLoading();
     falcor.get(["transcom2", "events", "tmc", TMCs, month, ["Incident", "Construction"]])
-      // .then(res => console.log("RES:", res))
+      .then(res => {
+        const numEvents = TMCs.reduce((a, c) => {
+          return ["Incident", "Construction"].reduce((aa, cc) => {
+            const n = get(res, ["json", "transcom2", "events", "tmc", c, month, cc, "length"], 0);
+            return aa + n;
+          }, a);
+        }, 0);
+        dispatch({
+          type: "update-state",
+          incidentsLoaded: true,
+          numEvents
+        });
+      })
       .then(() => stopLoading());
   }, [falcor, TMCs, month, startLoading, stopLoading, isVisible]);
 
-  const [transcom, setTranscom] = React.useState([]);
-
   React.useEffect(() => {
     if (!isVisible) return;
+
     const events = TMCs.reduce((a, c) => {
       return ["Incident", "Construction"].reduce((aa, cc) => {
         const e = get(falcorCache, ["transcom2", "events", "tmc", c, month, cc, "value"], []);
@@ -60,11 +101,8 @@ const GridComponent = ({ month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisib
         return aa;
       }, a);
     }, []);
-    setTranscom(events);
-  }, [falcorCache, TMCs, month, isVisible]);
 
-  const points = React.useMemo(() => {
-    return transcom.map(({ start_date_time, type, tmc }) => {
+    const points = events.map(({ start_date_time, type, tmc }) => {
       const date = new Date(start_date_time);
       const epoch = date.getHours() * 12 + Math.floor(date.getMinutes() / 5);
       return {
@@ -75,9 +113,16 @@ const GridComponent = ({ month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisib
         r: "6"
       }
     })
-  }, [transcom]);
 
-  return !isVisible ? null : (
+    dispatch({
+      type: "update-state",
+      points
+    });
+  }, [falcorCache, TMCs, month, isVisible]);
+
+  const renderGraph = data.length && isVisible && incidentsLoaded && (numEvents === points.length);
+
+  return (
     <>
       <div className={ `
         inset-0 ${ loading ? "absolute" : "hidden" }
@@ -85,25 +130,37 @@ const GridComponent = ({ month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisib
       ` }>
         <ScalableLoading />
       </div>
-      <GridGraph
-        showAnimations={ false }
-        colors={ scale }
-        data={ data }
-        keys={ TMCs }
-        keyWidths={ tmcWidths }
-        points={ points }
-        margin={ { top: 0, right: 60, bottom: 60, left: 120 } }
-        axisBottom={ { tickDensity: 1 } }
-        axisLeft={ {
-          format: leftAxisFormat,
-          tickValues
-        } }
-        hoverComp={ {
-          HoverComp: GridHoverComp,
-          valueFormat: ",.2f",
-          indexFormat
-        } }
-      />
+      { !renderGraph ? null :
+        <div className="w-full h-full relative">
+          <div className="bg-gray-300 absolute inset-0 flex items-center justify-center"
+            style={ {
+              marginRight: "60px",
+              marginBottom: "60px",
+              marginLeft: "120px"
+            } }>
+            <div className="font-bold text-3xl">RENDERING GRAPH...</div>
+          </div>
+          <GridGraph
+            showAnimations={ false }
+            colors={ scale }
+            data={ data }
+            keys={ TMCs }
+            keyWidths={ tmcWidths }
+            points={ points }
+            margin={ { top: 0, right: 60, bottom: 60, left: 120 } }
+            axisBottom={ { tickDensity: 1 } }
+            axisLeft={ {
+              format: leftAxisFormat,
+              tickValues
+            } }
+            hoverComp={ {
+              HoverComp: GridHoverComp,
+              valueFormat: ",.2f",
+              indexFormat
+            } }
+          />
+        </div>
+      }
     </>
   )
 }
