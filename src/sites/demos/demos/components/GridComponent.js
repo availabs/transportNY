@@ -48,7 +48,7 @@ const Reducer = (state, action) => {
   }
 }
 
-const GridComponent = ({ month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisible }) => {
+const GridComponent = ({ month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisible = true }) => {
 
   const tickValues = React.useMemo(() => {
     return data.filter(d => d.index.split(":")[1] == 12).map(d => d.index)
@@ -112,7 +112,7 @@ const GridComponent = ({ month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisib
         stroke: type === "Incident" ? "#00f" : "#fff",
         r: "6"
       }
-    })
+    });
 
     dispatch({
       type: "update-state",
@@ -124,15 +124,27 @@ const GridComponent = ({ month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisib
 
   return (
     <>
-      <div className={ `
-        inset-0 ${ loading ? "absolute" : "hidden" }
-        flex justify-center items-center z-50 bg-black opacity-50
-      ` }>
+      <div
+        className={ `
+          inset-0 ${ loading ? "absolute" : "hidden" } rounded-lg
+          flex justify-center items-center z-50 bg-black opacity-50
+        ` }
+        style={ {
+          marginRight: "60px",
+          marginBottom: "60px",
+          marginLeft: "120px"
+        } }>
         <ScalableLoading />
       </div>
+      <div className="border-2 rounded-lg absolute inset-0"
+        style={ {
+          marginRight: "60px",
+          marginBottom: "60px",
+          marginLeft: "120px"
+        } }/>
       { !renderGraph ? null :
         <div className="w-full h-full relative">
-          <div className="bg-gray-300 absolute inset-0 flex items-center justify-center"
+          <div className="bg-gray-300 rounded-lg absolute inset-0 flex items-center justify-center"
             style={ {
               marginRight: "60px",
               marginBottom: "60px",

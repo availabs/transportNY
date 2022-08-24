@@ -5,14 +5,17 @@ import TrackVisibility from 'react-on-screen';
 import { useParams } from "react-router-dom"
 
 import get from "lodash.get"
-import { groups as d3groups } from "d3-array"
-import { scaleQuantile, scaleThreshold } from "d3-scale"
+import { groups as d3groups, extent as d3extent } from "d3-array"
+import { scaleQuantile, scaleQuantize, scaleThreshold } from "d3-scale"
+
+import { useComponentDidMount } from "sites/tsmo/pages/Dashboards/components/utils"
 
 import {
   useFalcor,
   useTheme,
   getColorRange,
-  ScalableLoading
+  ScalableLoading,
+  Select
 } from "modules/avl-components/src"
 
 import { GridGraph } from "modules/avl-graph/src"
@@ -32,16 +35,33 @@ const DirectionMap = {
   W: "West"
 }
 
-const GridColors = getColorRange(9, "RdYlGn")
+const GridColors = getColorRange(9, "RdYlGn");
 
-const YearGrid = ({}) => {
+const DataTypes = [
+  { name: "Travel Time", value: "tt" },
+  { name: "Total Delay", value: "td" },
+  { name: "Non-recurrent Delay", value: "nrd" },
+  { name: "Recurrent Delay", value: "rd" }
+]
 
-  const [year, setYear] = React.useState(2021);
+const MonthGrid = () => {
+
+  const MOUNTED = useComponentDidMount();
+
+  const [month, setMonth] = React.useState("2021-04");
+  const year = React.useMemo(() => {
+    const [y, m] = month.split("-");
+    return y;
+  }, [month]);
+  const days = React.useMemo(() => {
+    const [y, m] = month.split("-");
+    return new Date(y, m, 0).getDate();
+  }, [month]);
   const [geo, setGeo] = React.useState("COUNTY|36001");
   const geoid = React.useMemo(() => {
     const [level, id] = geo.split("|");
     return id || "unknown";
-  }, [geo])
+  }, [geo]);
   const [tmclinear, setTmcLinear] = React.useState(212);
   const [direction, setDirection] = React.useState("N");
 
@@ -49,21 +69,24 @@ const YearGrid = ({}) => {
 
   const [gridData, setGridData] = React.useState([]);
   const [tmcWidths, setTmcWidths] = React.useState({});
+  const [dataType, setDataType] = React.useState("rd");
   const [scale, setScale] = React.useState(() => scaleQuantile());
 
   const [loading, setLoading] = React.useState(0);
   const loadingStart = React.useCallback(() => {
+    if (!MOUNTED) return;
     setLoading(prev => prev + 1);
-  }, []);
+  }, [MOUNTED]);
   const loadingStop = React.useCallback(() => {
+    if (!MOUNTED) return;
     setLoading(prev => prev - 1);
-  }, []);
+  }, [MOUNTED]);
 
   const params = useParams();
 
   React.useEffect(() => {
-    if (params.year) {
-      setYear(params.year);
+    if (params.month) {
+      setMonth(params.month);
     }
     if (params.tmclinear) {
       const [geoid, tmclinear, direction] = params.tmclinear.split("_");
@@ -102,12 +125,12 @@ const YearGrid = ({}) => {
     if (TMCs.length) {
       loadingStart();
       falcor.get(
-        ["tmc", TMCs, "tt", "year", year, "by", "hour"],
+        ["tmc", TMCs, dataType, "month", month, "by", "hour"],
         ["tmc", TMCs, "meta", year, ["length", "avg_speedlimit"]]
       )
       .then(() => loadingStop());
     }
-  }, [falcor, year, TMCs]);
+  }, [falcor, month, year, dataType, TMCs]);
 
   React.useEffect(() => {
     const widths = TMCs.reduce((a, c) => {
@@ -115,44 +138,52 @@ const YearGrid = ({}) => {
       return a;
     }, {});
 
+    setTmcWidths(widths);
+
     const data = TMCs.reduce((a, c) => {
-      const d = get(falcorCache, ["tmc", c, "tt", "year", year, "by", "hour", "value"], []);
+      const d = get(falcorCache, ["tmc", c, dataType, "month", month, "by", "hour", "value"], []);
       const mapped = d.map(d => {
-        const speed = get(widths, d.tmc, 1) / (d.tt / 3600);
-        return { ...d, speed };
+        if (dataType === "tt") {
+          const value = get(widths, d.tmc, 1) / (d.value / 3600);
+          return { ...d, value };
+        }
+        return d;
       });
       a.push(...mapped);
       return a;
     }, []);
 
-    let avgSL = Math.round(TMCs.reduce((a,c) =>  {
-      return a + (get(widths, c, 1) * get(falcorCache, ["tmc", c, "meta", year, "avg_speedlimit"], 35))
-    },0) / Object.values(widths).reduce((a,b) => a+b,0));
+    let scl = scaleQuantile()
+      .domain(data.map(d => d.value).filter(Boolean))
+      .range([...GridColors].reverse());
 
-    const scl = scaleThreshold()
-      .domain([avgSL - 25, avgSL - 20, avgSL - 15, avgSL - 10, avgSL - 5, avgSL - 2.5, avgSL, avgSL + 5])
-      .range(GridColors);
+    if (dataType === "tt") {
+      let avgSL = Math.round(
+        TMCs.reduce((a, c) =>  {
+          return a + (get(widths, c, 1) * get(falcorCache, ["tmc", c, "meta", year, "avg_speedlimit"], 35))
+        }, 0) / Object.values(widths).reduce((a, b) => a + b, 0)
+      );
+      scl = scaleThreshold()
+        .domain([avgSL - 25, avgSL - 20, avgSL - 15, avgSL - 10, avgSL - 5, avgSL - 2.5, avgSL, avgSL + 5])
+        .range(GridColors);
+    }
 
-    // const scl = scaleQuantile()
-    //   .domain(data.map(d => d.speed))
-    //   .range(GridColors);
+    setScale(() =>  scl);
 
-    setScale(() => scl);
+    const grouped = d3groups(data, d => `${ d.date }:${ `0${ d.resolution }`.slice(-2) }`);
 
-    setTmcWidths(widths);
-
-    const grouped = d3groups(data, d => d.date.slice(0, 7), d => `${ d.date }:${ d.resolution.toString().padStart(2, '0') }`);
-
-    const gd = grouped.map(([month, md]) => {
-      const mmd = md.map(([index, data]) => {
-        return data.reduce((a, c) => { a[c.tmc] = c.speed; return a; }, { index });
-      }).sort((a, b) => a.index.localeCompare(b.index))
-      return [month, mmd]
-    }).sort((a, b) => a[0].localeCompare(b[0]));
+    const gd = grouped.map(([index, data]) => {
+      return data.reduce((a, c) => {
+        if (c.value) {
+          a[c.tmc] = c.value;
+        }
+        return a;
+      }, { index });
+    }).sort((a, b) => a.index.localeCompare(b.index));
 
     setGridData(gd);
 
-  }, [falcorCache, year, TMCs]);
+  }, [falcorCache, month, year, dataType, TMCs]);
 
   return (
     <div>
@@ -162,45 +193,37 @@ const YearGrid = ({}) => {
       ` }>
         <ScalableLoading />
       </div>
-      <div className="px-12 py-4 text-xl">
-        <b>Geography:</b> { name }<br />
-        <b>Year:</b> { year }<br />
-        <b>TMC Linear:</b> { tmclinear }<br />
-        <b>Direction:</b> { DirectionMap[direction] }
+      <div className="px-12 py-4 grid grid-cols-2 gap-4">
+        <div className="text-xl">
+          <span className="font-bold">Geography:</span> { name }<br />
+          <span className="font-bold">Month:</span> { month }<br />
+          <span className="font-bold">TMC Linear:</span> { tmclinear }<br />
+          <span className="font-bold">Direction:</span> { DirectionMap[direction] }
+        </div>
+        <div>
+          <span className="text-xl font-bold">Data Type</span><br />
+          <Select options={ DataTypes }
+            value={ dataType }
+            accessor={ d => d.name }
+            valueAccessor={ d => d.value }
+            onChange={ setDataType }/>
+        </div>
       </div>
-      { gridData.map(([month, gd]) => {
-          return (
-            <GridTracker key={ month }
-              TMCs={ TMCs }
-              tmcWidths={ tmcWidths }
-              data={ gd }
-              month={ month }
-              scale={ scale }
-            />
-          )
-        })
-      }
-    </div>
-  )
-}
-
-const GridTracker = ({ month, ...props }) => {
-  const days = React.useMemo(() => {
-    const [y, m] = month.split("-");
-    return new Date(y, m, 0).getDate();
-  }, [month]);
-  return (
-    <div style={ { height: `${ days * 24 }px`}}>
-      <TrackVisibility partialVisibility className="h-full relative">
-        <GridComp { ...props } month={ month }/>
-      </TrackVisibility>
+      <div className="relative" style={ { height: `${ days * 24 }px`}}>
+        <GridComp month={ month }
+          TMCs={ TMCs }
+          tmcWidths={ tmcWidths }
+          data={ gridData }
+          month={ month }
+          scale={ scale }/>
+      </div>
     </div>
   )
 }
 
 const config = [
-  { name:'Year Grid',
-    path: "/yeargrid/:tmclinear/:year",
+  { name:'Month Grid',
+    path: "/monthgrid/:tmclinear/:month",
     showInBlocks: false,
     exact: true,
     auth: false,
@@ -209,10 +232,10 @@ const config = [
       color: 'dark',
       size: 'micro'
     },
-    component: YearGrid
+    component: MonthGrid
   },
-  { name:'Year Grid',
-    path: "/yeargrid",
+  { name:'Month Grid',
+    path: "/monthgrid",
     exact: true,
     auth: false,
     mainNav: false,
@@ -220,7 +243,7 @@ const config = [
       color: 'dark',
       size: 'micro'
     },
-    component: YearGrid
+    component: MonthGrid
   }
 ]
 
