@@ -22,7 +22,7 @@ import GridComp from "./components/GridComponent"
 const isLeapYear = year => {
   return (year % 400 === 0) || ((year % 100 !== 0) && (year % 4 === 0));
 }
-const daysInYear = year => {
+const daysInYearear = year => {
   return isLeapYear(year) ? 366 : 365;
 }
 const DirectionMap = {
@@ -102,36 +102,41 @@ const YearGrid = ({}) => {
     if (TMCs.length) {
       loadingStart();
       falcor.get(
-        ["tmc", TMCs, "tt", "year", year, "by", "hour"],
-        ["tmc", TMCs, "meta", year, ["length", "avg_speedlimit"]]
+        ["tmc", TMCs, "data", year, "by", "hour"],
+        ["tmc", TMCs, "meta", year, ["length", "avg_speedlimit", "firstname"]]
       )
       .then(() => loadingStop());
     }
   }, [falcor, year, TMCs]);
 
   React.useEffect(() => {
-    const widths = TMCs.reduce((a, c) => {
-      a[c] = get(falcorCache, ["tmc", c, "meta", year, "length"], 1);
-      return a;
-    }, {});
-
     const data = TMCs.reduce((a, c) => {
-      const d = get(falcorCache, ["tmc", c, "tt", "year", year, "by", "hour", "value"], []);
+      const d = get(falcorCache, ["tmc", c, "data", year, "by", "hour", "value"], []);
       const mapped = d.map(d => {
-        const speed = get(widths, d.tmc, 1) / (d.tt / 3600);
+        const speed = get(tmcWidths, d.tmc, 1) / (d.tt / 3600);
         return { ...d, speed };
       });
       a.push(...mapped);
       return a;
     }, []);
 
+
+    const widths = TMCs.reduce((a, c) => {
+      a[c] = get(falcorCache, ["tmc", c, "meta", year, "length"], 1);
+      return a;
+    }, {})
+
+
     let avgSL = Math.round(TMCs.reduce((a,c) =>  {
-      return a + (get(widths, c, 1) * get(falcorCache, ["tmc", c, "meta", year, "avg_speedlimit"], 35))
-    },0) / Object.values(widths).reduce((a,b) => a+b,0));
+        console.log(get(falcorCache, ["tmc", c, "meta", year, "avg_speedlimit"], 'na'))
+        return a + (get(widths, c, 1) * get(falcorCache, ["tmc", c, "meta", year, "avg_speedlimit"], 35))
+    },0) / Object.values(widths).reduce((a,b) => a+b,0))
+
+    
 
     const scl = scaleThreshold()
-      .domain([avgSL - 25, avgSL - 20, avgSL - 15, avgSL - 10, avgSL - 5, avgSL - 2.5, avgSL, avgSL + 5])
-      .range(GridColors);
+        .domain([avgSL-20,avgSL-15, avgSL-10, avgSL-5, avgSL -2 , avgSL, avgSL+5 ])
+        .range(GridColors);
 
     // const scl = scaleQuantile()
     //   .domain(data.map(d => d.speed))
@@ -145,7 +150,10 @@ const YearGrid = ({}) => {
 
     const gd = grouped.map(([month, md]) => {
       const mmd = md.map(([index, data]) => {
-        return data.reduce((a, c) => { a[c.tmc] = c.speed; return a; }, { index });
+        return {
+          index,
+          ...data.reduce((a, c) => { a[c.tmc] = c.speed; return a; }, {})
+        }
       }).sort((a, b) => a.index.localeCompare(b.index))
       return [month, mmd]
     }).sort((a, b) => a[0].localeCompare(b[0]));
@@ -191,7 +199,7 @@ const GridTracker = ({ month, ...props }) => {
   }, [month]);
   return (
     <div style={ { height: `${ days * 24 }px`}}>
-      <TrackVisibility partialVisibility className="h-full relative">
+      <TrackVisibility offset={ days * 12 } className="h-full relative">
         <GridComp { ...props } month={ month }/>
       </TrackVisibility>
     </div>
@@ -200,7 +208,7 @@ const GridTracker = ({ month, ...props }) => {
 
 const config = [
   { name:'Year Grid',
-    path: "/yeargrid/:tmclinear/:year",
+    path: "/corridor/:tmclinear/:year",
     showInBlocks: false,
     exact: true,
     auth: false,
@@ -212,7 +220,7 @@ const config = [
     component: YearGrid
   },
   { name:'Year Grid',
-    path: "/yeargrid",
+    path: "/corridor",
     exact: true,
     auth: false,
     mainNav: false,

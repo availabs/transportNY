@@ -25,7 +25,7 @@ const UserMenu = ({user}) => {
     )
 }
 
-const Item = (to, icon, span, condition) => (
+export const Item = (to, icon, span, condition) => (
     condition === undefined || condition ?
         <Link to={ to } >
             <div className='px-6 py-2 bg-blue-500 text-white hover:text-blue-100'>
@@ -37,6 +37,8 @@ const Item = (to, icon, span, condition) => (
         </Link>
     : null
 )
+
+
 export default withAuth(({title, shadowed = true, user, children}) => {
    
     const theme = useTheme()
@@ -46,9 +48,16 @@ export default withAuth(({title, shadowed = true, user, children}) => {
             {!user.authed ?
                 <Link className={`${theme.topnav({}).navitemTop}`} to="/auth/login">Login</Link> :
                 <Dropdown control={<UserMenu user={user}/>} className={`hover:bg-blue-500 group `} >
-                    <div className='py-4 bg-blue-500'> 
-                        {Item('/auth/logout', 'fad fa-sign-out-alt pb-2 pr-1 pt-2', 'Logout')}
+                    <div className='p-1 bg-blue-500'>
+                        { user.authLevel >= 5 ? 
+                        <div className='py-1 '> 
+                            {Item('/datamanager', 'fad fa-database flex-shrink-0  pr-1', 'Data Manager')}
+                        </div> : ''}
+                        <div className='py-1 border-t border-blue-400'> 
+                            {Item('/auth/logout', 'fad fa-sign-out-alt pb-2 pr-1', 'Logout')}
+                        </div>
                     </div>
+                       
                 </Dropdown>
             }
         </div>

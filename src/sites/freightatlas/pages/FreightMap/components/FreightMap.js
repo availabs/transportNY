@@ -29,10 +29,7 @@ const Map = ({ events }) => {
                 let newlayers = layerList.includes(id) ? 
                     [...layerList].filter(d => d !== id) :
                     [...layerList , id]
-  
-                setLayerList(newlayers)               
-                
-                
+                setLayerList(newlayers)                  
             }
         }
     }, [layerList])
@@ -47,10 +44,11 @@ const Map = ({ events }) => {
         styles: [
             {name: "Light",
                 style: 'mapbox://styles/am3081/ckm86j4bw11tj18o5zf8y9pou' },
-            {name: "Blank Road Labels",
-                style: 'mapbox://styles/am3081/cl0ieiesd000514mop5fkqjox'},
             {name: "Dark",
-                style: 'mapbox://styles/am3081/ckm85o7hq6d8817nr0y6ute5v' }
+                style: 'mapbox://styles/am3081/ckm85o7hq6d8817nr0y6ute5v' },
+            { name: "Satellite Streets",
+                style: 'mapbox://styles/am3081/cjya70364016g1cpmbetipc8u' }
+           
         ]
     }
 

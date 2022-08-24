@@ -4,6 +4,8 @@ import get from 'lodash.get'
 // import { useParams } from 'react-router-dom'
 import FreightAtlasLayer from './FreightAtlasLayer'
 import { AvlMap } from "modules/avl-map/src"
+
+import Create from './create'
 import config from "config.json"
 
 // import { getAttributes } from 'pages/DataManager/components/attributes'
@@ -177,6 +179,8 @@ const Table = ({source}) => {
   return <div> Table View </div>  
 }
 
+
+
 const FreightAtlashShapefileConfig = {
   map: {
     name: 'Map',
@@ -187,7 +191,12 @@ const FreightAtlashShapefileConfig = {
     name: 'Table',
     path: '/table',
     component: Table
+  },
+  sourceCreate: {
+    name: 'Create',
+    component: Create
   }
+
 }
 
 export default FreightAtlashShapefileConfig

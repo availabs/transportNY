@@ -75,6 +75,7 @@ export const getCorridors = (tmcMetaData,year,tmcs) => {
       c.roadname = c.roadnames.join(',')
       c.direction = c.directions.join(',')
       c.fsystem = c.fsystems.join(',')
+      c.year = year
       c.total_delay_per_mile = c.total_delay / c.length
       c.pm_total_delay_per_mile = c.pm_total_delay / c.length
       c.recurrent_delay_per_mile = c.recurrent_delay / c.length

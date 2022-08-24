@@ -2,9 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useFalcor,TopNav, /*withAuth, Input, Button*/ } from 'modules/avl-components/src'
 import get from 'lodash.get'
 import { useParams } from 'react-router-dom'
-import {Pages, DataTypes} from './DataTypes'
+import {Pages, DataTypes} from '../DataTypes'
 
-import SourcesLayout from './components/SourcesLayout'
+import SourcesLayout from '../components/SourcesLayout'
 
 import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
     
@@ -49,7 +49,17 @@ const Source = () => {
   const source = useMemo(() => {
     let attributes =  getAttributes(get(falcorCache,['datamanager','sources','byId', sourceId],{'attributes': {}})['attributes']) 
     if(DataTypes[attributes.type] ){
-      setPages({...Pages,...DataTypes[attributes.type]})  
+
+      // check for pages to add 
+      let typePages = Object.keys(DataTypes[attributes.type]).reduce((a,c)=>{
+        if(DataTypes[attributes.type][c].path) {
+          a[c] = DataTypes[attributes.type][c]
+        }
+        return a
+      },{})
+      let allPages = {...Pages,...typePages}
+      console.log('allPages', allPages)
+      setPages(allPages)  
     } else {
        setPages(Pages) 
     }
@@ -97,6 +107,30 @@ const config = [{
 {
   name:'View Source',
   path: "/datasources/source/:sourceId/:page",
+  exact: true,
+  auth: false,
+  mainNav: false,
+  sideNav: {
+    color: 'dark',
+    size: 'micro'
+  },
+  component: Source
+},
+{
+  name:'View Source',
+  path: "/datamanager/source/:sourceId",
+  exact: true,
+  auth: false,
+  mainNav: false,
+  sideNav: {
+    color: 'dark',
+    size: 'micro'
+  },
+  component: Source
+},
+{
+  name:'View Source',
+  path: "/datamanager/source/:sourceId/:page",
   exact: true,
   auth: false,
   mainNav: false,
