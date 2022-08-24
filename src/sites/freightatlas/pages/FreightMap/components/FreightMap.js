@@ -29,10 +29,7 @@ const Map = ({ events }) => {
                 let newlayers = layerList.includes(id) ? 
                     [...layerList].filter(d => d !== id) :
                     [...layerList , id]
-  
-                setLayerList(newlayers)               
-                
-                
+                setLayerList(newlayers)                  
             }
         }
     }, [layerList])

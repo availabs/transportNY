@@ -25,7 +25,7 @@ const UserMenu = ({user}) => {
     )
 }
 
-const Item = (to, icon, span, condition) => (
+export const Item = (to, icon, span, condition) => (
     condition === undefined || condition ?
         <Link to={ to } >
             <div className='px-6 py-2 bg-blue-500 text-white hover:text-blue-100'>
@@ -37,6 +37,8 @@ const Item = (to, icon, span, condition) => (
         </Link>
     : null
 )
+
+
 export default withAuth(({title, shadowed = true, user, children}) => {
    
     const theme = useTheme()

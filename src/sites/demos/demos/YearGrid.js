@@ -143,6 +143,7 @@ const YearGrid = ({}) => {
     //   .range(GridColors);
 
     setScale(() => scl);
+
     setTmcWidths(widths);
 
     const grouped = d3groups(data, d => d.date.slice(0, 7), d => `${ d.date }:${ d.resolution.toString().padStart(2, '0') }`);
@@ -198,7 +199,7 @@ const GridTracker = ({ month, ...props }) => {
   }, [month]);
   return (
     <div style={ { height: `${ days * 24 }px`}}>
-      <TrackVisibility once partialVisibility className="h-full relative">
+      <TrackVisibility offset={ days * 12 } className="h-full relative">
         <GridComp { ...props } month={ month }/>
       </TrackVisibility>
     </div>

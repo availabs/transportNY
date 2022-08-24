@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useFalcor, SideNav } from 'modules/avl-components/src'
+import { useFalcor, SideNav, Dropdown, withAuth } from 'modules/avl-components/src'
 import { Link } from 'react-router-dom'
 import get from 'lodash.get'
 import {/*getDomain,*/getSubdomain} from 'utils'
 import { useParams } from 'react-router-dom'
+
+import {Item} from 'pages/Auth/AuthMenu'
 
 import {SourceAttributes, ViewAttributes, getAttributes} from './attributes'
 
@@ -122,7 +124,7 @@ const SourcesLayout = ({children}) => {
         <Breadcrumbs />
       </div>
       <div className='flex'>
-        <div className='w-72  shadow h-full sticky top-0 '>
+        {/*<div className='w-72  shadow h-full sticky top-0 '>
           <div className='pt-1 pb-4 px-1'>
             <input 
               className='w-full text-lg p-2 border border-gray-300 ' 
@@ -137,19 +139,51 @@ const SourcesLayout = ({children}) => {
               themeOptions={{size:'full',responsive: 'none',color: 'transparent'}}
             />
           </div>
-        </div>
+        </div>*/}
         <div className='flex-1 pl-4 '>
-            {children ? 
-              children : 
-                sources
-                .map((s,i) => <SourceThumb key={i} source={s} />)
-            }
+          {sourceId ? '' : 
+            
+            <div>
+              <DataManagerHeader />
+              <div>
+                <input 
+                  className='w-full text-lg p-2 border border-gray-300 ' 
+                  placeholder='Search datasources'
+                  value={layerSearch}
+                  onChange={(e) => setLayerSearch(e.target.value)}
+                />
+              </div>
+            </div>
+          }
+          {children ? 
+            children : 
+              sources
+              .map((s,i) => <SourceThumb key={i} source={s} />)
+          }
           
         </div>
       </div>
     </div>
   )
 }
+
+const DataManagerHeader = withAuth(({user}) => {
+  return (
+    <div className='flex justify-between py-4'>
+      <div className='text-xl  font-medium'> Data Manager</div>
+       <Dropdown control={<div className='p-2'> ... </div>} className={`hover:bg-blue-500 group `} openType='click'>
+          <div className='p-1 bg-blue-500'>
+              { user.authLevel >= 5 ? 
+              <div className='py-1 '> 
+                  {Item('/datasources/create/source', 'fad fa-database flex-shrink-0  pr-1', 'Data Manager')}
+              </div> : ''}
+              
+          </div>
+                       
+        </Dropdown>
+    </div>
+  )
+})
 
 
 export default SourcesLayout

@@ -1,6 +1,7 @@
 import React from 'react';
 import SourcesLayout from './components/SourcesLayout'
 import SourceView from './Source'
+import SourceCreate from './Source/create'
 
 const DataManager = () => {
   return (
@@ -10,7 +11,7 @@ const DataManager = () => {
   )
 }
 
-const SourceList = {
+const SourceList = [{
   name:'Data Sources',
   path: "/datasources",
   exact: true,
@@ -21,10 +22,13 @@ const SourceList = {
     size: 'micro'
   },
   component: DataManager
-}
+}]
+
 const config = [
-  SourceList,
-  ...SourceView
+  ...SourceList,
+  ...SourceView,
+  ...SourceCreate
+
 ]
 
 export default config;
