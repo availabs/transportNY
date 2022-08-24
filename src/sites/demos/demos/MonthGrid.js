@@ -69,7 +69,7 @@ const MonthGrid = () => {
 
   const [gridData, setGridData] = React.useState([]);
   const [tmcWidths, setTmcWidths] = React.useState({});
-  const [dataType, setDataType] = React.useState("rd");
+  const [dataType, setDataType] = React.useState("tt");
   const [scale, setScale] = React.useState(() => scaleQuantile());
 
   const [loading, setLoading] = React.useState(0);
