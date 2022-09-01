@@ -12,6 +12,8 @@ import { GridGraph } from "modules/avl-graph/src"
 
 import { useComponentDidMount } from "sites/tsmo/pages/Dashboards/components/utils"
 
+import Stoplights from "./Stoplights"
+
 const indexFormat = index => {
   let [date, hour] = index.split(":");
   const ampm = +hour < 12 ? "am" : "pm";
@@ -27,6 +29,7 @@ const InitialState = {
   incidentsLoaded: false,
   numEvents: 0,
   points: [],
+  stoplights: []
 }
 const Reducer = (state, action) => {
   const { type, ...payload } = action;
@@ -48,7 +51,12 @@ const Reducer = (state, action) => {
   }
 }
 
-const GridComponent = ({ month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisible = true }) => {
+const GridComponent = ({ year, month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisible = true }) => {
+
+  const days = React.useMemo(() => {
+    const [y, m] = month.split("-");
+    return new Date(y, m, 0).getDate();
+  }, [month]);
 
   const tickValues = React.useMemo(() => {
     return data.filter(d => d.index.split(":")[1] == 12).map(d => d.index)
@@ -71,18 +79,40 @@ const GridComponent = ({ month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisib
 
   const { falcor, falcorCache } = useFalcor();
 
-  const year = React.useMemo(() => data[0].index.slice(0,4), 
-    [data,falcorCache]);
-
-  const bottomAxisFormat = React.useMemo((index) => {
-    return (index) => {
-      console.log('format', index)
-      return  get(falcorCache, ["tmc", index, "meta", year,  "firstname"])
-    }
-  },[year,falcorCache])
+  const bottomAxisFormat = React.useCallback(tmc => {
+    return get(falcorCache, ["tmc", tmc, "meta", year, "firstname"], tmc);
+  }, [year, falcorCache]);
 
   React.useEffect(() => {
     if (!isVisible) return;
+
+    startLoading();
+    falcor.get(["tmc", TMCs, "stoplights", year])
+      .then(res => console.log("RES:", res))
+      .then(() => stopLoading());
+  }, [falcor, TMCs, year, startLoading, stopLoading, isVisible]);
+
+  React.useEffect(() => {
+    if (!isVisible) return;
+
+    const totalLength = TMCs.reduce((a, c) => {
+      return a + get(tmcWidths, c, 1);
+    }, 0);
+
+    const stoplights = TMCs.map(tmc => {
+      const lights = get(falcorCache, ["tmc", tmc, "stoplights", year, "value"], []);
+      const length = get(tmcWidths, tmc, 1);
+      return { tmc, lights, length: length / totalLength };
+    })
+    dispatch({
+      type: "update-state",
+      stoplights
+    })
+  }, [falcorCache, TMCs, year, isVisible])
+
+  React.useEffect(() => {
+    if (!isVisible) return;
+
     startLoading();
     falcor.get(["transcom2", "events", "tmc", TMCs, month, ["Incident", "Construction"]])
       .then(res => {
@@ -133,57 +163,70 @@ const GridComponent = ({ month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisib
   const renderGraph = data.length && isVisible && incidentsLoaded && (numEvents === points.length);
 
   return (
-    <>
-      <div
-        className={ `
-          inset-0 ${ loading ? "absolute" : "hidden" } rounded-lg
-          flex justify-center items-center z-50 bg-black opacity-50
-        ` }
-        style={ {
-          marginRight: "60px",
-          marginBottom: "60px",
-          marginLeft: "120px"
-        } }>
-        <ScalableLoading />
-      </div>
-      <div className="border-2 rounded-lg absolute inset-0"
-        style={ {
-          marginRight: "60px",
-          marginBottom: "60px",
-          marginLeft: "120px"
-        } }/>
-      { !renderGraph ? null :
-        <div className="w-full h-full relative">
-          <div className="bg-gray-300 rounded-lg absolute inset-0 flex items-center justify-center"
-            style={ {
-              marginRight: "60px",
-              marginBottom: "60px",
-              marginLeft: "120px"
-            } }>
-            <div className="font-bold text-3xl">RENDERING GRAPH...</div>
-          </div>
-          <GridGraph
-            showAnimations={ false }
-            colors={ scale }
-            data={ data }
-            keys={ TMCs }
-            keyWidths={ tmcWidths }
-            points={ points }
-            margin={ { top: 0, right: 60, bottom: 60, left: 120 } }
-            axisBottom={ { tickDensity: 1 } }
-            axisLeft={ {
-              format: leftAxisFormat,
-              tickValues
-            } }
-            hoverComp={ {
-              HoverComp: GridHoverComp,
-              valueFormat: ",.2f",
-              indexFormat
-            } }
-          />
+    <div>
+      <div className="relative" style={ { height: `${ days * 24 }px`} }>
+        <div
+          className={ `
+            inset-0 ${ loading ? "absolute" : "hidden" } rounded-lg
+            flex justify-center items-center z-50 bg-black opacity-50
+          ` }
+          style={ {
+            marginRight: "60px",
+            marginBottom: "60px",
+            marginLeft: "120px"
+          } }>
+          <ScalableLoading />
         </div>
-      }
-    </>
+        <div className="border-2 rounded-lg absolute inset-0"
+          style={ {
+            marginRight: "60px",
+            marginBottom: "60px",
+            marginLeft: "120px"
+          } }/>
+        { !renderGraph ? null :
+          <div className="w-full h-full relative">
+            <div className="bg-gray-300 rounded-lg absolute inset-0 flex items-center justify-center"
+              style={ {
+                marginRight: "60px",
+                marginBottom: "60px",
+                marginLeft: "120px"
+              } }>
+              <div className="font-bold text-3xl">RENDERING GRAPH...</div>
+            </div>
+            <GridGraph
+              showAnimations={ false }
+              colors={ scale }
+              data={ data }
+              keys={ TMCs }
+              keyWidths={ tmcWidths }
+              points={ points }
+              margin={ { top: 0, right: 60, bottom: 60, left: 120 } }
+              axisBottom={ {
+                tickDensity: 0.3,
+                format: bottomAxisFormat
+              } }
+              axisLeft={ {
+                format: leftAxisFormat,
+                tickValues
+              } }
+              hoverComp={ {
+                HoverComp: GridHoverComp,
+                valueFormat: ",.2f",
+                indexFormat
+              } }
+            />
+          </div>
+        }
+      </div>
+      <div className="w-full"
+        style={ {
+          paddingRight: "60px",
+          paddingLeft: "120px",
+          paddingBottom: "60px"
+        } }>
+        <Stoplights stoplights={ state.stoplights }/>
+      </div>
+    </div>
   )
 }
 
