@@ -71,12 +71,11 @@ const GridComponent = ({ month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisib
 
   const { falcor, falcorCache } = useFalcor();
 
-  const year = React.useMemo(() => data[0].index.slice(0,4), 
+  const year = React.useMemo(() => get(data ,`[0].index`, '2020').slice(0,4), 
     [data,falcorCache]);
 
   const bottomAxisFormat = React.useMemo((index) => {
     return (index) => {
-      console.log('format', index)
       return  get(falcorCache, ["tmc", index, "meta", year,  "firstname"])
     }
   },[year,falcorCache])
@@ -154,7 +153,7 @@ const GridComponent = ({ month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisib
         } }/>
       { !renderGraph ? null :
         <div className="w-full h-full relative">
-          <div className="bg-gray-300 rounded-lg absolute inset-0 flex items-center justify-center"
+          <div className="bg-gray-100 rounded-lg absolute inset-0 flex items-center justify-center"
             style={ {
               marginRight: "60px",
               marginBottom: "60px",

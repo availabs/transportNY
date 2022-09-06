@@ -4,7 +4,7 @@ import get from 'lodash.get'
 import { useParams } from 'react-router-dom'
 import { DataTypes } from '../DataTypes'
 
-import SourcesLayout from '../components/SourcesLayout'
+import SourcesLayout, {DataManagerHeader}  from '../components/SourcesLayout'
 
 import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
     
@@ -34,9 +34,9 @@ const Source = () => {
           </pre>
       </div>
       <SourcesLayout>
-        Create New Source
-        <div className="overflow-hidden">
-    
+        
+      <div className='p-4 font-medium'> Create New Source </div>
+      
       <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
         <dl className="sm:divide-y sm:divide-gray-200">
           {Object.keys(SourceAttributes)
@@ -81,10 +81,10 @@ const Source = () => {
                         //console.log('hello', e, attr, {[attr]: e, ...source})
                         setSource({ ...source, type: e.target.value,})
                       }}>
-                        <option value="" disabled selected>Select your option</option>
+                        <option value="" disabled >Select your option</option>
                         {Object.keys(DataTypes)
                           .filter(k => DataTypes[k].sourceCreate)
-                          .map(k => <option value={k} className='p-2'>{k}</option>)
+                          .map(k => <option key={k} value={k} className='p-2'>{k}</option>)
                         }
                     </select>
                   </div> 
@@ -96,7 +96,7 @@ const Source = () => {
         </dl>
         <CreateComp />
       </div>
-    </div>
+   
   </SourcesLayout>
 </div>
   )
@@ -110,6 +110,7 @@ const config = [{
   exact: true,
   auth: true,
   mainNav: false,
+  title: <DataManagerHeader />,
   sideNav: {
     color: 'dark',
     size: 'micro'

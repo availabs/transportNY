@@ -9,6 +9,7 @@ import { /*Select,*/
 } from "modules/avl-components/src"
 import { LayerContext } from './FreightMap'
 import LayerManager from './LayerManager'
+import LayerControlPanel from './LayerControlPanel'
 // import get from 'lodash.get'
 
 
@@ -80,32 +81,6 @@ const MapStylesTab = ({ mapStyles, styleIndex, MapActions, mapboxMap }) => {
   )
 }
 
-const DefaultLayerPanel = ({layer,rect}) => {
-  const LayerTabs = [
-        {
-            icon: "fa fa-layer-group",
-            Component: LayerListTab
-        },
-        {
-            icon: "fa fa-map",
-            Component: MapStylesTab
-        }
-    ]
-
-  return (
-    <div className='pl-[4px] w-full bg-white' style={{height: rect.height - 15}}>
-      <div className='w-full h-full  border-l border-gray-200'>
-        <div className='border-b border-gray-200 flex justify-between p-3'>
-          <div className='text-lg text-bold flex-1'>  {layer.name} </div>
-          <div className='p-1 hover:bg-blue-50 cursor-pointer'> <span className ='fad fa-download text-blue-500' alt='download' />  </div>
-          </div>
-        <div>
-          
-        </div>
-      </div>
-    </div>
-  )
-}
 
 const LayerControl = ({ layer, setActiveLayer, activeLayer, MapActions }) => {
   //const theme = useTheme();
@@ -135,7 +110,7 @@ const LayerControl = ({ layer, setActiveLayer, activeLayer, MapActions }) => {
       setActiveLayer(layer.layer_id)
       const compProps = { layer, rect };
       extendSidebar({
-        Comp: DefaultLayerPanel,
+        Comp: LayerControlPanel,
         compProps,
         top: `calc(${rect.top}px + 0.5rem)`,
         

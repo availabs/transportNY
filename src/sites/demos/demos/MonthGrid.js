@@ -69,7 +69,7 @@ const MonthGrid = () => {
 
   const [gridData, setGridData] = React.useState([]);
   const [tmcWidths, setTmcWidths] = React.useState({});
-  const [dataType, setDataType] = React.useState("rd");
+  const [dataType, setDataType] = React.useState("tt");
   const [scale, setScale] = React.useState(() => scaleQuantile());
 
   const [loading, setLoading] = React.useState(0);
@@ -126,7 +126,7 @@ const MonthGrid = () => {
       loadingStart();
       falcor.get(
         ["tmc", TMCs, dataType, "month", month, "by", "hour"],
-        ["tmc", TMCs, "meta", year, ["length", "avg_speedlimit"]]
+        ["tmc", TMCs, "meta", year, ["length", "avg_speedlimit", "firstname"]]
       )
       .then(() => loadingStop());
     }
@@ -166,6 +166,8 @@ const MonthGrid = () => {
       scl = scaleThreshold()
         .domain([avgSL - 25, avgSL - 20, avgSL - 15, avgSL - 10, avgSL - 5, avgSL - 2.5, avgSL, avgSL + 5])
         .range(GridColors);
+
+      console.log('sl', avgSL, [avgSL - 25, avgSL - 20, avgSL - 15, avgSL - 10, avgSL - 5, avgSL - 2.5, avgSL, avgSL + 5])  
     }
 
     setScale(() =>  scl);
@@ -184,6 +186,8 @@ const MonthGrid = () => {
     setGridData(gd);
 
   }, [falcorCache, month, year, dataType, TMCs]);
+
+  console.log('testing', gridData)
 
   return (
     <div>

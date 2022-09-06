@@ -4,7 +4,7 @@ import get from 'lodash.get'
 import { useParams } from 'react-router-dom'
 import {Pages, DataTypes} from '../DataTypes'
 
-import SourcesLayout from '../components/SourcesLayout'
+import SourcesLayout, { DataManagerHeader } from '../components/SourcesLayout'
 
 import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
     
@@ -98,6 +98,7 @@ const config = [{
   exact: true,
   auth: false,
   mainNav: false,
+  title: <DataManagerHeader />,
   sideNav: {
     color: 'dark',
     size: 'micro'
@@ -110,6 +111,7 @@ const config = [{
   exact: true,
   auth: false,
   mainNav: false,
+  title: <DataManagerHeader />,
   sideNav: {
     color: 'dark',
     size: 'micro'
@@ -122,6 +124,7 @@ const config = [{
   exact: true,
   auth: false,
   mainNav: false,
+  title: <DataManagerHeader />,
   sideNav: {
     color: 'dark',
     size: 'micro'
@@ -134,6 +137,7 @@ const config = [{
   exact: true,
   auth: false,
   mainNav: false,
+  title: <DataManagerHeader />,
   sideNav: {
     color: 'dark',
     size: 'micro'
