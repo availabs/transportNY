@@ -111,6 +111,7 @@ const MonthGrid = () => {
     if (params.tmclinear) {
       const [geoid, tmclinear, direction] = params.tmclinear.split("_");
       setGeo(`COUNTY|${ geoid }`);
+      setSelectedGeo(`COUNTY|${ geoid }`);
       setTmcLinear(tmclinear);
       setDirection(direction.toUpperCase());
     }
@@ -237,7 +238,7 @@ const MonthGrid = () => {
         .domain([avgSL - 25, avgSL - 20, avgSL - 15, avgSL - 10, avgSL - 5, avgSL - 2.5, avgSL, avgSL + 5])
         .range(GridColors);
 
-      console.log('sl', avgSL, [avgSL - 25, avgSL - 20, avgSL - 15, avgSL - 10, avgSL - 5, avgSL - 2.5, avgSL, avgSL + 5])  
+      console.log('sl', avgSL, [avgSL - 25, avgSL - 20, avgSL - 15, avgSL - 10, avgSL - 5, avgSL - 2.5, avgSL, avgSL + 5])
     }
 
     setScale(() =>  scl);
@@ -275,7 +276,7 @@ const MonthGrid = () => {
 
 
   return (
-    <div>
+    <div style={ { width: "calc(100vw - 3.5rem)"}}>
       <div className={ `
           inset-0 ${ loading ? "fixed" : "hidden" }
           flex justify-center items-center z-50 bg-black opacity-50
@@ -315,11 +316,11 @@ const MonthGrid = () => {
         <div className="text-xl font-bold col-span-2 flex items-center justify-center">
           { MonthMap[month] } { year }
         </div>
-        <div className="col-span-5">
+        <div className="col-span-5 flex items-center">
           <Scale scale={ scale }/>
         </div>
       </div>
-      <div className="flex mx-8 font-bold text-lg">
+      <div className="flex mx-8 font-bold text-lg my-2">
         <div className="flex-1">
           <Link to={ prev }><span className="fa fa-caret-left"/> Previous Month</Link>
         </div>
@@ -341,7 +342,7 @@ const Scale = ({ scale }) => {
   const domain = scale.domain();
   const range = scale.range();
   return (
-    <div>
+    <div className="w-full">
       <div className="flex flex-row">
         { range.map(color => (
             <div key={ color } className="h-4 flex-1"
