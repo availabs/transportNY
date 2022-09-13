@@ -1,5 +1,5 @@
 import YearGrid from "./YearGrid"
-import MonthGrid from "./MonthGrid"
+import DateGrid from "./DateGrid"
 
 import MesoGetter from "./mesonet_getter"
 import Test2 from "./test2"
@@ -10,6 +10,8 @@ const demos = [
   ...YearGrid,
   ...MonthGrid,
   MesoGetter,
+  ...DateGrid,
+  Test1,
   Test2,
   Test3,
   Test4
