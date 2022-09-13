@@ -120,7 +120,7 @@ const SourcesLayout = ({children}) => {
 
   return (
     <div>
-      <div className='pb-2'>
+      <div className=''>
         <Breadcrumbs />
       </div>
       <div className='flex'>
@@ -143,8 +143,7 @@ const SourcesLayout = ({children}) => {
         <div className='flex-1 pl-4 '>
           {sourceId ? '' : 
             
-            <div>
-              <DataManagerHeader />
+            <div className='py-4'>
               <div>
                 <input 
                   className='w-full text-lg p-2 border border-gray-300 ' 
@@ -167,20 +166,29 @@ const SourcesLayout = ({children}) => {
   )
 }
 
-const DataManagerHeader = withAuth(({user}) => {
+export const DataManagerHeader = withAuth(({user}) => {
   return (
-    <div className='flex justify-between py-4'>
-      <div className='text-xl  font-medium'> Data Manager</div>
-       <Dropdown control={<div className='p-2'> ... </div>} className={`hover:bg-blue-500 group `} openType='click'>
-          <div className='p-1 bg-blue-500'>
-              { user.authLevel >= 5 ? 
-              <div className='py-1 '> 
-                  {Item('/datasources/create/source', 'fad fa-database flex-shrink-0  pr-1', 'Data Manager')}
-              </div> : ''}
-              
+    <div className='pt-[2px]'>
+      { user.authLevel >= 5 ? 
+        (
+          <div className=' h-full'>
+            <Dropdown control={
+              <div className='px-2 flex text-lg'>
+                <div className=' font-medium text-gray-800'> Data Manager</div> 
+                <div className='fal fa-angle-down px-3 mt-[6px] '/>
+              </div>} 
+              className={`text-gray-800 group`} openType='click'
+            >
+              <div className='p-1 bg-blue-500 text-base'>
+                <div className='py-1 '> 
+                    {Item('/datasources/create/source', 'fa fa-file-plus flex-shrink-0  pr-1', 'Add New Datasource')}
+                </div>
+              </div>          
+            </Dropdown>
           </div>
-                       
-        </Dropdown>
+        ) 
+        : <div/>
+      }
     </div>
   )
 })

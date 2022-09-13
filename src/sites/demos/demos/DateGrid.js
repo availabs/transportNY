@@ -237,6 +237,8 @@ const MonthGrid = () => {
       scl = scaleThreshold()
         .domain([avgSL - 25, avgSL - 20, avgSL - 15, avgSL - 10, avgSL - 5, avgSL - 2.5, avgSL, avgSL + 5])
         .range(GridColors);
+
+      console.log('sl', avgSL, [avgSL - 25, avgSL - 20, avgSL - 15, avgSL - 10, avgSL - 5, avgSL - 2.5, avgSL, avgSL + 5])  
     }
 
     setScale(() =>  scl);
@@ -256,6 +258,7 @@ const MonthGrid = () => {
 
   }, [falcorCache, date, dateType, year, dataType, TMCs]);
 
+
   const [prev, next] = React.useMemo(() => {
     const [y, m] = date.split("-").map(Number);
 
@@ -270,6 +273,7 @@ const MonthGrid = () => {
       `/dategrid/${ geoid }_${ tmclinear }_${ direction }/${ ny }-${ `0${ nm }`.slice(-2) }`
     ]
   }, [geoid, tmclinear, direction, date])
+
 
   return (
     <div style={ { width: "calc(100vw - 3.5rem)"}}>

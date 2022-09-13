@@ -1,32 +1,34 @@
 import React from 'react'
-
+import get from 'lodash.get'
 const HOST = 'http://localhost:5566'
 
 const Create = ({}) => {
-  const [state, setState] = React.useState({
-    gisUploadId: null,
-    fileName: '',
-    layerNames: [],
-    layerName: null,
-    forceUpdate: null,
-    tableDescriptor: null,
-    routesByLayer: {},
-    addedSources: {},
-  })
+ 
+    const[ gisUploadId, setGisUploadId ] = React.useState(null)
+    const[ fileName, setFileName] = React.useState ('')
+    const[ layerNames, setLayerNames] = React.useState ([])
+    const[ layerName, setLayerName] = React.useState ('')
+    const[ forceUpdate, setForceUpdate] = React.useState (null)
+    const[ tableDescriptor, setTableDescriptor] = React.useState (null)
+    const[ routesByLayer, setRoutesByLayer] = React.useState ({})
+    const[ addedSources, setAddedSources] = React.useState ({})
 
 
-  const selectLayer = async (_layerName) => {
+  const selectLayer = async (_layerName, _id) => {
+    if(!_id) {
+      _id = gisUploadId
+    }
         
-    setState({...state, ...{layerName: _layerName, tableDescriptor: null}})
+    setLayerName(_layerName)
+    setTableDescriptor({})
 
     const tableDescriptorRes = await fetch(
-      `${HOST}/staged-geospatial-dataset/${state.gisUploadId}/${_layerName}/tableDescriptor`
+      `${HOST}/staged-geospatial-dataset/${_id}/${_layerName}/tableDescriptor`
     );
 
     // The tableDescriptor controls DB table creation and loading.
     let tabledata = await tableDescriptorRes.json()
-    console.log('testing data', tabledata)
-    setState({...state, ...{tableDescriptor: tabledata}})
+    setTableDescriptor(tabledata)
        
   }
 
@@ -52,11 +54,14 @@ const Create = ({}) => {
     ); 
 
     const layerNames = await layerNamesRes.json();
+    setGisUploadId(id)
+    setLayerNames(layerNames)
+    setFileName(file.name)
     if(layerNames[0]){
-      selectLayer(layerNames[0])  
+      selectLayer(layerNames[0], id)  
     }
 
-    setState({...state, ...{gisUploadId: id, layerNames, fileName: file.name }})
+    
   }
 
   
@@ -64,11 +69,11 @@ const Create = ({}) => {
   return (
     <div className='w-full'>
       <div> Add New Source</div>
-      <div className='fixed right-0 top-[380px] w-64 '>
+      {/*<div className='fixed right-0 top-[380px] w-64 '>
           <pre>
             {JSON.stringify(state,null,3)}
           </pre>
-      </div>
+      </div>*/}
       <div className='w-full border border-dashed border-gray-300 bg-gray-100'>
         <div className='p-4'>
           <button >
@@ -81,20 +86,59 @@ const Create = ({}) => {
             </button>
         </div>
       </div>
-      { state.layerNames.length > 0 ? 
+      { layerNames.length > 0 ? 
         (<div className='w-full '>
           <div className='p-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6'>
             <dt className="text-sm font-medium text-gray-500 py-5">Select Layer</dt>
             <div className='sm:col-span-2 pr-8 pt-3'>
-              <select className='w-full bg-white p-2 flex-1 shadow bg-grey-50 focus:bg-blue-100  border-gray-300' 
-                value={state.layerName}        
+              <select 
+                className='w-full bg-white p-2 flex-1 shadow bg-grey-50 focus:bg-blue-100  border-gray-300' 
+                value={layerName}
+                onChange={e => selectLayer(e.target.value)}      
               >
-                {state.layerNames.map(l => <option value={l}>{l}</option>)}
+                {layerNames.map(l => <option key={l} value={l}>{l}</option>)}
               </select>
             </div>
           </div>
         </div>) : ''
       }
+      <div >
+
+        <table className='w-full'>
+          <thead>
+            <tr>
+              <th className='text-left'>GIS Dataset Field Name</th>
+              <th className='text-right'>
+                Database Column Name
+              </th>
+              <td className='text-right'>
+                Database Column Type
+              </td>
+            </tr>
+          </thead>
+          <tbody>
+            {get(tableDescriptor,'columnTypes',[]).map((row) => (
+              <tr
+                key={row.key}
+                className='border-b'
+              >
+                <td className='py-4'>
+                  {row.key}
+                </td>
+                <td className='text-right  p-2'>
+                  <input
+                    className='w-full p-2 flex-1 shadow bg-grey-50 focus:bg-blue-100 border-gray-300'
+                    id={row.key}
+                    defaultValue={row.col}
+                    onChange={(e) => (row.col = e.target.value)}
+                  />
+                </td>
+                <td className='text-right  p-2'>{row.db_type}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

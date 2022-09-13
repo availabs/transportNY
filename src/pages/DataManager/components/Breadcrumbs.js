@@ -10,12 +10,12 @@ export default function BreadCrumbs () {
   const {falcor,falcorCache} = useFalcor()
   useEffect(() => { 
     async function fetchData () {
-      return await falcor.get(
+      return sourceId ? await falcor.get(
         [
           "datamanager","sources","byId",sourceId,
           "attributes",["categories","name"]
         ]
-      )
+      ) : Promise.resolve({})
     }
     fetchData()
   }, [falcor, sourceId])

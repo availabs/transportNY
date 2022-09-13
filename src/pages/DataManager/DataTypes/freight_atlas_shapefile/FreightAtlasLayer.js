@@ -35,6 +35,7 @@ class FreightAtlasLayer extends LayerContainer {
   };
 
   init(map, falcor) {
+    //console.log('hello options', options)
     //console.log('----init----', this)
       // return falcor
       //   .get(["geo", "36", "geoLevels"])

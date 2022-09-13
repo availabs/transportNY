@@ -1,5 +1,5 @@
 import React from 'react';
-import SourcesLayout from './components/SourcesLayout'
+import SourcesLayout, { DataManagerHeader } from './components/SourcesLayout'
 import SourceView from './Source'
 import SourceCreate from './Source/create'
 
@@ -17,6 +17,7 @@ const SourceList = [{
   exact: true,
   auth: false,
   mainNav: false,
+  title: <DataManagerHeader />,
   sideNav: {
     color: 'dark',
     size: 'micro'

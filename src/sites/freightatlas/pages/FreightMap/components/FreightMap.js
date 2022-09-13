@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useRef} from "react"
 // import { useSelector } from 'react-redux';
 import { AvlMap } from "modules/avl-map/src"
 import { useFalcor } from "modules/avl-components/src"
@@ -19,6 +19,7 @@ export const LayerContext = React.createContext({
 
 
 const Map = ({ events }) => {
+    const mounted = useRef(false);
     const {falcor,falcorCache} = useFalcor()
     const [layerList, setLayerList] = React.useState([54,17,8])
     const [layerData, setLayerData] = React.useState([])
@@ -76,6 +77,7 @@ const Map = ({ events }) => {
                 return new Date(a.last_updated) - new Date(b.last_updated)
             })
 
+        
         // to do - get layer name
         let sourceAttributes = getAttributes(get(falcorCache,[
               "datamanager","sources","byId",sourceId,
@@ -84,9 +86,13 @@ const Map = ({ events }) => {
         return views[0] ? 
             {
                 layer_id: sourceId,
+                view_id: get(views[0],'id',null),
+                version: get(views[0],'version',null),
+                metadata: get(views[0],'metadata',{}),
                 name: getName(sourceAttributes),
                 sources: get(views[0],'metadata.tiles.sources',[]),
                 layers: get(views[0],'metadata.tiles.layers',[])
+
             } : null
           
     })
@@ -103,16 +109,16 @@ const Map = ({ events }) => {
                 // don't call layer a second time
                 .filter(d => !currentLayerIds.includes(d.layer_id))
                 .map(l => FreightAtlasLayer(l))
-            
-
-            setLayerData([...layerData.filter(d => layerList.includes(d.layer_id)), ...output])
+            if(mounted.current) {
+                setLayerData([...layerData.filter(d => layerList.includes(d.layer_id)), ...output])
+            }
         }
         updateLayers()
-    },[layerList,falcorCache])
+    },[layerList,falcorCache,mounted.current])
 
     return (
         
-        <div className='w-full h-full'  >
+        <div className='w-full h-full' ref={mounted}>
             <LayerContext.Provider value={layerContextValue}>
                 <AvlMap
                     accessToken={ config.MAPBOX_TOKEN }
