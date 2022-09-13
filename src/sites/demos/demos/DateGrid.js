@@ -111,6 +111,7 @@ const MonthGrid = () => {
     if (params.tmclinear) {
       const [geoid, tmclinear, direction] = params.tmclinear.split("_");
       setGeo(`COUNTY|${ geoid }`);
+      setSelectedGeo(`COUNTY|${ geoid }`);
       setTmcLinear(tmclinear);
       setDirection(direction.toUpperCase());
     }
@@ -271,7 +272,7 @@ const MonthGrid = () => {
   }, [geoid, tmclinear, direction, date])
 
   return (
-    <div>
+    <div style={ { width: "calc(100vw - 3.5rem)"}}>
       <div className={ `
           inset-0 ${ loading ? "fixed" : "hidden" }
           flex justify-center items-center z-50 bg-black opacity-50
