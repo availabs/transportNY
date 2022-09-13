@@ -8,10 +8,8 @@ import Test4 from "./test4"
 
 const demos = [
   ...YearGrid,
-  ...MonthGrid,
-  MesoGetter,
   ...DateGrid,
-  Test1,
+  MesoGetter,
   Test2,
   Test3,
   Test4
