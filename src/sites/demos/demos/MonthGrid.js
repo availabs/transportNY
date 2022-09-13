@@ -1,8 +1,6 @@
 import React from "react"
 
-import TrackVisibility from 'react-on-screen';
-
-import { useParams } from "react-router-dom"
+import { useParams, Link } from "react-router-dom"
 
 import get from "lodash.get"
 import { groups as d3groups, extent as d3extent } from "d3-array"
@@ -53,17 +51,13 @@ const MonthGrid = () => {
     const [y, m] = month.split("-");
     return y;
   }, [month]);
-  const days = React.useMemo(() => {
-    const [y, m] = month.split("-");
-    return new Date(y, m, 0).getDate();
-  }, [month]);
   const [geo, setGeo] = React.useState("COUNTY|36001");
   const geoid = React.useMemo(() => {
     const [level, id] = geo.split("|");
     return id || "unknown";
   }, [geo]);
-  const [tmclinear, setTmcLinear] = React.useState(212);
-  const [direction, setDirection] = React.useState("N");
+  const [tmclinear, setTmcLinear] = React.useState(430);
+  const [direction, setDirection] = React.useState("E");
 
   const [TMCs, setTMCs] = React.useState([]);
 
@@ -130,7 +124,17 @@ const MonthGrid = () => {
       )
       .then(() => loadingStop());
     }
-  }, [falcor, month, year, dataType, TMCs]);
+  }, [falcor, month, dataType, TMCs]);
+
+  React.useEffect(() => {
+    if (TMCs.length) {
+      loadingStart();
+      falcor.get(
+        ["tmc", TMCs, "meta", year, ["length", "avg_speedlimit", "firstname"]]
+      )
+      .then(() => loadingStop());
+    }
+  }, [falcor, year, dataType, TMCs]);
 
   React.useEffect(() => {
     const widths = TMCs.reduce((a, c) => {
@@ -187,7 +191,22 @@ const MonthGrid = () => {
 
   }, [falcorCache, month, year, dataType, TMCs]);
 
-  console.log('testing', gridData)
+
+  const [prev, next] = React.useMemo(() => {
+    const [y, m] = month.split("-").map(Number);
+
+    const py = m === 1 ? y - 1 : y;
+    const pm = m === 1 ? 12 : m - 1;
+
+    const ny = m === 12 ? y + 1 : y;
+    const nm = m === 12 ? 1 : m + 1;
+
+    return [
+      `/monthgrid/${ geoid }_${ tmclinear }_${ direction }/${ py }-${ `0${ pm }`.slice(-2) }`,
+      `/monthgrid/${ geoid }_${ tmclinear }_${ direction }/${ ny }-${ `0${ nm }`.slice(-2) }`
+    ]
+  }, [geoid, tmclinear, direction, month])
+
 
   return (
     <div>
@@ -213,14 +232,20 @@ const MonthGrid = () => {
             onChange={ setDataType }/>
         </div>
       </div>
-      <div className="relative" style={ { height: `${ days * 24 }px`}}>
-        <GridComp month={ month }
-          TMCs={ TMCs }
-          tmcWidths={ tmcWidths }
-          data={ gridData }
-          month={ month }
-          scale={ scale }/>
+      <div className="flex mx-8 font-bold text-lg">
+        <div className="flex-1">
+          <Link to={ prev }><span className="fa fa-caret-left"/> Previous Month</Link>
+        </div>
+        <div className="flex-0">
+          <Link to={ next }>Next Month <span className="fa fa-caret-right"/></Link>
+        </div>
       </div>
+      <GridComp month={ month } year={ year }
+        TMCs={ TMCs }
+        tmcWidths={ tmcWidths }
+        data={ gridData }
+        month={ month }
+        scale={ scale }/>
     </div>
   )
 }
