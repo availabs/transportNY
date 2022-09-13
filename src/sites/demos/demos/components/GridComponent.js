@@ -51,12 +51,12 @@ const Reducer = (state, action) => {
   }
 }
 
-const GridComponent = ({ year, month, data, ttToSpeed, TMCs, tmcWidths, scale, isVisible = true }) => {
+const GridComponent = ({ year, date, data, ttToSpeed, TMCs, tmcWidths, scale, isVisible = true }) => {
 
   const days = React.useMemo(() => {
-    const [y, m] = month.split("-");
+    const [y, m] = date.split("-");
     return new Date(y, m, 0).getDate();
-  }, [month]);
+  }, [date]);
 
   const tickValues = React.useMemo(() => {
     return data.filter(d => d.index.split(":")[1] == 12).map(d => d.index)
@@ -79,16 +79,22 @@ const GridComponent = ({ year, month, data, ttToSpeed, TMCs, tmcWidths, scale, i
 
   const { falcor, falcorCache } = useFalcor();
 
-  const bottomAxisFormat = React.useCallback(tmc => {
-    return get(falcorCache, ["tmc", tmc, "meta", year, "firstname"], tmc);
-  }, [year, falcorCache]);
+  // const bottomAxisFormat = React.useCallback(tmc => {
+  //   return get(falcorCache, ["tmc", tmc, "meta", year, "firstname"], tmc);
+  // }, [year, falcorCache]);
 
   React.useEffect(() => {
     if (!isVisible) return;
 
     startLoading();
     falcor.get(["tmc", TMCs, "stoplights", year])
-      .then(res => console.log("RES:", res))
+      .then(res => {
+        const nodeIds = TMCs.reduce((a, c) => {
+          const sls = get(res, ["json", "tmc", c, "stoplights", year], []);
+          a.push(...sls.map(sl => sl.osm_node_id));
+          return a;
+        }, [])
+      })
       .then(() => stopLoading());
   }, [falcor, TMCs, year, startLoading, stopLoading, isVisible]);
 
@@ -99,10 +105,15 @@ const GridComponent = ({ year, month, data, ttToSpeed, TMCs, tmcWidths, scale, i
       return a + get(tmcWidths, c, 1);
     }, 0);
 
+    let prev = null;
+
     const stoplights = TMCs.map(tmc => {
       const lights = get(falcorCache, ["tmc", tmc, "stoplights", year, "value"], []);
       const length = get(tmcWidths, tmc, 1);
-      return { tmc, lights, length: length / totalLength };
+      const fn = get(falcorCache, ["tmc", tmc, "meta", year, "firstname"]);
+      const firstname = fn === prev ? "" : fn;
+      prev = fn;
+      return { tmc, lights, length: length / totalLength, firstname };
     })
     dispatch({
       type: "update-state",
@@ -114,11 +125,11 @@ const GridComponent = ({ year, month, data, ttToSpeed, TMCs, tmcWidths, scale, i
     if (!isVisible) return;
 
     startLoading();
-    falcor.get(["transcom2", "events", "tmc", TMCs, month, ["Incident", "Construction"]])
+    falcor.get(["transcom2", "events", "tmc", TMCs, date, ["Incident", "Construction"]])
       .then(res => {
         const numEvents = TMCs.reduce((a, c) => {
           return ["Incident", "Construction"].reduce((aa, cc) => {
-            const n = get(res, ["json", "transcom2", "events", "tmc", c, month, cc, "length"], 0);
+            const n = get(res, ["json", "transcom2", "events", "tmc", c, date, cc, "length"], 0);
             return aa + n;
           }, a);
         }, 0);
@@ -129,14 +140,14 @@ const GridComponent = ({ year, month, data, ttToSpeed, TMCs, tmcWidths, scale, i
         });
       })
       .then(() => stopLoading());
-  }, [falcor, TMCs, month, startLoading, stopLoading, isVisible]);
+  }, [falcor, TMCs, date, startLoading, stopLoading, isVisible]);
 
   React.useEffect(() => {
     if (!isVisible) return;
 
     const events = TMCs.reduce((a, c) => {
       return ["Incident", "Construction"].reduce((aa, cc) => {
-        const e = get(falcorCache, ["transcom2", "events", "tmc", c, month, cc, "value"], []);
+        const e = get(falcorCache, ["transcom2", "events", "tmc", c, date, cc, "value"], []);
         aa.push(...e);
         return aa;
       }, a);
@@ -158,7 +169,7 @@ const GridComponent = ({ year, month, data, ttToSpeed, TMCs, tmcWidths, scale, i
       type: "update-state",
       points
     });
-  }, [falcorCache, TMCs, month, isVisible]);
+  }, [falcorCache, TMCs, date, isVisible]);
 
   const renderGraph = data.length && isVisible && incidentsLoaded && (numEvents === points.length);
 
@@ -174,7 +185,8 @@ const GridComponent = ({ year, month, data, ttToSpeed, TMCs, tmcWidths, scale, i
             marginRight: "60px",
             marginBottom: "60px",
             marginLeft: "120px"
-          } }>
+          } }
+        >
           <ScalableLoading />
         </div>
         <div className="border-2 rounded-lg absolute inset-0"
@@ -182,7 +194,8 @@ const GridComponent = ({ year, month, data, ttToSpeed, TMCs, tmcWidths, scale, i
             marginRight: "60px",
             marginBottom: "60px",
             marginLeft: "120px"
-          } }/>
+          } }
+        />
         { !renderGraph ? null :
           <div className="w-full h-full relative">
             <div className="bg-gray-300 rounded-lg absolute inset-0 flex items-center justify-center"
@@ -190,7 +203,8 @@ const GridComponent = ({ year, month, data, ttToSpeed, TMCs, tmcWidths, scale, i
                 marginRight: "60px",
                 marginBottom: "60px",
                 marginLeft: "120px"
-              } }>
+              } }
+            >
               <div className="font-bold text-3xl">RENDERING GRAPH...</div>
             </div>
             <GridGraph
@@ -200,11 +214,7 @@ const GridComponent = ({ year, month, data, ttToSpeed, TMCs, tmcWidths, scale, i
               keys={ TMCs }
               keyWidths={ tmcWidths }
               points={ points }
-              margin={ { top: 0, right: 60, bottom: 60, left: 120 } }
-              axisBottom={ {
-                tickDensity: 0.3,
-                format: bottomAxisFormat
-              } }
+              margin={ { top: 0, right: 60, bottom: 0, left: 120 } }
               axisLeft={ {
                 format: leftAxisFormat,
                 tickValues
@@ -223,7 +233,8 @@ const GridComponent = ({ year, month, data, ttToSpeed, TMCs, tmcWidths, scale, i
           paddingRight: "60px",
           paddingLeft: "120px",
           paddingBottom: "60px"
-        } }>
+        } }
+      >
         <Stoplights stoplights={ state.stoplights }/>
       </div>
     </div>
