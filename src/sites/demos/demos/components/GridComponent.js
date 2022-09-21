@@ -247,6 +247,8 @@ console.log("GRID DATA:", data);
               <div className="font-bold text-3xl">RENDERING GRAPH...</div>
             </div>
             <GridGraph
+              bgColor="#000"
+              nullColor="#E5E7EB"
               onClick={ onClick }
               showAnimations={ false }
               colors={ scale }
