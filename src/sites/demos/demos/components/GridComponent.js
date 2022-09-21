@@ -1,6 +1,8 @@
 import React from "react"
 
 import get from "lodash.get"
+import { range as d3range } from "d3-array"
+import { useHistory, useParams, Link } from "react-router-dom"
 
 import {
   useFalcor,
@@ -13,16 +15,6 @@ import { GridGraph } from "modules/avl-graph/src"
 import { useComponentDidMount } from "sites/tsmo/pages/Dashboards/components/utils"
 
 import Stoplights from "./Stoplights"
-
-const indexFormat = index => {
-  let [date, hour] = index.split(":");
-  const ampm = +hour < 12 ? "am" : "pm";
-  hour = +hour % 12 === 0 ? 12 : +hour % 12;
-  return `${ date } ${ hour }${ ampm }`;
-}
-const leftAxisFormat = index => {
-  return index.slice(0, 10);
-}
 
 const InitialState = {
   loading: 0,
@@ -51,16 +43,49 @@ const Reducer = (state, action) => {
   }
 }
 
-const GridComponent = ({ year, date, data, ttToSpeed, TMCs, tmcWidths, scale, isVisible = true }) => {
+const monthIndexFormat = index => {
+  let [date, hour] = index.split(":");
+  const ampm = +hour < 12 ? "am" : "pm";
+  hour = +hour % 12 === 0 ? 12 : +hour % 12;
+  return `${ date } ${ hour }${ ampm }`;
+}
+const leftAxisMonthFormat = index => {
+  return index.slice(0, 10);
+}
 
-  const days = React.useMemo(() => {
-    const [y, m] = date.split("-");
-    return new Date(y, m, 0).getDate();
+const epochFormat = index => {
+  let minutes = +index * 5;
+  let hour = Math.floor(minutes / 60);
+  const ampm = +hour < 12 ? "am" : "pm";
+  hour = +hour % 12 === 0 ? 12 : +hour % 12;
+  minutes = minutes % 60;
+  return `${ hour }:${ `0${ minutes }`.slice(-2) }${ ampm }`;
+}
+
+const GridComponent = ({ date, data, ttToSpeed, TMCs, tmcWidths, scale, onClick, isVisible = true }) => {
+
+console.log("GRID DATA:", data);
+
+  const [year, month, day] = React.useMemo(() => {
+    return date.split("-").map(Number);
   }, [date]);
+  const dateType = !day ? "month" : "day";
+  const resolution = dateType === "month" ? "hour" : "epoch";
+
+  const height = React.useMemo(() => {
+    if (dateType === "month") {
+      const [y, m] = date.split("-");
+      return new Date(y, m, 0).getDate() * 24;
+    }
+    return 288 * 2;
+  }, [date, dateType]);
 
   const tickValues = React.useMemo(() => {
-    return data.filter(d => d.index.split(":")[1] == 12).map(d => d.index)
-  }, [data]);
+    if (dateType === "month") {
+      return data.filter(d => d.index.split(":")[1] == 12).map(d => d.index);
+    }
+    return d3range(0, 288).filter((d, i) => !((i - 3) % 6)).map(d => `00${ d }`.slice(-3) );
+  }, [data, dateType]);
 
   const MOUNTED = useComponentDidMount();
 
@@ -171,11 +196,25 @@ const GridComponent = ({ year, date, data, ttToSpeed, TMCs, tmcWidths, scale, is
     });
   }, [falcorCache, TMCs, date, isVisible]);
 
+  const indexFormat = React.useMemo(() => {
+    if (dateType === "month") {
+      return monthIndexFormat;
+    }
+    return epochFormat;
+  }, [dateType]);
+
+  const leftAxisFormat = React.useMemo(() => {
+    if (dateType === "month") {
+      return leftAxisMonthFormat;
+    }
+    return epochFormat;
+  }, [dateType]);
+
   const renderGraph = data.length && isVisible && incidentsLoaded && (numEvents === points.length);
 
   return (
     <div>
-      <div className="relative" style={ { height: `${ days * 24 }px`} }>
+      <div className="relative" style={ { height: `${ height }px`} }>
         <div
           className={ `
             inset-0 ${ loading ? "absolute" : "hidden" } rounded-lg
@@ -208,6 +247,7 @@ const GridComponent = ({ year, date, data, ttToSpeed, TMCs, tmcWidths, scale, is
               <div className="font-bold text-3xl">RENDERING GRAPH...</div>
             </div>
             <GridGraph
+              onClick={ onClick }
               showAnimations={ false }
               colors={ scale }
               data={ data }

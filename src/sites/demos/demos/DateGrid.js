@@ -3,7 +3,7 @@ import React from "react"
 import { useHistory, useParams, Link } from "react-router-dom"
 
 import get from "lodash.get"
-import { groups as d3groups, extent as d3extent } from "d3-array"
+import { groups as d3groups, extent as d3extent, range as d3range } from "d3-array"
 import { scaleQuantile, scaleQuantize, scaleThreshold } from "d3-scale"
 
 import { useComponentDidMount } from "sites/tsmo/pages/Dashboards/components/utils"
@@ -32,6 +32,8 @@ const DirectionMap = {
   E: "East",
   W: "West"
 }
+const Year = new Date().getFullYear();
+const Years = d3range(Year, 2015, -1);
 const MonthMap = {
   1: "January",
   2: "February",
@@ -46,6 +48,8 @@ const MonthMap = {
   11: "November",
   12: "December"
 }
+const Months = d3range(1, 13)
+  .map(m => ({ value: m, name: MonthMap[m] }));
 
 const GridColors = getColorRange(9, "RdYlGn");
 
@@ -65,6 +69,7 @@ const MonthGrid = () => {
     return date.split("-").map(Number);
   }, [date]);
   const dateType = !day ? "month" : "day";
+  const resolution = dateType === "month" ? "hour" : "epoch"
 
   const [geo, setGeo] = React.useState("COUNTY|36001");
   const geoid = React.useMemo(() => {
@@ -80,10 +85,27 @@ const MonthGrid = () => {
 
   const history = useHistory();
 
-  const setNewUrl = React.useCallback(tmclineaerKey => {
+  const setUrlFromTmclinearKey = React.useCallback(tmclinearKey => {
     const [level, geoid] = selectedGeo.split("|");
-    history.push(`/dategrid/${ geoid }_${ tmclineaerKey }/${ date }`)
+    history.push(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
   }, [history, date, selectedGeo]);
+
+  const setUrlFromMonth = React.useCallback(month => {
+    const [level, geoid] = selectedGeo.split("|");
+    const date = `${ year }-${ `0${ month }`.slice(-2) }`;
+    history.push(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
+
+  }, [history, year, tmclinearKey, selectedGeo]);
+  const setUrlFromYear = React.useCallback(year => {
+    const [level, geoid] = selectedGeo.split("|");
+    const date = `${ year }-${ `0${ month }`.slice(-2) }`;
+    history.push(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
+  }, [history, month, tmclinearKey, selectedGeo]);
+
+  const setUrlFromDate = React.useCallback(date => {
+    const [level, geoid] = selectedGeo.split("|");
+    history.push(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
+  }, [history, tmclinearKey, selectedGeo])
 
   const [TMCs, setTMCs] = React.useState([]);
 
@@ -186,12 +208,11 @@ const MonthGrid = () => {
   React.useEffect(() => {
     if (TMCs.length) {
       loadingStart();
-      falcor.get(
-        ["tmc", TMCs, dataType, dateType, date, "by", "hour"]
-      )
-      .then(() => loadingStop());
+      falcor.get(["tmc", TMCs, dataType, dateType, date, "by", resolution])
+        .then(res => console.log("RES:", res))
+        .then(() => loadingStop());
     }
-  }, [falcor, date, dateType, dataType, TMCs]);
+  }, [falcor, date, dateType, dataType, resolution, TMCs]);
 
   React.useEffect(() => {
     if (TMCs.length) {
@@ -212,7 +233,7 @@ const MonthGrid = () => {
     setTmcWidths(widths);
 
     const data = TMCs.reduce((a, c) => {
-      const d = get(falcorCache, ["tmc", c, dataType, dateType, date, "by", "hour", "value"], []);
+      const d = get(falcorCache, ["tmc", c, dataType, dateType, date, "by", resolution, "value"], []);
       const mapped = d.map(d => {
         if (dataType === "tt") {
           const value = get(widths, d.tmc, 1) / (d.value / 3600);
@@ -237,13 +258,24 @@ const MonthGrid = () => {
       scl = scaleThreshold()
         .domain([avgSL - 25, avgSL - 20, avgSL - 15, avgSL - 10, avgSL - 5, avgSL - 2.5, avgSL, avgSL + 5])
         .range(GridColors);
-
-      console.log('sl', avgSL, [avgSL - 25, avgSL - 20, avgSL - 15, avgSL - 10, avgSL - 5, avgSL - 2.5, avgSL, avgSL + 5])
     }
 
     setScale(() =>  scl);
 
-    const grouped = d3groups(data, d => `${ d.date }:${ `0${ d.resolution }`.slice(-2) }`);
+    let grouped = [];
+    if (dateType === "month") {
+      grouped = d3groups(data, d => `${ d.date }:${ `0${ d.resolution }`.slice(-2) }`);
+    }
+    else {
+      const epochs = new Set(d3range(0, 288).map(e => `00${ e }`.slice(-3)));
+      grouped = d3groups(data, d => `00${ d.resolution }`.slice(-3) );
+      grouped.forEach(([index]) => {
+        epochs.delete(index);
+      })
+      for (const epoch of epochs) {
+        grouped.push([epoch, []]);
+      }
+    }
 
     const gd = grouped.map(([index, data]) => {
       return data.reduce((a, c) => {
@@ -256,24 +288,44 @@ const MonthGrid = () => {
 
     setGridData(gd);
 
-  }, [falcorCache, date, dateType, year, dataType, TMCs]);
+  }, [falcorCache, date, dateType, year, dataType, resolution, TMCs]);
 
 
   const [prev, next] = React.useMemo(() => {
-    const [y, m] = date.split("-").map(Number);
+    if (dateType === "month") {
+      const [y, m] = date.split("-").map(Number);
 
-    const py = m === 1 ? y - 1 : y;
-    const pm = m === 1 ? 12 : m - 1;
+      const py = m === 1 ? y - 1 : y;
+      const pm = m === 1 ? 12 : m - 1;
 
-    const ny = m === 12 ? y + 1 : y;
-    const nm = m === 12 ? 1 : m + 1;
+      const ny = m === 12 ? y + 1 : y;
+      const nm = m === 12 ? 1 : m + 1;
+
+      return [
+        `/dategrid/${ geoid }_${ tmclinear }_${ direction }/${ py }-${ `0${ pm }`.slice(-2) }`,
+        `/dategrid/${ geoid }_${ tmclinear }_${ direction }/${ ny }-${ `0${ nm }`.slice(-2) }`
+      ]
+    }
+    const [y, m, d] = date.split("-").map(Number);
+    const pDate = new Date(y, m - 1, d - 1);
+    const pd = `${ pDate.getFullYear() }-${ `0${ pDate.getMonth() + 1 }`.slice(-2) }-${ `0${ pDate.getDate() }`.slice(-2) }`;
+
+    const nDate = new Date(y, m - 1, d + 1);
+    const nd = `${ nDate.getFullYear() }-${ `0${ nDate.getMonth() + 1 }`.slice(-2) }-${ `0${ nDate.getDate() }`.slice(-2) }`;
 
     return [
-      `/dategrid/${ geoid }_${ tmclinear }_${ direction }/${ py }-${ `0${ pm }`.slice(-2) }`,
-      `/dategrid/${ geoid }_${ tmclinear }_${ direction }/${ ny }-${ `0${ nm }`.slice(-2) }`
+      `/dategrid/${ geoid }_${ tmclinear }_${ direction }/${ pd }`,
+      `/dategrid/${ geoid }_${ tmclinear }_${ direction }/${ nd }`
     ]
-  }, [geoid, tmclinear, direction, date])
+  }, [geoid, tmclinear, direction, date, dateType]);
 
+  const onClick = React.useMemo(() => {
+    if (dateType === "day") return null;
+    return (e, { key, index, value }) => {
+      e.stopPropagation();
+      setUrlFromDate(index.slice(0, 10));
+    };
+  }, [history, dateType, setUrlFromDate]);
 
   return (
     <div style={ { width: "calc(100vw - 3.5rem)"}}>
@@ -284,11 +336,10 @@ const MonthGrid = () => {
       >
         <ScalableLoading />
       </div>
-      <div className="px-12 py-4 grid grid-cols-2 gap-4">
-        <div className="text-xl">
+      <div className="px-12 py-4 grid grid-cols-3 gap-1">
+        <div className="text-xl font-bold col-span-2">
         </div>
-        <div>
-          <span className="text-xl font-bold">Data Type</span><br />
+        <div className="text-xl font-bold">
           <Select options={ DataTypes }
             value={ dataType }
             accessor={ d => d.name }
@@ -296,43 +347,53 @@ const MonthGrid = () => {
             onChange={ setDataType }/>
         </div>
       </div>
-      <div className="px-12 grid grid-cols-12">
-        <div className="text-xl font-bold col-span-5 grid grid-cols-2 gap-1">
-          <div>
+      <div className="px-12 grid grid-cols-12 gap-1">
+        <div className="text-xl font-bold col-span-8 grid grid-cols-10 gap-1">
+          <div className="col-span-3">
             <Select options={ counties }
               onChange={ setSelectedGeo }
               value={ selectedGeo }
               valueAccessor={ d => d.geo }
               accessor={ d => get(falcorCache, ["geo", d.geoid, "name"], geoid) }/>
           </div>
-          <div>
+          <div className="col-span-3">
             <Select options={ tmclinearsByCounties[selectedGeo] }
-              onChange={ setNewUrl }
+              onChange={ setUrlFromTmclinearKey }
               value={ tmclinearKey }
               accessor={ d => d.name }
               valueAccessor={ d => d.key }/>
           </div>
+          <div className="col-span-2">
+            <Select options={ Months }
+              onChange={ setUrlFromMonth }
+              value={ month }
+              valueAccessor={ m => m.value }
+              accessor={ m => m.name }/>
+          </div>
+          <div className="col-span-2">
+            <Select options={ Years }
+              onChange={ setUrlFromYear }
+              value={ year }/>
+          </div>
         </div>
-        <div className="text-xl font-bold col-span-2 flex items-center justify-center">
-          { MonthMap[month] } { year }
-        </div>
-        <div className="col-span-5 flex items-center">
+        <div className="col-span-4 flex items-center">
           <Scale scale={ scale }/>
         </div>
       </div>
       <div className="flex mx-8 font-bold text-lg my-2">
         <div className="flex-1">
-          <Link to={ prev }><span className="fa fa-caret-left"/> Previous Month</Link>
+          <Link to={ prev }><span className="fa fa-caret-left"/> Previous { dateType }</Link>
         </div>
         <div className="flex-0">
-          <Link to={ next }>Next Month <span className="fa fa-caret-right"/></Link>
+          <Link to={ next }>Next { dateType } <span className="fa fa-caret-right"/></Link>
         </div>
       </div>
-      <GridComp date={ date } year={ year }
+      <GridComp date={ date }
         TMCs={ TMCs }
         tmcWidths={ tmcWidths }
         data={ gridData }
         scale={ scale }
+        onClick={ onClick }
       />
     </div>
   )
@@ -353,7 +414,7 @@ const Scale = ({ scale }) => {
       <div className="flex flex-row">
         { range.map((color, i) => (
             <div key={ color } className="flex-1 text-center text-sm">
-              { i < domain.length ? `below ${ domain[i] }` : `${ domain[i - 1] }+` }
+              { i < domain.length ? `< ${ domain[i] }` : `${ domain[i - 1] }+` }
             </div>
           ))
         }
