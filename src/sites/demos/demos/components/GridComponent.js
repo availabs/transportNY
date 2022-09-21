@@ -64,8 +64,6 @@ const epochFormat = index => {
 
 const GridComponent = ({ date, data, ttToSpeed, TMCs, tmcWidths, scale, onClick, isVisible = true }) => {
 
-console.log("GRID DATA:", data);
-
   const [year, month, day] = React.useMemo(() => {
     return date.split("-").map(Number);
   }, [date]);
@@ -182,7 +180,9 @@ console.log("GRID DATA:", data);
       const date = new Date(start_date_time);
       const epoch = date.getHours() * 12 + Math.floor(date.getMinutes() / 5);
       return {
-        index: `${ start_date_time.slice(0, 10) }:${ `0${ epoch }`.slice(-2) }`,
+        index: dateType === "month" ?
+          `${ start_date_time.slice(0, 10) }:${ `0${ epoch }`.slice(-2) }` :
+          `00${ epoch }`.slice(-3),
         key: tmc,
         fill: type === "Incident" ? "#00f" : "#fff",
         stroke: type === "Incident" ? "#00f" : "#fff",
@@ -194,7 +194,7 @@ console.log("GRID DATA:", data);
       type: "update-state",
       points
     });
-  }, [falcorCache, TMCs, date, isVisible]);
+  }, [falcorCache, TMCs, date, dateType, isVisible]);
 
   const indexFormat = React.useMemo(() => {
     if (dateType === "month") {
