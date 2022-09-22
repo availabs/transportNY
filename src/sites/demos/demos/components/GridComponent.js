@@ -176,7 +176,7 @@ const GridComponent = ({ date, data, ttToSpeed, TMCs, tmcWidths, scale, onClick,
       }, a);
     }, []);
 
-    const points = events.map(({ start_date_time, type, tmc }) => {
+    const points = events.map(({ start_date_time, type, tmc, ...rest }) => {
       const date = new Date(start_date_time);
       const epoch = date.getHours() * 12 + Math.floor(date.getMinutes() / 5);
       return {
@@ -186,7 +186,8 @@ const GridComponent = ({ date, data, ttToSpeed, TMCs, tmcWidths, scale, onClick,
         key: tmc,
         fill: type === "Incident" ? "#00f" : "#fff",
         stroke: type === "Incident" ? "#00f" : "#fff",
-        r: "6"
+        r: "6",
+        data: { start_date_time, type, tmc, ...rest }
       }
     });
 
@@ -247,6 +248,7 @@ const GridComponent = ({ date, data, ttToSpeed, TMCs, tmcWidths, scale, onClick,
               <div className="font-bold text-3xl">RENDERING GRAPH...</div>
             </div>
             <GridGraph
+              hoverPoints
               bgColor="#000"
               nullColor="#E5E7EB"
               onClick={ onClick }
@@ -285,7 +287,13 @@ const GridComponent = ({ date, data, ttToSpeed, TMCs, tmcWidths, scale, onClick,
 
 export default GridComponent;
 
-const GridHoverComp = ({ data, indexFormat, keyFormat, valueFormat }) => {
+const GridHoverComp = ({ target, ...rest }) => {
+  return target === "graph" ?
+    <GraphHoverComp { ...rest }/> :
+    <PointHoverComp { ...rest }/>
+}
+
+const GraphHoverComp = ({ data, indexFormat, keyFormat, valueFormat }) => {
 
   const indexes = get(data, "indexes", []);
   const index = get(data, "index", null);
@@ -305,7 +313,7 @@ const GridHoverComp = ({ data, indexFormat, keyFormat, valueFormat }) => {
       grid grid-cols-1 gap-1 px-2 pt-1 pb-2 rounded
       ${ theme.accent1 }
     ` }>
-      <div className="font-bold text-lg leading-6 border-b-2 pl-2">
+      <div className="font-bold text-lg leading-6 border-b-2 border-current pl-2">
         { keyFormat(get(data, "key", null)) }
       </div>
       { indexes.slice(l, h + 1).map(i => (
@@ -326,6 +334,31 @@ const GridHoverComp = ({ data, indexFormat, keyFormat, valueFormat }) => {
           </div>
         ))
       }
+    </div>
+  )
+}
+const PointHoverComp = ({ data }) => {
+
+  const theme = useTheme();
+
+  return (
+    <div className={ `
+      grid grid-cols-1 gap-1 px-2 pt-1 pb-2 rounded
+      ${ theme.accent1 }
+    ` }>
+      <div className="font-bold text-lg leading-6 border-b-2 border-current pl-2">
+        { data.type } ({ data.event_id })
+      </div>
+      <div className="px-2 grid grid-cols-5">
+        <div className="col-span-2 font-bold">Start Time:</div>
+        <div className="col-span-3">{ data.start_date_time }</div>
+
+        <div className="col-span-2 font-bold">End Time:</div>
+        <div className="col-span-3">{ data.stop_date_time }</div>
+      </div>
+      <div className="px-2 max-w-md whitespace-pre-wrap">
+        { data.description }
+      </div>
     </div>
   )
 }

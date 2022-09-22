@@ -209,7 +209,6 @@ const MonthGrid = () => {
     if (TMCs.length) {
       loadingStart();
       falcor.get(["tmc", TMCs, dataType, dateType, date, "by", resolution])
-        .then(res => console.log("RES:", res))
         .then(() => loadingStop());
     }
   }, [falcor, date, dateType, dataType, resolution, TMCs]);
