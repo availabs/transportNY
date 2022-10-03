@@ -2,6 +2,7 @@ import React from 'react';
 import SourcesLayout, { DataManagerHeader } from './components/SourcesLayout'
 import SourceView from './Source'
 import SourceCreate from './Source/create'
+import Settings from "./Source/settings";
 
 const DataManager = () => {
   return (
@@ -28,8 +29,8 @@ const SourceList = [{
 const config = [
   ...SourceList,
   ...SourceView,
-  ...SourceCreate
-
+  ...SourceCreate,
+  ...Settings
 ]
 
 export default config;
