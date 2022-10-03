@@ -1,14 +1,20 @@
 import React from 'react';
 
-const Home = () => 
-  <div className='h-screen flex-1 flex flex-col text-gray-900 bg-gray-100'>
-      <div className="flex-1 flex items-center justify-center flex-col">
-        <div className="text-6xl font-bold">NPMRDS</div>
-        <div className="text-xl">Coming soon</div>
-        <div className="text-xl">Check Back Later...</div>
-      </div>
-  </div>
+import { Link } from "react-router-dom"
 
+const Home = () => (
+  <div className="max-w-6xl mx-auto my-8">
+    <div className="text-3xl font-bold">
+      Welcome to NPMRDS
+    </div>
+    <div className="flex flex-col text-lg">
+      <Link to="/mystuff">My Stuff</Link>
+      <Link to="/mystuff/routes">My Routes</Link>
+      <Link to="/mystuff/reports">My Reports</Link>
+      <Link to="/mystuff/templates">My Templates</Link>
+    </div>
+  </div>
+)
 const config = {
   name:'TransportNY',
   // title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
