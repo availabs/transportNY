@@ -3,9 +3,15 @@ import { TabPanel, Dropdown } from "modules/avl-components/src"
 import get from 'lodash.get'
 
 const LayerStylePane = (props) => {
+  console.log('LayerStylePane', props)
+  const viewData = get(props.layer, 'view_data', {})
   return (
-    <div className='border-t border-gray-300 h-full bg-gray-100'> 
+    <div className='border-t border-gray-300 h-full bg-gray-100 w-full'> 
       Styles ...
+      <pre>
+        {JSON.stringify(viewData, null,3)}
+      </pre>
+
     </div>
   )
 }
@@ -41,8 +47,8 @@ const LayerControlPanel = (props) => {
               openType='click'
             >
                {Object.keys(downloads)
-                .map(d => (
-                  <div className='bg-white p-2'>
+                .map((d,i) => (
+                  <div key={i} className='bg-white p-2'>
                     <a onClick={() => console.log('clicked', d)} className='w-full text-center hover:border-b border-blue-300'  href={downloads[d]}>{d}</a>
                   </div>
                 ))
@@ -53,7 +59,7 @@ const LayerControlPanel = (props) => {
 
           </div>
         </div>
-        <div className='bg-white'>
+        <div className='bg-white overflow-hidden'>
          <TabPanel 
             tabs={LayerTabs} 
             {...props} 

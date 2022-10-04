@@ -71,7 +71,6 @@ const Map = ({ events }) => {
         
 
     const getMapData = (sourceId) => {
-        console.log('getMapData')
         let views = Object.values(get(falcorCache,["datamanager","sources","byId",sourceId,"views","byIndex",],{}))
             .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
             .sort((a,b) => {
@@ -91,7 +90,8 @@ const Map = ({ events }) => {
                 metadata: get(views[0],'metadata',{}),
                 name: getName(sourceAttributes),
                 sources: get(views[0],'metadata.tiles.sources',[]),
-                layers: get(views[0],'metadata.tiles.layers',[])
+                layers: get(views[0],'metadata.tiles.layers',[]),
+                view_data: views[0]
 
             } : null
           

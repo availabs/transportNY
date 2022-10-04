@@ -1,6 +1,4 @@
 import React from 'react'
-// import get from 'lodash.get'
-// const HOST = 'http://localhost:5566'
 
 const Create = () => {
 
