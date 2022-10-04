@@ -10,21 +10,12 @@ import { scaleQuantile, scaleThreshold } from "d3-scale"
 
 import {
   useFalcor,
-  useTheme,
   getColorRange,
   ScalableLoading
 } from "modules/avl-components/src"
 
-import { GridGraph } from "modules/avl-graph/src"
-
 import GridComp from "./components/GridComponent"
 
-const isLeapYear = year => {
-  return (year % 400 === 0) || ((year % 100 !== 0) && (year % 4 === 0));
-}
-const daysInYear = year => {
-  return isLeapYear(year) ? 366 : 365;
-}
 const DirectionMap = {
   N: "North",
   S: "South",
@@ -34,12 +25,12 @@ const DirectionMap = {
 
 const GridColors = getColorRange(9, "RdYlGn")
 
-const YearGrid = ({}) => {
+const YearGrid = () => {
 
   const [year, setYear] = React.useState(2021);
   const [geo, setGeo] = React.useState("COUNTY|36001");
   const geoid = React.useMemo(() => {
-    const [level, id] = geo.split("|");
+    const [, id] = geo.split("|");
     return id || "unknown";
   }, [geo])
   const [tmclinear, setTmcLinear] = React.useState(212);
@@ -76,9 +67,7 @@ const YearGrid = ({}) => {
   const { falcor, falcorCache } = useFalcor();
 
   React.useEffect(() => {
-    loadingStart();
     falcor.get(["geo", geoid, "name"])
-      .then(() => loadingStop());
   }, [falcor, geoid]);
 
   const name = React.useMemo(() => {
@@ -86,9 +75,7 @@ const YearGrid = ({}) => {
   }, [falcorCache, geoid])
 
   React.useEffect(() => {
-    loadingStart();
     falcor.get(["tmc", "tmclinear", year, geo, tmclinear, direction])
-      .then(() => loadingStop());
   }, [falcor, year, geo, tmclinear, direction, loadingStart, loadingStop]);
 
   React.useEffect(() => {
@@ -100,12 +87,10 @@ const YearGrid = ({}) => {
 
   React.useEffect(() => {
     if (TMCs.length) {
-      loadingStart();
       falcor.get(
         ["tmc", TMCs, "tt", "year", year, "by", "hour"],
         ["tmc", TMCs, "meta", year, ["length", "avg_speedlimit"]]
       )
-      .then(() => loadingStop());
     }
   }, [falcor, year, TMCs]);
 

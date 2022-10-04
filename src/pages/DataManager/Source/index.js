@@ -44,7 +44,7 @@ const Source = () => {
       return data
     }
     fetchData()
-  }, [sourceId])
+  }, [sourceId, falcor])
 
   const views = useMemo(() => {
     return Object.values(get(falcorCache,["dama", pgEnv, "sources","byId",sourceId,"views","byIndex",],{}))

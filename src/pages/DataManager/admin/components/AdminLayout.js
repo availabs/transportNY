@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useFalcor, SideNav } from 'modules/avl-components/src'
+import { useFalcor, /*SideNav*/ } from 'modules/avl-components/src'
 import { Link } from 'react-router-dom'
 import { useSelector } from "react-redux";
 
 import get from 'lodash.get'
-import {/*getDomain,*/getSubdomain} from 'utils'
-import { useParams } from 'react-router-dom'
+// import {/*getDomain,*/getSubdomain} from 'utils'
+// import { useParams } from 'react-router-dom'
 
 import { selectPgEnv } from "pages/DataManager/store"
 
@@ -49,19 +49,19 @@ const SourceThumb = ({source}) => {
   )
 }
 
-const domainFilters = {
-  freightatlas: 'Freight Atlas',
-  npmrds: 'NPMRDS',
-  tsmo: 'TSMO',
-  transit: 'Transit'
-}
+// const domainFilters = {
+//   freightatlas: 'Freight Atlas',
+//   npmrds: 'NPMRDS',
+//   tsmo: 'TSMO',
+//   transit: 'Transit'
+// }
 
 const SourcesLayout = ({children}) => {
-  const SUBDOMAIN = getSubdomain(window.location.host)
+  //const SUBDOMAIN = getSubdomain(window.location.host)
   const {falcor,falcorCache} = useFalcor()
   // const [displayLayer, setDisplayLayer] = useState(null)
   const [layerSearch, setLayerSearch] = useState('')
-  const { sourceId } = useParams()
+  //const { sourceId } = useParams()
   const pgEnv = useSelector(selectPgEnv);
   
   useEffect(() => {
@@ -82,7 +82,7 @@ const SourcesLayout = ({children}) => {
         .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
   },[falcorCache, pgEnv])
 
-  const current_site = get(domainFilters, `[${SUBDOMAIN}]`, '') //'Freight Atlas'
+  //const current_site = get(domainFilters, `[${SUBDOMAIN}]`, '') //'Freight Atlas'
   
   
 

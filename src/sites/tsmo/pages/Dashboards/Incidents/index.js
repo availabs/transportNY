@@ -30,7 +30,7 @@ import { HeroStatComp } from "./components/CompareComp"
 
 import {F_SYSTEM_MAP} from '../components/metaData'
 
-import {duration2minutes,  vehicleDelay2cost} from './components/utils'
+import {duration2minutes,  /*vehicleDelay2cost*/} from './components/utils'
 
 import { calcCost } from "sites/tsmo/pages/Dashboards/Congestion/components/data_processing"
 
@@ -128,7 +128,7 @@ const Incidents = props => {
        "start_date_time",
        "geom"]
     ]).then(() => setLoading(-1));
-  }, [falcor, eventIds]);
+  }, [falcor, eventIds, setLoading]);
 
   const [TMCs, setTMCs] = React.useState([]);
 

@@ -1,7 +1,6 @@
-import React from "react";
 import mapboxgl from "mapbox-gl";
 import get from "lodash.get";
-import { extent as d3extent, groups as d3groups } from "d3-array";
+import { extent as d3extent } from "d3-array"
 import { scaleQuantize } from "d3-scale";
 
 import { LayerContainer } from "modules/avl-map/src";
@@ -17,7 +16,7 @@ import {
   ConflationCaseLayers,
 } from "./conflation";
 
-import { capitalize, DelayFormat } from "./utils";
+import { DelayFormat } from "./utils";
 
 
 const ColorRange = getColorRange(7, "RdYlGn");
@@ -35,7 +34,7 @@ const CaseLayerFilters = ConflationCaseLayers.reduce((a, { id, filter }) => {
 class ConflationLayer extends LayerContainer {
 
   fetchData(falcor) {
-    const { year, point, tmcs = [] } = this.props;
+    const { year, tmcs = [] } = this.props;
     if (!(year && tmcs.length)) {
       console.log('map no fetch')
       return Promise.resolve();
@@ -52,7 +51,7 @@ class ConflationLayer extends LayerContainer {
     // }
     //map
     const falcorCache = falcor.getCache();
-    const { tmcs, ways, year, activeBranch } = this.props;
+    const { tmcs, year, activeBranch } = this.props;
 
 
     const tmcKey = this.props.showRaw ? "rawTmcDelayData" : "tmcDelayData";
@@ -291,5 +290,5 @@ class PointLayer extends LayerContainer {
   };
 }
 
-
-export default { ConflationLayer, PointLayer }
+const Layers = { ConflationLayer, PointLayer }
+export default Layers

@@ -29,9 +29,9 @@ import {/*duration2minutes*/  vehicleDelay2cost} from 'sites/tsmo/pages/Dashboar
 
 import { calcCost } from "./components/data_processing"
 
-function getDaysInMonth(year, month) {
-  return new Date(year, month, 0).getDate();
-}
+// function getDaysInMonth(year, month) {
+//   return new Date(year, month, 0).getDate();
+// }
 
 const colors =  ['#e5496d', '#fad264', '#F8C22E','#E6AB07','#B08306', '#7A5A04']
 // const colors = ['#e96835','#f5dc50','#a63b6e','#e54249','#49969b'],
@@ -123,7 +123,7 @@ const RecurrentDelay = props => {
     if (TMCs.length) {
       falcor.chunk(["tmc", TMCs, "meta", [year - 1, year], ["aadt", "aadt_combi", "aadt_singl"]])
     }
-  }, [falcor, TMCs]);
+  }, [falcor, TMCs, year]);
 
   const compareData = React.useMemo(() => {
     const py = year - 1,
