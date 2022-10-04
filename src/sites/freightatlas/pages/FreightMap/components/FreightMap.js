@@ -76,7 +76,7 @@ const Map = ({ events }) => {
     }
         
 
-    const getMapData = ((sourceId) => {
+    const getMapData = (sourceId) => {
         console.log('getMapData')
         let views = Object.values(get(falcorCache,["dama", pgEnv,"sources","byId",sourceId,"views","byIndex",],{}))
             .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))

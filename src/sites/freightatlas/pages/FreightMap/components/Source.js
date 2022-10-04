@@ -15,7 +15,7 @@ const Overview = ({source, views}) => {
       <div className='flex'>
         <div className="flex-1">
           <div>
-          {get(source,'categories',[]).map(cat => cat.map(s => <span className='text-xs p-1 px-2 bg-blue-200 text-blue-600 mr-2'>{s}</span>))}
+          {(get(source,'categories',[]) || []).map(cat => cat.map(s => <span className='text-xs p-1 px-2 bg-blue-200 text-blue-600 mr-2'>{s}</span>))}
           </div>
           <p className="mt-1 max-w-2xl text-sm text-gray-500 py-2">
             {get(source,'description', false) || 'No Description'}
