@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import React, { memo } from 'react'
 import { animated, to,/*SpringValue*/ } from '@react-spring/web'
 import { useTheme } from '@nivo/core'
 // import { NodeProps } from './types'

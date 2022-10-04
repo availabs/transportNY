@@ -164,7 +164,7 @@ const LayerListTab = ({activeLayers,MapActions,...rest},) => {
         //     .filter(({data}) => data.sectionLanding)
         //     .sort((a, b) => a.data.index - b.data.index);
 
-        // const [item] = sections.splice(start, 1);
+        // const [item] = sectionsab.splice(start, 1);
         // sections.splice(end, 0, item);
 
         // sections.forEach((item, i) => {
@@ -173,6 +173,7 @@ const LayerListTab = ({activeLayers,MapActions,...rest},) => {
         // })
     }, [/*activeLayers*/])
 
+    
     return (
         <div>
            <div className='p-4 border-b border-gray-200'>
