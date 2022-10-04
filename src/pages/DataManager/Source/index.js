@@ -39,7 +39,7 @@ const Source = () => {
       return data
     }
     fetchData()
-  }, [sourceId])
+  }, [sourceId, falcor])
 
   const views = useMemo(() => {
     return Object.values(get(falcorCache,["datamanager","sources","byId",sourceId,"views","byIndex",],{}))

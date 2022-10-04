@@ -1,17 +1,17 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useFalcor,TopNav, Input /*withAuth, Input, Button*/ } from 'modules/avl-components/src'
+import React, { useMemo, useState } from 'react';
+import { /*useFalcor,*//*TopNav,*/ Input /*withAuth, Input, Button*/ } from 'modules/avl-components/src'
 import get from 'lodash.get'
-import { useParams } from 'react-router-dom'
+// import { useParams } from 'react-router-dom'
 import { DataTypes } from '../DataTypes'
 
 import SourcesLayout, {DataManagerHeader}  from '../components/SourcesLayout'
 
-import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
+import {SourceAttributes, /*ViewAttributes, getAttributes*/} from 'pages/DataManager/components/attributes'
     
 
 
 const Source = () => {
-  const {falcor, falcorCache} = useFalcor()
+  //const {falcor, falcorCache} = useFalcor()
   const [ source, setSource ] = useState( 
     Object.keys(SourceAttributes)
       .filter(d => !['id', 'metadata','statistics'].includes(d))
@@ -42,7 +42,7 @@ const Source = () => {
           {Object.keys(SourceAttributes)
             .filter(d => !['id','metadata','description', 'type','statistics', 'category', 'update_interval', 'categories'].includes(d))
             .map((attr,i) => {
-              let val = typeof source[attr] === 'object' ? JSON.stringify(source[attr]) : source[attr]
+              // let val = typeof source[attr] === 'object' ? JSON.stringify(source[attr]) : source[attr]
               return (
                 <div key={i} className='flex justify-between group'>
                   <div  className="flex-1 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">

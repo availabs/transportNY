@@ -14,7 +14,7 @@ import {
   Table,
 } from "modules/avl-components/src"
 
-import {duration2minutes, timeConvert, vehicleDelay2cost} from './utils'
+import {duration2minutes, timeConvert, /*vehicleDelay2cost*/} from './utils'
 
 import { calcCost } from "sites/tsmo/pages/Dashboards/Congestion/components/data_processing"
 

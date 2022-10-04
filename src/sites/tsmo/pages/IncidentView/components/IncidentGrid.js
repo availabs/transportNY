@@ -10,7 +10,7 @@ import {
   rollup as d3rollup,
 } from "d3-array";
 import { format as d3format } from "d3-format";
-import { scaleQuantile, scaleLinear, scaleThreshold } from "d3-scale";
+import { /*scaleQuantile,*/ scaleLinear, scaleThreshold } from "d3-scale";
 
 import { GridGraph,/* BarGraph, LineGraph*/} from "modules/avl-graph/src";
 import get from "lodash.get";
@@ -21,7 +21,7 @@ const ColorRange = getColorRange(7, "RdYlGn");
 const DiffColorRange = getColorRange(8, "YlOrBr", true);
 
 const epochFormat = (de) => {
-  const [d, e] = de.split("|");
+  const [, e] = de.split("|");
   const m = e * 5;
   let hour = Math.floor(m / 60);
   const am = hour < 12 ? "am" : "pm";
@@ -56,7 +56,7 @@ const IncidentGrid = ({
 
 	React.useEffect(() => {
 		if(congestionData && congestionData.dates) { 
-     	const [requestKeys, tmcs, year] = makeNpmrdsRequestKeys(congestionData);
+     	const [requestKeys,,] = makeNpmrdsRequestKeys(congestionData);
     	setRequestKeys(requestKeys);
    	}
     if (requestKeys.length && tmcs.length && year) {
@@ -66,7 +66,7 @@ const IncidentGrid = ({
           ["pm3", "measuresByTmc", tmcs, Math.max(year-1, 2016), "freeflow_tt"]
         )
     }
-  }, [falcor,falcorCache, congestionData]);
+  }, [falcor,falcorCache,requestKeys, congestionData, tmcs, year]);
 	
 	const getFF = (tmc, year, falcorCache) => {
 	  const fftt = get(
@@ -88,7 +88,7 @@ const IncidentGrid = ({
 	  return (length / avg_speedlimit) * 3600;
 	};
 
-	const expandData = (tmcs, year, requestKeys, falcorCache) => {
+	const expandData = React.useMemo((tmcs, year, requestKeys, falcorCache) => {
 
 	  return requestKeys.reduce((a, rk) => {
 	    const data = [...get(falcorCache, ["routes", "data", rk, "value"], [])];
@@ -136,7 +136,7 @@ const IncidentGrid = ({
 	    a[rk] = data;
 	    return a;
 	  }, {});
-	};
+	},[]);
 
 	const gridData = React.useMemo(() => {
 	   	if(!congestionData || !congestionData.dates) return []
@@ -160,17 +160,17 @@ const IncidentGrid = ({
 
 	    const expandedData = expandData(tmcs, year, requestKeys, falcorCache);
 
-	    const dataDomain = requestKeys.reduce((a, c) => {
-	      const data = get(expandedData, c, [])
-	        .filter(({ tmc }) => tmcs.has(tmc))
-	        .map((d) => {
-	          const { tmc, value } = d;
-	          const length = get(falcorCache, ["tmc", tmc, "meta", year, "length"]);
-	          return length * (3600.0 / value);
-	        });
-	      a.push(...data);
-	      return a;
-	    }, []);
+	    // const dataDomain = requestKeys.reduce((a, c) => {
+	    //   const data = get(expandedData, c, [])
+	    //     .filter(({ tmc }) => tmcs.has(tmc))
+	    //     .map((d) => {
+	    //       const { tmc, value } = d;
+	    //       const length = get(falcorCache, ["tmc", tmc, "meta", year, "length"]);
+	    //       return length * (3600.0 / value);
+	    //     });
+	    //   a.push(...data);
+	    //   return a;
+	    // }, []);
 
 	    // const _colors = scaleQuantize()
 	    //   .domain([33, d3extent(dataDomain)[1]])
@@ -338,7 +338,7 @@ const IncidentGrid = ({
 	          ? "Yearly Avg. Speeds"
 	          : "Speed Differences",
 	    }));
-  	}, [requestKeys, falcorCache,activeBranch, corridors, congestionData,year]);
+  	}, [requestKeys, falcorCache,activeBranch, corridors, congestionData,year, expandData]);
 
 	const points = React.useMemo(() => {
 	    if(!congestionData || !congestionData.dates) return []

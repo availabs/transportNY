@@ -17,8 +17,8 @@ import {getTMCs, getCorridors} from './data_processing'
 import { F_SYSTEM_MAP } from 'sites/tsmo/pages/Dashboards/components/metaData'
 
 
-const fFormat = d3format(",.1f")
-const floatFormat = f => (f === null) || isNaN(f) ? "no data" : fFormat(f);
+// const fFormat = d3format(",.1f")
+// const floatFormat = f => (f === null) || isNaN(f) ? "no data" : fFormat(f);
 const siFormat = d3format(".3s")
 
 const TableColumns = [
@@ -31,7 +31,7 @@ const TableColumns = [
           change = rank - pm_rank
 
       return (
-        <Link to={`/corridor/${d.row.original.corridor}/${d.row.original.year}`}>
+        <Link to={`/corridor/${d.row.original.corridor}/${d.row.original.year}-${d.row.original.month}`}>
           {rank}
           <span className='pl-2 text-sm w-full text-center'>
           {change === 0 ?
@@ -52,18 +52,20 @@ const TableColumns = [
           to = get(d, 'row.original.to', '')
 
       return (<div>
-        <div>
-          {get(d, 'row.original.roadname', '')}
-          <span className='font-bold text-sm'>
-          &nbsp;{get(d, 'row.original.direction','')}
-          </span>
-          <span className='font-bold text-sm float-right text-gray-500'>
-          &nbsp;{get(d, 'row.original.length',0).toFixed(2)} mi
-          </span>
-        </div>
-        <div className='text-xs font-italic text-gray-600'>
-          {from} {from !== to ? `to ${to}` : ''}
-        </div>
+        <Link to={`/corridor/${d.row.original.corridor}/${d.row.original.year}-${d.row.original.month}`}>
+          <div>
+            {get(d, 'row.original.roadname', '')}
+            <span className='font-bold text-sm'>
+            &nbsp;{get(d, 'row.original.direction','')}
+            </span>
+            <span className='font-bold text-sm float-right text-gray-500'>
+            &nbsp;{get(d, 'row.original.length',0).toFixed(2)} mi
+            </span>
+          </div>
+          <div className='text-xs font-italic text-gray-600'>
+            {from} {from !== to ? `to ${to}` : ''}
+          </div>
+        </Link>
       </div>)
     }
   },
@@ -131,8 +133,14 @@ const CongestionSegmentTable = ({ rawDelayData, setHoveredTMCs }) => {
 
 
   const corridors = React.useMemo(() =>
-    getCorridors(tmcMetaData,year,tmcs).slice(0, 15),
-    [tmcMetaData,year,tmcs]
+    getCorridors(tmcMetaData,year,tmcs)
+      .slice(0, 15)
+      .map(d => {
+        d.month = (month+'').padStart(2,'0')
+        return d
+      })
+    ,
+    [tmcMetaData,year,tmcs,month]
   )
 
   const onRowEnter = React.useCallback((e, { original }) => {
@@ -142,8 +150,7 @@ const CongestionSegmentTable = ({ rawDelayData, setHoveredTMCs }) => {
     setHoveredTMCs([]);
   }, [setHoveredTMCs]);
 
-  console.log('corridors', corridors)
-
+  
   return (
     <div>
        <Table

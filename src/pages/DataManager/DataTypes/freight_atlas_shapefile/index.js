@@ -73,7 +73,7 @@ const Edit = ({startValue, attr, viewId, parentData, cancel=()=>{}}) => {
         let val = parentData
         val.tiles[attr] = update
         // console.log('testing',JSON.stringify(val), val)
-        let response = await falcor.set({
+        await falcor.set({
             paths: [
               ['datamanager','views','byId',viewId,'attributes', 'metadata' ]
             ],
@@ -118,13 +118,13 @@ const Edit = ({startValue, attr, viewId, parentData, cancel=()=>{}}) => {
 
 
 
-const MapPage = () => {
+const MapPage = ({source,views}) => {
   // const { sourceId } = useParams()
-  const [ activeView /*, setActiveView*/ ] = useState(null)
-  const [ mapData /*, setMapData*/ ] = useState({})
+  const [ activeView /*, setActiveView*/ ] = useState(get(views,'[0]', null))
+  const [ mapData /*, setMapData*/ ] = useState(get(views,'[0].metadata.tiles',{}))
   const [ editing, setEditing ] = React.useState(null)
 
- 
+  console.log('testing', mapData, activeView)
 
   return (
     <div> 

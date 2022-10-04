@@ -53,7 +53,7 @@ const Map = ({ events }) => {
         ]
     }
 
-    const fetchSourceData = async (sourceId) => {
+    const fetchSourceData = async (sourceId) => { 
         const lengthPath = ["datamanager","sources","byId",sourceId,"views","length"]
         const resp = await falcor.get(lengthPath);
         return falcor.get(
@@ -67,17 +67,17 @@ const Map = ({ events }) => {
               "attributes",Object.values(SourceAttributes)
             ]
         )
-     
     }
+        
 
-    const getMapData = ((sourceId) => {
+    const getMapData = (sourceId) => {
+        console.log('getMapData')
         let views = Object.values(get(falcorCache,["datamanager","sources","byId",sourceId,"views","byIndex",],{}))
             .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
             .sort((a,b) => {
                 return new Date(a.last_updated) - new Date(b.last_updated)
             })
 
-        
         // to do - get layer name
         let sourceAttributes = getAttributes(get(falcorCache,[
               "datamanager","sources","byId",sourceId,
@@ -95,7 +95,7 @@ const Map = ({ events }) => {
 
             } : null
           
-    })
+    }
  
     React.useEffect( () => {
         const updateLayers = async () => {
@@ -109,12 +109,19 @@ const Map = ({ events }) => {
                 // don't call layer a second time
                 .filter(d => !currentLayerIds.includes(d.layer_id))
                 .map(l => FreightAtlasLayer(l))
+
             if(mounted.current) {
-                setLayerData([...layerData.filter(d => layerList.includes(d.layer_id)), ...output])
+                setLayerData(l => [...l.filter(d => layerList.includes(d.layer_id)), ...output])
             }
         }
         updateLayers()
-    },[layerList,falcorCache,mounted.current])
+    },[
+        layerList,
+        falcorCache,
+        // fetchSourceData,
+        // getMapData,
+        // layerData
+    ])
 
     return (
         

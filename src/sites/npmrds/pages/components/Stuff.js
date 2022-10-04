@@ -1,14 +1,9 @@
 import React from "react"
 
 import get from "lodash.get"
-import { useHistory, useParams, Link } from "react-router-dom"
 
 import {
   useFalcor,
-  useTheme,
-  getColorRange,
-  ScalableLoading,
-  Select
 } from "modules/avl-components/src"
 
 const Folder = ({ id, openedFolders, setOpenedFolders }) => {
