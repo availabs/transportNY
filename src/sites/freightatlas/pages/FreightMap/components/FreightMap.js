@@ -53,26 +53,25 @@ const Map = ({ events }) => {
         ]
     }
 
-    const fetchSourceData = React.useMemo((sourceId) => {
-        const fetchIt = async (sourceId) => { 
-            const lengthPath = ["datamanager","sources","byId",sourceId,"views","length"]
-            const resp = await falcor.get(lengthPath);
-            return falcor.get(
-                [
-                  "datamanager","sources","byId",sourceId,"views","byIndex",
-                  {from:0, to:  get(resp.json, lengthPath, 0)-1},
-                  "attributes",Object.values(ViewAttributes)
-                ],
-                [
-                  "datamanager","sources","byId",sourceId,
-                  "attributes",Object.values(SourceAttributes)
-                ]
-            )
-        }
-        return fetchIt(sourceId)
-    }, [falcor])
+    const fetchSourceData = async (sourceId) => { 
+        const lengthPath = ["datamanager","sources","byId",sourceId,"views","length"]
+        const resp = await falcor.get(lengthPath);
+        return falcor.get(
+            [
+              "datamanager","sources","byId",sourceId,"views","byIndex",
+              {from:0, to:  get(resp.json, lengthPath, 0)-1},
+              "attributes",Object.values(ViewAttributes)
+            ],
+            [
+              "datamanager","sources","byId",sourceId,
+              "attributes",Object.values(SourceAttributes)
+            ]
+        )
+    }
+        
 
-    const getMapData = React.useMemo((sourceId) => {
+    const getMapData = (sourceId) => {
+        console.log('getMapData')
         let views = Object.values(get(falcorCache,["datamanager","sources","byId",sourceId,"views","byIndex",],{}))
             .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
             .sort((a,b) => {
@@ -96,7 +95,7 @@ const Map = ({ events }) => {
 
             } : null
           
-    }, [falcorCache])
+    }
  
     React.useEffect( () => {
         const updateLayers = async () => {
@@ -110,17 +109,18 @@ const Map = ({ events }) => {
                 // don't call layer a second time
                 .filter(d => !currentLayerIds.includes(d.layer_id))
                 .map(l => FreightAtlasLayer(l))
+
             if(mounted.current) {
-                setLayerData([...layerData.filter(d => layerList.includes(d.layer_id)), ...output])
+                setLayerData(l => [...l.filter(d => layerList.includes(d.layer_id)), ...output])
             }
         }
         updateLayers()
     },[
         layerList,
         falcorCache,
-        fetchSourceData,
-        getMapData,
-        layerData
+        // fetchSourceData,
+        // getMapData,
+        // layerData
     ])
 
     return (
