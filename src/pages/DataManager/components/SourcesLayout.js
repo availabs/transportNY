@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useFalcor, SideNav, Dropdown, withAuth } from 'modules/avl-components/src'
+import { useFalcor, /*SideNav,*/ Dropdown, withAuth } from 'modules/avl-components/src'
 import { Link } from 'react-router-dom'
 import get from 'lodash.get'
-import {/*getDomain,*/getSubdomain} from 'utils'
+// import {getDomain,getSubdomain} from 'utils'
 import { useParams } from 'react-router-dom'
 
 import {Item} from 'pages/Auth/AuthMenu'
@@ -47,15 +47,15 @@ const SourceThumb = ({source}) => {
   )
 }
 
-const domainFilters = {
-  freightatlas: 'Freight Atlas',
-  npmrds: 'NPMRDS',
-  tsmo: 'TSMO',
-  transit: 'Transit'
-}
+// const domainFilters = {
+//   freightatlas: 'Freight Atlas',
+//   npmrds: 'NPMRDS',
+//   tsmo: 'TSMO',
+//   transit: 'Transit'
+// }
 
 const SourcesLayout = ({children}) => {
-  const SUBDOMAIN = getSubdomain(window.location.host)
+  //const SUBDOMAIN = getSubdomain(window.location.host)
   const {falcor,falcorCache} = useFalcor()
   // const [displayLayer, setDisplayLayer] = useState(null)
   const [layerSearch, setLayerSearch] = useState('')
@@ -79,15 +79,15 @@ const SourcesLayout = ({children}) => {
         .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
   },[falcorCache])
 
-  const current_site = get(domainFilters, `[${SUBDOMAIN}]`, '') //'Freight Atlas'
+  // const current_site = get(domainFilters, `[${SUBDOMAIN}]`, '') //'Freight Atlas'
   
-  let menuItems =  useMemo(() => { 
+  /*let menuItems =  useMemo(() => { 
     let menu =  Object.values(sources
         .filter(d => get(d,`categories`,[]).map(d => d[0]).includes(current_site))
         .filter(d => { 
           return !layerSearch || d.name.split('/').pop().split('_').join(' ').toLowerCase().includes(layerSearch.toLowerCase()) 
         })
-      .reduce((a,b) => {
+      .reduce((a,b) => {/
         b.categories.forEach(cat => {
           if(cat[0] === current_site){
             if(!a[cat[1]]){
@@ -115,7 +115,7 @@ const SourcesLayout = ({children}) => {
       },{}))
       console.log('cacl menu', menu)
       return menu
-    },[sources,sourceId,layerSearch,current_site])
+    },[sources,sourceId,layerSearch,current_site])*/
 
 
   return (

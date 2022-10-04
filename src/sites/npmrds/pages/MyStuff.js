@@ -1,14 +1,10 @@
 import React from "react"
 
 import get from "lodash.get"
-import { useHistory, useParams, Link } from "react-router-dom"
+import { useParams} from "react-router-dom"
 
 import {
   useFalcor,
-  useTheme,
-  getColorRange,
-  ScalableLoading,
-  Select
 } from "modules/avl-components/src"
 
 import FolderIcon from "./components/FolderIcon"
@@ -38,7 +34,7 @@ const MyStuff = props => {
     if (!openedFolders.length) {
       setOpenedFolders(folders.slice(0, 1));
     }
-  }, [falcorCache]);
+  }, [falcorCache,openedFolders.length]);
 
   const params = useParams();
 
@@ -56,7 +52,7 @@ const MyStuff = props => {
             <FolderIcon key={ f.id } size={ 10 } { ...f }
               onClick={ e => setOpenedFolders([f]) }
               className="cursor-pointer mr-1"
-              opened={ f.id == get(openedFolders, [openedFolders.length - 1, "id"]) }/>
+              opened={ +f.id === +get(openedFolders, [openedFolders.length - 1, "id"]) }/>
           ))
         }
       </div>

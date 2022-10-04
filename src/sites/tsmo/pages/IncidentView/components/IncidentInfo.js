@@ -4,8 +4,6 @@ import {
 } from "modules/avl-components/src";
 import get from 'lodash.get'
 
-import { timeConvert } from 'sites/tsmo/pages/Dashboards/Incidents/components/utils'
-
 
 const rawDataKeys = [
  "event_id",
@@ -122,7 +120,7 @@ export const IncidentTitle = ({event_id}) => {
 
 	React.useEffect(() => {
 		return falcor.get(["transcom2","eventsbyId",event_id, rawDataKeys])
-  	}, [event_id]);
+  	}, [event_id, falcor]);
   	
   	const incident = React.useMemo(() => {
 	    const eData = get(
@@ -169,7 +167,7 @@ const IncidentInfo = ({event_id}) => {
 
 	React.useEffect(() => {
 		return falcor.get(["transcom2","eventsbyId",event_id, rawDataKeys])
-  	}, [event_id]);
+  	}, [event_id, falcor]);
   	
   	const incident = React.useMemo(() => {
 	    const eData = get(
@@ -188,7 +186,7 @@ const IncidentInfo = ({event_id}) => {
 
   	let start = new Date(get(incident, 'start_date_time', ''))
   	let end = new Date(get(incident, 'close_date', ''))
-  	let duration = Math.floor((Math.abs(start - end)/1000)/60);
+  	// let duration = Math.floor((Math.abs(start - end)/1000)/60);
   
 	return (
 		<div className="p-8 bg-white shadow">

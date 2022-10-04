@@ -1,9 +1,5 @@
 import React from "react"
 
-import get from "lodash.get"
-
-import { scaleOrdinal } from "d3-scale"
-
 const getTransform = i => {
   return `
     translate(${ i % 2 ? "0.25rem" : "-0.5rem" }, 2rem) rotate(45deg)

@@ -1,8 +1,6 @@
 import React from "react"
-
 import get from "lodash.get"
 import { range as d3range } from "d3-array"
-import { useHistory, useParams, Link } from "react-router-dom"
 
 import {
   useFalcor,
@@ -64,11 +62,11 @@ const epochFormat = index => {
 
 const GridComponent = ({ date, data, ttToSpeed, TMCs, tmcWidths, scale, onClick, isVisible = true }) => {
 
-  const [year, month, day] = React.useMemo(() => {
+  const [year, /*month*/, day] = React.useMemo(() => {
     return date.split("-").map(Number);
   }, [date]);
   const dateType = !day ? "month" : "day";
-  const resolution = dateType === "month" ? "hour" : "epoch";
+  // const resolution = dateType === "month" ? "hour" : "epoch";
 
   const height = React.useMemo(() => {
     if (dateType === "month") {
@@ -80,7 +78,7 @@ const GridComponent = ({ date, data, ttToSpeed, TMCs, tmcWidths, scale, onClick,
 
   const tickValues = React.useMemo(() => {
     if (dateType === "month") {
-      return data.filter(d => d.index.split(":")[1] == 12).map(d => d.index);
+      return data.filter(d => +d.index.split(":")[1] === +12).map(d => d.index);
     }
     return d3range(0, 288).filter((d, i) => !((i - 3) % 6)).map(d => `00${ d }`.slice(-3) );
   }, [data, dateType]);
@@ -112,7 +110,7 @@ const GridComponent = ({ date, data, ttToSpeed, TMCs, tmcWidths, scale, onClick,
     startLoading();
     falcor.get(["tmc", TMCs, "stoplights", year])
       .then(res => {
-        const nodeIds = TMCs.reduce((a, c) => {
+        TMCs.reduce((a, c) => {
           const sls = get(res, ["json", "tmc", c, "stoplights", year], []);
           a.push(...sls.map(sl => sl.osm_node_id));
           return a;
@@ -142,7 +140,7 @@ const GridComponent = ({ date, data, ttToSpeed, TMCs, tmcWidths, scale, onClick,
       type: "update-state",
       stoplights
     })
-  }, [falcorCache, TMCs, year, isVisible])
+  }, [falcorCache, TMCs, year, isVisible, tmcWidths])
 
   React.useEffect(() => {
     if (!isVisible) return;

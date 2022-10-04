@@ -87,7 +87,7 @@ const LayerControl = ({ layer, setActiveLayer, activeLayer, MapActions }) => {
   const { /*layerList,*/ toggleLayer } = useContext(LayerContext);
   const {
     extendSidebar,
-    passCompProps,
+    /*passCompProps,*/
     closeExtension,
     sidebarRef,
     open,
@@ -97,7 +97,7 @@ const LayerControl = ({ layer, setActiveLayer, activeLayer, MapActions }) => {
     if(open === 1 && activeLayer === layer.layer_id) {
       setActiveLayer(null)
     }
-  }, [open])
+  }, [open, activeLayer, layer.layer_id, setActiveLayer])
 
   const onClick = React.useCallback(
     (e) => {
@@ -121,7 +121,8 @@ const LayerControl = ({ layer, setActiveLayer, activeLayer, MapActions }) => {
       extendSidebar,
       closeExtension,
       activeLayer,
-      layer
+      layer,
+      setActiveLayer
     ]
   );
 
