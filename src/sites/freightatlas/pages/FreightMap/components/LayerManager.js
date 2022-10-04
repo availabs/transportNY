@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState, useContext } from 'react';
 import { useFalcor,SideNav } from 'modules/avl-components/src'
+import { useSelector } from "react-redux";
+
 import get from 'lodash.get'
 //import {getDomain,getSubdomain} from 'utils'
 
@@ -9,6 +11,7 @@ import {SourceAttributes, getAttributes, getName} from 'pages/DataManager/compon
 
 import { LayerContext } from './FreightMap'
 
+import { selectPgEnv } from "pages/DataManager/store"
 
 const LayerManager = ({activeLayers,MapActions,...rest}) => {
 	// const SUBDOMAIN = getSubdomain(window.location.host)
@@ -17,13 +20,14 @@ const LayerManager = ({activeLayers,MapActions,...rest}) => {
   	const [layerSearch, setLayerSearch] = useState('')
   	const { layerList, toggleLayer } = useContext(LayerContext);
 
+  const pgEnv = useSelector(selectPgEnv);
   	
 	useEffect(() => {
 	   const fetchData = async () => {
-		   const lengthPath = ["datamanager", "sources", "length"];
+		   const lengthPath = ["dama", pgEnv, "sources", "length"];
 		    const resp = await falcor.get(lengthPath);
 		    return await falcor.get([
-		      "datamanager","sources","byIndex",
+		      "dama", pgEnv,"sources","byIndex",
 		      {from:0, to:  get(resp.json, lengthPath, 0)-1},
 		      "attributes",Object.values(SourceAttributes),
 		    ])
@@ -32,7 +36,7 @@ const LayerManager = ({activeLayers,MapActions,...rest}) => {
 	}, [falcor])
 
 	const sources = useMemo(() => {
-	    return Object.values(get(falcorCache,['datamanager','sources','byIndex'],{}))
+	    return Object.values(get(falcorCache,["dama", pgEnv,'sources','byIndex'],{}))
 	      .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
 	},[falcorCache])
 

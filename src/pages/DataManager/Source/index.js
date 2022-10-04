@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useFalcor,TopNav, /*withAuth, Input, Button*/ } from 'modules/avl-components/src'
+import { useSelector } from "react-redux";
+
 import get from 'lodash.get'
 import { useParams } from 'react-router-dom'
 import {Pages, DataTypes} from '../DataTypes'
@@ -8,29 +10,32 @@ import SourcesLayout, { DataManagerHeader } from '../components/SourcesLayout'
 
 import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
     
-
+import { selectPgEnv } from "pages/DataManager/store"
 
 const Source = () => {
   const {falcor, falcorCache} = useFalcor()
   const { sourceId, page } = useParams()
   const [ pages, setPages] = useState(Pages)
+  const pgEnv = useSelector(selectPgEnv);
+
   const Page = useMemo(() => {
     return page ? get(pages,`[${page}].component`,Pages['overview'].component)  : Pages['overview'].component
   },[page,pages])
+
   useEffect(() => {
     async function fetchData () {
       console.time('fetch data')
-      const lengthPath = ["datamanager","sources","byId",sourceId,"views","length"]
+      const lengthPath = ["dama", pgEnv, "sources","byId",sourceId,"views","length"]
       console.log('source ', lengthPath)
       const resp = await falcor.get(lengthPath);
       let data =  await falcor.get(
         [
-          "datamanager","sources","byId",sourceId,"views","byIndex",
+          "dama", pgEnv, "sources","byId",sourceId,"views","byIndex",
           {from:0, to:  get(resp.json, lengthPath, 0)-1},
           "attributes",Object.values(ViewAttributes)
         ],
         [
-          "datamanager","sources","byId",sourceId,
+          "dama", pgEnv, "sources","byId",sourceId,
           "attributes",Object.values(SourceAttributes)
         ]
       )
@@ -42,12 +47,12 @@ const Source = () => {
   }, [sourceId, falcor])
 
   const views = useMemo(() => {
-    return Object.values(get(falcorCache,["datamanager","sources","byId",sourceId,"views","byIndex",],{}))
+    return Object.values(get(falcorCache,["dama", pgEnv, "sources","byId",sourceId,"views","byIndex",],{}))
       .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
   },[falcorCache,sourceId])
 
   const source = useMemo(() => {
-    let attributes =  getAttributes(get(falcorCache,['datamanager','sources','byId', sourceId],{'attributes': {}})['attributes']) 
+    let attributes =  getAttributes(get(falcorCache,["dama", pgEnv,'sources','byId', sourceId],{'attributes': {}})['attributes']) 
     if(DataTypes[attributes.type] ){
 
       // check for pages to add 

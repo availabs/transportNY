@@ -1,18 +1,24 @@
 import React, {useMemo, useEffect} from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useSelector } from "react-redux";
+
 import { useFalcor } from 'modules/avl-components/src'
 import get from 'lodash.get'
+
 import { getAttributes } from './attributes'
+import { selectPgEnv } from "pages/DataManager/store"
 
 
 export default function BreadCrumbs () {
   const { sourceId /*,view*/ } = useParams()
   const {falcor,falcorCache} = useFalcor()
+  const pgEnv = useSelector(selectPgEnv);
+
   useEffect(() => { 
     async function fetchData () {
       return sourceId ? await falcor.get(
         [
-          "datamanager","sources","byId",sourceId,
+          "dama", pgEnv,"sources","byId",sourceId,
           "attributes",["categories","name"]
         ]
       ) : Promise.resolve({})
@@ -21,7 +27,7 @@ export default function BreadCrumbs () {
   }, [falcor, sourceId])
 
   const pages = useMemo(() => {
-    let attr = getAttributes(get(falcorCache,['datamanager','sources','byId', sourceId],{'attributes': {}})['attributes']) 
+    let attr = getAttributes(get(falcorCache,["dama", pgEnv,'sources','byId', sourceId],{'attributes': {}})['attributes']) 
     if(!get(attr, 'categories[0]', false)) { 
       return [{name:'',to:''}]
     }

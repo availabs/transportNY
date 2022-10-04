@@ -1,19 +1,21 @@
 import React, { useEffect, useMemo } from 'react';
 import { useFalcor } from 'modules/avl-components/src'
+import { useSelector } from "react-redux";
+
 import get from 'lodash.get'
 // import { useParams } from 'react-router-dom'
 
 import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
+import { selectPgEnv } from "pages/DataManager/store"
 
 
 const Overview = ({source, views}) => {
-
   return (
     <div className="overflow-hidden">
       <div className='flex'>
         <div className="flex-1">
           <div>
-          {get(source,'categories',[]).map(cat => cat.map(s => <span className='text-xs p-1 px-2 bg-blue-200 text-blue-600 mr-2'>{s}</span>))}
+          {(get(source,'categories',[]) || []).map(cat => cat.map(s => <span className='text-xs p-1 px-2 bg-blue-200 text-blue-600 mr-2'>{s}</span>))}
           </div>
           <p className="mt-1 max-w-2xl text-sm text-gray-500 py-2">
             {get(source,'description', false) || 'No Description'}
@@ -102,34 +104,35 @@ const Metadata = ({source}) => {
 
 const Source = ({sourceId}) => {
   const {falcor,falcorCache} = useFalcor()
+  const pgEnv = useSelector(selectPgEnv);
   
   useEffect( () => {
     const fetchData = async () => { 
-      const lengthPath = ["datamanager","sources","byId",sourceId,"views","length"]
+      const lengthPath = ["dama", pgEnv,"sources","byId",sourceId,"views","length"]
       const resp = await falcor.get(lengthPath);
       return await falcor.get(
         [
-          "datamanager","sources","byId",sourceId,"views","byIndex",
+          "dama", pgEnv,"sources","byId",sourceId,"views","byIndex",
           {from:0, to:  get(resp.json, lengthPath, 0)-1},
           "attributes",Object.values(ViewAttributes)
         ],
         [
-          "datamanager","sources","byId",sourceId,
+          "dama", pgEnv,"sources","byId",sourceId,
           "attributes",Object.values(SourceAttributes)
         ]
       )
     }
     fetchData()
-  }, [falcor, sourceId])
+  }, [falcor, sourceId, pgEnv])
 
   const views = useMemo(() => {
-    return Object.values(get(falcorCache,["datamanager","sources","byId",sourceId,"views","byIndex",],{}))
+    return Object.values(get(falcorCache,["dama", pgEnv,"sources","byId",sourceId,"views","byIndex",],{}))
       .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
-  },[falcorCache,sourceId])
+  },[falcorCache, sourceId, pgEnv])
 
   const source = useMemo(() => {
-    return getAttributes(get(falcorCache,['datamanager','sources','byId', sourceId],{'attributes': {}})['attributes']) 
-  },[falcorCache,sourceId])
+    return getAttributes(get(falcorCache,["dama", pgEnv,'sources','byId', sourceId],{'attributes': {}})['attributes']) 
+  },[falcorCache, sourceId, pgEnv])
 
   return (
     <div className='max-w-6xl mx-auto px-2'>

@@ -13,9 +13,9 @@ import { useSelector } from "react-redux";
 import get from "lodash.get";
 import Switch from "react-switch";
 
-import { selectPgEnv } from "../../store";
+import { selectPgEnv } from "pages/DataManager/store";
 
-const HOST = "http://localhost:3369";
+const HOST = "http://saturn.availabs.org:3369";
 
 const Create = () => {
   const pgEnv = useSelector(selectPgEnv);
