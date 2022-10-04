@@ -44,12 +44,12 @@ const Source = () => {
       return data
     }
     fetchData()
-  }, [sourceId, falcor])
+  }, [sourceId, falcor, pgEnv])
 
   const views = useMemo(() => {
     return Object.values(get(falcorCache,["dama", pgEnv, "sources","byId",sourceId,"views","byIndex",],{}))
       .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
-  },[falcorCache,sourceId])
+  },[falcorCache,sourceId,pgEnv])
 
   const source = useMemo(() => {
     let attributes =  getAttributes(get(falcorCache,["dama", pgEnv,'sources','byId', sourceId],{'attributes': {}})['attributes']) 
@@ -69,7 +69,7 @@ const Source = () => {
        setPages(Pages) 
     }
     return attributes
-  },[falcorCache, sourceId])
+  },[falcorCache, sourceId, pgEnv])
 
   return (
     <div className='max-w-6xl mx-auto'>

@@ -24,7 +24,7 @@ export default function BreadCrumbs () {
       ) : Promise.resolve({})
     }
     fetchData()
-  }, [falcor, sourceId])
+  }, [falcor, sourceId, pgEnv])
 
   const pages = useMemo(() => {
     let attr = getAttributes(get(falcorCache,["dama", pgEnv,'sources','byId', sourceId],{'attributes': {}})['attributes']) 
@@ -43,7 +43,7 @@ export default function BreadCrumbs () {
     cats.push({name:attr.name.split('/').pop().split('_').join(' ')})
     return cats
 
-  },[falcorCache,sourceId])
+  },[falcorCache,sourceId,pgEnv])
 
   return (
     <nav className="border-b border-gray-200 flex " aria-label="Breadcrumb">
