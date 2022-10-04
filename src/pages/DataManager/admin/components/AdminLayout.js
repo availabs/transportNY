@@ -30,7 +30,7 @@ const SourceThumb = ({source}) => {
       ])
     }
     fetchData()
-  }, [falcor,source.id])
+  }, [falcor, source.id, pgEnv])
 
   // const views = useMemo(() => {
   //   return Object.values(get(falcorCache,["dama", pgEnv,"sources","byId",source.id,"views","byIndex",],{}))
@@ -62,6 +62,7 @@ const SourcesLayout = ({children}) => {
   // const [displayLayer, setDisplayLayer] = useState(null)
   const [layerSearch, setLayerSearch] = useState('')
   const { sourceId } = useParams()
+  const pgEnv = useSelector(selectPgEnv);
   
   useEffect(() => {
       async function fetchData () {
@@ -74,12 +75,12 @@ const SourcesLayout = ({children}) => {
         ])
       }
       return fetchData()
-  }, [falcor])
+  }, [falcor, pgEnv])
 
   const sources = useMemo(() => {
       return Object.values(get(falcorCache,["dama", pgEnv, 'sources','byIndex'],{}))
         .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
-  },[falcorCache])
+  },[falcorCache, pgEnv])
 
   const current_site = get(domainFilters, `[${SUBDOMAIN}]`, '') //'Freight Atlas'
   

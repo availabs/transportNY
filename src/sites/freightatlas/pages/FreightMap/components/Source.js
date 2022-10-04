@@ -10,8 +10,6 @@ import { selectPgEnv } from "pages/DataManager/store"
 
 
 const Overview = ({source, views}) => {
-  const pgEnv = useSelector(selectPgEnv);
-
   return (
     <div className="overflow-hidden">
       <div className='flex'>
@@ -106,6 +104,7 @@ const Metadata = ({source}) => {
 
 const Source = ({sourceId}) => {
   const {falcor,falcorCache} = useFalcor()
+  const pgEnv = useSelector(selectPgEnv);
   
   useEffect( () => {
     const fetchData = async () => { 
@@ -124,16 +123,16 @@ const Source = ({sourceId}) => {
       )
     }
     fetchData()
-  }, [falcor, sourceId])
+  }, [falcor, sourceId, pgEnv])
 
   const views = useMemo(() => {
     return Object.values(get(falcorCache,["dama", pgEnv,"sources","byId",sourceId,"views","byIndex",],{}))
       .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
-  },[falcorCache,sourceId])
+  },[falcorCache, sourceId, pgEnv])
 
   const source = useMemo(() => {
     return getAttributes(get(falcorCache,["dama", pgEnv,'sources','byId', sourceId],{'attributes': {}})['attributes']) 
-  },[falcorCache,sourceId])
+  },[falcorCache, sourceId, pgEnv])
 
   return (
     <div className='max-w-6xl mx-auto px-2'>

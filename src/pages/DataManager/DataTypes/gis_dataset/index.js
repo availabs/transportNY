@@ -11,13 +11,11 @@ import { AvlMap } from "modules/avl-map/src";
 import Create from "./create";
 import config from "config.json";
 
-import { selectPgEnv } from "pages/DataManager/store"
+import { selectPgEnv } from "pages/DataManager/store";
 
 // import { getAttributes } from 'pages/DataManager/components/attributes'
 
 const Map = ({ layers }) => {
-  const pgEnv = useSelector(selectPgEnv);
-
   const mapOptions = {
     zoom: 6.2,
     center: [-75.95, 42.89],
@@ -57,6 +55,8 @@ const Map = ({ layers }) => {
 const Edit = ({ startValue, attr, viewId, parentData, cancel = () => {} }) => {
   const { falcor } = useFalcor();
   const [value, setValue] = useState("");
+  const pgEnv = useSelector(selectPgEnv);
+
   /*const [loading, setLoading] = useState(false)*/
   const inputEl = useRef(null);
 
@@ -79,15 +79,7 @@ const Edit = ({ startValue, attr, viewId, parentData, cancel = () => {} }) => {
         // console.log('testing',JSON.stringify(val), val)
         await falcor.set({
           paths: [
-            [
-              "dama",
-              pgEnv,
-              "views",
-              "byId",
-              viewId,
-              "attributes",
-              "metadata",
-            ],
+            ["dama", pgEnv, "views", "byId", viewId, "attributes", "metadata"],
           ],
           jsonGraph: {
             dama: {
