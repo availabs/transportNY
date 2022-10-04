@@ -2,15 +2,18 @@ import React, {useRef} from "react"
 // import { useSelector } from 'react-redux';
 import { AvlMap } from "modules/avl-map/src"
 import { useFalcor } from "modules/avl-components/src"
+import { useSelector } from "react-redux";
+import get from 'lodash.get'
+
 // import {MacroLayerFactory} from './IncidentsLayer'
 //import {FreightAtlasFactory} from '../layers/freight_atlas'
 import FreightAtlasLayer from 'pages/DataManager/DataTypes/freight_atlas_shapefile/FreightAtlasLayer'
 import {SourceAttributes, ViewAttributes, getAttributes, getName} from 'pages/DataManager/components/attributes'
 import config from "config.json"
-import get from 'lodash.get'
 
 import {CustomSidebar} from './MapControls'
 
+import { selectPgEnv } from "pages/DataManager/store"
 
 export const LayerContext = React.createContext({
   layerList: [],
@@ -23,6 +26,8 @@ const Map = ({ events }) => {
     const {falcor,falcorCache} = useFalcor()
     const [layerList, setLayerList] = React.useState([54,17,8])
     const [layerData, setLayerData] = React.useState([])
+    const pgEnv = useSelector(selectPgEnv);
+
     const layerContextValue = React.useMemo(() => {
         return { 
             layerList, 
@@ -54,16 +59,16 @@ const Map = ({ events }) => {
     }
 
     const fetchSourceData = async (sourceId) => {
-        const lengthPath = ["datamanager","sources","byId",sourceId,"views","length"]
+        const lengthPath = ["dama", pgEnv,"sources","byId",sourceId,"views","length"]
         const resp = await falcor.get(lengthPath);
         return falcor.get(
             [
-              "datamanager","sources","byId",sourceId,"views","byIndex",
+              "dama", pgEnv,"sources","byId",sourceId,"views","byIndex",
               {from:0, to:  get(resp.json, lengthPath, 0)-1},
               "attributes",Object.values(ViewAttributes)
             ],
             [
-              "datamanager","sources","byId",sourceId,
+              "dama", pgEnv,"sources","byId",sourceId,
               "attributes",Object.values(SourceAttributes)
             ]
         )
@@ -71,7 +76,7 @@ const Map = ({ events }) => {
     }
 
     const getMapData = ((sourceId) => {
-        let views = Object.values(get(falcorCache,["datamanager","sources","byId",sourceId,"views","byIndex",],{}))
+        let views = Object.values(get(falcorCache,["dama", pgEnv,"sources","byId",sourceId,"views","byIndex",],{}))
             .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
             .sort((a,b) => {
                 return new Date(a.last_updated) - new Date(b.last_updated)
@@ -80,7 +85,7 @@ const Map = ({ events }) => {
         
         // to do - get layer name
         let sourceAttributes = getAttributes(get(falcorCache,[
-              "datamanager","sources","byId",sourceId,
+              "dama", pgEnv,"sources","byId",sourceId,
               "attributes"
             ], {}))
         return views[0] ? 

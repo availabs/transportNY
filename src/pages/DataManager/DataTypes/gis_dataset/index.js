@@ -1,18 +1,23 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useFalcor, Button } from "modules/avl-components/src";
-import get from "lodash.get";
+import { useSelector } from "react-redux";
 // import { useParams } from 'react-router-dom'
+
+import get from "lodash.get";
+
 import GisDatasetLayer from "./GisDatasetLayer";
 import { AvlMap } from "modules/avl-map/src";
 
 import Create from "./create";
 import config from "config.json";
 
-const pgEnv = "dama_dev_1";
+import { selectPgEnv } from "pages/DataManager/store"
 
 // import { getAttributes } from 'pages/DataManager/components/attributes'
 
 const Map = ({ layers }) => {
+  const pgEnv = useSelector(selectPgEnv);
+
   const mapOptions = {
     zoom: 6.2,
     center: [-75.95, 42.89],
@@ -75,7 +80,7 @@ const Edit = ({ startValue, attr, viewId, parentData, cancel = () => {} }) => {
         await falcor.set({
           paths: [
             [
-              "datamanager",
+              "dama",
               pgEnv,
               "views",
               "byId",
@@ -85,11 +90,13 @@ const Edit = ({ startValue, attr, viewId, parentData, cancel = () => {} }) => {
             ],
           ],
           jsonGraph: {
-            datamanager: {
-              views: {
-                byId: {
-                  [viewId]: {
-                    attributes: { metadata: JSON.stringify(val) },
+            dama: {
+              [pgEnv]: {
+                views: {
+                  byId: {
+                    [viewId]: {
+                      attributes: { metadata: JSON.stringify(val) },
+                    },
                   },
                 },
               },

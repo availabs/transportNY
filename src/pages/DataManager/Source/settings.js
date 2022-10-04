@@ -6,7 +6,7 @@ import { useFalcor } from "modules/avl-components/src";
 import { DataManagerHeader } from "../components/SourcesLayout";
 
 import {
-  FalcorPaths,
+  queryPgEnvs,
   setPgEnv,
   setFalcorGraph,
   selectPgEnv,
@@ -25,8 +25,7 @@ const Settings = () => {
 
   useEffect(() => {
     (async () => {
-      await falcor.get(FalcorPaths.PG_ENVS_LIST);
-
+      falcor.get(queryPgEnvs());
       dispatch(setFalcorGraph(falcorCache));
     })();
   }, [falcor, dispatch, falcorCache]);

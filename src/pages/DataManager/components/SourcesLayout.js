@@ -1,27 +1,31 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useFalcor, SideNav, Dropdown, withAuth } from 'modules/avl-components/src'
 import { Link } from 'react-router-dom'
+import { useSelector } from "react-redux";
+
 import get from 'lodash.get'
 import {/*getDomain,*/getSubdomain} from 'utils'
 import { useParams } from 'react-router-dom'
 
 import {Item} from 'pages/Auth/AuthMenu'
 
+import { selectPgEnv } from "pages/DataManager/store"
+
 import {SourceAttributes, ViewAttributes, getAttributes} from './attributes'
 
 import Breadcrumbs from './Breadcrumbs'
 
 
-
 const SourceThumb = ({source}) => {
   const {falcor} = useFalcor()
+  const pgEnv = useSelector(selectPgEnv);
   
   useEffect(() => {
     async function fetchData () {
-      const lengthPath = ["datamanager","sources","byId",source.id,"views","length"]
+      const lengthPath = ["dama", pgEnv,"sources","byId",source.id,"views","length"]
       const resp = await falcor.get(lengthPath);
       return await falcor.get([
-        "datamanager","sources","byId",
+        "dama", pgEnv,"sources","byId",
         source.id, "views","byIndex",
         {from:0, to:  get(resp.json, lengthPath, 0)-1},
         "attributes", Object.values(ViewAttributes)
@@ -31,7 +35,7 @@ const SourceThumb = ({source}) => {
   }, [falcor,source.id])
 
   // const views = useMemo(() => {
-  //   return Object.values(get(falcorCache,["datamanager","sources","byId",source.id,"views","byIndex",],{}))
+  //   return Object.values(get(falcorCache,["dama", pgEnv,"sources","byId",source.id,"views","byIndex",],{}))
   //     .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
   // },[falcorCache,source.id])
 
@@ -63,10 +67,10 @@ const SourcesLayout = ({children}) => {
   
   useEffect(() => {
       async function fetchData () {
-        const lengthPath = ["datamanager", "sources", "length"];
+        const lengthPath = ["dama", pgEnv, "sources", "length"];
         const resp = await falcor.get(lengthPath);
         return await falcor.get([
-          "datamanager","sources","byIndex",
+          "dama", pgEnv,"sources","byIndex",
           {from:0, to:  get(resp.json, lengthPath, 0)-1},
           "attributes",Object.values(SourceAttributes),
         ])
@@ -75,7 +79,7 @@ const SourcesLayout = ({children}) => {
   }, [falcor])
 
   const sources = useMemo(() => {
-      return Object.values(get(falcorCache,['datamanager','sources','byIndex'],{}))
+      return Object.values(get(falcorCache,["dama", pgEnv,'sources','byIndex'],{}))
         .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
   },[falcorCache])
 

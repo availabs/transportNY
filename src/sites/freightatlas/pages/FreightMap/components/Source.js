@@ -1,12 +1,16 @@
 import React, { useEffect, useMemo } from 'react';
 import { useFalcor } from 'modules/avl-components/src'
+import { useSelector } from "react-redux";
+
 import get from 'lodash.get'
 // import { useParams } from 'react-router-dom'
 
 import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
+import { selectPgEnv } from "pages/DataManager/store"
 
 
 const Overview = ({source, views}) => {
+  const pgEnv = useSelector(selectPgEnv);
 
   return (
     <div className="overflow-hidden">
@@ -105,16 +109,16 @@ const Source = ({sourceId}) => {
   
   useEffect( () => {
     const fetchData = async () => { 
-      const lengthPath = ["datamanager","sources","byId",sourceId,"views","length"]
+      const lengthPath = ["dama", pgEnv,"sources","byId",sourceId,"views","length"]
       const resp = await falcor.get(lengthPath);
       return await falcor.get(
         [
-          "datamanager","sources","byId",sourceId,"views","byIndex",
+          "dama", pgEnv,"sources","byId",sourceId,"views","byIndex",
           {from:0, to:  get(resp.json, lengthPath, 0)-1},
           "attributes",Object.values(ViewAttributes)
         ],
         [
-          "datamanager","sources","byId",sourceId,
+          "dama", pgEnv,"sources","byId",sourceId,
           "attributes",Object.values(SourceAttributes)
         ]
       )
@@ -123,12 +127,12 @@ const Source = ({sourceId}) => {
   }, [falcor, sourceId])
 
   const views = useMemo(() => {
-    return Object.values(get(falcorCache,["datamanager","sources","byId",sourceId,"views","byIndex",],{}))
+    return Object.values(get(falcorCache,["dama", pgEnv,"sources","byId",sourceId,"views","byIndex",],{}))
       .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
   },[falcorCache,sourceId])
 
   const source = useMemo(() => {
-    return getAttributes(get(falcorCache,['datamanager','sources','byId', sourceId],{'attributes': {}})['attributes']) 
+    return getAttributes(get(falcorCache,["dama", pgEnv,'sources','byId', sourceId],{'attributes': {}})['attributes']) 
   },[falcorCache,sourceId])
 
   return (

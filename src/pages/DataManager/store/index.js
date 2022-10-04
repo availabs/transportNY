@@ -21,11 +21,9 @@ export const datamanagerSlice = createSlice({
   reducers,
 });
 
-export const FalcorPaths = {
-  PG_ENVS_LIST: ["dama-info", "pgEnvs"],
-};
-
 export const { setPgEnv, setFalcorGraph } = datamanagerSlice.actions;
+
+export const queryPgEnvs = () => ["dama-info", "pgEnvs"];
 
 export const selectPgEnv = (state) =>
   get(state, ["data_manager", "pgEnv"], null);
