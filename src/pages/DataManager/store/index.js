@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import get from "lodash.get";
 
 const initialState = {
-  pgEnv: "dama_dev_1",
+  pgEnv: "npmrds",
   falcorGraph: null,
 };
 

@@ -2,10 +2,13 @@ import React, { useEffect, /*useMemo,*/ useState } from 'react';
 import { useFalcor, withAuth, Input, Button } from 'modules/avl-components/src'
 import get from 'lodash.get'
 import { SourceAttributes } from 'pages/DataManager/components/attributes'
+import { useSelector } from "react-redux";
+import { selectPgEnv } from "pages/DataManager/store"
 
 const Edit = ({startValue, attr, sourceId, cancel=()=>{}}) => {
   const { falcor } = useFalcor()
   const [value, setValue] = useState('')
+  const pgEnv = useSelector(selectPgEnv);
   /*const [loading, setLoading] = useState(false)*/
 
   useEffect(() => {
@@ -16,14 +19,16 @@ const Edit = ({startValue, attr, sourceId, cancel=()=>{}}) => {
     if(sourceId) {
       falcor.set({
           paths: [
-            ['datamanager','sources','byId',sourceId,'attributes', attr ]
+            ['dama',pgEnv,'sources','byId',sourceId,'attributes', attr ]
           ],
           jsonGraph: {
-            datamanager:{
-              sources: {
-                byId:{
-                  [sourceId] : {
-                      attributes : {[attr]: value}
+            dama:{
+              [pgEnv] : {
+                sources: {
+                  byId:{
+                    [sourceId] : {
+                        attributes : {[attr]: value}
+                    }
                   }
                 }
               }
@@ -53,7 +58,11 @@ const OverviewEdit = withAuth(({source, views, user}) => {
       <div className="pl-4 py-6 hover:py-6 sm:pl-6 flex justify-between group">
         <div className="flex-1 mt-1 max-w-2xl text-sm text-gray-500">
           {editing === 'description' ? 
-            <Edit startValue={get(source,'description', '')} cancel={() => setEditing(null)}/> : 
+            <Edit 
+              startValue={get(source,'description', '')}
+              attr={'description'}
+              sourceId={source.id}
+              cancel={() => setEditing(null)}/> : 
             get(source,'description', false) || 'No Description'}
         </div>
         <div className='hidden group-hover:block text-blue-500 cursor-pointer' onClick={e => setEditing('description')}>

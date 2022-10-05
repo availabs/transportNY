@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useFalcor,TopNav, /*withAuth, Input, Button*/ } from 'modules/avl-components/src'
-import { useSelector } from "react-redux";
+
 
 import get from 'lodash.get'
 import { useParams } from 'react-router-dom'
@@ -9,7 +9,7 @@ import {Pages, DataTypes} from '../DataTypes'
 import SourcesLayout, { DataManagerHeader } from '../components/SourcesLayout'
 
 import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
-    
+import { useSelector } from "react-redux";
 import { selectPgEnv } from "pages/DataManager/store"
 
 const Source = () => {

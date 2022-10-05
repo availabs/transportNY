@@ -1,5 +1,5 @@
 import React from 'react'
-import { TabPanel, Dropdown } from "modules/avl-components/src"
+// import { TabPanel, Dropdown } from "modules/avl-components/src"
 import get from 'lodash.get'
 
 const LayerStylePane = (props) => {
