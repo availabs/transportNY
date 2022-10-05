@@ -96,23 +96,13 @@ const OverviewEdit = withAuth(({source, views, user}) => {
             <dt className="text-sm font-medium text-gray-500">Versions</dt>
             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
               <ul className="border border-gray-200 rounded-md divide-y divide-gray-200">
-                {views.map((v,i) => (
-                  <li key={i} className="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
-                    <div className="w-0 flex-1 flex items-center">
-                      <span className="ml-2 flex-1 w-0 truncate">{v.version}</span>
-                    </div>
-                    <div className="ml-4 flex-shrink-0">
-                      <div className="font-medium text-indigo-600 hover:text-indigo-500">
-                        Table
-                      </div>
-                    </div>
-                    <div className="ml-4 flex-shrink-0">
-                      <div className="font-medium text-indigo-600 hover:text-indigo-500">
-                        Download
-                      </div>
-                    </div>
-                  </li>
-                ))}
+                <select  className="pl-3 pr-4 py-3 w-full bg-white mr-2 flex items-center justify-between text-sm">
+                  
+                  {views.map((v,i) => (
+                        <option key={i} className="ml-2  truncate">{v.version}</option>
+                      
+                  ))}
+                </select>
               </ul>
             </dd>
           </div>
