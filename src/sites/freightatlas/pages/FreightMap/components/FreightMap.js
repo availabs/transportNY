@@ -58,79 +58,83 @@ const Map = ({ events }) => {
         ]
     }
 
-    const fetchSourceData = async (sourceId) => {
-        const lengthPath = ["dama", pgEnv,"sources","byId",sourceId,"views","length"]
-
-        const resp = await falcor.get(lengthPath);
-        return falcor.get(
-            [
-              "dama", pgEnv,"sources","byId",sourceId,"views","byIndex",
-              {from:0, to:  get(resp.json, lengthPath, 0)-1},
-              "attributes",Object.values(ViewAttributes)
-            ],
-            [
-              "dama", pgEnv,"sources","byId",sourceId,
-              "attributes",Object.values(SourceAttributes)
-            ]
-        )
-    }
-        
-
-    const getMapData = (sourceId) => {
-        let views = Object.values(get(falcorCache,["datamanager","sources","byId",sourceId,"views","byIndex",],{}))
-            .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
-            .sort((a,b) => {
-                return new Date(a.last_updated) - new Date(b.last_updated)
-            })
-
-        // to do - get layer name
-        let sourceAttributes = getAttributes(get(falcorCache,[
-              "dama", pgEnv,"sources","byId",sourceId,
-              "attributes"
-            ], {}))
-        return views[0] ? 
-            {
-                layer_id: sourceId,
-                view_id: get(views[0],'id',null),
-                version: get(views[0],'version',null),
-                metadata: get(views[0],'metadata',{}),
-                name: getName(sourceAttributes),
-                sources: get(views[0],'metadata.tiles.sources',[]),
-                layers: get(views[0],'metadata.tiles.layers',[]),
-                view_data: views[0]
-
-            } : null
-          
-    }
- 
     React.useEffect( () => {
+        const fetchSourceData = async (sourceId) => {
+            const lengthPath = ["dama", pgEnv,"sources","byId",sourceId,"views","length"]
+
+            const resp = await falcor.get(lengthPath);
+            return falcor.get(
+                [
+                  "dama", pgEnv,"sources","byId",sourceId,"views","byIndex",
+                  {from:0, to:  get(resp.json, lengthPath, 0)-1},
+                  "attributes",Object.values(ViewAttributes)
+                ],
+                [
+                  "dama", pgEnv,"sources","byId",sourceId,
+                  "attributes",Object.values(SourceAttributes)
+                ]
+            )
+        }
+            
+
+        const getMapData = (sourceId) => {
+            let views = Object.values(get(falcorCache,["dama", pgEnv, "sources","byId", sourceId, "views","byIndex",],{}))
+                .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
+                .sort((a,b) => {
+                    return new Date(a.last_updated) - new Date(b.last_updated)
+                })
+
+            // to do - get layer name
+            let sourceAttributes = getAttributes(get(falcorCache,[
+                  "dama", pgEnv,"sources","byId",sourceId,
+                  "attributes"
+                ], {}))
+            return views[0] ? 
+                {
+                    layer_id: sourceId,
+                    view_id: get(views[0],'id',null),
+                    version: get(views[0],'version',null),
+                    metadata: get(views[0],'metadata',{}),
+                    name: getName(sourceAttributes),
+                    sources: get(views[0],'metadata.tiles.sources',[]),
+                    layers: get(views[0],'metadata.tiles.layers',[]),
+                    view_data: views[0]
+
+                } : null
+              
+        }
+ 
         const updateLayers = async () => {
             await Promise.all(layerList.map(sourceId => fetchSourceData(sourceId)))
-            let currentLayerIds = layerData.map(d => d.layer_id).filter(d => d)
-            //console.log('layerData', layerData,currentLayerIds)
             
-            let output = layerList
-                .map(sourceId => getMapData(sourceId))
-                .filter(d => d)
-                // don't call layer a second time
-                .filter(d => !currentLayerIds.includes(d.layer_id))
-                .map(l => FreightAtlasLayer(l))
-
             if(mounted.current) {
-                setLayerData(l => [...l.filter(d => layerList.includes(d.layer_id)), ...output])
+                setLayerData(l => {
+                    // use functional setState
+                    // to get info about previous layerData (l)
+                    let currentLayerIds = l.map(d => d.layer_id).filter(d => d)
+                    
+                    let output = layerList
+                        .map(sourceId => getMapData(sourceId))
+                        .filter(d => d)
+                        // don't call layer a second time
+                        .filter(d => !currentLayerIds.includes(d.layer_id))
+                        .map(l => FreightAtlasLayer(l))
+
+
+                    return [...l.filter(d => layerList.includes(d.layer_id)), ...output]
+                })
             }
         }
+
         updateLayers()
     },[
         layerList,
         falcorCache,
-        // fetchSourceData,
-        // getMapData,
-        // layerData
+        falcor,
+        pgEnv
     ])
 
     return (
-        
         <div className='w-full h-full' ref={mounted}>
             <LayerContext.Provider value={layerContextValue}>
                 <AvlMap
@@ -141,7 +145,6 @@ const Map = ({ events }) => {
                 />
             </LayerContext.Provider>
         </div>
-       
     )
 }
 

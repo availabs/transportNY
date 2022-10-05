@@ -188,6 +188,9 @@ export const DataManagerHeader = withAuth(({user}) => {
                 <div className='py-1 '> 
                     {Item('/datasources/create/source', 'fa fa-file-plus flex-shrink-0  pr-1', 'Add New Datasource')}
                 </div>
+                <div className='py-1 '> 
+                    {Item('/datasources/settings', 'fa fa-cog flex-shrink-0  pr-1', 'Datamanager Settings')}
+                </div>
               </div>          
             </Dropdown>
           </div>
