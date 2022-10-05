@@ -1,5 +1,8 @@
 import React, { useMemo, useState } from 'react';
+import { useSelector } from "react-redux";
+
 import { /*useFalcor,*//*TopNav,*/ Input /*withAuth, Input, Button*/ } from 'modules/avl-components/src'
+
 import get from 'lodash.get'
 // import { useParams } from 'react-router-dom'
 import { DataTypes } from '../DataTypes'
@@ -8,9 +11,10 @@ import SourcesLayout, {DataManagerHeader}  from '../components/SourcesLayout'
 
 import {SourceAttributes, /*ViewAttributes, getAttributes*/} from 'pages/DataManager/components/attributes'
     
-
+import { selectIsPwrUsr } from "pages/DataManager/store";
 
 const Source = () => {
+// prettier canary
   //const {falcor, falcorCache} = useFalcor()
   const [ source, setSource ] = useState( 
     Object.keys(SourceAttributes)
@@ -21,8 +25,25 @@ const Source = () => {
       }, {})
   )
 
-  const CreateComp = useMemo(() => get(DataTypes, `[${source.type}].sourceCreate.component`, () => <div />)
-    ,[source.type]) 
+  const isPwrUsr = useSelector(selectIsPwrUsr);
+
+  const dataTypes = isPwrUsr
+    ? DataTypes
+    : Object.keys(DataTypes).reduce((acc, dType) => {
+        const component = DataTypes[dType];
+        console.log(component);
+        if (component.pwrUsrOnly) {
+          return acc;
+        }
+
+        acc[dType] = component;
+
+        return acc;
+      }, {});
+
+
+  const CreateComp = useMemo(() => get(dataTypes, `[${source.type}].sourceCreate.component`, () => <div />)
+    ,[dataTypes, source.type])
   
   // console.log('new source', CreateComp)
   
@@ -82,8 +103,8 @@ const Source = () => {
                         setSource({ ...source, type: e.target.value,})
                       }}>
                         <option value="" disabled >Select your option</option>
-                        {Object.keys(DataTypes)
-                          .filter(k => DataTypes[k].sourceCreate)
+                        {Object.keys(dataTypes)
+                          .filter(k => dataTypes[k].sourceCreate)
                           .map(k => <option key={k} value={k} className='p-2'>{k}</option>)
                         }
                     </select>

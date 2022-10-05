@@ -220,6 +220,7 @@ const GisDatasetConfig = {
     name: "Create",
     component: Create,
   },
+  pwrUsrOnly: true,
 };
 
 export default GisDatasetConfig;

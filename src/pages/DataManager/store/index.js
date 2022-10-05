@@ -50,11 +50,22 @@ export const {
 
 export const queryPgEnvs = () => ["dama-info", "pgEnvs"];
 
-const selectFalcorGraph = (state) =>
-  get(state, ["data_manager", "falcorGraph"], null);
+const selectFalcorGraph = (state) => {
+  return get(state, ["data_manager", "falcorGraph"], null);
+}
 
-export const selectPgEnv = (state) =>
-  get(state, ["data_manager", "pgEnv"], null);
+export const selectPgEnv = (state) => {
+  return get(state, ["data_manager", "pgEnv"], null);
+};
+
+export const selectIsPwrUsr = (state) => {
+  const { user } = state;
+
+  const isPwrUsr =
+    user && Array.isArray(user.groups) && user.groups.includes("AVAIL");
+
+  return isPwrUsr;
+};
 
 export const selectPgEnvs = (state) =>
   get(selectFalcorGraph(state), [...queryPgEnvs(), "value"], []);
