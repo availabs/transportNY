@@ -33,18 +33,18 @@ const LayerManager = ({activeLayers,MapActions,...rest}) => {
 		    ])
 		}
 		fetchData()
-	}, [falcor])
+	}, [falcor, pgEnv])
 
 	const sources = useMemo(() => {
 	    return Object.values(get(falcorCache,["dama", pgEnv,'sources','byIndex'],{}))
 	      .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
-	},[falcorCache])
+	},[falcorCache, pgEnv])
 
 	const current_site = 'Freight Atlas'
 	// const current_filter = null
 	let menuItems =  useMemo(() => { 
 	    return Object.values(sources
-	    .filter(d => d.categories.map(d => d[0]).includes(current_site))
+	    .filter(d => d.categories && d.categories.map(d => d[0]).includes(current_site))
 	    .filter(d => { 
 	    	return !layerSearch || d.name.split('/').pop().split('_').join(' ').toLowerCase().includes(layerSearch.toLowerCase()) 
 	    })

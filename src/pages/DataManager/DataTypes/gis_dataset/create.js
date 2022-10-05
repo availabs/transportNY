@@ -15,7 +15,7 @@ import Switch from "react-switch";
 
 import { selectPgEnv } from "pages/DataManager/store";
 
-const HOST = "http://saturn.availabs.org:3369";
+import { DAMA_HOST } from "config";
 
 const Create = () => {
   const pgEnv = useSelector(selectPgEnv);
@@ -41,7 +41,7 @@ const Create = () => {
 
   const [damaPublished, setDamaPublished] = React.useState(false);
 
-  const rtPfx = `${HOST}/dama-admin/${pgEnv}`;
+  const rtPfx = `${DAMA_HOST}/dama-admin/${pgEnv}`;
 
   const resetState = () => {
     // NOTE: we do not reset gisUploadId unless a new file uploaded.

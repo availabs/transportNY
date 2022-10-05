@@ -2,17 +2,40 @@ import { createSlice } from "@reduxjs/toolkit";
 
 import get from "lodash.get";
 
+const defaultPgEnv = "npmrds";
+
+const lclStoKeys = {
+  pgEnv: "redux.data_manager.pgEnv",
+};
+
+const onLoadPgEnv = localStorage.getItem(lclStoKeys.pgEnv);
+
 const initialState = {
-  pgEnv: "dama_dev_1",
   falcorGraph: null,
+  pgEnv: onLoadPgEnv || defaultPgEnv,
 };
 
 const reducers = {
-  setPgEnv: (state, action) => ({ ...state, pgEnv: action.payload }),
-  setFalcorGraph: (state, action) => ({
-    ...state,
-    falcorGraph: action.payload,
-  }),
+  setFalcorGraph: (state, action) => {
+    if (selectFalcorGraph(state) !== null) {
+      return state;
+    }
+
+    return {
+      ...state,
+      falcorGraph: action.payload,
+    };
+  },
+
+  setPgEnv: (state, action) => {
+    const { payload: pgEnv } = action;
+
+    const oldPgEnv = selectPgEnv(state);
+
+    localStorage.setItem(lclStoKeys.pgEnv, pgEnv);
+
+    return oldPgEnv === pgEnv ? state : { ...state, pgEnv };
+  },
 };
 
 export const datamanagerSlice = createSlice({
@@ -21,18 +44,19 @@ export const datamanagerSlice = createSlice({
   reducers,
 });
 
-export const { setPgEnv, setFalcorGraph } = datamanagerSlice.actions;
+export const {
+  actions: { setPgEnv, setFalcorGraph },
+} = datamanagerSlice;
 
 export const queryPgEnvs = () => ["dama-info", "pgEnvs"];
+
+const selectFalcorGraph = (state) =>
+  get(state, ["data_manager", "falcorGraph"], null);
 
 export const selectPgEnv = (state) =>
   get(state, ["data_manager", "pgEnv"], null);
 
 export const selectPgEnvs = (state) =>
-  get(
-    state,
-    ["data_manager", "falcorGraph", "dama-info", "pgEnvs", "value"],
-    []
-  );
+  get(selectFalcorGraph(state), [...queryPgEnvs(), "value"], []);
 
 export default datamanagerSlice.reducer;
