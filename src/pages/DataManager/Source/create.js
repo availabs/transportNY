@@ -31,7 +31,6 @@ const Source = () => {
     ? DataTypes
     : Object.keys(DataTypes).reduce((acc, dType) => {
         const component = DataTypes[dType];
-        console.log(component);
         if (component.pwrUsrOnly) {
           return acc;
         }
