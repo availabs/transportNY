@@ -455,13 +455,13 @@ const Create = () => {
         return acc;
       }, {});
 
-    const long2short = Object.entries(short2long).reduce(
-      (acc, [short, long]) => {
-        acc[long] = short;
-        return acc;
-      },
-      {}
-    );
+    // const long2short = Object.entries(short2long).reduce(
+    //   (acc, [short, long]) => {
+    //     acc[long] = short;
+    //     return acc;
+    //   },
+    //   {}
+    // );
 
     const existingSrcSelector =
       useExistingSource && damaDataSrcs ? (

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useFalcor,TopNav, /*withAuth, Input, Button*/ } from 'modules/avl-components/src'
-import { useSelector } from "react-redux";
+
 
 import get from 'lodash.get'
 import { useParams } from 'react-router-dom'
@@ -9,7 +9,7 @@ import {Pages, DataTypes} from '../DataTypes'
 import SourcesLayout, { DataManagerHeader } from '../components/SourcesLayout'
 
 import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
-    
+import { useSelector } from "react-redux";
 import { selectPgEnv } from "pages/DataManager/store"
 
 const Source = () => {
@@ -44,12 +44,12 @@ const Source = () => {
       return data
     }
     fetchData()
-  }, [sourceId, falcor])
+  }, [sourceId, falcor, pgEnv])
 
   const views = useMemo(() => {
     return Object.values(get(falcorCache,["dama", pgEnv, "sources","byId",sourceId,"views","byIndex",],{}))
       .map(v => getAttributes(get(falcorCache,v.value,{'attributes': {}})['attributes']))
-  },[falcorCache,sourceId])
+  },[falcorCache,sourceId,pgEnv])
 
   const source = useMemo(() => {
     let attributes =  getAttributes(get(falcorCache,["dama", pgEnv,'sources','byId', sourceId],{'attributes': {}})['attributes']) 
@@ -69,7 +69,7 @@ const Source = () => {
        setPages(Pages) 
     }
     return attributes
-  },[falcorCache, sourceId])
+  },[falcorCache, sourceId, pgEnv])
 
   return (
     <div className='max-w-6xl mx-auto'>
