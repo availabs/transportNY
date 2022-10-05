@@ -192,12 +192,6 @@ export const DataManagerHeader = withAuth(({user}) => {
                     {Item('/datasources/settings', 'fa fa-cog flex-shrink-0  pr-1', 'Datamanager Settings')}
                 </div>
               </div>          
-
-              <div className='p-1 bg-blue-500 text-base'>
-                <div className='py-1 '>
-                    {Item('/datasources/settings', 'fa fa-file-plus flex-shrink-0  pr-1', 'Settings')}
-                </div>
-              </div>
             </Dropdown>
           </div>
         ) 
