@@ -66,7 +66,22 @@ const PublishStatus = {
   AWAITING: "AWAITING",
   IN_PROGRESS: "IN_PROGRESS",
   PUBLISHED: "PUBLISHED",
+  ERROR: "ERROR",
 };
+
+async function checkApiResponse(res) {
+  if (!res.ok) {
+    let errMsg = res.statusText;
+    try {
+      const { message } = await res.json();
+      errMsg = message;
+    } catch (err) {
+      console.error(err);
+    }
+
+    throw new Error(errMsg);
+  }
+}
 
 const Create = ({ source }) => {
   const pgEnv = useSelector(selectPgEnv);
@@ -88,6 +103,8 @@ const Create = ({ source }) => {
   const [publishStatus, setPublishStatus] = React.useState(
     PublishStatus.AWAITING
   );
+
+  const [publishErrMsg, setPublishErrMsg] = React.useState(null);
 
   const { name: sourceName, displayName: sourceDisplayName } = source;
 
@@ -137,6 +154,8 @@ const Create = ({ source }) => {
     //
     const newEtlCtxRes = await fetch(`${rtPfx}/new-etl-context-id`);
 
+    await checkApiResponse(newEtlCtxRes);
+
     const _etlCtxId = await newEtlCtxRes.text();
 
     setEtlContextId(_etlCtxId);
@@ -168,9 +187,11 @@ const Create = ({ source }) => {
       url.searchParams.append("etl_context_id", etlCtxId);
       url.searchParams.append("event_id", sinceEventId);
 
-      const response = await fetch(url);
+      const res = await fetch(url);
 
-      const events = await response.json();
+      await checkApiResponse(res);
+
+      const events = await res.json();
 
       return events;
     }
@@ -201,12 +222,16 @@ const Create = ({ source }) => {
       }
     );
 
+    await checkApiResponse(res);
+
     // Upload response is the ETL ID
     const [{ id }] = await res.json();
 
     const layerNamesRes = await fetch(
       `${rtPfx}/staged-geospatial-dataset/${id}/layerNames`
     );
+
+    await checkApiResponse(layerNamesRes);
 
     const layerNames = await layerNamesRes.json();
 
@@ -232,6 +257,8 @@ const Create = ({ source }) => {
         `${rtPfx}/staged-geospatial-dataset/${_id}/${_layerName}/tableDescriptor`
       );
 
+      await checkApiResponse(res);
+
       // The tableDescriptor controls DB table creation and loading.
       const tblDsc = await res.json();
 
@@ -240,7 +267,7 @@ const Create = ({ source }) => {
   };
 
   const stageLayerData = async () => {
-    await fetch(
+    const updTblDscRes = await fetch(
       `${rtPfx}/staged-geospatial-dataset/${gisUploadId}/updateTableDescriptor`,
       {
         method: "POST",
@@ -251,12 +278,16 @@ const Create = ({ source }) => {
       }
     );
 
+    await checkApiResponse(updTblDscRes);
+
     const url = new URL(
       `${rtPfx}/staged-geospatial-dataset/stageLayerData/${layerName}`
     );
     url.searchParams.append("etl_context_id", etlContextId);
 
-    await fetch(url);
+    const stgLyrDataRes = await fetch(url);
+
+    await checkApiResponse(stgLyrDataRes);
   };
 
   const approveQA = async () => {
@@ -268,7 +299,7 @@ const Create = ({ source }) => {
   };
 
   const createNewDataSource = async () => {
-    await fetch(`${rtPfx}/metadata/createNewDataSource`, {
+    const res = await fetch(`${rtPfx}/metadata/createNewDataSource`, {
       method: "POST",
       body: JSON.stringify({
         name: sourceName,
@@ -278,6 +309,8 @@ const Create = ({ source }) => {
         "Content-Type": "application/json",
       },
     });
+
+    await checkApiResponse(res);
   };
 
   async function submitViewMeta() {
@@ -308,23 +341,31 @@ const Create = ({ source }) => {
     url.searchParams.append("etl_context_id", etlContextId);
     url.searchParams.append("user_id", userId);
 
-    await fetch(url);
+    const res = await fetch(url);
+
+    await checkApiResponse(res);
   }
 
   async function simplePublish() {
-    setPublishStatus(PublishStatus.IN_PROGRESS);
+    try {
+      setPublishStatus(PublishStatus.IN_PROGRESS);
 
-    await createNewDataSource();
+      await createNewDataSource();
 
-    await stageLayerData();
+      await stageLayerData();
 
-    await approveQA();
+      await approveQA();
 
-    await submitViewMeta();
+      await submitViewMeta();
 
-    await publishGisDatasetLayer();
+      await publishGisDatasetLayer();
 
-    setPublishStatus(PublishStatus.PUBLISHED);
+      setPublishStatus(PublishStatus.PUBLISHED);
+    } catch (err) {
+      setPublishStatus(PublishStatus.ERROR);
+      console.log("==>", err.message);
+      setPublishErrMsg(err.message);
+    }
   }
 
   const getLayersSelector = () => {
@@ -484,11 +525,20 @@ const Create = ({ source }) => {
     }
 
     let publishButtonText = "Publish";
+    let publishButtonBgColor = "#3b82f680";
+
     if (publishStatus === PublishStatus.IN_PROGRESS) {
       publishButtonText = "Publishing...";
+      publishButtonBgColor = "#e5e7eb";
     }
     if (publishStatus === PublishStatus.PUBLISHED) {
       publishButtonText = "Published";
+      publishButtonBgColor = "#e5e7eb";
+    }
+
+    if (publishStatus === PublishStatus.ERROR) {
+      publishButtonText = "Publish Error";
+      publishButtonBgColor = "red";
     }
 
     const fieldsMappingSection = tableDescriptor ? (
@@ -500,7 +550,6 @@ const Create = ({ source }) => {
                 GIS Dataset Field Name
               </th>
               <th className="text-center">Database Column Name</th>
-              <th className="text-center">Omit</th>
             </tr>
           </thead>
           <tbody>
@@ -510,41 +559,88 @@ const Create = ({ source }) => {
                 <td className="text-right  p-2">
                   <input
                     className="w-full p-2 flex-1 shadow bg-grey-50 focus:bg-blue-100 border-gray-300"
-                    disabled={false} // FIXME
+                    disabled={publishStatus !== PublishStatus.AWAITING}
                     id={row.key}
                     defaultValue={row.col}
                     onChange={(e) => (row.col = e.target.value)}
                   />
                 </td>
-                <td className="py-4 text-center">
-                  <input type="checkbox" />
-                </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <span
-          style={{
-            display: "inline-block",
-            marginTop: "20px",
-            textAlign: "center",
-            padding: "10px",
-            fontSize: "25px",
-            border: "2px solid",
-            borderRadius: "25px",
-            backgroundColor:
-              publishStatus === PublishStatus.AWAITING
-                ? "#3b82f680"
-                : "#e5e7eb",
-          }}
-          onClick={() => {
-            if (publishStatus === PublishStatus.AWAITING) {
-              simplePublish();
-            }
-          }}
-        >
-          {publishButtonText}
-        </span>
+        {publishStatus !== PublishStatus.ERROR ? (
+          <span
+            style={{
+              display: "inline-block",
+              marginTop: "20px",
+              textAlign: "center",
+              padding: "10px",
+              fontSize: "25px",
+              border: "2px solid",
+              borderRadius: "25px",
+              backgroundColor: publishButtonBgColor,
+            }}
+            onClick={() => {
+              if (publishStatus === PublishStatus.AWAITING) {
+                simplePublish();
+              }
+            }}
+          >
+            {publishButtonText}
+          </span>
+        ) : (
+          <table
+            className="w-2/3"
+            style={{
+              margin: "40px auto",
+              textAlign: "center",
+              border: "1px solid",
+              borderColor: "back",
+            }}
+          >
+            <thead
+              style={{
+                color: "black",
+                backgroundColor: "red",
+                fontWeight: "bolder",
+                textAlign: "center",
+                marginTop: "40px",
+                fontSize: "20px",
+                border: "1px solid",
+                borderColor: "black",
+              }}
+            >
+              <tr>
+                <th style={{ border: "1px solid", borderColor: "black" }}>
+                  {" "}
+                  Publish Error Message
+                </th>
+                <th style={{ border: "1px solid", borderColor: "black" }}>
+                  {" "}
+                  ETL Context ID
+                </th>
+              </tr>
+            </thead>
+            <tbody style={{ border: "1px solid" }}>
+              <tr style={{ border: "1px solid" }}>
+                <td
+                  style={{
+                    border: "1px solid",
+                    padding: "10px",
+                    backgroundColor: "white",
+                    color: "darkred",
+                  }}
+                >
+                  {publishErrMsg}
+                </td>
+                <td style={{ border: "1px solid", backgroundColor: "white" }}>
+                  {etlContextId}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        )}
       </div>
     ) : (
       <span
