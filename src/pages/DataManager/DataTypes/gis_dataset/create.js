@@ -94,11 +94,14 @@ const Create = ({ source }) => {
   const [maxSeenEventId, setMaxSeenEventId] = React.useState(null);
 
   const [uploadedFile, setUploadedFile] = React.useState(null);
+  const [uploadErrMsq, setUploadErrMsg] = React.useState(null);
 
   const [layerNames, setLayerNames] = React.useState([]);
   const [layerName, setLayerName] = React.useState(null);
 
   const [tableDescriptor, setTableDescriptor] = React.useState(null);
+  const [layerAnalysis, setLayerAnalysis] = React.useState(null);
+  const [lyrAnlysErrMsg, setLyrAnlysErrMsg] = React.useState(null);
 
   const [publishStatus, setPublishStatus] = React.useState(
     PublishStatus.AWAITING
@@ -130,119 +133,128 @@ const Create = ({ source }) => {
   const resetState = () => {
     // NOTE: we do not reset gisUploadId unless a new file uploaded.
     setFileUploadStatus(null);
+    setUploadErrMsg(null);
     setLayerNames(null);
     setLayerName(null);
+    setLyrAnlysErrMsg(null);
     setTableDescriptor(null);
+    setLayerAnalysis(null);
 
     setPublishStatus(PublishStatus.AWAITING);
+    setPublishErrMsg(null);
   };
 
   const uploadGisFile = async (file) => {
-    /*
+    let stopPolling = false;
+
+    try {
+      /*
         1. Get an etl_context_id
         2. Progress polling
     */
-    resetState();
-    setUploadedFile(file);
+      resetState();
+      setUploadedFile(file);
 
-    // First, we need to get a new etl-context-id
-    //
-    //   NOTE:  If we omit this step, in order to get progress updates
-    //          the dama-admin server would need to immediately return the etlContextId
-    //          for an upload, and the client would need to determine the status of the
-    //          upload by querying the upload events.
-    //
-    const newEtlCtxRes = await fetch(`${rtPfx}/new-etl-context-id`);
+      // First, we need to get a new etl-context-id
+      //
+      //   NOTE:  If we omit this step, in order to get progress updates
+      //          the dama-admin server would need to immediately return the etlContextId
+      //          for an upload, and the client would need to determine the status of the
+      //          upload by querying the upload events.
+      //
+      const newEtlCtxRes = await fetch(`${rtPfx}/new-etl-context-id`);
 
-    await checkApiResponse(newEtlCtxRes);
+      await checkApiResponse(newEtlCtxRes);
 
-    const _etlCtxId = await newEtlCtxRes.text();
+      const _etlCtxId = await newEtlCtxRes.text();
 
-    setEtlContextId(_etlCtxId);
+      setEtlContextId(_etlCtxId);
 
-    const formData = new FormData();
-    // https://moleculer.services/docs/0.14/moleculer-web.html#File-upload-aliases
-    // text form-data fields must be sent before files fields.
-    formData.append("etlContextId", _etlCtxId);
-    formData.append("user_id", userId);
-    formData.append("fileSizeBytes", file.size);
-    formData.append("progressUpdateIntervalMs", progressUpdateIntervalMs);
-    formData.append("file", file);
+      const formData = new FormData();
+      // https://moleculer.services/docs/0.14/moleculer-web.html#File-upload-aliases
+      // text form-data fields must be sent before files fields.
+      formData.append("etlContextId", _etlCtxId);
+      formData.append("user_id", userId);
+      formData.append("fileSizeBytes", file.size);
+      formData.append("progressUpdateIntervalMs", progressUpdateIntervalMs);
+      formData.append("file", file);
 
-    let _maxSeenEventId = -1;
+      let _maxSeenEventId = -1;
 
-    let stopPolling = false;
+      async function queryEtlContextEvents(
+        etlCtxId = etlContextId,
+        sinceEventId = maxSeenEventId
+      ) {
+        if (!etlCtxId) {
+          console.error("etlContextId is required to poll for events.");
+          return;
+        }
 
-    async function queryEtlContextEvents(
-      etlCtxId = etlContextId,
-      sinceEventId = maxSeenEventId
-    ) {
-      if (!etlCtxId) {
-        console.error("etlContextId is required to poll for events.");
-        return;
+        const url = new URL(`${rtPfx}/events/query`);
+
+        url.searchParams.append("etl_context_id", etlCtxId);
+        url.searchParams.append("event_id", sinceEventId);
+
+        const res = await fetch(url);
+
+        await checkApiResponse(res);
+
+        const events = await res.json();
+
+        return events;
       }
 
-      const url = new URL(`${rtPfx}/events/query`);
+      async function pollEvents() {
+        const events = await queryEtlContextEvents(_etlCtxId, _maxSeenEventId);
 
-      url.searchParams.append("etl_context_id", etlCtxId);
-      url.searchParams.append("event_id", sinceEventId);
+        if (Array.isArray(events) && events.length) {
+          const latestEvent = events[events.length - 1];
+          // console.log(latestEvent);
+          setMaxSeenEventId(latestEvent.event_id);
+          setFileUploadStatus(latestEvent);
+        }
 
-      const res = await fetch(url);
+        if (!stopPolling) {
+          setTimeout(pollEvents, progressUpdateIntervalMs);
+        }
+      }
+
+      setTimeout(pollEvents, progressUpdateIntervalMs);
+
+      // Upload the Geospatial Dataset
+      const res = await fetch(
+        `${rtPfx}/staged-geospatial-dataset/uploadGeospatialDataset`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       await checkApiResponse(res);
 
-      const events = await res.json();
+      // Upload response is the ETL ID
+      const [{ id }] = await res.json();
 
-      return events;
-    }
+      const layerNamesRes = await fetch(
+        `${rtPfx}/staged-geospatial-dataset/${id}/layerNames`
+      );
 
-    async function pollEvents() {
-      const events = await queryEtlContextEvents(_etlCtxId, _maxSeenEventId);
+      await checkApiResponse(layerNamesRes);
 
-      if (Array.isArray(events) && events.length) {
-        const latestEvent = events[events.length - 1];
-        // console.log(latestEvent);
-        setMaxSeenEventId(latestEvent.event_id);
-        setFileUploadStatus(latestEvent);
+      const layerNames = await layerNamesRes.json();
+
+      stopPolling = true;
+
+      setGisUploadId(id);
+      setLayerNames(layerNames);
+
+      if (layerNames.length === 1) {
+        selectLayer(layerNames[0], id);
       }
-
-      if (!stopPolling) {
-        setTimeout(pollEvents, progressUpdateIntervalMs);
-      }
+    } catch (err) {
+      stopPolling = true;
+      setUploadErrMsg(err.message);
     }
-
-    setTimeout(pollEvents, progressUpdateIntervalMs);
-
-    // Upload the Geospatial Dataset
-    const res = await fetch(
-      `${rtPfx}/staged-geospatial-dataset/uploadGeospatialDataset`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
-
-    await checkApiResponse(res);
-
-    // Upload response is the ETL ID
-    const [{ id }] = await res.json();
-
-    const layerNamesRes = await fetch(
-      `${rtPfx}/staged-geospatial-dataset/${id}/layerNames`
-    );
-
-    await checkApiResponse(layerNamesRes);
-
-    const layerNames = await layerNamesRes.json();
-
-    setGisUploadId(id);
-    setLayerNames(layerNames);
-
-    if (layerNames.length === 1) {
-      selectLayer(layerNames[0], id);
-    }
-
-    stopPolling = true;
   };
 
   const selectLayer = async (_layerName, _id) => {
@@ -253,16 +265,27 @@ const Create = ({ source }) => {
     setLayerName(_layerName);
 
     if (_layerName) {
-      const res = await fetch(
-        `${rtPfx}/staged-geospatial-dataset/${_id}/${_layerName}/tableDescriptor`
-      );
+      try {
+        const tblDscRes = await fetch(
+          `${rtPfx}/staged-geospatial-dataset/${_id}/${_layerName}/tableDescriptor`
+        );
 
-      await checkApiResponse(res);
+        await checkApiResponse(tblDscRes);
+        const tblDsc = await tblDscRes.json();
 
-      // The tableDescriptor controls DB table creation and loading.
-      const tblDsc = await res.json();
+        const lyrAnlysRes = await fetch(
+          `${rtPfx}/staged-geospatial-dataset/${_id}/${_layerName}/layerAnalysis`
+        );
 
-      setTableDescriptor(tblDsc);
+        await checkApiResponse(lyrAnlysRes);
+        const lyrAnlys = await lyrAnlysRes.json();
+
+        console.log(lyrAnlys);
+        setTableDescriptor(tblDsc);
+        setLayerAnalysis(lyrAnlys);
+      } catch (err) {
+        setLyrAnlysErrMsg(err.message);
+      }
     }
   };
 
@@ -369,6 +392,61 @@ const Create = ({ source }) => {
   }
 
   const getLayersSelector = () => {
+    if (uploadErrMsq) {
+      return (
+        <table
+          className="w-2/3"
+          style={{
+            margin: "40px auto",
+            textAlign: "center",
+            border: "1px solid",
+            borderColor: "back",
+          }}
+        >
+          <thead
+            style={{
+              color: "black",
+              backgroundColor: "red",
+              fontWeight: "bolder",
+              textAlign: "center",
+              marginTop: "40px",
+              fontSize: "20px",
+              border: "1px solid",
+              borderColor: "black",
+            }}
+          >
+            <tr>
+              <th style={{ border: "1px solid", borderColor: "black" }}>
+                {" "}
+                GIS Dataset Upload Error
+              </th>
+              <th style={{ border: "1px solid", borderColor: "black" }}>
+                {" "}
+                ETL Context ID
+              </th>
+            </tr>
+          </thead>
+          <tbody style={{ border: "1px solid" }}>
+            <tr style={{ border: "1px solid" }}>
+              <td
+                style={{
+                  border: "1px solid",
+                  padding: "10px",
+                  backgroundColor: "white",
+                  color: "darkred",
+                }}
+              >
+                {uploadErrMsq}
+              </td>
+              <td style={{ border: "1px solid", backgroundColor: "white" }}>
+                {etlContextId}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      );
+    }
+
     if (!uploadedFile) {
       return (
         <div className="w-full border border-dashed border-gray-300 bg-gray-100">
@@ -519,8 +597,168 @@ const Create = ({ source }) => {
     );
   };
 
-  const getTableDescriptorSection = () => {
+  const getLayerAnalysisSection = () => {
     if (!layerName) {
+      return "";
+    }
+
+    if (lyrAnlysErrMsg) {
+      return (
+        <table
+          className="w-2/3"
+          style={{
+            margin: "40px auto",
+            textAlign: "center",
+            border: "1px solid",
+            borderColor: "back",
+          }}
+        >
+          <thead
+            style={{
+              color: "black",
+              backgroundColor: "red",
+              fontWeight: "bolder",
+              textAlign: "center",
+              marginTop: "40px",
+              fontSize: "20px",
+              border: "1px solid",
+              borderColor: "black",
+            }}
+          >
+            <tr>
+              <th style={{ border: "1px solid", borderColor: "black" }}>
+                {" "}
+                Layer Analysis Error
+              </th>
+              <th style={{ border: "1px solid", borderColor: "black" }}>
+                {" "}
+                ETL Context ID
+              </th>
+            </tr>
+          </thead>
+          <tbody style={{ border: "1px solid" }}>
+            <tr style={{ border: "1px solid" }}>
+              <td
+                style={{
+                  border: "1px solid",
+                  padding: "10px",
+                  backgroundColor: "white",
+                  color: "darkred",
+                }}
+              >
+                {lyrAnlysErrMsg}
+              </td>
+              <td style={{ border: "1px solid", backgroundColor: "white" }}>
+                {etlContextId}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      );
+    }
+
+    if (!layerAnalysis) {
+      return <div>Analyzing Layer... please wait.</div>;
+    }
+
+    const { layerGeometriesAnalysis } = layerAnalysis;
+
+    const { featuresCount, countsByPostGisType, commonPostGisGeometryType } =
+      layerGeometriesAnalysis;
+
+    const plSfx = featuresCount > 1 ? "s" : "";
+
+    const geomTypes = Object.keys(countsByPostGisType).sort(
+      (a, b) => countsByPostGisType[b] - countsByPostGisType[a]
+    );
+
+    let geomTypeSection;
+    if (geomTypes.length === 1) {
+      const [geomType] = geomTypes;
+
+      geomTypeSection = (
+        <div
+          className="text-blue-500"
+          style={{ textAlign: "center", fontWeight: "bold" }}
+        >
+          The layer contains {featuresCount} {geomType} feature{plSfx}.
+        </div>
+      );
+    } else {
+      geomTypeSection = (
+        <div style={{ width: "100%" }}>
+          <div style={{ width: "50%", margin: "10px auto" }}>
+            The layer contained features of multiple geometry types:
+            <table
+              style={{
+                marginTop: "20px",
+                backgroundColor: "white",
+                margin: "30px auto",
+                border: "1px solid",
+              }}
+            >
+              <thead style={{ backgroundColor: "black", color: "white" }}>
+                <tr>
+                  <th
+                    className="text-center"
+                    style={{ padding: "10px", borderRight: "1px solid white" }}
+                  >
+                    Geometry Type
+                  </th>
+                  <th className="text-center" style={{ padding: "10px" }}>
+                    Feature Count
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {geomTypes.map((type) => (
+                  <tr className="border-b">
+                    <td
+                      className="py-4 text-center"
+                      style={{ padding: "10px", border: "1px solid" }}
+                    >
+                      {type}
+                    </td>
+                    <td
+                      className="text-center  p-2"
+                      style={{ padding: "10px", border: "1px solid" }}
+                    >
+                      {countsByPostGisType[type]}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            For consistency, all features will be converted to{" "}
+            {commonPostGisGeometryType}s.
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <span
+          style={{
+            display: "inline-block",
+            width: "100%",
+            marginTop: "20px",
+            textAlign: "center",
+            paddingTop: "25px",
+            paddingBottom: "50px",
+            fontSize: "25px",
+            borderTop: "4px solid",
+          }}
+        >
+          Layer Analysis
+        </span>
+        {geomTypeSection}
+      </div>
+    );
+  };
+
+  const getTableDescriptorSection = () => {
+    if (!layerName || uploadErrMsq || lyrAnlysErrMsg) {
       return "";
     }
 
@@ -614,7 +852,7 @@ const Create = ({ source }) => {
               <tr>
                 <th style={{ border: "1px solid", borderColor: "black" }}>
                   {" "}
-                  Publish Error Message
+                  Publish Error
                 </th>
                 <th style={{ border: "1px solid", borderColor: "black" }}>
                   {" "}
@@ -696,6 +934,7 @@ const Create = ({ source }) => {
       </div>
 
       {getLayersSelector()}
+      {getLayerAnalysisSection()}
       {getTableDescriptorSection()}
 
       <div
