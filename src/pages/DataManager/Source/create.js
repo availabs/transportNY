@@ -114,7 +114,7 @@ const Source = () => {
             </div>
           </div>
         </dl>
-        <CreateComp />
+        <CreateComp source={source} />
       </div>
    
   </SourcesLayout>

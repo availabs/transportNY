@@ -1,12 +1,10 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 import SourcesLayout, { DataManagerHeader } from "./components/SourcesLayout";
 
 import SourceView from "./Source";
 import SourceCreate from "./Source/create";
 import Settings from "./Source/settings";
-
-import { setFalcorGraph } from "./store";
 
 const DataManager = () => {
   return (

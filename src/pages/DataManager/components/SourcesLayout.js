@@ -172,6 +172,8 @@ const SourcesLayout = ({children}) => {
 }
 
 export const DataManagerHeader = withAuth(({user}) => {
+  const pgEnv = useSelector(selectPgEnv);
+
   return (
     <div className='pt-[2px]'>
       { user.authLevel >= 5 ? 
@@ -181,6 +183,7 @@ export const DataManagerHeader = withAuth(({user}) => {
               <div className='px-2 flex text-lg'>
                 <div className=' font-medium text-gray-800'> Data Manager</div> 
                 <div className='fal fa-angle-down px-3 mt-[6px] '/>
+                <div style={{color: 'red', paddingLeft: '15px', fontWeight: 'bold' }}>{pgEnv}</div>
               </div>} 
               className={`text-gray-800 group`} openType='click'
             >

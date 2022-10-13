@@ -2,10 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 
 import get from "lodash.get";
 
+const sliceName = "data_manager";
+
 const defaultPgEnv = "npmrds";
 
 const lclStoKeys = {
-  pgEnv: "redux.data_manager.pgEnv",
+  pgEnv: `redux.${sliceName}.pgEnv`,
 };
 
 const onLoadPgEnv = localStorage.getItem(lclStoKeys.pgEnv);
@@ -39,7 +41,7 @@ const reducers = {
 };
 
 export const datamanagerSlice = createSlice({
-  name: "data_manager",
+  name: sliceName,
   initialState,
   reducers,
 });
@@ -51,11 +53,11 @@ export const {
 export const queryPgEnvs = () => ["dama-info", "pgEnvs"];
 
 const selectFalcorGraph = (state) => {
-  return get(state, ["data_manager", "falcorGraph"], null);
-}
+  return get(state, [sliceName, "falcorGraph"], null);
+};
 
 export const selectPgEnv = (state) => {
-  return get(state, ["data_manager", "pgEnv"], null);
+  return get(state, [sliceName, "pgEnv"], null);
 };
 
 export const selectIsPwrUsr = (state) => {
@@ -65,6 +67,12 @@ export const selectIsPwrUsr = (state) => {
     user && Array.isArray(user.groups) && user.groups.includes("AVAIL");
 
   return isPwrUsr;
+};
+
+export const selectUserId = (state) => {
+  const { user } = state;
+
+  return user ? user.id : null;
 };
 
 export const selectPgEnvs = (state) =>
