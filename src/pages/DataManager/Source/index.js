@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useFalcor,TopNav, /*withAuth, Input, Button*/ } from 'modules/avl-components/src'
+import { useFalcor,TopNav, withAuth /*, Input, Button*/ } from 'modules/avl-components/src'
 
 
 import get from 'lodash.get'
@@ -12,7 +12,7 @@ import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager
 import { useSelector } from "react-redux";
 import { selectPgEnv } from "pages/DataManager/store"
 
-const Source = () => {
+const Source = (props) => {
   const {falcor, falcorCache} = useFalcor()
   const { sourceId, page } = useParams()
   const [ pages, setPages] = useState(Pages)
@@ -26,7 +26,6 @@ const Source = () => {
     async function fetchData () {
       console.time('fetch data')
       const lengthPath = ["dama", pgEnv, "sources","byId",sourceId,"views","length"]
-      console.log('source ', lengthPath)
       const resp = await falcor.get(lengthPath);
       let data =  await falcor.get(
         [
@@ -40,7 +39,7 @@ const Source = () => {
         ]
       )
       console.timeEnd('fetch data')
-      console.log(data)
+      //console.log(data)
       return data
     }
     fetchData()
@@ -63,7 +62,7 @@ const Source = () => {
         return a
       },{})
       let allPages = {...Pages,...typePages}
-      console.log('allPages', allPages)
+      // console.log('allPages', allPages)
       setPages(allPages)  
     } else {
        setPages(Pages) 
@@ -74,8 +73,8 @@ const Source = () => {
   return (
     <div className='max-w-6xl mx-auto'>
       <SourcesLayout>
-        <div className='text-xl font-medium overflow-hidden '>
-          {source.name}
+        <div className='text-xl font-medium overflow-hidden p-2 border-b '>
+          {source.display_name || source.name}
         </div>
         <TopNav 
           menuItems={Object.values(pages)
@@ -88,7 +87,7 @@ const Source = () => {
           themeOptions={{size:'inline'}}
         />
         <div className='w-full p-4 bg-white shadow mb-4'>
-          <Page source={source} views={views} />
+          <Page source={source} views={views} user={props.user} />
         </div>
       </SourcesLayout>
     </div>
@@ -108,7 +107,7 @@ const config = [{
     color: 'dark',
     size: 'micro'
   },
-  component: Source
+  component: withAuth(Source)
 },
 {
   name:'View Source',
@@ -121,33 +120,8 @@ const config = [{
     color: 'dark',
     size: 'micro'
   },
-  component: Source
-},
-{
-  name:'View Source',
-  path: "/datamanager/source/:sourceId",
-  exact: true,
-  auth: false,
-  mainNav: false,
-  title: <DataManagerHeader />,
-  sideNav: {
-    color: 'dark',
-    size: 'micro'
-  },
-  component: Source
-},
-{
-  name:'View Source',
-  path: "/datamanager/source/:sourceId/:page",
-  exact: true,
-  auth: false,
-  mainNav: false,
-  title: <DataManagerHeader />,
-  sideNav: {
-    color: 'dark',
-    size: 'micro'
-  },
-  component: Source
-}]
+  component: withAuth(Source)
+}
+]
 
 export default config;

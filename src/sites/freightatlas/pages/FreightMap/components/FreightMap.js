@@ -8,7 +8,8 @@ import get from 'lodash.get'
 // import {MacroLayerFactory} from './IncidentsLayer'
 //import {FreightAtlasFactory} from '../layers/freight_atlas'
 import FreightAtlasLayer from 'pages/DataManager/DataTypes/freight_atlas_shapefile/FreightAtlasLayer'
-import {SourceAttributes, ViewAttributes, getAttributes, getName} from 'pages/DataManager/components/attributes'
+import { FreightAtlasInfoLayer } from '../layers/freight_atlas_info'
+import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
 import config from "config.json"
 
 import {CustomSidebar} from './MapControls'
@@ -20,12 +21,14 @@ export const LayerContext = React.createContext({
   setLayerList: () => {}
 });
 
+const infoLayer = new FreightAtlasInfoLayer()
+
 
 const Map = ({ events }) => {
     const mounted = useRef(false);
     const {falcor,falcorCache} = useFalcor()
     const [layerList, setLayerList] = React.useState([54,17,8])
-    const [layerData, setLayerData] = React.useState([])
+    const [layerData, setLayerData] = React.useState([infoLayer])
     const pgEnv = useSelector(selectPgEnv);
 
     const layerContextValue = React.useMemo(() => {
@@ -89,16 +92,16 @@ const Map = ({ events }) => {
                   "dama", pgEnv,"sources","byId",sourceId,
                   "attributes"
                 ], {}))
+
             return views[0] ? 
                 {
                     layer_id: sourceId,
-                    view_id: get(views[0],'id',null),
-                    version: get(views[0],'version',null),
-                    metadata: get(views[0],'metadata',{}),
-                    name: getName(sourceAttributes),
+                    name: get(sourceAttributes,'display_name', ''),
                     sources: get(views[0],'metadata.tiles.sources',[]),
                     layers: get(views[0],'metadata.tiles.layers',[]),
-                    view_data: views[0]
+                    views: views,
+                    source: sourceAttributes,
+                    activeView: 0
 
                 } : null
               
@@ -121,7 +124,7 @@ const Map = ({ events }) => {
                         .map(l => FreightAtlasLayer(l))
 
 
-                    return [...l.filter(d => layerList.includes(d.layer_id)), ...output]
+                    return [infoLayer,...l.filter(d => layerList.includes(d.layer_id)), ...output]
                 })
             }
         }

@@ -1,5 +1,6 @@
 import React from 'react';
-import SourcesLayout, { DataManagerHeader } from './components/SourcesLayout'
+import { DataManagerHeader } from './components/SourcesLayout'
+import SourceList from './Source/list'
 import SourceView from './Source'
 import SourceCreate from './Source/create'
 import Settings from "./Source/settings";
@@ -7,12 +8,12 @@ import Settings from "./Source/settings";
 const DataManager = () => {
   return (
     <div className='max-w-6xl mx-auto'>
-      <SourcesLayout />
+      <SourceList />
     </div>
   )
 }
 
-const SourceList = [{
+const SourcesList = [{
   name:'Data Sources',
   path: "/datasources",
   exact: true,
@@ -24,10 +25,38 @@ const SourceList = [{
     size: 'micro'
   },
   component: DataManager
-}]
+},
+{
+  name:'Data Sources',
+  path: "/datasources/cat/:cat1",
+  exact: true,
+  auth: false,
+  mainNav: false,
+  title: <DataManagerHeader />,
+  sideNav: {
+    color: 'dark',
+    size: 'micro'
+  },
+  component: DataManager
+},
+{
+  name:'Data Sources',
+  path: "/datasources/cat/:cat1/:cat2",
+  exact: true,
+  auth: false,
+  mainNav: false,
+  title: <DataManagerHeader />,
+  sideNav: {
+    color: 'dark',
+    size: 'micro'
+  },
+  component: DataManager
+}
+
+]
 
 const config = [
-  ...SourceList,
+  ...SourcesList,
   ...SourceView,
   ...SourceCreate,
   ...Settings

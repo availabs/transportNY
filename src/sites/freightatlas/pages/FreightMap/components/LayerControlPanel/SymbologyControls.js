@@ -5,8 +5,8 @@ import get from 'lodash.get'
 const LayerStylePane = (props) => {
   // console.log('LayerStylePane', props)
   const mapBoxLayer = React.useMemo(() => 
-  	get(props.layer.view_data, 'metadata.tiles.layers[0]', {}),
-  	[props.layer.view_data]
+  	get(props.layer.views, `[${props.layer.activeView}]metadata.tiles.layers[0]`, {}),
+  	[props.layer.views, props.layer.activeView]
   )
 
   const renderControl = React.useMemo(() => {
@@ -26,9 +26,9 @@ const LayerStylePane = (props) => {
   return (
     <div className='border-t border-gray-300 h-full bg-gray-100 w-full'> 
       {renderControl}
-      <pre>
+      {/*<pre>
         {JSON.stringify(mapBoxLayer, null,3)}
-      </pre>
+      </pre>*/}
 
     </div>
   )

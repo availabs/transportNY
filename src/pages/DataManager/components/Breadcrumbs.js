@@ -10,7 +10,7 @@ import { selectPgEnv } from "pages/DataManager/store"
 
 
 export default function BreadCrumbs () {
-  const { sourceId /*,view*/ } = useParams()
+  const { sourceId, cat1, cat2} = useParams()
   const {falcor,falcorCache} = useFalcor()
   const pgEnv = useSelector(selectPgEnv);
 
@@ -28,22 +28,24 @@ export default function BreadCrumbs () {
 
   const pages = useMemo(() => {
     let attr = getAttributes(get(falcorCache,["dama", pgEnv,'sources','byId', sourceId],{'attributes': {}})['attributes']) 
-    if(!get(attr, 'categories[0]', false)) { 
+    /*if(!get(attr, 'categories[0]', false)) { 
       return [{name:'',to:''}]
-    }
+    }*/
 
-    let catList = get(attr ,'categories[0]', [])
+    let catList = get(attr ,'categories[0]', false) || [cat1,cat2].filter(d => d)
+
+    console.log('BreadCrumbs', catList, cat1, cat2, get(attr ,'categories[0]', false))
+
     let cats = typeof catList !== 'object' ? [] 
-      : catList.map(d => {
+      : catList.map((d,i) => {
         return {
           name: d,
-          to: ''
-        }
+          href: `/datasources/cat/${i > 0 ? catList[i-1] + '/' : ''}${d}`        }
       })
-    cats.push({name:attr.name.split('/').pop().split('_').join(' ')})
+    cats.push({name:attr.display_name})
     return cats
 
-  },[falcorCache,sourceId,pgEnv])
+  },[falcorCache,sourceId,pgEnv, cat1, cat2])
 
   return (
     <nav className="border-b border-gray-200 flex " aria-label="Breadcrumb">
@@ -56,8 +58,8 @@ export default function BreadCrumbs () {
             </Link>
           </div>
         </li>
-        {pages.map((page) => (
-          <li key={page.name} className="flex">
+        {pages.map((page,i) => (
+          <li key={i} className="flex">
             <div className="flex items-center">
               <svg
                 className="flex-shrink-0 w-6 h-full text-gray-300"

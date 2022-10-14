@@ -7,7 +7,7 @@ import get from 'lodash.get'
 
 import Source from './Source'
 
-import {SourceAttributes, getAttributes, getName} from 'pages/DataManager/components/attributes'
+import {SourceAttributes, getAttributes } from 'pages/DataManager/components/attributes'
 
 import { LayerContext } from './FreightMap'
 
@@ -61,7 +61,7 @@ const LayerManager = ({activeLayers,MapActions,...rest}) => {
 	          	className: ' ',
 	          	name: (
 	          		<div className={`flex p-2 hover:bg-blue-100 border-r-4 ${b.id === displayLayer ? 'border-blue-600' : 'border-white'}`}>
-	          			<div className='flex-1 pl-6 cursor-pointer text-sm' onClick={() => setDisplayLayer(b.id)}>{getName(b)}</div>
+	          			<div className='flex-1 pl-6 cursor-pointer text-sm' onClick={() => setDisplayLayer(b.id)}>{b.display_name}</div>
 	          			<div>
 	          				<i 
 	          					onClick={(e) => {

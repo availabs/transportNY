@@ -185,7 +185,9 @@ const LayerListTab = ({activeLayers,MapActions,...rest},) => {
             </div>
             <div className=''>
               <DndList onDrop={droppedSection}>
-                { activeLayers.map(layer =>
+                { activeLayers
+                  .filter(l => l.layerControl !== 'none')
+                  .map(layer =>
                     <LayerControl
                         key={ layer.id }
                         setActiveLayer={setActiveLayer}
