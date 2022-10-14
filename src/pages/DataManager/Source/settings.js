@@ -5,28 +5,18 @@ import { useFalcor } from "modules/avl-components/src";
 
 import { DataManagerHeader } from "../components/SourcesLayout";
 
-import {
-  queryPgEnvs,
-  setPgEnv,
-  setFalcorGraph,
-  selectPgEnv,
-  selectPgEnvs,
-} from "../store";
+import { queryPgEnvs, setPgEnv, selectPgEnv, selectPgEnvs } from "../store";
 
 const Settings = () => {
-  // Note: This may cause unnecessary re-renders. Prob best to limit to state.data_manager slice.
-  console.log("==> datasources/settings RENDER");
+  const { falcor, falcorCache } = useFalcor();
+  const dispatch = useDispatch();
 
   const pgEnv = useSelector(selectPgEnv);
   const pgEnvs = useSelector(selectPgEnvs);
 
-  const { falcor, falcorCache } = useFalcor();
-  const dispatch = useDispatch();
-
   useEffect(() => {
     (async () => {
       falcor.get(queryPgEnvs());
-      dispatch(setFalcorGraph(falcorCache));
     })();
   }, [falcor, dispatch, falcorCache]);
 

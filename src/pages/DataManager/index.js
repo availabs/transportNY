@@ -10,8 +10,8 @@ const DataManager = () => {
     <div className='max-w-6xl mx-auto'>
       <SourceList />
     </div>
-  )
-}
+  );
+};
 
 const SourcesList = [{
   name:'Data Sources',
@@ -61,5 +61,6 @@ const config = [
   ...SourceCreate,
   ...Settings
 ]
+
 
 export default config;

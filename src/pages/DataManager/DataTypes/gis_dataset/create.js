@@ -1,132 +1,259 @@
 /*
  *  TODO:
- *        [ ] Poll for ETL events.
- *              Currently, "damaPublished" even if publish fails.
- *
- *        [ ] Spinner when uploading a GIS Dataset (after Choose File)
- *
+ *        [ ] fetch err handling
+ *        [ ] Replace gisUploadId with etlContextId
  */
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 
 import get from "lodash.get";
-import Switch from "react-switch";
+import prettyBytes from "pretty-bytes";
 
-import { selectPgEnv } from "pages/DataManager/store";
+import { selectPgEnv, selectUserId } from "pages/DataManager/store";
 
-const HOST = "http://saturn.availabs.org:3369";
+import { DAMA_HOST } from "config";
 
-const Create = () => {
+const progressUpdateIntervalMs = 3000;
+
+// https://www.geeksforgeeks.org/how-to-create-a-custom-progress-bar-component-in-react-js/
+const ProgressBar = ({ progress }) => {
+  const Parentdiv = {
+    display: "inline-block",
+    height: "100%",
+    width: "100%",
+    backgroundColor: "whitesmoke",
+    borderRadius: 40,
+    margin: 50,
+  };
+
+  const Childdiv = {
+    display: "inline-block",
+    height: "84%",
+    width: `${progress}`,
+    backgroundColor: "#3b82f680",
+    borderRadius: 40,
+    textAlign: "right",
+  };
+
+  const progresstext = {
+    padding: 10,
+    color: "black",
+    fontWeight: 900,
+  };
+
+  return (
+    <div style={Parentdiv}>
+      <span
+        style={{
+          fontWeight: "bold",
+          paddingLeft: "10px",
+          paddingRight: "10px",
+        }}
+      >
+        {" "}
+        Sent:
+      </span>
+
+      <div style={Childdiv}>
+        <span style={progresstext}>{`${progress}`}</span>
+      </div>
+    </div>
+  );
+};
+
+const PublishStatus = {
+  AWAITING: "AWAITING",
+  IN_PROGRESS: "IN_PROGRESS",
+  PUBLISHED: "PUBLISHED",
+  ERROR: "ERROR",
+};
+
+async function checkApiResponse(res) {
+  if (!res.ok) {
+    let errMsg = res.statusText;
+    try {
+      const { message } = await res.json();
+      errMsg = message;
+    } catch (err) {
+      console.error(err);
+    }
+
+    throw new Error(errMsg);
+  }
+}
+
+const Create = ({ source }) => {
   const pgEnv = useSelector(selectPgEnv);
+  const userId = useSelector(selectUserId);
 
   const [gisUploadId, setGisUploadId] = React.useState(null);
+  const [etlContextId, setEtlContextId] = React.useState(null);
+
+  const [fileUploadStatus, setFileUploadStatus] = React.useState(null);
+  const [maxSeenEventId, setMaxSeenEventId] = React.useState(null);
+
+  const [uploadedFile, setUploadedFile] = React.useState(null);
+  const [uploadErrMsq, setUploadErrMsg] = React.useState(null);
 
   const [layerNames, setLayerNames] = React.useState([]);
   const [layerName, setLayerName] = React.useState(null);
 
   const [tableDescriptor, setTableDescriptor] = React.useState(null);
-  const [etlContextId, setEtlContextId] = React.useState(null);
-  const [qaApproved, setQaApproved] = React.useState(false);
+  const [layerAnalysis, setLayerAnalysis] = React.useState(null);
+  const [lyrAnlysErrMsg, setLyrAnlysErrMsg] = React.useState(null);
 
-  const [useExistingSource, setUseExistingSource] = React.useState(false);
-  const [damaSrcTblCols, setDamaSrcTblCols] = React.useState(null);
-  const [damaSrcMeta, setDamaSrcMeta] = React.useState(null);
-  const [damaSrcName, setDamaSrcName] = React.useState(null);
+  const [publishStatus, setPublishStatus] = React.useState(
+    PublishStatus.AWAITING
+  );
 
-  const [damaDataSrcs, setDamaDataSrcs] = React.useState(null);
+  const [publishErrMsg, setPublishErrMsg] = React.useState(null);
 
-  const [damaViewTblCols, setDamaViewTblCols] = React.useState(null);
-  const [damaViewMeta, setDamaViewMeta] = React.useState(null);
+  const { name: sourceName, displayName: sourceDisplayName } = source;
 
-  const [damaPublished, setDamaPublished] = React.useState(false);
+  if (!sourceName) {
+    return (
+      <div
+        style={{
+          display: "inline-block",
+          width: "100%",
+          marginTop: "30px",
+          textAlign: "center",
+          fontSize: "20px",
+          fontWeight: "bold",
+        }}
+      >
+        <span>Please provide a source name above.</span>
+      </div>
+    );
+  }
 
-  const rtPfx = `${HOST}/dama-admin/${pgEnv}`;
+  const rtPfx = `${DAMA_HOST}/dama-admin/${pgEnv}`;
 
   const resetState = () => {
     // NOTE: we do not reset gisUploadId unless a new file uploaded.
-
+    setFileUploadStatus(null);
+    setUploadErrMsg(null);
+    setLayerNames(null);
     setLayerName(null);
+    setLyrAnlysErrMsg(null);
     setTableDescriptor(null);
-    setEtlContextId(null);
-    setQaApproved(false);
+    setLayerAnalysis(null);
 
-    setUseExistingSource(false);
-
-    setDamaSrcMeta(null);
-    setDamaSrcName(null);
-
-    setDamaDataSrcs(null);
-
-    setDamaViewMeta(null);
-
-    setDamaPublished(false);
+    setPublishStatus(PublishStatus.AWAITING);
+    setPublishErrMsg(null);
   };
 
-  useEffect(() => {
-    const fn = async () => {
-      console.log("USE EFFECT");
-
-      const [src, vw] = await Promise.all([
-        (async () => {
-          const res = await fetch(
-            `${rtPfx}/table-columns?tableSchema=data_manager&tableName=sources`
-          );
-          const schema = await res.json();
-          console.log("src", schema);
-          return schema;
-        })(),
-
-        (async () => {
-          const res = await fetch(
-            `${rtPfx}/table-columns?tableSchema=data_manager&tableName=views`
-          );
-          const schema = await res.json();
-          console.log("vw", schema);
-          return schema;
-        })(),
-      ]);
-
-      setDamaSrcTblCols(src);
-      setDamaViewTblCols(vw);
-    };
-
-    fn();
-  }, [rtPfx]);
-
-  if (!(damaSrcTblCols && damaViewTblCols)) {
-    return <span>Initializing</span>;
-  }
-
   const uploadGisFile = async (file) => {
-    resetState();
+    let stopPolling = false;
 
-    const formData = new FormData();
-    formData.append("file", file);
+    try {
+      /*
+        1. Get an etl_context_id
+        2. Progress polling
+    */
+      resetState();
+      setUploadedFile(file);
 
-    // Upload the Geospatial Dataset
-    const res = await fetch(
-      `${rtPfx}/staged-geospatial-dataset/uploadGeospatialDataset`,
-      {
-        method: "POST",
-        body: formData,
+      // First, we need to get a new etl-context-id
+      //
+      //   NOTE:  If we omit this step, in order to get progress updates
+      //          the dama-admin server would need to immediately return the etlContextId
+      //          for an upload, and the client would need to determine the status of the
+      //          upload by querying the upload events.
+      //
+      const newEtlCtxRes = await fetch(`${rtPfx}/new-etl-context-id`);
+
+      await checkApiResponse(newEtlCtxRes);
+
+      const _etlCtxId = await newEtlCtxRes.text();
+
+      setEtlContextId(_etlCtxId);
+
+      const formData = new FormData();
+      // https://moleculer.services/docs/0.14/moleculer-web.html#File-upload-aliases
+      // text form-data fields must be sent before files fields.
+      formData.append("etlContextId", _etlCtxId);
+      formData.append("user_id", userId);
+      formData.append("fileSizeBytes", file.size);
+      formData.append("progressUpdateIntervalMs", progressUpdateIntervalMs);
+      formData.append("file", file);
+
+      let _maxSeenEventId = -1;
+
+      async function queryEtlContextEvents(
+        etlCtxId = etlContextId,
+        sinceEventId = maxSeenEventId
+      ) {
+        if (!etlCtxId) {
+          console.error("etlContextId is required to poll for events.");
+          return;
+        }
+
+        const url = new URL(`${rtPfx}/events/query`);
+
+        url.searchParams.append("etl_context_id", etlCtxId);
+        url.searchParams.append("event_id", sinceEventId);
+
+        const res = await fetch(url);
+
+        await checkApiResponse(res);
+
+        const events = await res.json();
+
+        return events;
       }
-    );
 
-    // Upload response is the ETL ID
-    const [{ id }] = await res.json();
+      async function pollEvents() {
+        const events = await queryEtlContextEvents(_etlCtxId, _maxSeenEventId);
 
-    const layerNamesRes = await fetch(
-      `${rtPfx}/staged-geospatial-dataset/${id}/layerNames`
-    );
+        if (Array.isArray(events) && events.length) {
+          const latestEvent = events[events.length - 1];
+          // console.log(latestEvent);
+          setMaxSeenEventId(latestEvent.event_id);
+          setFileUploadStatus(latestEvent);
+        }
 
-    const layerNames = await layerNamesRes.json();
+        if (!stopPolling) {
+          setTimeout(pollEvents, progressUpdateIntervalMs);
+        }
+      }
 
-    setGisUploadId(id);
-    setLayerNames(layerNames);
+      setTimeout(pollEvents, progressUpdateIntervalMs);
 
-    if (layerNames.length === 1) {
-      selectLayer(layerNames[0], id);
+      // Upload the Geospatial Dataset
+      const res = await fetch(
+        `${rtPfx}/staged-geospatial-dataset/uploadGeospatialDataset`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      await checkApiResponse(res);
+
+      // Upload response is the ETL ID
+      const [{ id }] = await res.json();
+
+      const layerNamesRes = await fetch(
+        `${rtPfx}/staged-geospatial-dataset/${id}/layerNames`
+      );
+
+      await checkApiResponse(layerNamesRes);
+
+      const layerNames = await layerNamesRes.json();
+
+      stopPolling = true;
+
+      setGisUploadId(id);
+      setLayerNames(layerNames);
+
+      if (layerNames.length === 1) {
+        selectLayer(layerNames[0], id);
+      }
+    } catch (err) {
+      stopPolling = true;
+      setUploadErrMsg(err.message);
     }
   };
 
@@ -135,55 +262,35 @@ const Create = () => {
       _id = gisUploadId;
     }
 
-    resetState();
     setLayerName(_layerName);
 
     if (_layerName) {
-      const res = await fetch(
-        `${rtPfx}/staged-geospatial-dataset/${_id}/${_layerName}/tableDescriptor`
-      );
+      try {
+        const tblDscRes = await fetch(
+          `${rtPfx}/staged-geospatial-dataset/${_id}/${_layerName}/tableDescriptor`
+        );
 
-      // The tableDescriptor controls DB table creation and loading.
-      const tblDsc = await res.json();
+        await checkApiResponse(tblDscRes);
+        const tblDsc = await tblDscRes.json();
 
-      setTableDescriptor(tblDsc);
+        const lyrAnlysRes = await fetch(
+          `${rtPfx}/staged-geospatial-dataset/${_id}/${_layerName}/layerAnalysis`
+        );
 
-      setDamaSrcMeta(
-        damaSrcTblCols.reduce((acc, col) => {
-          acc[col] = "";
-          return acc;
-        }, {})
-      );
+        await checkApiResponse(lyrAnlysRes);
+        const lyrAnlys = await lyrAnlysRes.json();
 
-      setDamaViewMeta(
-        damaViewTblCols.reduce((acc, col) => {
-          acc[col] = "";
-          return acc;
-        }, {})
-      );
+        console.log(lyrAnlys);
+        setTableDescriptor(tblDsc);
+        setLayerAnalysis(lyrAnlys);
+      } catch (err) {
+        setLyrAnlysErrMsg(err.message);
+      }
     }
   };
 
-  const getDamaDataSources = async () => {
-    //  we repeat this call because
-    //    since we are possibly inserting into the data_manager.sources table
-    //    it seems safe to assume the available sources will change over time.
-    setDamaDataSrcs(null);
-
-    const res = await fetch(`${rtPfx}/dama-data-sources`);
-
-    // The tableDescriptor controls DB table creation and loading.
-    const srcs = await res.json();
-
-    console.log({ damaDataSrcs: srcs });
-
-    setDamaDataSrcs(srcs);
-  };
-
   const stageLayerData = async () => {
-    /*
-     */
-    await fetch(
+    const updTblDscRes = await fetch(
       `${rtPfx}/staged-geospatial-dataset/${gisUploadId}/updateTableDescriptor`,
       {
         method: "POST",
@@ -194,121 +301,244 @@ const Create = () => {
       }
     );
 
-    const event = {
-      type: "dama/data_source_integrator:LOAD_REQUEST",
-      payload: { id: gisUploadId, layerName },
-      meta: { DAMAA: true },
-    };
+    await checkApiResponse(updTblDscRes);
 
-    const res = await fetch(`${rtPfx}/events/dispatch`, {
-      method: "POST",
-      body: JSON.stringify(event),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const url = new URL(
+      `${rtPfx}/staged-geospatial-dataset/stageLayerData/${layerName}`
+    );
+    url.searchParams.append("etl_context_id", etlContextId);
 
-    const {
-      meta: { etl_context_id },
-    } = await res.json();
+    const stgLyrDataRes = await fetch(url);
 
-    setEtlContextId(etl_context_id);
+    await checkApiResponse(stgLyrDataRes);
   };
 
   const approveQA = async () => {
-    const event = {
-      type: "dama/data_source_integrator:QA_APPROVED",
-      meta: {
-        DAMAA: true,
-        etl_context_id: etlContextId,
-        timestamp: new Date().toISOString(),
-      },
-    };
+    const url = new URL(`${rtPfx}/staged-geospatial-dataset/approveQA`);
+    url.searchParams.append("etl_context_id", etlContextId);
+    url.searchParams.append("user_id", userId);
 
-    await fetch(`${rtPfx}/events/dispatch`, {
-      method: "POST",
-      body: JSON.stringify(event),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    setQaApproved(true);
+    await fetch(url);
   };
 
   const createNewDataSource = async () => {
-    const res = await fetch(`${rtPfx}/create/dataSource`, {
+    const res = await fetch(`${rtPfx}/metadata/createNewDataSource`, {
       method: "POST",
-      body: JSON.stringify(damaSrcMeta),
+      body: JSON.stringify({
+        name: sourceName,
+        display_name: sourceDisplayName,
+      }),
       headers: {
         "Content-Type": "application/json",
       },
     });
 
-    const { name } = await res.json();
-
-    console.log("==> created damaSrc", name);
-
-    await getDamaDataSources();
-
-    setDamaSrcName(name);
-    setDamaViewMeta({ ...damaViewMeta, data_source_name: name });
-    setUseExistingSource(true);
+    await checkApiResponse(res);
   };
 
   async function submitViewMeta() {
-    const event = {
-      type: "dama/data_source_integrator:VIEW_METADATA_SUBMITTED",
-      payload: damaViewMeta,
-      meta: {
-        DAMAA: true,
-        etl_context_id: etlContextId,
-        timestamp: new Date().toISOString(),
-      },
+    const url = new URL(`${rtPfx}/staged-geospatial-dataset/submitViewMeta`);
+    url.searchParams.append("etl_context_id", etlContextId);
+    url.searchParams.append("user_id", userId);
+
+    const viewMetadata = {
+      data_source_name: sourceName,
+      table_schema: "gis_datasets",
+      table_name: `${sourceName}_v1`,
+      version: 1,
     };
 
-    await fetch(`${rtPfx}/events/dispatch`, {
+    await fetch(url, {
       method: "POST",
-      body: JSON.stringify(event),
+      body: JSON.stringify(viewMetadata),
       headers: {
         "Content-Type": "application/json",
       },
     });
   }
 
-  async function publishData() {
-    await submitViewMeta();
+  async function publishGisDatasetLayer() {
+    const url = new URL(
+      `${rtPfx}/staged-geospatial-dataset/publishGisDatasetLayer`
+    );
+    url.searchParams.append("etl_context_id", etlContextId);
+    url.searchParams.append("user_id", userId);
 
-    const event = {
-      type: "dama/data_source_integrator:PUBLISH",
-      meta: {
-        DAMAA: true,
-        etl_context_id: etlContextId,
-        timestamp: new Date().toISOString(),
-      },
-    };
+    const res = await fetch(url);
 
-    await fetch(`${rtPfx}/events/dispatch`, {
-      method: "POST",
-      body: JSON.stringify(event),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    setDamaPublished(true);
+    await checkApiResponse(res);
   }
 
-  const layersSelector =
-    layerNames.length > 0 ? (
-      <div className="w-full ">
-        <div className="p-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt className="text-sm font-medium text-gray-500 py-5">
-            Select Layer
-          </dt>
-          <div className="sm:col-span-2 pr-8 pt-3">
+  async function simplePublish() {
+    try {
+      setPublishStatus(PublishStatus.IN_PROGRESS);
+
+      await createNewDataSource();
+
+      await stageLayerData();
+
+      await approveQA();
+
+      await submitViewMeta();
+
+      await publishGisDatasetLayer();
+
+      setPublishStatus(PublishStatus.PUBLISHED);
+    } catch (err) {
+      setPublishStatus(PublishStatus.ERROR);
+      console.log("==>", err.message);
+      setPublishErrMsg(err.message);
+    }
+  }
+
+  const getLayersSelector = () => {
+    if (uploadErrMsq) {
+      return (
+        <table
+          className="w-2/3"
+          style={{
+            margin: "40px auto",
+            textAlign: "center",
+            border: "1px solid",
+            borderColor: "back",
+          }}
+        >
+          <thead
+            style={{
+              color: "black",
+              backgroundColor: "red",
+              fontWeight: "bolder",
+              textAlign: "center",
+              marginTop: "40px",
+              fontSize: "20px",
+              border: "1px solid",
+              borderColor: "black",
+            }}
+          >
+            <tr>
+              <th style={{ border: "1px solid", borderColor: "black" }}>
+                {" "}
+                GIS Dataset Upload Error
+              </th>
+              <th style={{ border: "1px solid", borderColor: "black" }}>
+                {" "}
+                ETL Context ID
+              </th>
+            </tr>
+          </thead>
+          <tbody style={{ border: "1px solid" }}>
+            <tr style={{ border: "1px solid" }}>
+              <td
+                style={{
+                  border: "1px solid",
+                  padding: "10px",
+                  backgroundColor: "white",
+                  color: "darkred",
+                }}
+              >
+                {uploadErrMsq}
+              </td>
+              <td style={{ border: "1px solid", backgroundColor: "white" }}>
+                {etlContextId}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      );
+    }
+
+    if (!uploadedFile) {
+      return (
+        <div className="w-full border border-dashed border-gray-300 bg-gray-100">
+          <div className="p-4">
+            <button>
+              <input
+                type="file"
+                onChange={(e) => {
+                  uploadGisFile(e.target.files[0]);
+                }}
+              />
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // TODO: Table with file metadata
+    //       LayerName or LayerSelector as a table row
+
+    let layerRow;
+
+    if (!Array.isArray(layerNames)) {
+      if (!fileUploadStatus) {
+        layerRow = (
+          <tr>
+            <td className="py-4 text-left">File Upload Status</td>
+            <td className="py-4 text-center">Sending GIS File to server</td>
+          </tr>
+        );
+      } else {
+        const { type, payload } = fileUploadStatus;
+
+        if (/GIS_FILE_UPLOAD_PROGRESS$/.test(type)) {
+          layerRow = (
+            <tr>
+              <td className="py-4 text-left">File Upload Status</td>
+              <td className="py-4 text-left">
+                <ProgressBar progress={payload.progress} />
+              </td>
+            </tr>
+          );
+        } else if (/GIS_FILE_RECEIVED$/.test(type)) {
+          layerRow = (
+            <tr>
+              <td className="py-4 text-left">File Upload Status</td>
+              <td className="py-4 text-center">File Received</td>
+            </tr>
+          );
+        } else if (/START_GIS_FILE_UPLOAD_ANALYSIS$/.test(type)) {
+          layerRow = (
+            <tr>
+              <td className="py-4 text-left">File Upload Status</td>
+              <td className="py-4 text-center">
+                Server Analyzing the GIS File
+              </td>
+            </tr>
+          );
+        } else if (/FINISH_GIS_FILE_UPLOAD$/.test(type)) {
+          layerRow = (
+            <tr>
+              <td className="py-4 text-left">File Upload Status</td>
+              <td className="py-4 text-center">GIS File Analysis Complete</td>
+            </tr>
+          );
+        } else {
+          layerRow = (
+            <tr>
+              <td className="py-4 text-left">File Upload Status</td>
+              <td className="py-4 text-center">Processing</td>
+            </tr>
+          );
+        }
+      }
+    } else if (layerNames.length === 1) {
+      if (!layerName) {
+        selectLayer(layerNames[0]);
+      }
+
+      layerRow = (
+        <tr>
+          <td className="py-4 text-left">Layer Name</td>
+          <td className="py-4 text-center">{layerName}</td>
+        </tr>
+      );
+    } else {
+      layerRow = (
+        <tr>
+          <td className="py-4 text-left">Select Layer</td>
+          <td className="py-4 text-center">
             <select
-              className="w-full bg-white p-2 flex-1 shadow bg-grey-50 focus:bg-blue-100  border-gray-300"
+              className="text-center w-1/2 bg-white p-2 shadow bg-grey-50 focus:bg-blue-100 border-gray-300"
               value={layerName || ""}
               onChange={(e) => selectLayer(e.target.value || null)}
             >
@@ -318,255 +548,193 @@ const Create = () => {
                 </option>
               ))}
             </select>
-          </div>
-        </div>
-      </div>
-    ) : (
-      ""
-    );
+          </td>
+        </tr>
+      );
+    }
 
-  const tableDescriptorSection = tableDescriptor ? (
-    <div>
-      <span
-        style={{
-          display: "inline-block",
-          width: "100%",
-          marginTop: "20px",
-          textAlign: "center",
-          paddingTop: "25px",
-          paddingBottom: "50px",
-          fontSize: "25px",
-          borderTop: "4px solid",
-        }}
-      >
-        Database Table Descriptor
-      </span>
-
+    return (
       <div>
+        <div
+          style={{
+            display: "inline-block",
+            width: "100%",
+            marginTop: "10px",
+            textAlign: "center",
+            paddingBottom: "20px",
+            fontSize: "20px",
+            fontWeight: "bold",
+          }}
+        >
+          <span>File Metadata</span>
+        </div>
+
         <table className="w-full">
-          <thead>
-            <tr>
-              <th className="text-left">GIS Dataset Field Name</th>
-              <th className="text-right">Database Column Name</th>
-              <td className="text-right">Database Column Type</td>
-            </tr>
-          </thead>
           <tbody>
-            {get(tableDescriptor, "columnTypes", []).map((row) => (
-              <tr key={row.key} className="border-b">
-                <td className="py-4">{row.key}</td>
-                <td className="text-right  p-2">
-                  <input
-                    className="w-full p-2 flex-1 shadow bg-grey-50 focus:bg-blue-100 border-gray-300"
-                    disabled={!!etlContextId}
-                    id={row.key}
-                    defaultValue={row.col}
-                    onChange={(e) => (row.col = e.target.value)}
-                  />
-                </td>
-                <td className="text-right  p-2">{row.db_type}</td>
-              </tr>
-            ))}
+            <tr key="uploaded-file-meta--name" className="border-b">
+              <td className="py-4 text-left">Name</td>
+              <td className="text-center  p-2">{uploadedFile.name}</td>
+            </tr>
+
+            <tr key="uploaded-file-meta--last-mod-ts" className="border-b">
+              <td className="py-4 text-left">Last Modified</td>
+              <td className="text-center  p-2">
+                {uploadedFile.lastModifiedDate.toLocaleString()}
+              </td>
+            </tr>
+
+            <tr key="uploaded-file-meta--size" className="border-b">
+              <td className="py-4 text-left">Size</td>
+              <td className="text-center  p-2">
+                {prettyBytes(uploadedFile.size)}
+              </td>
+            </tr>
+
+            {layerRow}
           </tbody>
         </table>
       </div>
+    );
+  };
 
-      <span
-        style={{
-          display: "inline-block",
-          marginTop: "20px",
-          textAlign: "center",
-          padding: "10px",
-          fontSize: "25px",
-          border: "2px solid",
-          borderRadius: "25px",
-          backgroundColor: etlContextId ? "#e5e7eb" : "#3b82f680",
-        }}
-        onClick={stageLayerData}
-      >
-        {etlContextId ? "Data Staged in Database" : "Stage Data in Database"}
-      </span>
-    </div>
-  ) : (
-    ""
-  );
-
-  const qaSection = etlContextId ? (
-    <div>
-      <span
-        style={{
-          display: "inline-block",
-          width: "100%",
-          marginTop: "20px",
-          textAlign: "center",
-          paddingTop: "25px",
-          paddingBottom: "50px",
-          fontSize: "25px",
-          borderTop: "4px solid",
-        }}
-      >
-        Quality Assurance
-      </span>
-      <span
-        style={{
-          display: "inline-block",
-          marginTop: "20px",
-          textAlign: "center",
-          padding: "10px",
-          fontSize: "25px",
-          border: "2px solid",
-          borderRadius: "25px",
-          backgroundColor: qaApproved ? "#e5e7eb" : "#3b82f680",
-        }}
-        onClick={approveQA}
-      >
-        {qaApproved ? "QA Approved" : "Approve QA"}
-      </span>
-    </div>
-  ) : (
-    ""
-  );
-
-  function getSrcMetaForm() {
-    if (!damaDataSrcs) {
-      setTimeout(getDamaDataSources);
+  const getLayerAnalysisSection = () => {
+    if (!layerName) {
       return "";
     }
 
-    if (!etlContextId || !qaApproved) {
-      return "";
-    }
-
-    const srcMetaOmittedMetaCols = [
-      "id",
-      "metadata",
-      "statistics",
-      "categories",
-      "category",
-      "data_table",
-    ];
-
-    const getShortName = (name) => name.split("/").slice(-2).join("/");
-
-    const short2long =
-      damaDataSrcs &&
-      damaDataSrcs.reduce((acc, { name: longName }) => {
-        acc[getShortName(longName)] = longName;
-        return acc;
-      }, {});
-
-    // const long2short = Object.entries(short2long).reduce(
-    //   (acc, [short, long]) => {
-    //     acc[long] = short;
-    //     return acc;
-    //   },
-    //   {}
-    // );
-
-    const existingSrcSelector =
-      useExistingSource && damaDataSrcs ? (
-        <div className="w-full ">
-          <div className="p-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt className="text-sm font-medium text-gray-500 py-5">
-              Select Data Source Name
-            </dt>
-            <div className="sm:col-span-2 pr-8 pt-3">
-              <select
-                className="w-full bg-white p-2 flex-1 shadow bg-grey-50 focus:bg-blue-100  border-gray-300"
-                value={damaSrcName}
-                disabled={damaPublished}
-                onChange={(e) => {
-                  const data_source_name = e.target.value;
-
-                  setDamaSrcName(data_source_name);
-                  setDamaViewMeta({ ...damaViewMeta, data_source_name });
+    if (lyrAnlysErrMsg) {
+      return (
+        <table
+          className="w-2/3"
+          style={{
+            margin: "40px auto",
+            textAlign: "center",
+            border: "1px solid",
+            borderColor: "back",
+          }}
+        >
+          <thead
+            style={{
+              color: "black",
+              backgroundColor: "red",
+              fontWeight: "bolder",
+              textAlign: "center",
+              marginTop: "40px",
+              fontSize: "20px",
+              border: "1px solid",
+              borderColor: "black",
+            }}
+          >
+            <tr>
+              <th style={{ border: "1px solid", borderColor: "black" }}>
+                {" "}
+                Layer Analysis Error
+              </th>
+              <th style={{ border: "1px solid", borderColor: "black" }}>
+                {" "}
+                ETL Context ID
+              </th>
+            </tr>
+          </thead>
+          <tbody style={{ border: "1px solid" }}>
+            <tr style={{ border: "1px solid" }}>
+              <td
+                style={{
+                  border: "1px solid",
+                  padding: "10px",
+                  backgroundColor: "white",
+                  color: "darkred",
                 }}
               >
-                {[null, ...Object.keys(short2long).sort()].map((shortName) => (
-                  <option
-                    key={shortName || "null"}
-                    value={shortName ? short2long[shortName] : ""}
-                  >
-                    {shortName || ""}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      ) : (
-        ""
+                {lyrAnlysErrMsg}
+              </td>
+              <td style={{ border: "1px solid", backgroundColor: "white" }}>
+                {etlContextId}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       );
+    }
 
-    const newSrcFormFields =
-      !useExistingSource && damaSrcTblCols ? (
-        <div>
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th className="text-center">Property</th>
-                <th className="text-center">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              {damaSrcTblCols
-                .filter((col) => !srcMetaOmittedMetaCols.includes(col))
-                .map((col) => (
-                  <tr key={col} className="border-b">
-                    <td className="py-4">{col}</td>
+    if (!layerAnalysis) {
+      return <div>Analyzing Layer... please wait.</div>;
+    }
+
+    const { layerGeometriesAnalysis } = layerAnalysis;
+
+    const { featuresCount, countsByPostGisType, commonPostGisGeometryType } =
+      layerGeometriesAnalysis;
+
+    const plSfx = featuresCount > 1 ? "s" : "";
+
+    const geomTypes = Object.keys(countsByPostGisType).sort(
+      (a, b) => countsByPostGisType[b] - countsByPostGisType[a]
+    );
+
+    let geomTypeSection;
+    if (geomTypes.length === 1) {
+      const [geomType] = geomTypes;
+
+      geomTypeSection = (
+        <div
+          className="text-blue-500"
+          style={{ textAlign: "center", fontWeight: "bold" }}
+        >
+          The layer contains {featuresCount} {geomType} feature{plSfx}.
+        </div>
+      );
+    } else {
+      geomTypeSection = (
+        <div style={{ width: "100%" }}>
+          <div style={{ width: "50%", margin: "10px auto" }}>
+            The layer contained features of multiple geometry types:
+            <table
+              style={{
+                marginTop: "20px",
+                backgroundColor: "white",
+                margin: "30px auto",
+                border: "1px solid",
+              }}
+            >
+              <thead style={{ backgroundColor: "black", color: "white" }}>
+                <tr>
+                  <th
+                    className="text-center"
+                    style={{ padding: "10px", borderRight: "1px solid white" }}
+                  >
+                    Geometry Type
+                  </th>
+                  <th className="text-center" style={{ padding: "10px" }}>
+                    Feature Count
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {geomTypes.map((type) => (
+                  <tr className="border-b">
                     <td
-                      className="text-right  p-2"
-                      style={
-                        col === "name" &&
-                        get(damaSrcMeta, "name", "").length < 3
-                          ? { border: "1px solid red" }
-                          : {}
-                      }
+                      className="py-4 text-center"
+                      style={{ padding: "10px", border: "1px solid" }}
                     >
-                      <input
-                        required={col === "name"}
-                        className="w-full p-2 flex-1 shadow bg-grey-50 focus:bg-blue-100"
-                        id={col}
-                        value={get(damaSrcMeta, col, "")}
-                        onChange={(e) => {
-                          setDamaSrcMeta({
-                            ...damaSrcMeta,
-                            [col]: e.target.value,
-                          });
-                        }}
-                      />
+                      {type}
+                    </td>
+                    <td
+                      className="text-center  p-2"
+                      style={{ padding: "10px", border: "1px solid" }}
+                    >
+                      {countsByPostGisType[type]}
                     </td>
                   </tr>
                 ))}
-            </tbody>
-          </table>
-
-          <span
-            style={{
-              display: "inline-block",
-              marginTop: "20px",
-              textAlign: "center",
-              padding: "10px",
-              fontSize: "25px",
-              border: "2px solid",
-              borderRadius: "25px",
-              backgroundColor:
-                !damaSrcName && get(damaSrcMeta, "name", "").length >= 3
-                  ? "#3b82f680"
-                  : "#e5e7eb",
-            }}
-            onClick={
-              !damaSrcName && get(damaSrcMeta, "name", "").length >= 3
-                ? createNewDataSource
-                : () => {}
-            }
-          >
-            Create New Data Source
-          </span>
+              </tbody>
+            </table>
+            For consistency, all features will be converted to{" "}
+            {commonPostGisGeometryType}s.
+          </div>
         </div>
-      ) : (
-        ""
       );
+    }
 
     return (
       <div>
@@ -582,69 +750,151 @@ const Create = () => {
             borderTop: "4px solid",
           }}
         >
-          DataManager Source Metadata
+          Layer Analysis
         </span>
-
-        <label
-          style={{
-            display: "inline-block",
-            marginTop: "5px",
-            marginBottom: "20px",
-            textAlign: "center",
-            paddingTop: "5px",
-            paddingBottom: "25px",
-          }}
-        >
-          <span style={{ paddingRight: "15px" }}>Use Existing Data Source</span>
-          <Switch
-            onChange={() => {
-              if (!useExistingSource) {
-                // Switching to useExistingSource. Refresh the damaDataSrcs
-                getDamaDataSources();
-              } else {
-                //
-                setDamaSrcName(null);
-                setDamaViewMeta({ ...damaViewMeta, data_source_name: null });
-              }
-              setUseExistingSource(!useExistingSource);
-            }}
-            checked={useExistingSource}
-            disabled={damaPublished}
-          />
-        </label>
-        {existingSrcSelector}
-        {newSrcFormFields}
+        {geomTypeSection}
       </div>
     );
-  }
+  };
 
-  function getViewMetaForm() {
-    if (!(etlContextId && qaApproved && damaSrcName)) {
+  const getTableDescriptorSection = () => {
+    if (!layerName || uploadErrMsq || lyrAnlysErrMsg) {
       return "";
     }
 
-    const omittedViewMetaCols = [
-      "id",
-      "source_id",
-      "last_updated",
-      "metadata",
-      "etl_context_id",
-      "root_etl_context_id",
-      "statistics",
-    ];
+    let publishButtonText = "Publish";
+    let publishButtonBgColor = "#3b82f680";
 
-    const requiredFields = ["data_source_name", "table_schema", "table_name"];
-    const cols = [
-      ...requiredFields,
-      ...damaViewTblCols.filter(
-        (c) => !omittedViewMetaCols.includes(c) && !requiredFields.includes(c)
-      ),
-    ];
-    const allRequiredFieldsPopulated = requiredFields.every((col) =>
-      get(damaViewMeta, col)
+    if (publishStatus === PublishStatus.IN_PROGRESS) {
+      publishButtonText = "Publishing...";
+      publishButtonBgColor = "#e5e7eb";
+    }
+    if (publishStatus === PublishStatus.PUBLISHED) {
+      publishButtonText = "Published";
+      publishButtonBgColor = "#e5e7eb";
+    }
+
+    if (publishStatus === PublishStatus.ERROR) {
+      publishButtonText = "Publish Error";
+      publishButtonBgColor = "red";
+    }
+
+    const fieldsMappingSection = tableDescriptor ? (
+      <div>
+        <table className="w-full">
+          <thead>
+            <tr>
+              <th className="text-center" style={{ paddingRight: "40px" }}>
+                GIS Dataset Field Name
+              </th>
+              <th className="text-center">Database Column Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {get(tableDescriptor, "columnTypes", []).map((row) => (
+              <tr key={row.key} className="border-b">
+                <td className="py-4 text-left">{row.key}</td>
+                <td className="text-right  p-2">
+                  <input
+                    className="w-full p-2 flex-1 shadow bg-grey-50 focus:bg-blue-100 border-gray-300"
+                    disabled={publishStatus !== PublishStatus.AWAITING}
+                    id={row.key}
+                    defaultValue={row.col}
+                    onChange={(e) => (row.col = e.target.value)}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {publishStatus !== PublishStatus.ERROR ? (
+          <span
+            style={{
+              display: "inline-block",
+              marginTop: "20px",
+              textAlign: "center",
+              padding: "10px",
+              fontSize: "25px",
+              border: "2px solid",
+              borderRadius: "25px",
+              backgroundColor: publishButtonBgColor,
+            }}
+            onClick={() => {
+              if (publishStatus === PublishStatus.AWAITING) {
+                simplePublish();
+              }
+            }}
+          >
+            {publishButtonText}
+          </span>
+        ) : (
+          <table
+            className="w-2/3"
+            style={{
+              margin: "40px auto",
+              textAlign: "center",
+              border: "1px solid",
+              borderColor: "back",
+            }}
+          >
+            <thead
+              style={{
+                color: "black",
+                backgroundColor: "red",
+                fontWeight: "bolder",
+                textAlign: "center",
+                marginTop: "40px",
+                fontSize: "20px",
+                border: "1px solid",
+                borderColor: "black",
+              }}
+            >
+              <tr>
+                <th style={{ border: "1px solid", borderColor: "black" }}>
+                  {" "}
+                  Publish Error
+                </th>
+                <th style={{ border: "1px solid", borderColor: "black" }}>
+                  {" "}
+                  ETL Context ID
+                </th>
+              </tr>
+            </thead>
+            <tbody style={{ border: "1px solid" }}>
+              <tr style={{ border: "1px solid" }}>
+                <td
+                  style={{
+                    border: "1px solid",
+                    padding: "10px",
+                    backgroundColor: "white",
+                    color: "darkred",
+                  }}
+                >
+                  {publishErrMsg}
+                </td>
+                <td style={{ border: "1px solid", backgroundColor: "white" }}>
+                  {etlContextId}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        )}
+      </div>
+    ) : (
+      <span
+        style={{
+          display: "inline-block",
+          width: "100%",
+          textAlign: "center",
+          padding: "30px",
+        }}
+      >
+        Please wait... the server is analyzing the {layerName} layer. This may
+        take a while.
+      </span>
     );
 
-    return damaViewMeta && damaViewTblCols ? (
+    return (
       <div>
         <span
           style={{
@@ -655,78 +905,16 @@ const Create = () => {
             paddingTop: "25px",
             paddingBottom: "50px",
             fontSize: "25px",
-            borderTop: "2px solid",
+            borderTop: "4px solid",
           }}
         >
-          DataManager View Metadata
+          Field Names Mappings
         </span>
 
-        <table className="w-full">
-          <thead>
-            <tr>
-              <th className="text-center">Property</th>
-              <th className="text-center">Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cols.map((col) => (
-              <tr key={col} className="border-b">
-                <td className="py-4">{col}</td>
-                <td
-                  className="text-right  p-2"
-                  style={
-                    requiredFields.includes(col) && !get(damaViewMeta, col)
-                      ? { border: "1px solid red" }
-                      : {}
-                  }
-                >
-                  <input
-                    className="w-full p-2 flex-1 shadow bg-grey-50 focus:bg-blue-100"
-                    id={col}
-                    value={get(damaViewMeta, col, "")}
-                    disabled={damaPublished || col === "data_source_name"}
-                    onChange={(e) => {
-                      if (col !== "data_source_name") {
-                        setDamaViewMeta({
-                          ...damaViewMeta,
-                          [col]: e.target.value,
-                        });
-                      }
-                    }}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <span
-          style={{
-            display: "inline-block",
-            marginTop: "20px",
-            textAlign: "center",
-            padding: "10px",
-            fontSize: "25px",
-            border: "2px solid",
-            borderRadius: "25px",
-            backgroundColor:
-              requiredFields.every((col) => get(damaViewMeta, col)) &&
-              !damaPublished
-                ? "#3b82f680"
-                : "#e5e7eb",
-          }}
-          onClick={() => {
-            if (allRequiredFieldsPopulated && !damaPublished) {
-              publishData();
-            }
-          }}
-        >
-          {damaPublished ? "Published" : "Publish"}
-        </span>
+        {fieldsMappingSection}
       </div>
-    ) : (
-      ""
     );
-  }
+  };
 
   return (
     <div className="w-full">
@@ -734,44 +922,20 @@ const Create = () => {
         style={{
           display: "inline-block",
           width: "100%",
-          marginTop: "40px",
+          marginTop: "20px",
           textAlign: "center",
-          paddingTop: "50px",
-          paddingBottom: "100px",
-          fontSize: "30px",
+          paddingTop: "20px",
+          paddingBottom: "20px",
+          fontSize: "25px",
           borderTop: "8px solid",
         }}
       >
-        <span>Postgres Environment:</span>
-        <span style={{ color: "red", paddingLeft: "20px", fontWeight: "bold" }}>
-          {pgEnv}
-        </span>
+        <span>GIS Data Source</span>
       </div>
 
-      <div> Add New Source</div>
-      <div className="w-full border border-dashed border-gray-300 bg-gray-100">
-        <div className="p-4">
-          <button>
-            <input
-              type="file"
-              onChange={(e) => {
-                uploadGisFile(e.target.files[0]);
-              }}
-            />
-          </button>
-        </div>
-      </div>
-      {layersSelector}
-      {tableDescriptor ? (
-        <div>
-          {tableDescriptorSection}
-          {qaSection}
-          {getSrcMetaForm()}
-          {getViewMetaForm()}
-        </div>
-      ) : (
-        ""
-      )}
+      {getLayersSelector()}
+      {getLayerAnalysisSection()}
+      {getTableDescriptorSection()}
 
       <div
         style={{
