@@ -39,48 +39,7 @@ const LayerManager = ({ activeLayers, MapActions, ...rest }) => {
     fetchData();
   }, [falcor, pgEnv]);
 
-	const current_site = 'Freight Atlas'
-	// const current_filter = null
-	let menuItems =  useMemo(() => { 
-	    return Object.values(sources
-	    .filter(d => (get(d,'categories', []) || []).map(d => d[0]).includes(current_site))
-	    .filter(d => { 
-	    	return !layerSearch || d.name.split('/').pop().split('_').join(' ').toLowerCase().includes(layerSearch.toLowerCase()) 
-	    })
-	    .reduce((a,b) => {
-	      b.categories.forEach(cat => {
-	        if(cat[0] === current_site){
-	          if(!a[cat[1]]){
-	            a[cat[1]] = {
-	            	name: cat[1],
-	            	subMenus: []
-	            }
-	          }
-	          a[cat[1]].subMenus.push({
-	          	className: ' ',
-	          	name: (
-	          		<div className={`flex p-2 hover:bg-blue-100 border-r-4 ${b.id === displayLayer ? 'border-blue-600' : 'border-white'}`}>
-	          			<div className='flex-1 pl-6 cursor-pointer text-sm' onClick={() => setDisplayLayer(b.id)}>{b.display_name}</div>
-	          			<div>
-	          				<i 
-	          					onClick={(e) => {
-	          					 	toggleLayer(b.id)
-	          					 	if(activeLayers.map(d => d.layer_id).includes(b.id)){
-	          					 		let removeLayer = activeLayers.filter(d => d.layer_id === b.id)[0]
-	          					 		MapActions.removeLayer(removeLayer)
-	          					 	}
-	          					}}
-	          					className={`${layerList.includes(+b.id) ? 'fa fa-minus' : 'fa fa-plus' } text-xs text-blue-700 cursor-pointer rounded-sm py-1 px-1.5 hover:bg-blue-400 hover:text-white`}/>
-	          			</div>
-	          		</div>
-	          	),
-	          	//onClick: () => {}
-	          })
-	        }
-	      })
-	      return a
-	    },{}))
-	  },[sources,displayLayer,layerSearch,layerList,activeLayers,MapActions,toggleLayer])
+	
 
   const sources = useMemo(() => {
     return Object.values(
@@ -134,7 +93,7 @@ const LayerManager = ({ activeLayers, MapActions, ...rest }) => {
                       className="flex-1 pl-6 cursor-pointer text-sm"
                       onClick={() => setDisplayLayer(b.id)}
                     >
-                      {getName(b)}
+                      {b.display_name}
                     </div>
                     <div>
                       <i

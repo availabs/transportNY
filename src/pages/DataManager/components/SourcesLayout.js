@@ -1,13 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useFalcor, /*SideNav,*/ Dropdown, withAuth } from 'modules/avl-components/src'
-import { Link } from 'react-router-dom'
+import React from 'react';
+import { Dropdown, withAuth } from 'modules/avl-components/src'
 import { useSelector } from "react-redux";
-import { useParams } from 'react-router-dom'
 import { Item } from 'pages/Auth/AuthMenu'
 import { selectPgEnv } from "pages/DataManager/store"
-import {SourceAttributes, ViewAttributes, getAttributes} from './attributes'
 import Breadcrumbs from './Breadcrumbs'
-import get from 'lodash.get'
 
 
 const SourcesLayout = ({children}) => {
