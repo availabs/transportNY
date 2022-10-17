@@ -6,6 +6,7 @@
 
 import React from "react";
 import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 
 import get from "lodash.get";
 import prettyBytes from "pretty-bytes";
@@ -87,6 +88,8 @@ const Create = ({ source }) => {
   const pgEnv = useSelector(selectPgEnv);
   const userId = useSelector(selectUserId);
 
+  const history = useHistory();
+
   const [gisUploadId, setGisUploadId] = React.useState(null);
   const [etlContextId, setEtlContextId] = React.useState(null);
 
@@ -99,6 +102,8 @@ const Create = ({ source }) => {
   const [layerNames, setLayerNames] = React.useState([]);
   const [layerName, setLayerName] = React.useState(null);
 
+  const [newDataSourceMeta, setNewDataSourceMeta] = React.useState(null);
+
   const [tableDescriptor, setTableDescriptor] = React.useState(null);
   const [layerAnalysis, setLayerAnalysis] = React.useState(null);
   const [lyrAnlysErrMsg, setLyrAnlysErrMsg] = React.useState(null);
@@ -109,7 +114,17 @@ const Create = ({ source }) => {
 
   const [publishErrMsg, setPublishErrMsg] = React.useState(null);
 
-  const { name: sourceName, displayName: sourceDisplayName } = source;
+  const { name: sourceName, display_name: sourceDisplayName } = source;
+
+  if (publishStatus === PublishStatus.PUBLISHED) {
+    if (!newDataSourceMeta) {
+      throw new Error("BROKEN INVARIANT. PUBLISHED but no newDataSourceMeta");
+    }
+
+    const { id } = newDataSourceMeta;
+
+    history.push(`/datasources/source/${id}`);
+  }
 
   if (!sourceName) {
     return (
@@ -280,7 +295,6 @@ const Create = ({ source }) => {
         await checkApiResponse(lyrAnlysRes);
         const lyrAnlys = await lyrAnlysRes.json();
 
-        console.log(lyrAnlys);
         setTableDescriptor(tblDsc);
         setLayerAnalysis(lyrAnlys);
       } catch (err) {
@@ -327,6 +341,7 @@ const Create = ({ source }) => {
       body: JSON.stringify({
         name: sourceName,
         display_name: sourceDisplayName,
+        type: "gis_dataset",
       }),
       headers: {
         "Content-Type": "application/json",
@@ -334,6 +349,10 @@ const Create = ({ source }) => {
     });
 
     await checkApiResponse(res);
+
+    const newSrcMeta = await res.json();
+
+    setNewDataSourceMeta(newSrcMeta);
   };
 
   async function submitViewMeta() {
