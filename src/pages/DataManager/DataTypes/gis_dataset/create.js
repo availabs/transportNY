@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 import get from "lodash.get";
+
 import prettyBytes from "pretty-bytes";
 
 import { selectPgEnv, selectUserId } from "pages/DataManager/store";
@@ -362,18 +363,22 @@ const Create = ({ source }) => {
 
     const viewMetadata = {
       data_source_name: sourceName,
-      table_schema: "gis_datasets",
-      table_name: `${sourceName}_v1`,
       version: 1,
     };
 
-    await fetch(url, {
+    const res = await fetch(url, {
       method: "POST",
       body: JSON.stringify(viewMetadata),
       headers: {
         "Content-Type": "application/json",
       },
     });
+
+    await checkApiResponse(res);
+
+    const viewMetaRes = await res.json();
+
+    console.log(viewMetaRes);
   }
 
   async function publishGisDatasetLayer() {
@@ -405,7 +410,7 @@ const Create = ({ source }) => {
       setPublishStatus(PublishStatus.PUBLISHED);
     } catch (err) {
       setPublishStatus(PublishStatus.ERROR);
-      console.log("==>", err.message);
+      console.log("==>", err);
       setPublishErrMsg(err.message);
     }
   }
@@ -935,8 +940,9 @@ const Create = ({ source }) => {
     );
   };
 
+  // https://beta.reactjs.org/learn/managing-state#preserving-and-resetting-state
   return (
-    <div className="w-full">
+    <div key={etlContextId || "fresh-upload"} className="w-full">
       <div
         style={{
           display: "inline-block",
