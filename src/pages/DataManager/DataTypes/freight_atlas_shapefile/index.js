@@ -12,6 +12,8 @@ import config from "config.json"
     
 const Map = ({layers}) => {
     
+    console.log('layers', layers)
+    
     const mapOptions =  {
         zoom: 6.2,
         center: [
@@ -32,7 +34,7 @@ const Map = ({layers}) => {
  
     const map_layers = useMemo(() => {
       return layers.map(l => FreightAtlasLayer(l))
-    },[layers])
+    },[])
     
     return (
         
@@ -73,7 +75,7 @@ const Edit = ({startValue, attr, viewId, parentData, cancel=()=>{}}) => {
         let val = parentData
         val.tiles[attr] = update
         // console.log('testing',JSON.stringify(val), val)
-        let response = await falcor.set({
+        await falcor.set({
             paths: [
               ['datamanager','views','byId',viewId,'attributes', 'metadata' ]
             ],
@@ -118,21 +120,33 @@ const Edit = ({startValue, attr, viewId, parentData, cancel=()=>{}}) => {
 
 
 
-const MapPage = () => {
+const MapPage = ({source,views, user}) => {
   // const { sourceId } = useParams()
-  const [ activeView /*, setActiveView*/ ] = useState(null)
-  const [ mapData /*, setMapData*/ ] = useState({})
+  console.log('user auth', user)
+  const [ activeView /*, setActiveView*/ ] = useState(0)
+  const [ mapData /*, setMapData*/ ] = useState(get(views,'[0].metadata.tiles',{}))
   const [ editing, setEditing ] = React.useState(null)
+  const layer = React.useMemo(() => {
+      return {
+            name: source.name,
+            source: source,
+            views: views,
+            activeView: activeView,
+            sources: get(mapData,'sources',[]), 
+            layers: get(mapData,'layers',[])
+      }
+  },[source, views, mapData, activeView])
 
- 
+  // console.log('testing', mapData, activeView)
 
   return (
     <div> 
       Map View {/*{get(activeView,'id','')}*/}
 
       <div className='w-ful h-[700px]'>
-        <Map layers={[{name: "Test123", sources: get(mapData,'sources',[]), layers: get(mapData,'layers',[])}]}/>
+        <Map layers={[layer]}/>
       </div>
+      {user.authLevel >= 5 ? 
       <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
         <dl className="sm:divide-y sm:divide-gray-200">
           {['sources','layers']
@@ -148,8 +162,8 @@ const MapPage = () => {
                           <Edit 
                             startValue={val} 
                             attr={attr}
-                            viewId={get(activeView,'id',null)}
-                            parentData={get(activeView,'metadata',{})}
+                            viewId={get(views,`[${activeView}].id`,null)}
+                            parentData={get(views,`[${activeView}].metadata`,{})}
                             cancel={() => setEditing(null)}
                           />
                         </div> :  
@@ -170,7 +184,7 @@ const MapPage = () => {
             })
           }
         </dl>
-      </div>
+      </div> : ''}
     </div>
   ) 
 }

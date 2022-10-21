@@ -1,7 +1,7 @@
 import get from "lodash.get";
 
 export const getTMCs = (rawDelayData,year,month,region,f_systems,prevYearMonth) => {
-	let total = f_systems.reduce((out,fclass) => {
+  let total = f_systems.reduce((out,fclass) => {
       get(rawDelayData,`[${year}][${+month}][${region}][${fclass}].delay.value`,[])
         .forEach(tmc => {
           if(!out[tmc.tmc]){
@@ -98,7 +98,7 @@ export const getCorridors = (tmcMetaData,year,tmcs) => {
 }
 
 export const calcCost = (delay, { aadt, aadt_combi, aadt_singl }) => {
-	if (!delay || !aadt) return 0;
-	return (aadt - aadt_combi - aadt_singl) / aadt * delay * 1.66 * 17 +
-					(aadt_combi + aadt_singl) / aadt * delay * 33
+  if (!delay || !aadt) return 0;
+  return (aadt - aadt_combi - aadt_singl) / aadt * delay * 1.66 * 17 +
+          (aadt_combi + aadt_singl) / aadt * delay * 33
 }

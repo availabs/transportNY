@@ -3,29 +3,20 @@ import React from "react"
 import { useHistory, useParams, Link } from "react-router-dom"
 
 import get from "lodash.get"
-import { groups as d3groups, extent as d3extent, range as d3range } from "d3-array"
-import { scaleQuantile, scaleQuantize, scaleThreshold } from "d3-scale"
+import { groups as d3groups, range as d3range } from "d3-array"
+import { scaleQuantile, scaleThreshold } from "d3-scale"
 
 import { useComponentDidMount } from "sites/tsmo/pages/Dashboards/components/utils"
 
 import {
   useFalcor,
-  useTheme,
   getColorRange,
   ScalableLoading,
   Select
 } from "modules/avl-components/src"
 
-import { GridGraph } from "modules/avl-graph/src"
-
 import GridComp from "./components/GridComponent"
 
-const isLeapYear = year => {
-  return (year % 400 === 0) || ((year % 100 !== 0) && (year % 4 === 0));
-}
-const daysInYear = year => {
-  return isLeapYear(year) ? 366 : 365;
-}
 const DirectionMap = {
   N: "North",
   S: "South",
@@ -73,7 +64,7 @@ const MonthGrid = () => {
 
   const [geo, setGeo] = React.useState("COUNTY|36001");
   const geoid = React.useMemo(() => {
-    const [level, id] = geo.split("|");
+    const [/*level*/, id] = geo.split("|");
     return id || "unknown";
   }, [geo]);
 
@@ -86,24 +77,24 @@ const MonthGrid = () => {
   const history = useHistory();
 
   const setUrlFromTmclinearKey = React.useCallback(tmclinearKey => {
-    const [level, geoid] = selectedGeo.split("|");
+    const [/*level*/, geoid] = selectedGeo.split("|");
     history.push(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
   }, [history, date, selectedGeo]);
 
   const setUrlFromMonth = React.useCallback(month => {
-    const [level, geoid] = selectedGeo.split("|");
+    const [/*level*/, geoid] = selectedGeo.split("|");
     const date = `${ year }-${ `0${ month }`.slice(-2) }`;
     history.push(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
-
   }, [history, year, tmclinearKey, selectedGeo]);
+  
   const setUrlFromYear = React.useCallback(year => {
-    const [level, geoid] = selectedGeo.split("|");
+    const [/*level*/, geoid] = selectedGeo.split("|");
     const date = `${ year }-${ `0${ month }`.slice(-2) }`;
     history.push(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
   }, [history, month, tmclinearKey, selectedGeo]);
 
   const setUrlFromDate = React.useCallback(date => {
-    const [level, geoid] = selectedGeo.split("|");
+    const [/*level*/, geoid] = selectedGeo.split("|");
     history.push(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
   }, [history, tmclinearKey, selectedGeo])
 
@@ -142,9 +133,7 @@ const MonthGrid = () => {
   const { falcor, falcorCache } = useFalcor();
 
   React.useEffect(() => {
-    loadingStart();
     falcor.get(["geo", "36", "geoLevels"])
-      .then(() => loadingStop());
   }, [falcor]);
 
   const counties = React.useMemo(() => {
@@ -156,20 +145,16 @@ const MonthGrid = () => {
 
   React.useEffect(() => {
     if (!counties.length) return;
-    loadingStart();
     falcor.get(["geo", counties.map(c => c.geoid), "name"])
-      .then(() => loadingStop());
   }, [falcor, counties]);
 
-  const name = React.useMemo(() => {
+  /*const name = React.useMemo(() => {
     return get(falcorCache, ["geo", geoid, "name"], "Uknown Geography");
-  }, [falcorCache, geoid]);
+  }, [falcorCache, geoid]);*/
 
   React.useEffect(() => {
     if (!counties.length) return;
-    loadingStart();
     falcor.get(["geo", counties.map(c => c.geo), year, "tmclinear"])
-      .then(() => loadingStop());
   }, [falcor, counties, year]);
 
   const tmclinearsByCounties = React.useMemo(() => {
@@ -186,17 +171,15 @@ const MonthGrid = () => {
   }, [falcorCache, counties, year]);
 
   React.useEffect(() => {
-    loadingStart();
     falcor.get(
         ["tmc", "tmclinear", year, geo, tmclinear, direction],
         ["tmclinear", "meta", year, geo, tmclinear, direction, 'roadname']
       )
-      .then(() => loadingStop());
   }, [falcor, year, geo, tmclinear, direction, loadingStart, loadingStop]);
 
-  const roadname = React.useMemo(() => {
+  /*const roadname = React.useMemo(() => {
     return get(falcorCache, ["tmclinear", "meta", year, geo, tmclinear, direction, "roadname"], "");
-  }, [falcorCache, year, geo, tmclinear, direction]);
+  }, [falcorCache, year, geo, tmclinear, direction]);*/
 
   React.useEffect(() => {
     const tmcs = get(falcorCache, ["tmc", "tmclinear", year, geo, tmclinear, direction, "value"], []);
@@ -207,19 +190,15 @@ const MonthGrid = () => {
 
   React.useEffect(() => {
     if (TMCs.length) {
-      loadingStart();
       falcor.get(["tmc", TMCs, dataType, dateType, date, "by", resolution])
-        .then(() => loadingStop());
     }
   }, [falcor, date, dateType, dataType, resolution, TMCs]);
 
   React.useEffect(() => {
     if (TMCs.length) {
-      loadingStart();
       falcor.get(
         ["tmc", TMCs, "meta", year, ["length", "avg_speedlimit", "firstname"]]
       )
-      .then(() => loadingStop());
     }
   }, [falcor, year, dataType, TMCs]);
 
@@ -324,7 +303,7 @@ const MonthGrid = () => {
       e.stopPropagation();
       setUrlFromDate(index.slice(0, 10));
     };
-  }, [history, dateType, setUrlFromDate]);
+  }, [ dateType, setUrlFromDate]);
 
   return (
     <div style={ { width: "calc(100vw - 3.5rem)"}}>

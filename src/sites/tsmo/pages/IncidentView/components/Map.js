@@ -1,8 +1,5 @@
 import React from "react";
-
-import mapboxgl from "mapbox-gl";
 import get from "lodash.get";
-
 import { AvlMap } from "modules/avl-map/src";
 import config from "config.json"
 
@@ -28,7 +25,7 @@ const Map = ({ event_id, activeBranch }) => {
         "geom"
       ]
     ])
-  }, [event_id]);
+  }, [event_id,falcor]);
 
   const congestionData = React.useMemo(() => {
     return get(
@@ -82,7 +79,7 @@ const Map = ({ event_id, activeBranch }) => {
       [layers.current[0].id]: { tmcs, year, point, congestionData, showRaw, activeBranch },
       [layers.current[1].id]: { point },
     };
-  }, [tmcs, year, point, congestionData, activeBranch]);
+  }, [tmcs, year, point, congestionData, activeBranch, showRaw]);
 
   return congestionData ? 
     <div className='bg-white p-2' style={{ minHeight: "50rem" }} >

@@ -87,7 +87,7 @@ const LayerControl = ({ layer, setActiveLayer, activeLayer, MapActions }) => {
   const { /*layerList,*/ toggleLayer } = useContext(LayerContext);
   const {
     extendSidebar,
-    passCompProps,
+    /*passCompProps,*/
     closeExtension,
     sidebarRef,
     open,
@@ -97,7 +97,7 @@ const LayerControl = ({ layer, setActiveLayer, activeLayer, MapActions }) => {
     if(open === 1 && activeLayer === layer.layer_id) {
       setActiveLayer(null)
     }
-  }, [open])
+  }, [open, activeLayer, layer.layer_id, setActiveLayer])
 
   const onClick = React.useCallback(
     (e) => {
@@ -121,7 +121,8 @@ const LayerControl = ({ layer, setActiveLayer, activeLayer, MapActions }) => {
       extendSidebar,
       closeExtension,
       activeLayer,
-      layer
+      layer,
+      setActiveLayer
     ]
   );
 
@@ -164,7 +165,7 @@ const LayerListTab = ({activeLayers,MapActions,...rest},) => {
         //     .filter(({data}) => data.sectionLanding)
         //     .sort((a, b) => a.data.index - b.data.index);
 
-        // const [item] = sections.splice(start, 1);
+        // const [item] = sectionsab.splice(start, 1);
         // sections.splice(end, 0, item);
 
         // sections.forEach((item, i) => {
@@ -173,6 +174,7 @@ const LayerListTab = ({activeLayers,MapActions,...rest},) => {
         // })
     }, [/*activeLayers*/])
 
+    
     return (
         <div>
            <div className='p-4 border-b border-gray-200'>
@@ -183,7 +185,9 @@ const LayerListTab = ({activeLayers,MapActions,...rest},) => {
             </div>
             <div className=''>
               <DndList onDrop={droppedSection}>
-                { activeLayers.map(layer =>
+                { activeLayers
+                  .filter(l => l.layerControl !== 'none')
+                  .map(layer =>
                     <LayerControl
                         key={ layer.id }
                         setActiveLayer={setActiveLayer}

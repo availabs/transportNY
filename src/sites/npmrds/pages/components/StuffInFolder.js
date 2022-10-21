@@ -1,7 +1,5 @@
 import React from "react"
-
 import get from "lodash.get"
-import { useHistory, useParams, Link } from "react-router-dom"
 
 import Fuse from "fuse.js"
 

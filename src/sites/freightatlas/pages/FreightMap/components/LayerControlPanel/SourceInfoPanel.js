@@ -12,7 +12,7 @@ import { selectPgEnv } from "pages/DataManager/store"
 const Overview = ({source, views}) => {
   return (
     <div className="overflow-hidden">
-      <div className='flex'>
+      <div className='flex flex-col'>
         <div className="flex-1">
           <div>
           {(get(source,'categories',[]) || []).map(cat => cat.map(s => <span className='text-xs p-1 px-2 bg-blue-200 text-blue-600 mr-2'>{s}</span>))}
@@ -38,8 +38,8 @@ const Overview = ({source, views}) => {
               </div>
             {Object.keys(SourceAttributes)
               .filter(d => !['id','metadata','description','name','category', 'categories'].includes(d))
-              .map(attr => (
-              <div className="py-4 sm:py-5  sm:px-6">
+              .map((attr,i) => (
+              <div className={`py-4 sm:py-5 sm:px-6`}>
                 <div className="text-sm font-medium text-gray-500">{attr}</div>
                 <div className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                   {typeof source[attr] === 'object'}
@@ -79,8 +79,8 @@ const Metadata = ({source}) => {
         <dl className="sm:divide-y sm:divide-gray-200">
          
           {get(source,'metadata',[])
-            .map(col => (
-            <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            .map((col,i) => (
+            <div key={i} className={`py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 ${i % 2 === 1 ? 'bg-gray-100' : ''}`}>
               <dt className="text-sm text-gray-900">
                 {col.name}
               </dt>
@@ -136,9 +136,6 @@ const Source = ({sourceId}) => {
 
   return (
     <div className='max-w-6xl mx-auto px-2'>
-      <div className='text-xl font-medium overflow-hidden '>
-        <div>{source.name} <i className='fa fa-plus text-base text-blue-700 cursor-pointer rounded-sm py-0.5 px-2 hover:bg-blue-400 hover:text-white'/></div>
-      </div>
       <div className='w-full bg-white'>
         <Overview source={source} views={views} />
       </div>
@@ -149,4 +146,21 @@ const Source = ({sourceId}) => {
   )
 }
 
-export default Source
+
+
+const SourceInfoPanel = (props) => {
+  console.log('LayerStylePane', props)
+  const sourceId = React.useMemo(() => 
+  	get(props.layer, 'layer_id', -1),
+  	[props.layer]
+  )
+
+  
+  return (
+    <div className='border-t border-gray-300 h-full bg-gray-100 w-full'> 
+      {sourceId === -1 ? <span /> : <Source sourceId={sourceId} />}
+    </div>
+  )
+}
+
+export { SourceInfoPanel }

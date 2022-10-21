@@ -1,17 +1,21 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useFalcor,TopNav, Input /*withAuth, Input, Button*/ } from 'modules/avl-components/src'
+import React, { useMemo, useState } from 'react';
+import { useSelector } from "react-redux";
+
+import { /*useFalcor,*//*TopNav,*/ Input /*withAuth, Input, Button*/ } from 'modules/avl-components/src'
+
 import get from 'lodash.get'
-import { useParams } from 'react-router-dom'
+// import { useParams } from 'react-router-dom'
 import { DataTypes } from '../DataTypes'
 
 import SourcesLayout, {DataManagerHeader}  from '../components/SourcesLayout'
 
-import {SourceAttributes, ViewAttributes, getAttributes} from 'pages/DataManager/components/attributes'
+import {SourceAttributes, /*ViewAttributes, getAttributes*/} from 'pages/DataManager/components/attributes'
     
-
+import { selectIsPwrUsr } from "pages/DataManager/store";
 
 const Source = () => {
-  const {falcor, falcorCache} = useFalcor()
+// prettier canary
+  //const {falcor, falcorCache} = useFalcor()
   const [ source, setSource ] = useState( 
     Object.keys(SourceAttributes)
       .filter(d => !['id', 'metadata','statistics'].includes(d))
@@ -21,8 +25,24 @@ const Source = () => {
       }, {})
   )
 
-  const CreateComp = useMemo(() => get(DataTypes, `[${source.type}].sourceCreate.component`, () => <div />)
-    ,[source.type]) 
+  const isPwrUsr = useSelector(selectIsPwrUsr);
+
+  const dataTypes = isPwrUsr
+    ? DataTypes
+    : Object.keys(DataTypes).reduce((acc, dType) => {
+        const component = DataTypes[dType];
+        if (component.pwrUsrOnly) {
+          return acc;
+        }
+
+        acc[dType] = component;
+
+        return acc;
+      }, {});
+
+
+  const CreateComp = useMemo(() => get(dataTypes, `[${source.type}].sourceCreate.component`, () => <div />)
+    ,[dataTypes, source.type])
   
   // console.log('new source', CreateComp)
   
@@ -42,7 +62,7 @@ const Source = () => {
           {Object.keys(SourceAttributes)
             .filter(d => !['id','metadata','description', 'type','statistics', 'category', 'update_interval', 'categories'].includes(d))
             .map((attr,i) => {
-              let val = typeof source[attr] === 'object' ? JSON.stringify(source[attr]) : source[attr]
+              // let val = typeof source[attr] === 'object' ? JSON.stringify(source[attr]) : source[attr]
               return (
                 <div key={i} className='flex justify-between group'>
                   <div  className="flex-1 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -82,8 +102,8 @@ const Source = () => {
                         setSource({ ...source, type: e.target.value,})
                       }}>
                         <option value="" disabled >Select your option</option>
-                        {Object.keys(DataTypes)
-                          .filter(k => DataTypes[k].sourceCreate)
+                        {Object.keys(dataTypes)
+                          .filter(k => dataTypes[k].sourceCreate)
                           .map(k => <option key={k} value={k} className='p-2'>{k}</option>)
                         }
                     </select>
@@ -94,7 +114,7 @@ const Source = () => {
             </div>
           </div>
         </dl>
-        <CreateComp />
+        <CreateComp source={source} />
       </div>
    
   </SourcesLayout>
