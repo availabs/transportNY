@@ -1,10 +1,10 @@
 import Home from "sites/npmrds/pages/Home"
 
-import MyStuff from "./pages/MyStuff"
+import Folders from "./pages/Folders"
 
 const Routes = [
   Home,
-  ...MyStuff
+  ...Folders
 ]
 
 const site =  {

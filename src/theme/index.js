@@ -10,9 +10,9 @@ const ppdaf = () => {
     graphColors: [ '#1e40af','#93c5fd','#1d4ed8','#bfdbfe',],
     graphCategorical:  ['#fde72f','#95d840','#55a488','#2f708e','#453781','#472354'],
     // ['#e5496d', '#fad264', '#76d9a2'],
-    // ['#e96835','#f5dc50','#a63b6e','#e54249','#49969b'], 
+    // ['#e96835','#f5dc50','#a63b6e','#e54249','#49969b'],
     // ['#1e4b5a','#e75148','#0f1e37','#8c786e',],
-    // ['#fde72f','#95d840','#55a488','#2f708e','#453781','#472354'], 
+    // ['#fde72f','#95d840','#55a488','#2f708e','#453781','#472354'],
     //  ['#5fc0c8','#5559d3','#ed8534','#7e84fa','#7fe06a']
 
     sidenav: (opts={}) =>  {
@@ -148,7 +148,7 @@ const ppdaf = () => {
             mobile
           }
         }
-        
+
     },
 
 
@@ -276,7 +276,7 @@ const ppdaf = () => {
 
     tabpanel: (opts = {}) => {
             const { tabLocation = 'top' } = opts
-            
+
              let tabLocations = {
                 top:  {
                         tabpanelWrapper: 'flex-col',
@@ -324,13 +324,13 @@ const ppdaf = () => {
                     disabled:cursor-not-allowed
                 `,
                 primary: `
-                    border border-transparent shadow 
-                    text-sm leading-4 rounded-sm text-white bg-blue-600 hover:bg-blue-700 
+                    border border-transparent shadow
+                    text-sm leading-4 rounded-sm text-white bg-blue-600 hover:bg-blue-700
                     focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`,
                 danger: ''
             }
 
-            let sizes  = { 
+            let sizes  = {
                 base: 'px-4 py-4 leading-5 font-medium',
                 sm: 'text-sm px-2 py-2 leading-5 font-medium',
                 lg: 'text-lg px-6 py-6 leading-5 font-medium',
@@ -351,7 +351,7 @@ const ppdaf = () => {
                     size: sizes,
                     width: widths
                 }
-            } 
+            }
         },
         input: (opts = {}) => {
             const {color = 'white', size = 'small', width = 'block'} = opts
@@ -396,9 +396,9 @@ const ppdaf = () => {
                 xlarge: 'sm:max-w-8xl'
 
             }
-            
+
             return {
-                modalContainer: `${overlay === 'default' ? '' : 'pointer-events-none'} fixed bottom-0 inset-x-0 px-4 pb-4 inset-0 flex items-center justify-center`,
+                modalContainer: `${overlay === 'default' ? '' : 'pointer-events-none'} fixed bottom-0 inset-x-0 px-4 pb-4 inset-0 flex items-center justify-center z-50`,
                 modalOverlay: overlays[overlay],
                 modal: `${sizes[size]} w-full  pointer-events-auto bg-white rounded-lg overflow-hidden shadow-xl transform transition-all`,
                 vars: {
@@ -492,7 +492,7 @@ const ppdaf = () => {
     width: "",
 
     transition: "transition ease-in-out duration-150",
-    
+
     tableRow: "bg-gray-100 hover:bg-gray-200 transition ease-in-out duration-150",
     tableRowStriped:
       "bg-gray-100 even:bg-gray-200 hover:bg-gray-300 transition ease-in-out duration-150",

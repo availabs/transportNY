@@ -8,10 +8,10 @@ const Home = () => (
       Welcome to NPMRDS
     </div>
     <div className="flex flex-col text-lg">
-      <Link to="/mystuff">My Stuff</Link>
-      <Link to="/mystuff/routes">My Routes</Link>
-      <Link to="/mystuff/reports">My Reports</Link>
-      <Link to="/mystuff/templates">My Templates</Link>
+      <Link to="/folders">My Stuff</Link>
+      <Link to="/folders/routes">My Routes</Link>
+      <Link to="/folders/reports">My Reports</Link>
+      <Link to="/folders/templates">My Templates</Link>
     </div>
   </div>
 )
