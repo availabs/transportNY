@@ -13,26 +13,27 @@ import _ from "lodash";
 import EtlContext, {
   useEtlContextDependencies,
   EtlContextReact,
-} from "./utils/EtlContext";
+} from "../../utils/EtlContext";
 import { selectPgEnv, selectUserId } from "pages/DataManager/store";
 
 import {
   checkApiResponse,
   getNewEtlContextId,
   getDamaApiRoutePrefix,
-} from "./utils/api";
+} from "../../utils/api";
 
-import PublishStatus from "./constants/PublishStatus";
+import PublishStatus from "../../constants/PublishStatus";
+
 import reducer, { initialState, actions, selectors } from "./store";
 
-import UploadGisDataset from "./tasks/uploadGisDataset";
-import { selectors as uploadGisDatasetSelectors } from "./tasks/uploadGisDataset/store";
+import UploadGisDataset from "../uploadGisDataset";
+import { selectors as uploadGisDatasetSelectors } from "../uploadGisDataset/store";
 
-import SelectGisDatasetLayer from "./tasks/selectGisDatasetLayer";
-import { selectors as selectGisDatasetLayerSelectors } from "./tasks/selectGisDatasetLayer/store";
+import SelectGisDatasetLayer from "../selectGisDatasetLayer";
+import { selectors as selectGisDatasetLayerSelectors } from "../selectGisDatasetLayer/store";
 
-import UpdateGisDatasetLayerDatabaseSchema from "./tasks/updateGisDatasetLayerDatabaseSchema";
-import { selectors as updateGisDatasetLayerDatabaseSchemaSelectors } from "./tasks/updateGisDatasetLayerDatabaseSchema/store";
+import UpdateGisDatasetLayerDatabaseSchema from "../updateGisDatasetLayerDatabaseSchema";
+import { selectors as updateGisDatasetLayerDatabaseSchemaSelectors } from "../updateGisDatasetLayerDatabaseSchema/store";
 
 const workflow = [
   UploadGisDataset,

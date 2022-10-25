@@ -1,8 +1,8 @@
 // https://github.com/alexnm/re-ducks#reducers
 
-import PublishStatus from "../constants/PublishStatus";
+import PublishStatus from "../../../constants/PublishStatus";
 
-import * as uploadGisDatasetSelectors from "../tasks/uploadGisDataset/store/selectors";
+import * as uploadGisDatasetSelectors from "../../uploadGisDataset/store/selectors";
 
 export const initialState = {
   etlContextId: null,

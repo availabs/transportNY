@@ -1,4 +1,4 @@
-import createSimpleSelector from "../utils/createSimpleSelector";
+import createSimpleSelector from "../../../utils/createSimpleSelector";
 
 export const selectEtlContextId = createSimpleSelector("etlContextId");
 

@@ -1,10 +1,16 @@
-import { useEtlContextDependencies } from "../../../utils/EtlContext";
+import { useContext } from "react";
+import {
+  useEtlContextDependencies,
+  EtlContextReact,
+} from "../../../utils/EtlContext";
 
 import { operations } from "../store";
 
 const { selectLayer } = operations;
 
-export const LayerSelector = ({ ctx }) => {
+export const LayerSelector = () => {
+  const ctx = useContext(EtlContextReact);
+
   const { layerNames, layerName } = useEtlContextDependencies(ctx, [
     "layerNames",
     "layerName",
@@ -88,7 +94,9 @@ export const LayerSelector = ({ ctx }) => {
   );
 };
 
-export const LayerAnalysisSection = ({ ctx }) => {
+export const LayerAnalysisSection = () => {
+  const ctx = useContext(EtlContextReact);
+
   const { etlContextId, layerName, lyrAnlysErrMsg, layerAnalysis } =
     useEtlContextDependencies(ctx, [
       "etlContextId",

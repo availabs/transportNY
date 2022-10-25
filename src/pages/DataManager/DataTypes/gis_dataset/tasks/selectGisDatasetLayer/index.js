@@ -61,9 +61,9 @@ export default function SelectGisDatasetLayer() {
   }
 
   return (
-    <div>
-      <LayerSelector ctx={ctx} />
-      <LayerAnalysisSection ctx={ctx} />
-    </div>
+    <EtlContextReact.Provider value={ctx}>
+      <LayerSelector />
+      <LayerAnalysisSection />
+    </EtlContextReact.Provider>
   );
 }

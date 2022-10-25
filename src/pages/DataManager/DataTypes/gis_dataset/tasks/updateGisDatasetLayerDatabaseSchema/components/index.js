@@ -1,10 +1,16 @@
+import { useContext } from "react";
+
 import { debounce } from "lodash";
 
 import PublishStatus from "../../../constants/PublishStatus";
 
-import { useEtlContextDependencies } from "../../../utils/EtlContext";
+import {
+  useEtlContextDependencies,
+  EtlContextReact,
+} from "../../../utils/EtlContext";
 
-export const GisDatasetLayerDatabaseDbSchemaForm = ({ ctx }) => {
+export const GisDatasetLayerDatabaseDbSchemaForm = () => {
+  const ctx = useContext(EtlContextReact);
   const {
     dispatch,
     actions: { updateGisDatasetLayerDatabaseColumnName },

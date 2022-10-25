@@ -14,6 +14,8 @@ import {
 
 const { uploadGisDataset } = operations;
 
+export const taskName = "uploadGisDataset";
+
 export default function UploadGisDataset() {
   const pCtx = useContext(EtlContextReact);
 
@@ -26,7 +28,7 @@ export default function UploadGisDataset() {
 
   const { current: ctx } = useRef(
     new EtlContext({
-      name: "UploadGisDataset",
+      name: taskName,
       actions,
       selectors,
       dispatch,
@@ -38,7 +40,7 @@ export default function UploadGisDataset() {
 
   useEffect(() => {
     pCtx.dispatch({
-      type: "uploadGisDataset:STATE_UPDATE",
+      type: `${taskName}:STATE_UPDATE`,
       payload: state,
     });
   }, [pCtx, state]);

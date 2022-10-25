@@ -1,6 +1,6 @@
-import PublishStatus from "../constants/PublishStatus";
+import PublishStatus from "../../../constants/PublishStatus";
 
-import createSimpleIdentityAction from "../utils/createSimpleIdentityAction";
+import createSimpleIdentityAction from "../../../utils/createSimpleIdentityAction";
 
 export const resetState = createSimpleIdentityAction("RESET_STATE");
 
@@ -10,10 +10,6 @@ export const updateEtlContextId = createSimpleIdentityAction(
 
 export const updateMaxSeenEventId = createSimpleIdentityAction(
   "maxSeenEventId/UPDATE"
-);
-
-export const updateTableDescriptor = createSimpleIdentityAction(
-  "tableDescriptor/UPDATE"
 );
 
 export const setPublishStatusToInProgress = createSimpleIdentityAction(

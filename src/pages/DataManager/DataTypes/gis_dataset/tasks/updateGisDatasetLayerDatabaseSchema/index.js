@@ -70,8 +70,8 @@ export default function UpdateGisDatasetLayerDatabaseDbSchema() {
   }
 
   return (
-    <div>
-      <GisDatasetLayerDatabaseDbSchemaForm ctx={ctx} />
-    </div>
+    <EtlContextReact.Provider value={ctx}>
+      <GisDatasetLayerDatabaseDbSchemaForm />
+    </EtlContextReact.Provider>
   );
 }
