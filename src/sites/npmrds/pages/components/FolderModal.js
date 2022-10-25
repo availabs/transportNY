@@ -77,6 +77,10 @@ const checkCanEdit = (folder, state) => {
 
 const FolderModal = ({ openedFolders = [], isOpen = false, close, folder, user }) => {
 
+  const stopPropagation = React.useCallback(e => {
+    e.stopPropagation();
+  }, []);
+
   const parent = React.useMemo(() => {
     return get(openedFolders, [openedFolders.length - 1], {})
   }, [openedFolders]);
@@ -96,13 +100,16 @@ const FolderModal = ({ openedFolders = [], isOpen = false, close, folder, user }
     })
   }, [user]);
 
+  const prev = React.useRef(isOpen);
+
   React.useEffect(() => {
-    if (isOpen && parent.id) {
+    if (isOpen && (isOpen !== prev.current)) {
       dispatch({
         actionType: "reset",
         state: Init({ folder, user, parent })
       })
     }
+    prev.current = isOpen;
   }, [folder, user, parent, isOpen])
 
   const canCreate = checkCanCreate(state);
@@ -122,7 +129,9 @@ const FolderModal = ({ openedFolders = [], isOpen = false, close, folder, user }
 
   return (
     <Modal open={ isOpen }>
-      <div className="bg-gray-100 overflow-auto h-fit">
+      <div className="bg-gray-100 overflow-auto h-fit"
+        onClick={ stopPropagation }
+      >
         <div onClick={ close }
           className={ `
             absolute top-1 right-1 h-6 w-6

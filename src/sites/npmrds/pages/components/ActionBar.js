@@ -179,22 +179,40 @@ const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
   const [folders, setFolders] = React.useState([]);
 
   React.useEffect(() => {
-    falcor.get(["folders2", "user", "length"])
+    falcor.get(
+        ["folders2", "user", "length"],
+        ["folders2", "stuff", parent]
+      )
       .then(res => {
-        const length = get(res, ["json", "folders2", "user", "length"], 0)
+        const requests = [];
+
+        const length = get(res, ["json", "folders2", "user", "length"], 0);
         if (length) {
-          return falcor.get([
+          requests.push([
             "folders2", "user", "index", d3range(length),
             ["name", "icon", "color", "id", "updated_at", "created_at", "type", "owner", "editable"]
           ])
         }
+        const folders = get(res, ["json", "folders2", "stuff", parent], [])
+          .filter(s => s.stuff_type === "folder")
+          .map(s => s.stuff_id);
+        if (folders.length) {
+          requests.push([
+            "folders2", "id", folders,
+            ["name", "icon", "color", "id", "updated_at", "created_at", "type", "owner", "editable"]
+          ])
+        }
+        if (requests.length) {
+          return falcor.get(...requests);
+        }
       })
-  }, [falcor]);
+  }, [falcor, parent]);
 
   React.useEffect(() => {
     const length = get(falcorCache, ["folders2", "user", "length"], 0);
     const refs = d3range(length).map(i => get(falcorCache, ["folders2", "user", "index", i, "value"]));
-    const folders = refs.map(ref => get(falcorCache, ref, null)).filter(Boolean);
+    const folders = refs.map(ref => get(falcorCache, ref, null))
+      .filter(Boolean).filter(f => f.id != parent);
 
     folders.sort((a, b) => {
       if (a.type === b.type) {
@@ -205,8 +223,22 @@ const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
       return (a.type === "user") ? -1 : 1;
     });
 
-    setFolders(folders.filter(f => f.id != parent));
-  }, [falcorCache, parent]);
+    const selectedFolders = selectedStuff
+      .filter(({ type }) => type === "folder")
+      .reduce((a, c) => {
+        a.add(c.id);
+        return a;
+      }, new Set());
+
+    const subFolders = get(falcorCache, ["folders2", "stuff", parent, "value"], [])
+      .filter(s => s.stuff_type === "folder")
+      .map(f => {
+        return get(falcorCache, ["folders2", "id", f.stuff_id], null)
+      }).filter(Boolean)
+      .filter(f => !selectedFolders.has(f.id));
+
+    setFolders([...folders, ...subFolders]);
+  }, [falcorCache, parent, selectedStuff]);
 
   const [stuffActions, confirm] = useStuffActions(selectedStuff, parent)
 

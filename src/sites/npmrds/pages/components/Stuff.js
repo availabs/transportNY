@@ -12,6 +12,7 @@ import {
 import ConfirmModal from "./ConfirmModal"
 import Dropdown from "./MultiLevelDropdown"
 import FolderIcon from "./FolderIcon"
+import FolderModal from "./FolderModal"
 
 const Folder = ({ id, openedFolders, setOpenedFolders, forFolder, ...props }) => {
   const { falcor, falcorCache } = useFalcor();
@@ -36,22 +37,33 @@ const Folder = ({ id, openedFolders, setOpenedFolders, forFolder, ...props }) =>
     setOpenedFolders([...openedFolders.map(f => f.id), folder.id]);
   }, [openedFolders, setOpenedFolders, folder]);
 
-  const edit = React.useCallback(() => {
-
+  const [open, setOpen] = React.useState(false);
+  const openModal = React.useCallback(e => {
+    e.stopPropagation();
+    setOpen(true);
+  }, []);
+  const closeModal = React.useCallback(e => {
+    e.stopPropagation();
+    setOpen(false);
   }, []);
 
-  // const folderItems = React.useMemo(() => {
-  //   return [
-  //     { item: }
-  //   ]
-  // }, [])
+  const folderItems = React.useMemo(() => {
+    return [
+      { item: (
+          <ListItem onClick={ openModal }>
+            <span className="fa fa-pen-to-square mr-1"/>Edit
+          </ListItem>
+        )
+      }
+    ]
+  }, [openModal])
 
   const Container = forFolder ? FolderStuffContainer : StuffContainer;
 
   return (
     <div onClick={ openFolder }>
       <Container { ...props } { ...folder } id={ id } type="folder"
-        edit={ edit }
+        items={ folderItems }
       >
         <div className="mr-1">
           <FolderIcon size={ 1.25 }
@@ -62,6 +74,9 @@ const Folder = ({ id, openedFolders, setOpenedFolders, forFolder, ...props }) =>
           { get(folder, "name", "loading...") }
         </span>
       </Container>
+      <FolderModal folder={ folder }
+        isOpen={ open }
+        close={ closeModal }/>
     </div>
   )
 }
@@ -76,13 +91,6 @@ const Route = ({ id, forFolder, ...props }) => {
   React.useEffect(() => {
     setRoute(get(falcorCache, ["routes2", "id", id], {}));
   }, [falcorCache, id]);
-
-  const edit = React.useCallback(() => {
-
-  }, []);
-  const view = React.useCallback(() => {
-
-  }, []);
 
   const RouteItems = React.useMemo(() => {
     return [
@@ -126,13 +134,6 @@ const Report = ({ id, forFolder, ...props }) => {
     setReport(get(falcorCache, ["reports2", "id", id], {}));
   }, [falcorCache, id]);
 
-  const edit = React.useCallback(() => {
-
-  }, []);
-  const view = React.useCallback(() => {
-
-  }, []);
-
   const ReportItems = React.useMemo(() => {
     return [
       { item: (
@@ -174,13 +175,6 @@ const Template = ({ id, forFolder, ...props }) => {
   React.useEffect(() => {
     setTemplate(get(falcorCache, ["templates2", "id", id], {}));
   }, [falcorCache, id]);
-
-  const edit = React.useCallback(() => {
-
-  }, []);
-  const view = React.useCallback(() => {
-
-  }, []);
 
   const TemplateItems = React.useMemo(() => {
     return [
@@ -293,22 +287,40 @@ const FolderStuffContainer = props => {
   const [folders, setFolders] = React.useState([]);
 
   React.useEffect(() => {
-    falcor.get(["folders2", "user", "length"])
+    falcor.get(
+        ["folders2", "user", "length"],
+        ["folders2", "stuff", parent]
+      )
       .then(res => {
-        const length = get(res, ["json", "folders2", "user", "length"], 0)
+        const requests = [];
+
+        const length = get(res, ["json", "folders2", "user", "length"], 0);
         if (length) {
-          return falcor.get([
+          requests.push([
             "folders2", "user", "index", d3range(length),
             ["name", "icon", "color", "id", "updated_at", "created_at", "type", "owner", "editable"]
           ])
         }
+        const folders = get(res, ["json", "folders2", "stuff", parent], [])
+          .filter(s => s.stuff_type === "folder")
+          .map(s => s.stuff_id);
+        if (folders.length) {
+          requests.push([
+            "folders2", "id", folders,
+            ["name", "icon", "color", "id", "updated_at", "created_at", "type", "owner", "editable"]
+          ])
+        }
+        if (requests.length) {
+          return falcor.get(...requests);
+        }
       })
-  }, [falcor]);
+  }, [falcor, parent]);
 
   React.useEffect(() => {
     const length = get(falcorCache, ["folders2", "user", "length"], 0);
     const refs = d3range(length).map(i => get(falcorCache, ["folders2", "user", "index", i, "value"]));
-    const folders = refs.map(ref => get(falcorCache, ref, null)).filter(Boolean);
+    const folders = refs.map(ref => get(falcorCache, ref, null))
+      .filter(Boolean).filter(f => f.id != parent);
 
     folders.sort((a, b) => {
       if (a.type === b.type) {
@@ -319,8 +331,15 @@ const FolderStuffContainer = props => {
       return (a.type === "user") ? -1 : 1;
     });
 
-    setFolders(folders.filter(f => f.id != parent));
-  }, [falcorCache, parent]);
+    const subFolders = get(falcorCache, ["folders2", "stuff", parent, "value"], [])
+      .filter(s => s.stuff_type === "folder")
+      .filter(s => type === "folder" ? s.stuff_id != id : true)
+      .map(f => {
+        return get(falcorCache, ["folders2", "id", f.stuff_id], null)
+      }).filter(Boolean);
+
+    setFolders([...folders, ...subFolders]);
+  }, [falcorCache, parent, type, id]);
 
   const deleteStuff = React.useCallback(() => {
     switch (type) {
@@ -373,33 +392,8 @@ const FolderStuffContainer = props => {
         children: (
           folders.map(f => ({
             item: (
-              <div key={ f.id } className="px-2 flex items-center hover:bg-gray-300 w-52"
-                onClick={ e => copyToFolder(e, f.id) }
-              >
-                <div className="mr-1">
-                  <FolderIcon size={ 1.25 }
-                    icon={ get(f, "icon", "") }
-                    color={ get(f, "color", "#000") }/>
-                </div>
-                <span className="pt-1">
-                  { get(f, "name", "loading...") }
-                </span>
-              </div>
-            )
-          }))
-        )
-      },
-      { item: (
-          <ListItem>
-            <span className="fa fa-arrow-up-from-bracket mr-1"/>Move to folder
-          </ListItem>
-        ),
-        children: (
-          folders.map(f => ({
-            item: (
-              <ListItem key={ f.id }>
-                <div className="flex items-center"
-                  onClick={ e => moveToFolder(e, f.id) }>
+              <ListItem key={ f.id } onClick={ e => copyToFolder(e, f.id) }>
+                <div className="flex items-center">
                   <div className="mr-1">
                     <FolderIcon size={ 1.25 }
                       icon={ get(f, "icon", "") }
@@ -416,9 +410,31 @@ const FolderStuffContainer = props => {
       },
       { item: (
           <ListItem>
-            <div onClick={ confirmDelete }>
-              <span className="fa fa-trash text-red-400 mr-1"/>Delete { type }
-            </div>
+            <span className="fa fa-arrow-up-from-bracket mr-1"/>Move to folder
+          </ListItem>
+        ),
+        children: (
+          folders.map(f => ({
+            item: (
+              <ListItem key={ f.id } onClick={ e => moveToFolder(e, f.id) }>
+                <div className="flex items-center">
+                  <div className="mr-1">
+                    <FolderIcon size={ 1.25 }
+                      icon={ get(f, "icon", "") }
+                      color={ get(f, "color", "#000") }/>
+                  </div>
+                  <span className="pt-1">
+                    { get(f, "name", "loading...") }
+                  </span>
+                </div>
+              </ListItem>
+            )
+          }))
+        )
+      },
+      { item: (
+          <ListItem onClick={ confirmDelete }>
+            <span className="fa fa-trash text-red-400 mr-1"/>Delete { type }
           </ListItem>
         )
       },
@@ -473,9 +489,11 @@ const FolderStuffContainer = props => {
   )
 }
 
-const ListItem = ({ children }) => {
+const ListItem = ({ children, onClick = null }) => {
   return (
-    <div className="w-52 px-2 hover:bg-gray-300">
+    <div onClick={ onClick }
+      className="w-52 px-2 hover:bg-gray-300"
+    >
       { children }
     </div>
   )
