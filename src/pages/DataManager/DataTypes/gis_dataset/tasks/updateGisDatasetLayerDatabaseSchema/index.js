@@ -1,6 +1,9 @@
-import React, { useEffect, useReducer, useRef } from "react";
+import React, { useContext, useEffect, useReducer, useRef } from "react";
 
-import EtlContext, { useEtlContextDependencies } from "../../utils/EtlContext";
+import EtlContext, {
+  useEtlContextDependencies,
+  EtlContextReact,
+} from "../../utils/EtlContext";
 import { checkApiResponse } from "../../utils/api";
 
 import reducer, { init, selectors, actions } from "./store";
@@ -11,7 +14,9 @@ const { updateTableDescriptor } = actions;
 
 export const taskName = "updateGisDatasetLayerDatabaseSchema";
 
-export default function UpdateGisDatasetLayerDatabaseDbSchema({ ctx: pCtx }) {
+export default function UpdateGisDatasetLayerDatabaseDbSchema() {
+  const pCtx = useContext(EtlContextReact);
+
   const [state, dispatch] = useReducer(reducer, null, init);
 
   const { current: ctx } = useRef(

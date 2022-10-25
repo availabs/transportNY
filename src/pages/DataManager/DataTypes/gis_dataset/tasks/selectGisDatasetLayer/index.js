@@ -1,6 +1,9 @@
-import React, { useEffect, useReducer, useRef } from "react";
+import React, { useContext, useEffect, useReducer, useRef } from "react";
 
-import EtlContext, { useEtlContextDependencies } from "../../utils/EtlContext";
+import EtlContext, {
+  useEtlContextDependencies,
+  EtlContextReact,
+} from "../../utils/EtlContext";
 
 import reducer, { init, operations, selectors, actions } from "./store";
 
@@ -8,7 +11,9 @@ import { LayerSelector, LayerAnalysisSection } from "./components";
 
 const { getLayerNames, getLayerAnalysis } = operations;
 
-export default function SelectGisDatasetLayer({ ctx: pCtx }) {
+export default function SelectGisDatasetLayer() {
+  const pCtx = useContext(EtlContextReact);
+
   const [state, dispatch] = useReducer(reducer, null, init);
 
   const { current: ctx } = useRef(

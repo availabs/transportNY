@@ -3,7 +3,7 @@
 // FIXME: Need to decide how to handle getState and setState
 //        Simple cloneDeep means cloned/spawned contexts mutate original.
 
-import { useState, useRef } from "react";
+import { useState, useRef, createContext } from "react";
 import { assign, cloneDeep, isEqual, merge, omit } from "lodash";
 
 import { v4 as uuid } from "uuid";
@@ -142,3 +142,5 @@ export default class EtlContext {
     return etlCtx;
   }
 }
+
+export const EtlContextReact = createContext(null);

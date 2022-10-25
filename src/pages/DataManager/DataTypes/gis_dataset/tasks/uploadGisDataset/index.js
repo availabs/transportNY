@@ -1,6 +1,9 @@
-import React, { useEffect, useReducer, useRef } from "react";
+import React, { useContext, useEffect, useReducer, useRef } from "react";
 
-import EtlContext, { useEtlContextDependencies } from "../../utils/EtlContext";
+import EtlContext, {
+  useEtlContextDependencies,
+  EtlContextReact,
+} from "../../utils/EtlContext";
 import reducer, { init, actions, selectors, operations } from "./store";
 
 import {
@@ -11,7 +14,9 @@ import {
 
 const { uploadGisDataset } = operations;
 
-export default function UploadGisDataset({ ctx: pCtx }) {
+export default function UploadGisDataset() {
+  const pCtx = useContext(EtlContextReact);
+
   const [state, dispatch] = useReducer(
     reducer,
     // Fixme: maxSeenEventId belongs on damaEtlAdmin
