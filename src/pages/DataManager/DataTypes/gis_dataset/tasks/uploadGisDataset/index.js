@@ -17,12 +17,12 @@ const { uploadGisDataset } = operations;
 export const taskName = "uploadGisDataset";
 
 export default function UploadGisDataset() {
-  const pCtx = useContext(EtlContextReact);
+  const parentCtx = useContext(EtlContextReact);
 
   const [state, dispatch] = useReducer(
     reducer,
     // Fixme: maxSeenEventId belongs on damaEtlAdmin
-    { maxSeenEventId: pCtx.getState().maxSeenEventId || -1 },
+    { maxSeenEventId: parentCtx.getState().maxSeenEventId || -1 },
     init
   );
 
@@ -32,18 +32,18 @@ export default function UploadGisDataset() {
       actions,
       selectors,
       dispatch,
-      pCtx,
+      parentCtx,
     })
   );
 
   ctx.setState(state);
 
   useEffect(() => {
-    pCtx.dispatch({
+    parentCtx.dispatch({
       type: `${taskName}:STATE_UPDATE`,
       payload: state,
     });
-  }, [pCtx, state]);
+  }, [parentCtx, state]);
 
   const etlCtxDeps = useEtlContextDependencies(ctx, [
     "etlContextId",

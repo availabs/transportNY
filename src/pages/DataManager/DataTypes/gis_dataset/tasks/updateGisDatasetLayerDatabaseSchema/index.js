@@ -15,7 +15,7 @@ const { updateTableDescriptor } = actions;
 export const taskName = "updateGisDatasetLayerDatabaseSchema";
 
 export default function UpdateGisDatasetLayerDatabaseDbSchema() {
-  const pCtx = useContext(EtlContextReact);
+  const parentCtx = useContext(EtlContextReact);
 
   const [state, dispatch] = useReducer(reducer, null, init);
 
@@ -25,7 +25,7 @@ export default function UpdateGisDatasetLayerDatabaseDbSchema() {
       actions,
       selectors,
       dispatch,
-      pCtx,
+      parentCtx,
     })
   );
 
@@ -33,14 +33,14 @@ export default function UpdateGisDatasetLayerDatabaseDbSchema() {
 
   const {
     meta: { rtPfx },
-  } = pCtx;
+  } = parentCtx;
 
   useEffect(() => {
-    pCtx.dispatch({
+    parentCtx.dispatch({
       type: `${taskName}:STATE_UPDATE`,
       payload: state,
     });
-  }, [pCtx, state]);
+  }, [parentCtx, state]);
 
   const etlCtxDeps = useEtlContextDependencies(ctx, [
     "gisUploadId",

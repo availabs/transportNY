@@ -12,7 +12,7 @@ import { LayerSelector, LayerAnalysisSection } from "./components";
 const { getLayerNames, getLayerAnalysis } = operations;
 
 export default function SelectGisDatasetLayer() {
-  const pCtx = useContext(EtlContextReact);
+  const parentCtx = useContext(EtlContextReact);
 
   const [state, dispatch] = useReducer(reducer, null, init);
 
@@ -22,18 +22,18 @@ export default function SelectGisDatasetLayer() {
       actions,
       selectors,
       dispatch,
-      pCtx,
+      parentCtx,
     })
   );
 
   ctx.setState(state);
 
   useEffect(() => {
-    pCtx.dispatch({
+    parentCtx.dispatch({
       type: "selectGisDatasetLayer:STATE_UPDATE",
       payload: state,
     });
-  }, [pCtx, state]);
+  }, [parentCtx, state]);
 
   const etlCtxDeps = useEtlContextDependencies(ctx, [
     "gisUploadId",

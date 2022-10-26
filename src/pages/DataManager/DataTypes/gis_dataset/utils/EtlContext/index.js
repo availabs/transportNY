@@ -66,7 +66,7 @@ export function extractPropertiesFromEtlContextHierarchy(ctx, deps) {
 
     unresolvedDeps = unresolvedDeps.filter((dep) => props[dep] === undefined);
 
-    curCtx = curCtx.pCtx;
+    curCtx = curCtx.parentCtx;
   }
 
   return props;
@@ -103,7 +103,7 @@ export default class EtlContext {
 
     this.id = uuid();
 
-    this.meta = this.meta || (this.pCtx && this.pCtx.meta) || {};
+    this.meta = this.meta || (this.parentCtx && this.parentCtx.meta) || {};
 
     this.getState = this.getState.bind(this);
     this.setState = this.setState.bind(this);
@@ -137,7 +137,7 @@ export default class EtlContext {
       etlCtx.meta = this.meta;
     }
 
-    etlCtx.pCtx = this;
+    etlCtx.parentCtx = this;
 
     return etlCtx;
   }
