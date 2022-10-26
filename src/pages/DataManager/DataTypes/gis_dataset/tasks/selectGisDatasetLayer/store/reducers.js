@@ -3,8 +3,8 @@ import deepFreeze from "deep-freeze-strict";
 import { assign, cloneDeep } from "lodash";
 
 export const initialState = deepFreeze({
-  lastNames: null,
-  lastName: null,
+  layerNames: null,
+  layerName: null,
   lyrAnlysErrMsg: null,
   layerAnalysis: null,
 });

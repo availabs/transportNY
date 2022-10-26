@@ -20,9 +20,6 @@ export const LayerSelector = () => {
     return "";
   }
 
-  // TODO: Table with file metadata
-  //       LayerName or LayerSelector as a table row
-
   let layerRow;
 
   if (layerNames.length === 1) {
