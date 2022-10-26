@@ -43,27 +43,47 @@ export default function UpdateGisDatasetLayerDatabaseDbSchema() {
   }, [parentCtx, state]);
 
   const etlCtxDeps = useEtlContextDependencies(ctx, [
+    "databaseColumnNames",
     "gisUploadId",
     "layerName",
     "tableDescriptor",
   ]);
 
-  const { gisUploadId, layerName } = etlCtxDeps;
+  const { databaseColumnNames, gisUploadId, layerName } = etlCtxDeps;
 
   useEffect(() => {
     (async () => {
-      if (gisUploadId && layerName) {
+      // if creating new datasouce, databaseColumnNames = undefined
+      // if updating existing datasource, databaseColumnNames = string[] | null
+      const isCreatingNew = databaseColumnNames === undefined;
+
+      const awaitingDbCols = !(
+        isCreatingNew || Array.isArray(databaseColumnNames)
+      );
+
+      if (!awaitingDbCols && gisUploadId && layerName) {
         const tblDscRes = await fetch(
           `${rtPfx}/staged-geospatial-dataset/${gisUploadId}/${layerName}/tableDescriptor`
         );
 
         await checkApiResponse(tblDscRes);
+
         const tblDsc = await tblDscRes.json();
+
+        if (databaseColumnNames) {
+          const dbCols = new Set(databaseColumnNames);
+
+          for (const row of tblDsc.columnTypes) {
+            if (!dbCols.has(row.col)) {
+              row.col = null;
+            }
+          }
+        }
 
         dispatch(updateTableDescriptor(tblDsc));
       }
     })();
-  }, [rtPfx, gisUploadId, layerName]);
+  }, [rtPfx, databaseColumnNames, gisUploadId, layerName]);
 
   if (!layerName) {
     return "";

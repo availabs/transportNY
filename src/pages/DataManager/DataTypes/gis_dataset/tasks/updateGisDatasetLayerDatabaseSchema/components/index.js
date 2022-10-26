@@ -1,6 +1,8 @@
 import { useContext } from "react";
 
 import { debounce } from "lodash";
+import Dropdown from "react-dropdown";
+import "react-dropdown/style.css";
 
 import PublishStatus from "../../../constants/PublishStatus";
 
@@ -9,6 +11,46 @@ import {
   EtlContextReact,
 } from "../../../utils/EtlContext";
 
+const FreeFormColumnNameInput = ({ publishStatus, field, col, onChange }) => {
+  console.log("field:", field, "; col:", col);
+  return (
+    <input
+      className="w-full p-2 flex-1 shadow bg-grey-50 focus:bg-blue-100 border-gray-300"
+      disabled={publishStatus !== PublishStatus.AWAITING}
+      id={field}
+      defaultValue={col}
+      onChange={onChange}
+    />
+  );
+};
+
+const ConstrainedColumnNameInput = ({
+  publishStatus,
+  key,
+  col,
+  availableDbColNames,
+  onChange,
+}) => {
+  if (!availableDbColNames) {
+    return "";
+  }
+
+  const matches = availableDbColNames.includes(col);
+
+  const options = [null, ...availableDbColNames];
+
+  return (
+    <Dropdown
+      key={`col-names-dropdown-for-${key}`}
+      options={options}
+      onChange={onChange}
+      value={matches ? col : null}
+      placeholder="Select the db column name"
+      disabled={publishStatus !== PublishStatus.AWAITING}
+    />
+  );
+};
+
 export const GisDatasetLayerDatabaseDbSchemaForm = () => {
   const ctx = useContext(EtlContextReact);
   const {
@@ -16,12 +58,15 @@ export const GisDatasetLayerDatabaseDbSchemaForm = () => {
     actions: { updateGisDatasetLayerDatabaseColumnName },
   } = ctx;
 
-  const { layerName, tableDescriptor, publishStatus } =
-    useEtlContextDependencies(ctx, [
-      "layerName",
-      "tableDescriptor",
-      "publishStatus",
-    ]);
+  const etlCtxDeps = useEtlContextDependencies(ctx, [
+    "layerName",
+    "tableDescriptor",
+    "publishStatus",
+    "databaseColumnNames",
+  ]);
+
+  const { layerName, tableDescriptor, publishStatus, databaseColumnNames } =
+    etlCtxDeps;
 
   if (!layerName) {
     return "";
@@ -43,7 +88,19 @@ export const GisDatasetLayerDatabaseDbSchemaForm = () => {
     );
   }
 
+  const InputElem = databaseColumnNames
+    ? ConstrainedColumnNameInput
+    : FreeFormColumnNameInput;
+
   const tableDescriptorColumnTypes = tableDescriptor.columnTypes;
+
+  const mappedColNamesSet = new Set(
+    tableDescriptorColumnTypes.map(({ col }) => col)
+  );
+
+  const availableDbColNames =
+    databaseColumnNames &&
+    databaseColumnNames.filter((c) => !mappedColNamesSet.has(c));
 
   const fieldsMappingSection = (
     <div>
@@ -57,25 +114,27 @@ export const GisDatasetLayerDatabaseDbSchemaForm = () => {
           </tr>
         </thead>
         <tbody>
-          {tableDescriptorColumnTypes.map((row, rowIdx) => (
-            <tr key={row.key} className="border-b">
-              <td className="py-4 text-left">{row.key}</td>
+          {tableDescriptorColumnTypes.map(({ key, col }, rowIdx) => (
+            <tr key={key} className="border-b">
+              <td className="py-4 text-left">{key}</td>
               <td className="text-right  p-2">
-                <input
-                  className="w-full p-2 flex-1 shadow bg-grey-50 focus:bg-blue-100 border-gray-300"
-                  disabled={publishStatus !== PublishStatus.AWAITING}
-                  id={row.key}
-                  defaultValue={row.col}
-                  onChange={debounce(
-                    (e) =>
+                <InputElem
+                  {...{
+                    availableDbColNames,
+                    publishStatus,
+                    field: key,
+                    col,
+                    onChange: debounce((e) => {
+                      console.log("fieldsMappingSection onChange:", e);
+
                       dispatch(
                         updateGisDatasetLayerDatabaseColumnName(
                           rowIdx,
                           e.target.value
                         )
-                      ),
-                    500
-                  )}
+                      );
+                    }, 500),
+                  }}
                 />
               </td>
             </tr>

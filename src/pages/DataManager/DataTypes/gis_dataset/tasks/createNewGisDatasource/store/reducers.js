@@ -5,6 +5,11 @@ import PublishStatus from "../../../constants/PublishStatus";
 import * as uploadGisDatasetSelectors from "../../uploadGisDataset/store/selectors";
 
 export const initialState = {
+  dataSourceName: null,
+  dataSourceDisplayName: null,
+
+  dataSourceId: null,
+
   etlContextId: null,
   maxSeenEventId: null,
 
@@ -23,8 +28,14 @@ export default function reducer(state, action) {
   const { type, payload } = action;
 
   switch (type) {
-    case "RESET_STATE":
-      return initialState;
+    case "dataSourceName/UPDATE":
+      return { ...state, dataSourceName: payload };
+
+    case "dataSourceDisplayName/UPDATE":
+      return { ...state, dataSourceDisplayName: payload };
+
+    case "dataSourceId/UPDATE":
+      return { ...state, dataSourceId: payload };
 
     case "etlContextId/UPDATE":
       return { ...state, etlContextId: payload };

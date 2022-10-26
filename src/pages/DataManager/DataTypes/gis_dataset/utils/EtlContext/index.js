@@ -72,6 +72,21 @@ export function extractPropertiesFromEtlContextHierarchy(ctx, deps) {
   return props;
 }
 
+export function createEtlContextPropsProxy(ctx) {
+  return new Proxy(
+    {},
+    {
+      get(_target, prop) {
+        const { [prop]: value } = extractPropertiesFromEtlContextHierarchy(
+          ctx,
+          [prop]
+        );
+        return value;
+      },
+    }
+  );
+}
+
 export function useEtlContextDependencies(_ctx, deps) {
   const { current: ctx } = useRef(_ctx);
   const [dependencies] = useState(deps.slice());
@@ -79,11 +94,7 @@ export function useEtlContextDependencies(_ctx, deps) {
   const prevSliceRef = useRef({});
   const { current: prevSlice } = prevSliceRef;
 
-  // console.log("===== useEtlContextDependencies:", _ctx.name, "=====");
-
   const newSlice = extractPropertiesFromEtlContextHierarchy(ctx, deps);
-
-  // console.log({ deps, prevSlice, newSlice });
 
   for (const dep of dependencies) {
     if (!isEqual(prevSlice[dep], newSlice[dep])) {
@@ -93,7 +104,6 @@ export function useEtlContextDependencies(_ctx, deps) {
     }
   }
 
-  // console.log("returning old slice");
   return prevSlice;
 }
 

@@ -4,6 +4,18 @@ import createSimpleIdentityAction from "../../../utils/createSimpleIdentityActio
 
 export const resetState = createSimpleIdentityAction("RESET_STATE");
 
+export const updateDataSourceName = createSimpleIdentityAction(
+  "dataSourceName/UPDATE"
+);
+
+export const updateDataSourceDisplayName = createSimpleIdentityAction(
+  "dataSourceDisplayName/UPDATE"
+);
+
+export const updateDataSourceId = createSimpleIdentityAction(
+  "dataSourceId/UPDATE"
+);
+
 export const updateEtlContextId = createSimpleIdentityAction(
   "etlContextId/UPDATE"
 );

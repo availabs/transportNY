@@ -1,5 +1,13 @@
 import createSimpleSelector from "../../../utils/createSimpleSelector";
 
+export const selectDataSourceName = createSimpleSelector("dataSourceName");
+
+export const selectDataSourceDisplayName = createSimpleSelector(
+  "dataSourceDisplayName"
+);
+
+export const selectDataSourceId = createSimpleSelector("dataSourceId");
+
 export const selectEtlContextId = createSimpleSelector("etlContextId");
 
 export const selectMaxSeenId = createSimpleSelector("maxSeenEventId");
