@@ -156,7 +156,7 @@ const GisDataset = (props) => {
     }
   }, [publishStatus, dataSourceId, history]);
 
-  if (!dataSourceName) {
+  if (!sourceId && !dataSourceName) {
     return <RequestSourceName />;
   }
 

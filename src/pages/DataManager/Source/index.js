@@ -61,8 +61,8 @@ const Source = (props) => {
         }
         return a
       },{})
+
       let allPages = {...Pages,...typePages}
-      // console.log('allPages', allPages)
       setPages(allPages)  
     } else {
        setPages(Pages) 

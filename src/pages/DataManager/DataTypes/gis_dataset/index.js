@@ -8,7 +8,7 @@ import get from "lodash.get";
 import GisDatasetLayer from "./GisDatasetLayer";
 import { AvlMap } from "modules/avl-map/src";
 
-import Create from "./tasks/main";
+import GisDatasetLoader from "./tasks/main";
 import config from "config.json";
 
 import { selectPgEnv } from "pages/DataManager/store";
@@ -216,9 +216,15 @@ const GisDatasetConfig = {
     path: "/table",
     component: Table,
   },
+  // This key is used to filter in src/pages/DataManager/Source/create.js
   sourceCreate: {
     name: "Create",
-    component: Create,
+    component: GisDatasetLoader,
+  },
+  gisDatasetUpdate: {
+    name: "Load New View",
+    path: "/gisDatasetUpdate",
+    component: GisDatasetLoader,
   },
   pwrUsrOnly: false,
 };
