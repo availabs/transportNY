@@ -91,7 +91,7 @@ const ppdaf = () => {
         },
         mini: {
           fixed: 'ml-0 md:ml-20',
-          wrapper: "w-20 overflow-x-hidden p-1 pt-4",
+          wrapper: "w-20 overflow-x-hidden  pt-4",
           sideItem: "flex pr-4 py-4 text-base font-base border-b",
           topItem: "flex px-4 items-center text-sm font-light ",
           icon: "w-20 mr-4 text-4xl",
@@ -103,7 +103,7 @@ const ppdaf = () => {
           itemWrapper: 'p-1',
           sideItem: "flex text-base font-base",
           topItem: "flex mx-6 pr-4 py-2 text-sm font-light",
-          icon: "w-12 text-2xl hover:bg-neutral-900 px-2 py-3 my-2 rounded-lg mr-4 hover:text-blue-500",
+          icon: "w-12 text-2xl hover:bg-neutral-900 px-1 py-3 my-2 rounded-lg mr-4 hover:text-blue-500",
           sideItemContent: 'hidden',
         },
 
@@ -113,8 +113,8 @@ const ppdaf = () => {
                 inline: {
                     indicatorIcon: 'fa fa-caret-right pt-2.5',
                     indicatorIconOpen: 'fa fa-caret-down pt-2.5',
-                    subMenuWrapper: `w-full`,
-                    subMenuParentWrapper: `pl-2 flex flex-col w-full`
+                    subMenuWrapper: `pl-2 w-full`,
+                    subMenuParentWrapper: `flex flex-col w-full`
                 },
                 flyout: {
                     indicatorIcon: 'fa fa-caret-down',
