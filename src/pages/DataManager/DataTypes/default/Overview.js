@@ -65,9 +65,10 @@ const OverviewEdit = withAuth(({source, views, user}) => {
               cancel={() => setEditing(null)}/> : 
             get(source,'description', false) || 'No Description'}
         </div>
+        {user.authLevel > 5 ? 
         <div className='hidden group-hover:block text-blue-500 cursor-pointer' onClick={e => setEditing('description')}>
             <i className="fad fa-pencil absolute -ml-12  p-2 hover:bg-blue-500 rounded focus:bg-blue-700 hover:text-white "/>
-        </div>
+        </div> : '' }
       </div>
       <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
         <dl className="sm:divide-y sm:divide-gray-200">
@@ -93,10 +94,10 @@ const OverviewEdit = withAuth(({source, views, user}) => {
                       }
                     </dd>
                   </div>
-
+                  {user.authLevel > 5 ? 
                   <div className='hidden group-hover:block text-blue-500 cursor-pointer' onClick={e => editing === attr ? setEditing(null): setEditing(attr)}>
                     <i className="fad fa-pencil absolute -ml-12 mt-3 p-2.5 rounded hover:bg-blue-500 hover:text-white "/>
-                  </div>
+                  </div> : ''}
                 </div>
               )
             })

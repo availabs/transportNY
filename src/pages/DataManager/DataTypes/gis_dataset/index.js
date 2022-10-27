@@ -52,6 +52,7 @@ const Map = ({ layers }) => {
   );
 };
 
+
 const Edit = ({ startValue, attr, viewId, parentData, cancel = () => {} }) => {
   const { falcor } = useFalcor();
   const [value, setValue] = useState("");
@@ -205,6 +206,14 @@ const Table = (/*{ source }*/) => {
   return <div> Table View </div>;
 };
 
+const AddView = ({ layers }) => { 
+  return (
+    <div className="w-full h-full">
+      Add New View
+    </div>
+  );
+};
+
 const GisDatasetConfig = {
   map: {
     name: "Map",
@@ -219,6 +228,11 @@ const GisDatasetConfig = {
   sourceCreate: {
     name: "Create",
     component: Create,
+  },
+  addView: {
+    name: 'Add View',
+    path: '/view',
+    component: AddView
   },
   pwrUsrOnly: false,
 };

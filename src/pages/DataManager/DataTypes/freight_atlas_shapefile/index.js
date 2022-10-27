@@ -149,7 +149,7 @@ const MapPage = ({source,views, user}) => {
       {user.authLevel >= 5 ? 
       <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
         <dl className="sm:divide-y sm:divide-gray-200">
-          {['sources','layers']
+          {['sources','layers','symbology']
             .map((attr,i) => {
               let val = JSON.stringify(get(mapData,attr,[]),null,3)
               return (

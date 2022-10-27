@@ -50,7 +50,7 @@ const MapStylesTab = ({ mapStyles, styleIndex, MapActions, mapboxMap }) => {
     MapActions.setMapStyle(index);
   }, [MapActions]);
 
-  return (
+  return React.useMemo(() => (
     <div className={ `` }>
       <div className = 'p-4'> Select Basemap </div>
       <div className={ `
@@ -78,7 +78,7 @@ const MapStylesTab = ({ mapStyles, styleIndex, MapActions, mapboxMap }) => {
 
       </div>
     </div>
-  )
+  ), [mapStyles, styleIndex, updateStyle, loading])
 }
 
 
@@ -126,7 +126,9 @@ const LayerControl = ({ layer, setActiveLayer, activeLayer, MapActions }) => {
     ]
   );
 
-  return (
+  return React.useMemo(() => {
+    console.log('render layer')
+    return (
     <div
       onClick={onClick} 
       className={` flex flex-col border-b border-gray-100 hover:bg-blue-50 cursor-pointer`}>
@@ -151,7 +153,7 @@ const LayerControl = ({ layer, setActiveLayer, activeLayer, MapActions }) => {
       </div>
       
     </div>
-  );
+  )}, [layer.layer_id, layer.name, activeLayer]);
 };
 
 
@@ -175,7 +177,7 @@ const LayerListTab = ({activeLayers,MapActions,...rest},) => {
     }, [/*activeLayers*/])
 
     
-    return (
+    return React.useMemo(() => (
         <div>
            <div className='p-4 border-b border-gray-200'>
                 <button onClick={e => modalToggle(!modalOpen)} className={theme.button({color:'primary',width:'full', size: 'sm'}).button}>
@@ -214,7 +216,7 @@ const LayerListTab = ({activeLayers,MapActions,...rest},) => {
                 </div>
             </Modal>
         </div>
-    )
+    ),[activeLayers, activeLayer,modalOpen])
 
 }
 
@@ -230,7 +232,7 @@ const CustomSidebar = (props) => {
             Component: MapStylesTab
         }
     ]
-    return (
+    return React.useMemo(() => (
         <CollapsibleSidebar>
             <div  className='relative w-full h-full bg-gray-100  z-10 shadow-lg overflow-hidden'> 
                 {/*<div className='py-2 px-4 font-medium'> Freight Layers</div>*/}
@@ -241,7 +243,7 @@ const CustomSidebar = (props) => {
                 />
             </div>
         </CollapsibleSidebar>
-    )
+    ), [SidebarTabs])
 }
 export {
   MapStylesTab,

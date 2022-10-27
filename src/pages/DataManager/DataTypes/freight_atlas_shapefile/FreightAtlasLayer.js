@@ -39,18 +39,16 @@ const HoverComp = ({ data, layer }) => {
       ], {});
   }, [id, falcorCache, layerName, version]);
 
-  // console.log('attrInfo', AttrInfo)
-
   return (
     <div className='bg-white p-4 max-h-64 scrollbar-xs overflow-y-scroll'>
       <div className='font-medium pb-1 w-full border-b '>{layer.source.display_name}</div>
-      {Object.keys(AttrInfo).length === 0 ? `Fetching Attributes ${id}` : ''}
-      {Object.keys(AttrInfo).map((k,i) => 
-        <div className='flex border-b pt-1' key={i}>
-          <div className='flex-1 font-medium text-sm pl-1'>{k}</div>
-          <div className='flex-1 text-right font-thin pl-4 pr-1'>{AttrInfo[k].value}</div>
-        </div>
-      )} 
+        {Object.keys(AttrInfo).length === 0 ? `Fetching Attributes ${id}` : ''}
+        {Object.keys(AttrInfo).map((k,i) => 
+          <div className='flex border-b pt-1' key={i}>
+            <div className='flex-1 font-medium text-sm pl-1'>{k}</div>
+            <div className='flex-1 text-right font-thin pl-4 pr-1'>{AttrInfo[k].value}</div>
+          </div>
+        )} 
     </div>
   )
 }
@@ -70,19 +68,8 @@ class FreightAtlasLayer extends LayerContainer {
     callback: (layerId, features, lngLat) => {
       let feature = features[0];
       
-
-      //console.log('hover', v)
-      // let data = [
-      //   ...Object.keys(feature.properties).map((k) => [
-      //     k,
-      //     feature.properties[k],
-      //   ])
-      // ];
-      //data.push(["hoverlayer", layerId]);
-      //data.push([this.getMeasure(this.filters), v])
       let data = [feature.properties.id,  layerId ] 
-      //console.log('test', data)
-
+      
       return data
     },
     HoverComp
@@ -93,7 +80,7 @@ class FreightAtlasLayer extends LayerContainer {
   }
 
   render(map) {
-    console.log('FreightAtlasFactory', this)  
+    console.log('FreightAtlasFactory', this.layer_id)  
   }
    
 }
