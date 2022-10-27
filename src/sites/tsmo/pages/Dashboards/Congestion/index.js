@@ -57,20 +57,21 @@ const useComponentDidMount = () => {
 };
 
 const calculateCosts = (tmcDelayData, tmcMetaData) => {
-	const costs = {
-		total: 0,
-		accident: 0,
-		construction: 0,
-		"non-recurrent": 0,
-		recurrent: 0
-	}
-console.log("calculateCosts:", tmcDelayData, tmcMetaData)
-	for (const tmc in tmcDelayData) {
-		for (const key in costs) {
-			costs[key] += calcCost(tmcDelayData[tmc][key], get(tmcMetaData, tmc, {}))
-		}
-	}
-	return costs
+  const [year,month] = get(Object.values(tmcDelayData),'[0].index','2022-05').split('-')
+  const costs = {
+    total: 0,
+    accident: 0,
+    construction: 0,
+    "non-recurrent": 0,
+    recurrent: 0,
+    numDays: new Date(year, month, 0).getDate()
+  }
+  for (const tmc in tmcDelayData) {
+    for (const key in costs) {
+      costs[key] += calcCost(tmcDelayData[tmc][key], get(tmcMetaData, tmc, {}))
+    }
+  }
+  return costs
 }
 
 const RecurrentDelay = props => {
@@ -285,45 +286,6 @@ const RecurrentDelay = props => {
     }
   }, [falcorCache, region, fsystem, year, month]);
 
-    // const currentMonth = get(get(pieData,'data',[]).filter(d => d.index === tableDate),'[0]',{recurrent: 0, "non-recurrent": 0})
-    // const currentMonthTotal = (currentMonth['recurrent'] + currentMonth['non-recurrent'])
-
-    // const compareDataOld = React.useMemo(() => {
-    //   const py = year - 1,
-    //     pm = (month - 2 + 12) % 12 + 1,
-    //     prevMonth = `${+pm === 12 ? py : year }-${ `0${ pm }`.slice(-2) }`,
-    //     prevYear = `${ py }-${ `0${ month }`.slice(-2) }`;
-    //   return {
-    //     colorsForTypes,
-    //     currMonth: pieData.data.reduce((a, c) => {
-    //         if (c.index === tableDate) {
-    //           return {
-    //             ...c,
-    //             numDays: getDaysInMonth(year,month)
-    //           };
-    //         }
-    //         return a;
-    //       }, 0),
-    //     prevMonth: pieData.data.reduce((a, c) => {
-    //         if (c.index === prevMonth) {
-    //           return {
-    //             ...c,
-    //             numDays: getDaysInMonth(year,pm)
-    //           };
-    //         }
-    //         return a;
-    //       }, 0),
-    //     prevYear: pieData.data.reduce((a, c) => {
-    //         if (c.index === prevYear) {
-    //           return {
-    //             ...c,
-    //             numDays: getDaysInMonth(py,month)
-    //           };
-    //         }
-    //         return a;
-    //       }, 0),
-    //   }
-    // }, [pieData, tableDate, year, month]);
 
   const [hoveredTMCs, setHoveredTMCs] = React.useState([]);
 
@@ -383,7 +345,7 @@ const RecurrentDelay = props => {
         </div>*/}
          <div className='pt-4 pb-2 px-2 col-span-4'>
           <span className='text-xl font-medium uppercase text-gray-700'>
-             Top 15 Corridors by Delay / Mile
+             Top 15 Corridors by Vehicle Hours of Delay / Mile
           </span>
         </div>
         <div className='bg-white shadow rounded p-4 col-span-4 lg:col-span-2'>

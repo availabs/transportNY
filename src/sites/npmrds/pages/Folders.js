@@ -285,13 +285,31 @@ const FolderIconWrapper = ({ opened, onClick, deleteFolder, userAuth, ...folder 
 
 const config = [
   { name:'Folders',
+    icon: 'fa fa-folder',
     path: "/folders/:stuff?",
+    subMenus: [
+      {
+        name: 'Routes',
+        icon: 'fa fa-road',
+        path: '/folders/routes'
+      },
+      {
+        name: 'Reports',
+        icon: 'fa fa-file-lines',
+        path: '/folders/reports'
+      },
+      {
+        name: 'Templates',
+        icon: 'fa fa-gear',
+        path: '/folders/templates'
+      }
+    ],
     exact: true,
     auth: true,
-    mainNav: false,
+    mainNav: true,
     sideNav: {
       color: 'dark',
-      size: 'none'
+      size: 'compact'
     },
     component: withAuth(Folders)
   }

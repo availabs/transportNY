@@ -3,7 +3,6 @@ import React from 'react'
 import get from 'lodash.get'
 
 const LayerStylePane = (props) => {
-  // console.log('LayerStylePane', props)
   const mapBoxLayer = React.useMemo(() => 
   	get(props.layer.views, `[${props.layer.activeView}]metadata.tiles.layers[0]`, {}),
   	[props.layer.views, props.layer.activeView]
@@ -23,7 +22,7 @@ const LayerStylePane = (props) => {
   		
   },[mapBoxLayer])
 
-  return (
+  React.useMemo(() => (
     <div className='border-t border-gray-300 h-full bg-gray-100 w-full'> 
       {renderControl}
       {/*<pre>
@@ -31,7 +30,7 @@ const LayerStylePane = (props) => {
       </pre>*/}
 
     </div>
-  )
+  ), [renderControl])
 }
 
 const StrokeWidthControl = () => {

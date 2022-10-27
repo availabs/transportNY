@@ -90,7 +90,7 @@ const IncidentGrid = ({
 
 	const expandData = React.useMemo((tmcs, year, requestKeys, falcorCache) => {
 
-	  return requestKeys.reduce((a, rk) => {
+	  return (requestKeys || []).reduce((a, rk) => {
 	    const data = [...get(falcorCache, ["routes", "data", rk, "value"], [])];
 
 	    const tmcMap = d3rollup(

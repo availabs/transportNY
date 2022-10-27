@@ -68,13 +68,46 @@ const MyStuff = props => {
 
 const config = [
   { name:'MyStuff',
-    path: "/mystuff/:stuff?",
+    path: "/mystuff?",
     exact: true,
     auth: true,
-    mainNav: false,
+    mainNav: true,
     sideNav: {
       color: 'dark',
-      size: 'none'
+      size: 'compact'
+    },
+    component: MyStuff
+  },
+  { name:'Routes',
+    path: "/mystuff/routes",
+    exact: true,
+    auth: true,
+    mainNav: true,
+    sideNav: {
+      color: 'dark',
+      size: 'compact'
+    },
+    component: MyStuff
+  },
+  { name:'Reports',
+    path: "/mystuff/reports",
+    exact: true,
+    auth: true,
+    mainNav: true,
+    sideNav: {
+      color: 'dark',
+      size: 'compact'
+    },
+    component: MyStuff
+  },
+  { name:'Templates',
+    path: "/mystuff/templates",
+    exact: true,
+    auth: true,
+    mainNav: true,
+    sideNav: {
+      color: 'dark',
+      size: 'compact'
     },
     component: MyStuff
   }

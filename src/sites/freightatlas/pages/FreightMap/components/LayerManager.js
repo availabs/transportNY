@@ -21,7 +21,7 @@ const LayerManager = ({ activeLayers, MapActions, ...rest }) => {
   const { layerList, toggleLayer } = useContext(LayerContext);
 
   const pgEnv = useSelector(selectPgEnv);
-
+  
   useEffect(() => {
     const fetchData = async () => {
       const lengthPath = ["dama", pgEnv, "sources", "length"];

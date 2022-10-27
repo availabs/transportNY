@@ -13,19 +13,19 @@ const Home = () => (
       <Link to="/folders/reports">My Reports</Link>
       <Link to="/folders/templates">My Templates</Link>
     </div>
+    <span className='hover:pl-4'/>
   </div>
 )
 const config = {
-  name:'TransportNY',
-  // title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
-  // icon: 'fa-duotone fa-home',
+  name:'Home',
+  icon: 'fa fa-home',
   path: "/",
   exact: true,
   auth: true,
-  mainNav: false,
+  mainNav: true,
   sideNav: {
     color: 'dark',
-    size: 'none'
+    size: 'compact'
   },
   component: Home
 }
