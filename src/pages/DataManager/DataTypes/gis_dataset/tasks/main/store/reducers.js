@@ -5,10 +5,9 @@ import PublishStatus from "../../../constants/PublishStatus";
 import * as uploadGisDatasetSelectors from "../../uploadGisDataset/store/selectors";
 
 export const initialState = {
+  dataSourceId: null,
   dataSourceName: null,
   dataSourceDisplayName: null,
-
-  dataSourceId: null,
 
   etlContextId: null,
   maxSeenEventId: null,
@@ -21,6 +20,17 @@ export const initialState = {
   publishStatus: PublishStatus.AWAITING,
   publishErrMsg: null,
 };
+
+export function init(source) {
+  const state = {
+    ...initialState,
+    dataSourceId: source.id || null,
+    dataSourceName: source.name || null,
+    dataSourceDisplayName: source.display_name || null,
+  };
+
+  return state;
+}
 
 export default function reducer(state, action) {
   // console.log("==> createGisDatasource reducer:", { state, action });

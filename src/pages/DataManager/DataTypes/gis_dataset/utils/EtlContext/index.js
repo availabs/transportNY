@@ -99,7 +99,10 @@ export function useEtlContextDependencies(_ctx, deps) {
   for (const dep of dependencies) {
     if (!isEqual(prevSlice[dep], newSlice[dep])) {
       prevSliceRef.current = newSlice;
-      // console.log("returning new slice");
+
+      // console.log("ctx", ctx.name, " dep", dep, "changed.");
+      // console.log({ old: prevSlice[dep], new: newSlice[dep] });
+
       return newSlice;
     }
   }

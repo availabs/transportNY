@@ -8,7 +8,7 @@ import get from "lodash.get";
 import GisDatasetLayer from "./GisDatasetLayer";
 import { AvlMap } from "modules/avl-map/src";
 
-import Create from "./tasks/createNewGisDatasource";
+import Create from "./tasks/main";
 import config from "config.json";
 
 import { selectPgEnv } from "pages/DataManager/store";

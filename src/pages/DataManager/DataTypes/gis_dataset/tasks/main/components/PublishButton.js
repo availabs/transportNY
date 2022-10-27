@@ -7,12 +7,8 @@ import {
 
 import PublishStatus from "../../../constants/PublishStatus";
 
-export function PublishButton() {
+export function PublishButton({ publishOperation }) {
   const ctx = useContext(EtlContextReact);
-
-  const {
-    operations: { createNewDataSource },
-  } = ctx;
 
   const {
     layerName,
@@ -63,7 +59,7 @@ export function PublishButton() {
       }}
       onClick={() => {
         if (publishStatus === PublishStatus.AWAITING) {
-          createNewDataSource(ctx);
+          publishOperation(ctx);
         }
       }}
     >

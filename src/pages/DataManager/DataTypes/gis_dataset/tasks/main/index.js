@@ -1,12 +1,6 @@
-/*
- *  TODO:
- *        [ ] fetch err handling
- *        [ ] Replace gisUploadId with etlContextId
- */
-
-import React, { useEffect, useReducer, useRef } from "react";
+import React, { useEffect, useReducer, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 
 import _ from "lodash";
 
@@ -31,7 +25,7 @@ import { selectors as updateGisDatasetLayerDatabaseSchemaSelectors } from "../up
 
 import { PublishButton, PublishErrorMessage } from "./components/PublishButton";
 
-import reducer, { initialState, actions, selectors, operations } from "./store";
+import reducer, { init, actions, selectors, operations } from "./store";
 
 const workflow = [
   UploadGisDataset,
@@ -44,6 +38,8 @@ const {
   updateDataSourceDisplayName,
   updateEtlContextId,
 } = actions;
+
+const { createNewDataSource, updateExistingDataSource } = operations;
 
 const {
   selectUploadGisDatasetState,
@@ -81,13 +77,27 @@ function RequestSourceName() {
   );
 }
 
-const Create = ({ source }) => {
-  const { name: sourceName, display_name: sourceDisplayName } = source;
+const GisDataset = (props) => {
+  const { sourceId } = useParams();
+
+  const { source } = props;
+
+  const { name: dataSourceName, display_name: dataSourceDisplayName } = source;
+
+  const [isCreatingNew] = useState(!!source.id);
+
+  const publishOperation = isCreatingNew
+    ? updateExistingDataSource
+    : createNewDataSource;
 
   const pgEnv = useSelector(selectPgEnv);
   const userId = useSelector(selectUserId);
 
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(
+    reducer,
+    _.merge(source, { id: sourceId }),
+    init
+  );
 
   const rtPfx = pgEnv ? getDamaApiRoutePrefix(pgEnv) : null;
 
@@ -109,13 +119,23 @@ const Create = ({ source }) => {
 
   ctx.setState(state);
 
-  useEffect(() => {
-    dispatch(updateDataSourceName(sourceName));
-  }, [sourceName]);
+  const etlCtxDeps = useEtlContextDependencies(ctx, [
+    "etlContextId",
+    "dataSourceId",
+    "publishStatus",
+  ]);
+
+  const { etlContextId, dataSourceId, publishStatus } = etlCtxDeps;
+
+  ctx.assignMeta({ etlContextId, rtPfx });
 
   useEffect(() => {
-    dispatch(updateDataSourceDisplayName(sourceDisplayName));
-  }, [sourceDisplayName]);
+    dispatch(updateDataSourceName(dataSourceName));
+  }, [dataSourceName]);
+
+  useEffect(() => {
+    dispatch(updateDataSourceDisplayName(dataSourceDisplayName));
+  }, [dataSourceDisplayName]);
 
   // Probably want to wait until the user takes an action that requires the etlContextId
   // Could do that by wrapping fetch in ctx.api
@@ -128,23 +148,15 @@ const Create = ({ source }) => {
     })();
   }, [pgEnv, ctx]);
 
-  const etlCtxDeps = useEtlContextDependencies(ctx, [
-    "etlContextId",
-    "dataSourceId",
-    "publishStatus",
-  ]);
-
-  const { etlContextId, dataSourceId, publishStatus } = etlCtxDeps;
-
-  ctx.assignMeta({ etlContextId, rtPfx });
-
   const history = useHistory();
 
-  if (publishStatus === PublishStatus.PUBLISHED) {
-    history.push(`/datasources/source/${dataSourceId}`);
-  }
+  useEffect(() => {
+    if (publishStatus === PublishStatus.PUBLISHED) {
+      history.push(`/datasources/source/${dataSourceId}`);
+    }
+  }, [publishStatus, dataSourceId, history]);
 
-  if (!sourceName) {
+  if (!dataSourceName) {
     return <RequestSourceName />;
   }
 
@@ -172,7 +184,7 @@ const Create = ({ source }) => {
 
       <EtlContextReact.Provider value={ctx}>
         {workflowElems}
-        <PublishButton />
+        <PublishButton publishOperation={publishOperation} />
         <PublishErrorMessage />
       </EtlContextReact.Provider>
 
@@ -192,4 +204,4 @@ const Create = ({ source }) => {
   );
 };
 
-export default Create;
+export default GisDataset;

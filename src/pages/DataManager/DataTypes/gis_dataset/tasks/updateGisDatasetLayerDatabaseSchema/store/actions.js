@@ -1,5 +1,9 @@
 import createSimpleIdentityAction from "../../../utils/createSimpleIdentityAction";
 
+export const updateDatabaseColumnNames = createSimpleIdentityAction(
+  "databaseColumnNames/UPDATE_DATABASE_COLUMN_NAMES"
+);
+
 export const updateTableDescriptor = createSimpleIdentityAction(
   "tableDescriptor/UPDATE_TABLE_DESCRIPTOR"
 );

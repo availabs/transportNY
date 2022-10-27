@@ -154,11 +154,7 @@ export async function publishGisDatasetLayer(ctx) {
   await checkApiResponse(res);
 }
 
-export async function simpleCreateNewDataSource(ctx) {
-  const { id } = await createNewDataSource(ctx);
-
-  // setNewDataSourceMeta(newSrcMeta);
-
+export async function simpleUpdateExistingDataSource(ctx) {
   await stageLayerData(ctx);
 
   await approveQA(ctx);
@@ -166,6 +162,12 @@ export async function simpleCreateNewDataSource(ctx) {
   await submitViewMeta(ctx);
 
   await publishGisDatasetLayer(ctx);
+}
+
+export async function simpleCreateNewDataSource(ctx) {
+  const { id } = await createNewDataSource(ctx);
+
+  await simpleUpdateExistingDataSource(ctx);
 
   return id;
 }

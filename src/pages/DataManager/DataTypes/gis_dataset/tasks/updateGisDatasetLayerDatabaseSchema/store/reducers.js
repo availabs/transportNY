@@ -1,8 +1,9 @@
 import deepFreeze from "deep-freeze-strict";
 
-import { assign, cloneDeep, get } from "lodash";
+import { assign, cloneDeep, get, isEqual } from "lodash";
 
 export const initialState = deepFreeze({
+  databaseColumnNames: null,
   tableDescriptor: null,
 });
 
@@ -18,6 +19,16 @@ export default function reducer(state, action) {
   const { type, payload } = action;
 
   switch (type) {
+    case "databaseColumnNames/UPDATE_DATABASE_COLUMN_NAMES": {
+      const { databaseColumnNames } = state;
+
+      if (isEqual(databaseColumnNames, payload)) {
+        return state;
+      }
+
+      return { ...state, databaseColumnNames: payload };
+    }
+
     case "tableDescriptor/UPDATE_TABLE_DESCRIPTOR": {
       const { tableDescriptor } = state;
 
