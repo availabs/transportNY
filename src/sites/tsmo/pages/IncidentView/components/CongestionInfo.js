@@ -16,16 +16,19 @@ export const congestionController = (Component) => (props) => {
   const { event_id } = props;
 
   React.useEffect(() => {
-    falcor.get([
-      "transcom2",
-      "eventsbyId",
-      event_id,
-      [
-        "congestion_data",
-        "start_date_time",
-        "geom"
-      ]
-    ])
+    console.log('congestionController falcor', event_id )
+    if(event_id){
+        falcor.get([
+        "transcom2",
+        "eventsbyId",
+        event_id,
+        [
+          "congestion_data",
+          "start_date_time",
+          "geom"
+        ]
+      ])
+    }
   }, [falcor,event_id]);
 
   const congestionData = React.useMemo(() => {

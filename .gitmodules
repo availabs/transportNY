@@ -7,3 +7,6 @@
 [submodule "src/modules/avl-map"]
 	path = src/modules/avl-map
 	url = https://github.com/availabs/avl-map.git
+[submodule "src/modules/ams"]
+	path = src/modules/ams
+	url = git@github.com:availabs/ams.git

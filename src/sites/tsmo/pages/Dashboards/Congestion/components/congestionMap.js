@@ -4,7 +4,6 @@ import { AvlMap } from "modules/avl-map/src"
 import {MacroLayerFactory} from './layers/congestion-layer'
 import config from "config.json"
 
-import { ThemeContext } from "@availabs/avl-components"
 import PPDAF_THEME from "theme"
 
 const Map = ({ rawDelayData, hoveredTMCs }) => {
@@ -34,7 +33,6 @@ const Map = ({ rawDelayData, hoveredTMCs }) => {
     return (
 
         <div className='w-full h-full border min-h-[850px]'  >
-          <ThemeContext.Provider value={ PPDAF_THEME }>
 
             <AvlMap
                 accessToken={ config.MAPBOX_TOKEN }
@@ -45,7 +43,6 @@ const Map = ({ rawDelayData, hoveredTMCs }) => {
                 navigationControl="bottom-right"
             />
 
-          </ThemeContext.Provider>
         </div>
 
     )

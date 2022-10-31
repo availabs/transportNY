@@ -64,7 +64,7 @@ const calculateCosts = (tmcDelayData, tmcMetaData) => {
 		"non-recurrent": 0,
 		recurrent: 0
 	}
-console.log("calculateCosts:", tmcDelayData, tmcMetaData)
+  //console.log("calculateCosts:", tmcDelayData, tmcMetaData)
 	for (const tmc in tmcDelayData) {
 		for (const key in costs) {
 			costs[key] += calcCost(tmcDelayData[tmc][key], get(tmcMetaData, tmc, {}))

@@ -4,7 +4,6 @@ import { AvlMap } from "modules/avl-map/src"
 import {MacroLayerFactory} from './IncidentsLayer'
 import config from "config.json"
 
-import { ThemeContext } from "@availabs/avl-components"
 import PPDAF_THEME from "theme"
 
 const Map = ({ events, colorsForTypes, hoveredEvent }) => {
@@ -31,7 +30,7 @@ const Map = ({ events, colorsForTypes, hoveredEvent }) => {
     return (
 
         <div className='w-full h-full border min-h-[850px]'  >
-          <ThemeContext.Provider value={ PPDAF_THEME }>
+          
 
             <AvlMap accessToken={ config.MAPBOX_TOKEN }
               mapOptions={ mapOptions }
@@ -40,7 +39,7 @@ const Map = ({ events, colorsForTypes, hoveredEvent }) => {
               sidebarTabPosition='side'
               navigationControl="bottom-right"/>
 
-          </ThemeContext.Provider>
+          
         </div>
 
     )

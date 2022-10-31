@@ -8,9 +8,6 @@ import Layout from 'layout/ppdaf-layout'
 import get from 'lodash.get'
 import {/*getDomain,*/getSubdomain} from 'utils'
 
-import { useFalcor } from "modules/avl-components/src";
-import { setFalcorGraph } from "pages/DataManager/store"
-
 import {
   DefaultLayout,
   Messages
@@ -33,15 +30,6 @@ const Sites = {
 }
 
 const App = (props) => {
-  const { falcorCache } = useFalcor();
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    (async () => {
-      dispatch(setFalcorGraph(falcorCache));
-    })();
-  }, [dispatch, falcorCache]);
-
   const SUBDOMAIN = getSubdomain(window.location.host)
   // const PROJECT_HOST = getDomain(window.location.host)
 

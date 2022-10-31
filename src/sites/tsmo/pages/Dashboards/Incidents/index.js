@@ -483,7 +483,7 @@ const Incidents = props => {
   )
 }
 
-const IncidentsPageConfig =  [
+const IncidentsPageConfig = 
 
   { name:'Incidents',
     title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
@@ -498,7 +498,7 @@ const IncidentsPageConfig =  [
     },
     component: Incidents,
   }
-];
+
 export default IncidentsPageConfig;
 
 const precentFormat = d3format(",.1%")
