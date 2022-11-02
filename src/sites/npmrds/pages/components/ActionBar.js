@@ -212,7 +212,9 @@ const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
     const length = get(falcorCache, ["folders2", "user", "length"], 0);
     const refs = d3range(length).map(i => get(falcorCache, ["folders2", "user", "index", i, "value"]));
     const folders = refs.map(ref => get(falcorCache, ref, null))
-      .filter(Boolean).filter(f => f.id != parent);
+      .filter(Boolean)
+      .filter(f => f.id != parent)
+      .filter(f => f.type !== "default");
 
     folders.sort((a, b) => {
       if (a.type === b.type) {
@@ -252,7 +254,7 @@ const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
         <div className="flex-1 flex">
           { !stuffActions.length ?
             <div className="pl-1 text-gray-400 border border-transparent">
-              Select some stuff...
+              select stuff...
             </div> :
             stuffActions.map(({ action, key, Comp, label, ...rest }) => (
               <Comp key={ key }
