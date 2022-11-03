@@ -231,7 +231,7 @@ const GisDatasetConfig = {
   },
   addView: {
     name: 'Add View',
-    path: '/view',
+    path: '/addview',
     component: AddView
   },
   pwrUsrOnly: false,

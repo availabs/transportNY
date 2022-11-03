@@ -2,7 +2,7 @@ import React from 'react'
 import { TabPanel, Dropdown } from "modules/avl-components/src"
 import get from 'lodash.get'
 
-import { LayerStylePane } from './SymbologyControls'
+import { SymbologyControls } from 'pages/DataManager/components/SymbologyControls'
 import { SourceInfoPanel } from './SourceInfoPanel'
 
 
@@ -10,10 +10,10 @@ import { SourceInfoPanel } from './SourceInfoPanel'
 
 const LayerControlPanel = (props) => {
   const LayerTabs = [
-        // {
-        //     name: 'styles',
-        //     Component: LayerStylePane
-        // },
+        {
+            name: 'styles',
+            Component: SymbologyControls
+        },
         // {
         //     name: 'filter',
         //     Component: () => <div className='border-t border-gray-300 h-full bg-gray-100'> filter </div>
@@ -31,7 +31,7 @@ const LayerControlPanel = (props) => {
     <div className='pl-[4px] w-full bg-gray-100' style={{height: get(props, 'rect.height',0) - 15}}>
       <div className='w-full h-full  border-l border-gray-200'>
         <div className=' flex justify-between p-2 h-11  bg-white'>
-          <a href={`/datasources/source/${get(props,'layer.source.id',1)}`} target='_blank' className='block text-lg text-bold flex-1'>  {get(props, 'layer.name' , '')} </a>
+          <a href={`/datasources/source/${get(props,'layer.source.id',1)}`} target='_blank'  rel="noreferrer" className='block text-lg text-bold flex-1'>  {get(props, 'layer.name' , '')} </a>
           <div className=' hover:border-blue-50 hover:bg-blue-100 cursor-pointer'> 
             <Dropdown 
               control={<span className ='-m-0.5 fad fa-download text-blue-500 p-2' alt='download' />} 
@@ -53,7 +53,12 @@ const LayerControlPanel = (props) => {
         <div className='bg-white overflow-hidden'>
          <TabPanel 
             tabs={LayerTabs} 
-            {...props} 
+            {...props}
+            onChange={(v) => {
+              props.layer.symbology = v
+              props.layer.updateState()
+              console.log('symbology on change',props.layer)
+            }} 
             themeOptions={{tabLocation:'top'}}
           />
         </div>

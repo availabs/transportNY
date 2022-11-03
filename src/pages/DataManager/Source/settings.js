@@ -15,7 +15,7 @@ const Settings = () => {
 
   const pgEnv = useSelector(selectPgEnv);
   const pgEnvs = React.useMemo(() => {
-    get(falcorCache, ["dama-info", "pgEnvs", "value"], []);
+    return get(falcorCache, ["dama-info", "pgEnvs", "value"], []);
   },[falcorCache]);
 
   useEffect(() => {

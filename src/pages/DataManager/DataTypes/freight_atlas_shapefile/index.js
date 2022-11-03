@@ -4,6 +4,7 @@ import get from 'lodash.get'
 // import { useParams } from 'react-router-dom'
 import FreightAtlasLayer from './FreightAtlasLayer'
 import { AvlMap } from "modules/avl-map/src"
+import { SymbologyControls } from 'pages/DataManager/components/SymbologyControls'
 
 import Create from './create'
 import config from "config.json"
@@ -11,8 +12,6 @@ import config from "config.json"
 // import { getAttributes } from 'pages/DataManager/components/attributes'
     
 const Map = ({layers}) => {
-    
-    console.log('layers', layers)
     
     const mapOptions =  {
         zoom: 6.2,
@@ -34,7 +33,9 @@ const Map = ({layers}) => {
  
     const map_layers = useMemo(() => {
       return layers.map(l => FreightAtlasLayer(l))
-    },[])
+    },[layers])
+
+    console.log('map_layers',map_layers)
     
     return (
         
@@ -74,7 +75,7 @@ const Edit = ({startValue, attr, viewId, parentData, cancel=()=>{}}) => {
         let update = JSON.parse(value)
         let val = parentData
         val.tiles[attr] = update
-        // console.log('testing',JSON.stringify(val), val)
+        // console.log('testing',JSON.stringify(val), val)v
         await falcor.set({
             paths: [
               ['datamanager','views','byId',viewId,'attributes', 'metadata' ]
@@ -122,10 +123,12 @@ const Edit = ({startValue, attr, viewId, parentData, cancel=()=>{}}) => {
 
 const MapPage = ({source,views, user}) => {
   // const { sourceId } = useParams()
-  console.log('user auth', user)
+  const { falcor } = useFalcor()
+  // console.log('user auth', user)
   const [ activeView /*, setActiveView*/ ] = useState(0)
-  const [ mapData /*, setMapData*/ ] = useState(get(views,'[0].metadata.tiles',{}))
+  const [ mapData /*, setMapData*/ ] = useState(get(views,`[${activeView}].metadata.tiles`,{}))
   const [ editing, setEditing ] = React.useState(null)
+  const viewId = React.useMemo(() => get(views,`[${activeView}].id`,null), [views,activeView])
   const layer = React.useMemo(() => {
       return {
             name: source.name,
@@ -133,11 +136,41 @@ const MapPage = ({source,views, user}) => {
             views: views,
             activeView: activeView,
             sources: get(mapData,'sources',[]), 
-            layers: get(mapData,'layers',[])
+            layers: get(mapData,'layers',[]),
+            symbology: get(mapData, `symbology`, [])
       }
   },[source, views, mapData, activeView])
 
   // console.log('testing', mapData, activeView)
+  const save = async (attr, value) => {
+    if(viewId) {
+      try{
+        let update = value
+        let val = get(views,`[${activeView}].metadata`,{})
+        val.tiles[attr] = update
+        await falcor.set({
+            paths: [
+              ['datamanager','views','byId',viewId,'attributes', 'metadata' ]
+            ],
+            jsonGraph: {
+              datamanager:{
+                views: {
+                  byId:{
+                    [viewId] : {
+                        attributes : { 'metadata': JSON.stringify(val)}
+                    }
+                  }
+                }
+              }
+            }
+        })
+        // console.log('set run', response)
+        // cancel()
+      } catch (error) {
+        // console.log('error stuff',error,value, parentData);
+      }
+    }
+  }
 
   return (
     <div> 
@@ -148,6 +181,10 @@ const MapPage = ({source,views, user}) => {
       </div>
       {user.authLevel >= 5 ? 
       <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
+        <SymbologyControls 
+          layer={layer} 
+          onChange={(v) => save('symbology',v)}
+        />
         <dl className="sm:divide-y sm:divide-gray-200">
           {['sources','layers','symbology']
             .map((attr,i) => {

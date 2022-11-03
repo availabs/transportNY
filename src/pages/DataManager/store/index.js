@@ -20,8 +20,8 @@ export const datamanagerSlice = createSlice({
   },
   reducers: {
     setPgEnv: (state, action) => {
-      localStorage.setItem(lclStoKeys.pgEnv, action.pgEnv);
-      state.pgEnv = action.pgEnv
+      localStorage.setItem(lclStoKeys.pgEnv, action.payload);
+      state.pgEnv = action.payload
     },
   }
 });
@@ -44,7 +44,7 @@ export const selectUserId = (state) => {
 };
 
 export const selectPgEnv = (state) => {
-  return get(state, [sliceName, "pgEnv"], null);
+  return get(state, [sliceName, "pgEnv"], defaultPgEnv);
 };
 
 export const queryPgEnvs = () => ["dama-info", "pgEnvs"];
