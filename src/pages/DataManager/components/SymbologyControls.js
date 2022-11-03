@@ -26,64 +26,114 @@ const SymbologyControls = ({layer, onChange}) => {
   	get(data_table.split('.'),'[1]','').slice(-4),
   [data_table])
 
-  const renderControl = React.useMemo(() => {
-  	switch(mapBoxLayer.type) {
-  		case 'line':
-  			return <LineSymbologyControl 
-  				symbology={symbology}
-  				layerName={layerName}
-  				version={version}
-  				setSymbology={setSymbology}
-  			/>
-  		case 'circle':
-  			return <PointSymbologyControl />
-  		case 'fill':
-  			return <PolygonSymbologyControl />
-  		default:
-  			return <div>Invalid Layer</div>
-  	} 
-  		
-  },[mapBoxLayer,symbology, layerName, version])
-
   return React.useMemo(() => (
     <div className='border-t border-gray-300 h-full w-full'> 
       {/*<pre>
       	{JSON.stringify(symbology,null,3)}
     	</pre>*/}
-      {renderControl}
+      <SymbologyControl
+      		layerType={mapBoxLayer.type}
+  				symbology={symbology}
+  				layerName={layerName}
+  				version={version}
+  				setSymbology={setSymbology}
+  		/>
 
     </div>
-  ), [renderControl])
+  ), [mapBoxLayer,symbology, layerName, version])
 }
 
 //
-const LineSymbologyControl = (props) => {
+const SymbologyControl = (props) => {
+  const paintAttributes = [
+  	{
+  		name: 'Color',
+  		layerType: 'line',
+  		paintAttribute: 'line-color',
+  		defaultData: '#ccc',
+  		Component: ColorControl
+  	},
+  	{
+  		name: 'Opacity',
+  		layerType: 'line',
+  		paintAttribute: 'line-opacity',
+  		defaultData: '1',
+  		Component: SimpleRangeControl
+  	},
+  	{
+  		name: 'Width',
+  		layerType: 'line',
+  		paintAttribute: 'line-width',
+  		defaultData: '1',
+  		Component: SimpleNumberControl
+  	}
+  ]
   return (
     <div className=''>
     	<TabPanel 
-            tabs={[
-            	{
-            		name: <div className='text-sm text-left'> Color </div>,
-            		Component: () => <LineColorControl {...props}/>
-        			},
-        			{
-            		name: <div className='text-sm text-left'> Opacity </div>,
-            		Component: LineOpacityControl
-        			},
-            	{
-            		name: <div className='text-sm text-left'> Width </div>,
-            		Component: StrokeWidthControl
-        			},
-        			
-       			]}
-            {...props} 
-            themeOptions={{tabLocation:'left'}}
+        tabs={
+        	paintAttributes
+        		.filter(attr => attr.layerType === props.layerType)
+        		.map(attr => {
+        			return {
+          			name: <div className='text-sm text-left'> {attr.name} </div>,
+          			Component: () => <PaintControl {...props} {...attr}/>
+    					}
+    				})
+    		}
+        themeOptions={{tabLocation:'left'}}
        />
     </div>
   )
 }
 
+const PaintControl = ({
+		Component, 
+		paintAttribute, 
+		defaultData, 
+		symbology, 
+		layerName, 
+		version, 
+		setSymbology
+	}) => {
+	const lineColorIndex = useMemo(() => 
+		getStyleIndex(symbology,paintAttribute),[symbology])
 
+	const [lineColor,setLineColor] = useState({
+		paint: paintAttribute,
+		type: get(symbology, `[${lineColorIndex}].type`, 'simple'),
+		value: get(symbology, `[${lineColorIndex}].value`, defaultData),
+		range: get(symbology, `[${lineColorIndex}].range`, []),
+		domain: get(symbology, `[${lineColorIndex}].domain`, []),
+		column: get(symbology, `[${lineColorIndex}].column`, ''),
+	})
+
+	const update = (attr,value) => {
+		setLineColor({...lineColor, [attr]: value})
+		if(lineColorIndex === -1) {
+			setSymbology([
+				...symbology,
+				{...lineColor, [attr]: value}
+			])
+		} else {
+			let newSymbology = [...symbology]
+			newSymbology[lineColorIndex] = {...lineColor, [attr]: value}
+			setSymbology(newSymbology)
+		}
+
+	}
+
+	return (
+		<div className='flex px-2 py-4 h-full'>
+			<div className='bg-white flex-1 border border-gray-300 hover:bg-gray-100 h-full'>
+				<Component
+					symbology={lineColor}
+					onChange={update}
+				/>
+			</div>
+		</div>
+	)
+}
 
 const ColorControl = ({symbology,onChange}) => {
 		const renderControl = React.useMemo(() => {
@@ -140,7 +190,7 @@ const ThresholdScaleColorControl = ({value,onChange}) =>
 const OrdinalScaleColorControl = ({value,onChange}) => 
 		<div> Ordinal Scale Color Control </div>
 	
-const SimpleRangeControl = ({value,onChange, min=0, max=1,step=0.01}) => 
+const SimpleRangeControl = ({symbology,onChange, min=0, max=1,step=0.01}) => 
 		<div className = 'flex justify-between items-center p-1 '>
 			<div className='pt-2'>
 				<input 
@@ -148,125 +198,30 @@ const SimpleRangeControl = ({value,onChange, min=0, max=1,step=0.01}) =>
 					min={min}
 					max={max}
 					step={step}
-					value={ value } 
+					value={ symbology.value } 
 		      onChange={ v => onChange("value", v.target.value) }
 		     />
 		  </div>
-		  <div>{value}</div>
+		  <div>{symbology.value}</div>
 		</div>
 
-const LineColorControl = ({symbology, layerName, version, setSymbology}) => {
-	const lineColorIndex = useMemo(() => getStyleIndex(symbology,'line-color'),[symbology])
-	const [lineColor,setLineColor] = useState({
-		paint: 'line-color',
-		type: get(symbology, `[${lineColorIndex}].type`, 'simple'),
-		value: get(symbology, `[${lineColorIndex}].value`, '#fff'),
-		range: get(symbology, `[${lineColorIndex}].range`, []),
-		domain: get(symbology, `[${lineColorIndex}].domain`, []),
-		column: get(symbology, `[${lineColorIndex}].column`, ''),
-	})
-
-	const update = (attr,value) => {
-		setLineColor({...lineColor, [attr]: value})
-		if(lineColorIndex === -1) {
-			setSymbology([
-				...symbology,
-				{...lineColor, [attr]: value}
-			])
-		} else {
-			let newSymbology = [...symbology]
-			newSymbology[lineColorIndex] = {...lineColor, [attr]: value}
-			setSymbology(newSymbology)
-		}
-
-	}
-
-	return (
-		<div className='flex px-2 py-4 h-full'>
-			<div className='bg-white flex-1 border border-gray-300 hover:bg-gray-100 h-full'>
-				<ColorControl
-					symbology={lineColor}
-					onChange={update}
-				/>
-			</div>
+const SimpleNumberControl = ({symbology,onChange, min=1, max=50,step=1}) => 
+		<div className = 'flex justify-between items-center p-1 '>
+			<div className='flex-1'>
+				<input 
+					className='p-2 w-full bg-white text-right'
+					type='number'
+					min={min}
+					max={max}
+					step={step}
+					value={ symbology.value } 
+		      onChange={ v => onChange("value", v.target.value) }
+		     />
+		  </div>
+		  <div>px</div>
 		</div>
-	)
-}
-
-const LineOpacityControl = ({symbology, layerName, version, setSymbology}) => {
-	const lineColorIndex = useMemo(() => getStyleIndex(symbology,'line-opacity'),[symbology])
-	const [lineColor,setLineColor] = useState({
-		paint: 'line-opacity',
-		type: get(symbology, `[${lineColorIndex}].type`, 'simple'),
-		value: get(symbology, `[${lineColorIndex}].value`, 1),
-		range: get(symbology, `[${lineColorIndex}].range`, []),
-		domain: get(symbology, `[${lineColorIndex}].domain`, []),
-		column: get(symbology, `[${lineColorIndex}].column`, ''),
-	})
-
-	const update = (attr,value) => {
-		setLineColor({...lineColor, [attr]: value})
-		if(lineColorIndex === -1) {
-			setSymbology([
-				...symbology,
-				{...lineColor, [attr]: +value}
-			])
-		} else {
-			let newSymbology = [...symbology]
-			newSymbology[lineColorIndex] = {...lineColor, [attr]: value}
-			setSymbology(newSymbology)
-		}
-
-	}
-
-	return (
-		<div className='flex px-2 py-4 h-full'>
-			<div className='bg-white flex-1 border border-gray-300 hover:bg-gray-100 h-full'>
-				<SimpleRangeControl 
-					value={lineColor.value}
-					onChange={update}
-				/>
-			</div>
-		</div>
-	)
-}
 
 
-const StrokeWidthControl = () => {
-	return (
-		<div className='flex px-2 py-4 '>
-			<div className='bg-white flex-1 border border-gray-300 hover:bg-gray-100'>
-				x
-			</div>
-		</div>
-	)
-}
-
-const OpacityControl = () => {
-	return (
-		<div className='flex px-2 py-4 '>
-			<div className='bg-white flex-1 border border-gray-300 hover:bg-gray-100'>
-				x	
-			</div>
-		</div>
-	)
-} 
-
-const PointSymbologyControl = (props) => {
-  return (
-    <div className='-t border-gray-300 h-full bg-gray-100 w-full'> 
-      Point
-    </div>
-  )
-}
-
-const PolygonSymbologyControl = (props) => {
-  return (
-    <div className='border-t border-gray-300 h-full bg-gray-100 w-full'> 
-      Polygon
-    </div>
-  )
-}
 
 const getStyleIndex = (symbologoy, paint) => {
 	return symbologoy.reduce((out,current,i) => {

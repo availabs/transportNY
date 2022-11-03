@@ -21,7 +21,7 @@ const Folders = ({ user }) => {
   const { falcor, falcorCache } = useFalcor();
 
   const [folders, setFolders] = React.useState([]);
-  const [foldersByType, setFoldersByType] = React.useState([[], []])
+  const [foldersByType, setFoldersByType] = React.useState([[], [], []]);
   const [openedFolders, setOpenedFolders] = React.useState([]);
   const OpenedFolders = React.useMemo(() => {
     return openedFolders.map(fid => get(falcorCache, ["folders2", "id", fid]));
@@ -67,12 +67,9 @@ const Folders = ({ user }) => {
     const folders = refs.map(ref => get(falcorCache, ref, null)).filter(Boolean);
 
     folders.sort((a, b) => {
-      if (a.type === b.type) {
-        const aDate = new Date(a.updated_at);
-        const bDate = new Date(b.updated_at);
-        return bDate.getTime() - aDate.getTime();
-      }
-      return (a.type === "user") ? -1 : 1;
+      const aDate = new Date(a.updated_at);
+      const bDate = new Date(b.updated_at);
+      return bDate.getTime() - aDate.getTime();
     });
     setFolders(folders);
 
@@ -80,17 +77,20 @@ const Folders = ({ user }) => {
       if (c.type === "user") {
         a[0].push(c);
       }
-      else {
+      else if (c.type === "group") {
         a[1].push(c);
       }
+      else if (c.type === "default") {
+        a[2].push(c);
+      }
       return a;
-    }, [[], []]);
+    }, [[], [], []]);
     setFoldersByType(byType);
   }, [falcorCache]);
 
   React.useEffect(() => {
     if (folders.length && !openedFolders.length) {
-      setOpenedFolders([folders[0].id]);
+      setOpenedFolders([folders.filter(f => f.type === "user")[0].id]);
     }
   }, [folders, openedFolders]);
 
@@ -113,58 +113,11 @@ const Folders = ({ user }) => {
 
   return (
     <div className="max-w-6xl mx-auto my-8">
-      <div className="mb-1 pb-1">
-        <div className="grid grid-cols-3">
-          <div className="col-span-2">
-            { !foldersByType[0].length ? null :
-              <>
-                <div className="border-b-2 border-current mb-1 font-bold">User Folders</div>
-                <div className="grid grid-cols-5">
-                  { foldersByType[0].map(f => (
-                      <FolderIconWrapper key={ f.id } { ...f } size={ 7 }
-                        onClick={ e => setOpenedFolders([f.id]) }
-                        opened={ f.id == openedFolders[0] }
-                        deleteFolder={ deleteFolder }
-                        userAuth={ get(user, "authLevel", 0) }/>
-                    ))
-                  }
-                </div>
-              </>
-            }
-            { !foldersByType[1].length ? null :
-              <>
-                <div className="border-b-2 border-current mb-1 mt-2 font-bold">Group Folders</div>
-                <div className="grid grid-cols-5">
-                  { foldersByType[1].map(f => (
-                      <FolderIconWrapper key={ f.id } { ...f } size={ 7 }
-                        onClick={ e => setOpenedFolders([f.id]) }
-                        opened={ f.id == openedFolders[0] }
-                        deleteFolder={ deleteFolder }
-                        userAuth={ get(user, "authLevel", 0) }/>
-                    ))
-                  }
-                </div>
-              </>
-            }
-          </div>
-          <div className="flex items-center justify-center">
-            <div onClick={ openModal }
-              className={ `
-                w-40 h-40 rounded-lg hover:bg-gray-400
-                flex items-center justify-center
-                text-4xl hover:text-6xl cursor-pointer
-              ` }
-            >
-              <span className="fa fa-plus"/>
-            </div>
-          </div>
-        </div>
-      </div>
       { !openedFolders.length ? null :
-        <StuffInFolder
+        <StuffInFolder filter={ filter }
+          deleteFolder={ deleteFolder }
           openedFolders={ OpenedFolders }
-          setOpenedFolders={ setOpenedFolders }
-          filter={ filter }/>
+          setOpenedFolders={ setOpenedFolders }/>
       }
       <FolderModal isOpen={ open }
         close={ closeModal }/>
@@ -217,7 +170,7 @@ const FolderIconWrapper = ({ opened, onClick, deleteFolder, userAuth, ...folder 
         onMouseLeave={ isEditable ? onMouseLeave : null }
         className={ `
           rounded-xl border-2 hover:border-current
-          cursor-pointer mr-1 relative px-1 flex justify-center
+          cursor-pointer relative px-1 flex justify-center
           ${ opened ? "border-current" : "border-transparent" }
         ` }
       >
@@ -272,7 +225,9 @@ const FolderIconWrapper = ({ opened, onClick, deleteFolder, userAuth, ...folder 
           <div style={ { left: "-0.5rem", right: "-0.5rem" } }
             className="absolute bottom-0"
           >
-            { folder.name }
+            <div className="truncate whitespace-nowrap">
+              { folder.name }
+            </div>
           </div>
         </div>
       </div>
@@ -286,7 +241,7 @@ const FolderIconWrapper = ({ opened, onClick, deleteFolder, userAuth, ...folder 
 const config = [
   { name:'Folders',
     icon: 'fa fa-folder',
-    path: "/folders/:stuff?",
+    path: "/folders",
     subMenus: [
       {
         name: 'Routes',

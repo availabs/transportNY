@@ -13,6 +13,7 @@ import ConfirmModal from "./ConfirmModal"
 import Dropdown from "./MultiLevelDropdown"
 import FolderIcon from "./FolderIcon"
 import FolderModal from "./FolderModal"
+import StuffInfoModal from "./StuffInfoModal"
 
 const Folder = ({ id, openedFolders, setOpenedFolders, forFolder, ...props }) => {
   const { falcor, falcorCache } = useFalcor();
@@ -65,7 +66,7 @@ const Folder = ({ id, openedFolders, setOpenedFolders, forFolder, ...props }) =>
       <Container { ...props } { ...folder } id={ id } type="folder"
         items={ folderItems }
       >
-        <div className="mr-1">
+        <div className="mr-1 inline-block">
           <FolderIcon size={ 1.25 }
             icon={ get(folder, "icon", "") }
             color={ get(folder, "color", "#000") }/>
@@ -320,7 +321,9 @@ const FolderStuffContainer = props => {
     const length = get(falcorCache, ["folders2", "user", "length"], 0);
     const refs = d3range(length).map(i => get(falcorCache, ["folders2", "user", "index", i, "value"]));
     const folders = refs.map(ref => get(falcorCache, ref, null))
-      .filter(Boolean).filter(f => f.id != parent);
+      .filter(Boolean)
+      .filter(f => f.id != parent)
+      .filter(f => f.type !== "default");
 
     folders.sort((a, b) => {
       if (a.type === b.type) {
@@ -439,22 +442,35 @@ const FolderStuffContainer = props => {
         )
       },
     ]
-  }, [confirmDelete, moveToFolder, copyToFolder, type, folders]);
+  }, [items, confirmDelete, moveToFolder, copyToFolder, type, folders]);
+
+  const [imOpen, setImOpen] = React.useState(false);
+  const openInfoModal = React.useCallback(e => {
+    e.stopPropagation();
+    setImOpen(true);
+  }, []);
+  const closeInfoModal = React.useCallback(e => {
+    e.stopPropagation();
+    setImOpen(false);
+  }, []);
 
   return (
     <div className="flex items-center border-b px-1 hover:bg-gray-200">
       <div className="flex-1">
-        <div className="flex items-center font-bold">
+        <div className="font-bold">
           { children }
         </div>
         <div className="text-sm">
-          { new Date(updated_at).toLocaleString() }
+          { description }
         </div>
         <div className="text-sm italic">
-          { description }
+          last update: { new Date(updated_at).toLocaleString() }
         </div>
       </div>
       <div className="flex-0 flex items-center px-1">
+        <span onClick={ openInfoModal }
+          className="fa-regular fa-circle-info mr-4 cursor-pointer"
+        />
         <input type="checkbox"
           className="cursor-pointer"
           onChange={ onChecked }
@@ -471,6 +487,9 @@ const FolderStuffContainer = props => {
         </div>
       </div>
       <div className="pointer-events-none">
+        <StuffInfoModal type={ type } id={ id }
+          isOpen={ imOpen }
+          close={ closeInfoModal }/>
         <ConfirmModal
           isOpen={ Boolean(confirm.action) }
           close={ clearConfirm }
