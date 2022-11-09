@@ -138,7 +138,7 @@ const Layout = ({ children, menus, sideNav, title, site }) => {
 						]}
 					/>
 				</div>
-				<div className={`h-full flex-1 bg-neutral-100 ${theme.sidenav(themeOptions).fixed}`}>{children}</div>
+				<div className={`h-full flex-1 bg-slate-100 ${theme.sidenav(themeOptions).fixed}`}>{children}</div>
 			</div>
 		</div>
 	);

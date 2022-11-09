@@ -157,31 +157,43 @@ const StuffInFolder = ({ openedFolders, setOpenedFolders, filter, deleteFolder }
         setOpenedFolders={ setOpenedFolders }
         deleteFolder={ deleteFolder }/>
 
-      <ActionBar parent={ folder.id }
-        selectedStuff={ selectedStuff }
-        deselectAll={ deselectAll }/>
-
-      <div className="flex">
-        { !stuff.length ? null :
-          <Input type="text" className="w-full max-w-md px-2 py-1"
+      <div className='flex items-center'>
+        <div className="flex-1 flex border border-gray-100 mt-1">
+          
+          <Input type="text" className="w-full px-4 py-2 focus:outline-none 
+            border-b-2 border-transparent focus:border-blue-400 focus:bg-blue-50
+            shadow rounded-sm text-lg"
             value={ search }
             onChange={ setSearch }
-            placeholder="search stuff..."/>
-        }
-        { !search.length ? null :
-          <div onClick={ clearSearch }
-            className={ `
-              w-8 h-8 flex items-center justify-center
-              cursor-pointer hover:bg-gray-400 rounded ml-1
-              text-large hover:text-2xl
-            ` }
-          >
-            <span className={ `
-              fa fa-close
-            ` }/>
-          </div>
-        }
+            placeholder="Search..."/>
+        
+          { !search.length ? null :
+            <div onClick={ clearSearch }
+              className={ `
+                w-10 h-10 flex items-center justify-center
+                cursor-pointer  rounded -ml-12
+                text-large text-lg hover:text-2xl
+              ` }
+            >
+              <span className={ `
+                fa fa-close text-blue-500
+              ` }/>
+            </div>
+          }
+        </div>
+        <div>
+          <ButtonNew 
+            filter={filter}
+            openFolders={openedFolders}
+          />
+        </div>
       </div>
+      <div className='mt-2'>
+        <ActionBar parent={ folder.id }
+          selectedStuff={ selectedStuff }
+          deselectAll={ deselectAll }/>
+      </div>
+      <div className='bg-white p-4 shadow rounded-sm border border-gray-100 mt-2'> 
       { fuse(search).map((s, i)=> (
           <FolderStuff key={ i }
             openedFolders={ openedFolders }
@@ -198,6 +210,7 @@ const StuffInFolder = ({ openedFolders, setOpenedFolders, filter, deleteFolder }
             parent={ folder.id }/>
         ))
       }
+      </div>
     </div>
   )
 }
@@ -263,23 +276,23 @@ const FolderIconToolBase = ({ folder, deleteFolder, user }) => {
         <div onMouseOver={ onMouseOver }
           onMouseLeave={ onMouseLeave }
         >
-          <FolderIcon { ...folder } size={ 3 }/>
+          <FolderIcon { ...folder } size={ 2 }/>
           <div style={ { right: "100%" } }
             className={ `
-              absolute top-0 text-base bg-gray-200 font-normal
+              absolute top-0 text-base bg-gray-50 font-normal
               ${ show ? "block" : "hidden" }
               shadow-lg text-right
             ` }
           >
             <div onClick={ openModal }
-              className="px-2 hover:bg-gray-300 cursor-pointer whitespace-nowrap"
+              className="p-2 hover:bg-gray-300 cursor-pointer whitespace-nowrap"
             >
-              Edit Folder <span className="fa fa-edit"/>
+              Edit Folder <span className="fad fa-edit px-2"/>
             </div>
             <div onClick={ confirmDelete }
-              className="px-2 hover:bg-gray-300 cursor-pointer whitespace-nowrap"
+              className="p-2 hover:bg-gray-300 cursor-pointer whitespace-nowrap"
             >
-              Delete Folder <span className="fa fa-trash text-red-400"/>
+              Delete Folder <span className="fad fa-trash text-red-400 px-2"/>
             </div>
           </div>
         </div>
@@ -386,7 +399,7 @@ const FolderSelector = ({ folder, setOpenedFolders, deleteFolder }) => {
 { /* FOLDER SELECTOR */ }
       <div style={ { top: "100%" } }
         className={ `
-          absolute left-0 text-base bg-gray-200 font-normal
+          absolute left-0 text-base bg-gray-50 font-normal
           ${ show ? "block" : "hidden" }
           grid grid-cols-2 gap-1 shadow-lg w-screen max-w-4xl z-50
         ` }
@@ -395,16 +408,16 @@ const FolderSelector = ({ folder, setOpenedFolders, deleteFolder }) => {
         <div>
           { foldersByType.slice(0, 2).map(({ type, folders }) => (
               <div key={ type }>
-                <div className="font-bold border-b-2 border-current px-2 mt-1">
+                <div className="font-medium border-b border-gray-100 px-2 mt-1">
                   { type }
                 </div>
                 { folders.map(f => (
                     <div key={ f.id }
                       onClick={ e => openFolder(e, f.id) }
                       className={ `
-                        whitespace-nowrap px-2 hover:bg-gray-300 flex
+                        whitespace-nowrap px-2 py-1 hover:bg-blue-100 flex
                         ${ f.id === folder.id ?
-                          "bg-gray-300 cursor-not-allowed" : "cursor-pointer"
+                          "bg-blue-300 cursor-not-allowed" : "cursor-pointer"
                         }
                       ` }
                     >
@@ -423,16 +436,16 @@ const FolderSelector = ({ folder, setOpenedFolders, deleteFolder }) => {
         <div>
           { foldersByType.slice(2).map(({ type, folders }) => (
               <div key={ type }>
-                <div className="font-bold border-b-2 border-current px-2 mt-1">
+                <div className="font-medium border-b border-gray-100 px-2 mt-1">
                   { type }
                 </div>
                 { folders.map(f => (
                     <div key={ f.id }
                       onClick={ e => openFolder(e, f.id) }
                       className={ `
-                        whitespace-nowrap px-2 hover:bg-gray-300 flex
+                        whitespace-nowrap px-2 py-1 hover:bg-blue-100 flex
                         ${ f.id === folder.id ?
-                          "bg-gray-300 cursor-not-allowed" : "cursor-pointer"
+                          "bg-blue-300 cursor-not-allowed" : "cursor-pointer"
                         }
                       ` }
                     >
@@ -448,11 +461,11 @@ const FolderSelector = ({ folder, setOpenedFolders, deleteFolder }) => {
           }
         </div>
 
-        <div className="col-span-2 p-1 border-t-2 border-current">
+        <div className="col-span-2 p-1  border-b border-gray-100">
           <button onClick={ openModal }
             className={ `
               w-full flex justify-center items-center
-              h-12 border border-gray-300 rounded hover:bg-gray-300
+              h-12 border border-gray-100 rounded border border-gray-300 text-blue-500 hover:bg-blue-500 hover:text-white
             ` }
           >
             <span className="fa fa-plus mr-2 text-lg font-bold"/>
@@ -503,7 +516,7 @@ const FolderPath = ({ openedFolders, setOpenedFolders, filter, deleteFolder }) =
 
   return (
     <>
-      <div className="text-4xl font-bold flex relative">
+      <div className="text-3xl font-medium flex relative">
         <div className="flex-1 flex items-end">
           <FolderSelector folder={ openedFolders[0] }
             setOpenedFolders={ setOpenedFolders }
@@ -518,38 +531,6 @@ const FolderPath = ({ openedFolders, setOpenedFolders, filter, deleteFolder }) =
             ))
           }
         </div>
-        { filter }
-        <div className="flex items-center justify-center relative"
-          onMouseOver={ onMouseOver }
-          onMouseLeave={ onMouseLeave }
-        >
-          <div className={ `
-              h-10 w-10 rounded hover:bg-gray-400
-              flex items-center justify-center
-              text-xl hover:text-3xl cursor-pointer
-            ` }
-          >
-            <span className="fa fa-plus"/>
-          </div>
-          <div className={ `
-              top-0 right-0 absolute bg-gray-200 z-50
-              text-base font-normal whitespace-nowrap
-              ${ show ? "block" : "hidden" } cursor-pointer
-            ` }
-          >
-            <div className="px-2 hover:bg-gray-300"
-              onClick={ openModal }
-            >
-              <span className="fa fa-folder mr-1"/>Add New Sub Folder
-            </div>
-            <div className="px-2 hover:bg-gray-300">
-              <span className="fa fa-road mr-1"/>Add New Route
-            </div>
-            <div className="px-2 hover:bg-gray-300">
-              <span className="fa fa-chart-column mr-1"/>Add New Report
-            </div>
-          </div>
-        </div>
       </div>
 
       <FolderModal isOpen={ open }
@@ -557,5 +538,68 @@ const FolderPath = ({ openedFolders, setOpenedFolders, filter, deleteFolder }) =
         openedFolders={ openedFolders }/>
 
     </>
+  )
+}
+
+const ButtonNew = ({filter, openedFolders}) => {
+  const [show, setShow] = React.useState(false);
+  const onMouseOver = React.useCallback(e => {
+    setShow(true);
+  }, []);
+  const onMouseLeave = React.useCallback(e => {
+    setShow(false);
+  }, []);
+
+  const [open, setOpen] = React.useState(false);
+  const openModal = React.useCallback(e => {
+    setOpen(true);
+  }, []);
+  const closeModal = React.useCallback(e => {
+    setOpen(false);
+  }, []);
+
+  return (
+      <div className='px-2 pt-0.5'> 
+        <div className='flex items-center bg-blue-500 border border-lime-300 text-gray-50 rounded-md'>
+          <div className='py-2 px-6 text-lg'> Add New </div>
+          <div className="flex items-center justify-center relative "
+            onMouseOver={ onMouseOver }
+            onMouseLeave={ onMouseLeave }
+          >
+            <div className={ `
+                h-10 w-10 rounded 
+                flex items-center justify-center
+                text-xl hover:text-3xl cursor-pointer
+              ` }
+            >
+              <span className="fa fa-caret-down"/>
+            </div>
+            <div className={ `
+                top-[42px] right-0 absolute bg-gray-50 text-gray-600 z-50
+                text-base font-normal whitespace-nowrap
+                ${ show ? "block" : "hidden" } cursor-pointer
+              ` }
+            >
+              <div className="p-2 hover:bg-blue-100 w-40"
+                onClick={ openModal }
+              >
+                <span className="fad fa-folder mr-1 px-2 text-blue-500"/>Sub Folder
+              </div>
+              <div className="p-2 hover:bg-blue-100">
+                <span className="fad fa-road mr-1 px-2 text-blue-500"/>Route
+              </div>
+              <div className="p-2 hover:bg-blue-100">
+                <span className="fad fa-chart-column text-blue-500 mr-1 px-2"/>Report
+              </div>
+            </div>
+          </div>
+        </div>
+        <FolderModal 
+            isOpen={ open }
+            close={ closeModal }
+            openedFolders={ openedFolders }/>
+      </div>
+
+     
   )
 }

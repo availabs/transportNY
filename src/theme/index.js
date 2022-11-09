@@ -164,7 +164,7 @@ const ppdaf = () => {
 
       let colors = {
         white: {
-          contentBg: `bg-gray-100`,
+          contentBg: `bg-slate-100`,
           accentColor: `${accent}-500`,
           accentBg: `hover:bg-${accent}-500`,
           borderColor: `border-${primary}-100`,
@@ -361,7 +361,7 @@ const ppdaf = () => {
         input: (opts = {}) => {
             const {color = 'white', size = 'small', width = 'block'} = opts
             let colors = {
-                white: 'bg-white',
+                white: 'bg-white focus:outline-none',
                 gray: 'bg-gray-100'
             }
 

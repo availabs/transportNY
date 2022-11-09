@@ -106,6 +106,7 @@ const PaintControl = ({
 		range: get(symbology, `[${lineColorIndex}].range`, []),
 		domain: get(symbology, `[${lineColorIndex}].domain`, []),
 		column: get(symbology, `[${lineColorIndex}].column`, ''),
+		options: get(symbology, `[${lineColorIndex}].options`, ''),
 	})
 
 	const update = (attr,value) => {
