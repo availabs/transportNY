@@ -15,8 +15,8 @@ class FreightAtlasInfoLayer extends LayerContainer {
   infoBoxes = [
         {
             Component: ({layer}) => {
-
-                return (
+                return React.useMemo( () => {
+                  return (
                     <div className="relative border-top">
                         { layer.state.showInfo ?  
                         <div className={'p-1 w-full text-xs font-thin bg-white shadow p-2'}>
@@ -56,7 +56,8 @@ class FreightAtlasInfoLayer extends LayerContainer {
                         </div>
                         }
                     </div>
-                )
+                // eslint-disable-next-line react-hooks/exhaustive-deps
+                )}, [layer.state.showInfo])
             },
             width: this.state.infoWidth
         },

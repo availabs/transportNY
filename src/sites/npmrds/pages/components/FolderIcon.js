@@ -1,52 +1,61 @@
 import React from "react"
 
-const FolderIcon = props => {
+const FolderIcon = ({ children, open, ...props }) => {
   const {
     icon,
     color,
     name,
+    type,
     size = 10,
     opened = false,
-    className = "",
-    onClick = null
+    className = ""
   } = props;
   return (
     <div className={ `
         flex items-center justify-center relative
-        rounded-xl border-2 hover:border-current
-        ${ opened ? "border-current" : "border-transparent" }
         ${ className }
       ` }
       style={ {
         width: `${ size }rem`,
-        hieght: `${ size }rem`
+        height: `${ size }rem`
       } }
-      onClick={ onClick }
     >
       <span className="fa fa-folder"
         style={ {
           color: "#f1d592",
-          fontSize: `${ 0.9 * size }rem`
+          fontSize: `${ 0.95 * size }rem`
         } }
       />
       <div className="left-0 right-0 absolute top-0 font-bold"
         style={ {
-          paddingLeft: `${ size * 0.1 }rem`,
-          paddingTop: `${ size * 0.15 }rem`,
+          paddingLeft: `${ size * 0.05 }rem`,
+          paddingTop: `${ size * 0.2 }rem`,
           fontSize: `${ size * 0.1 }rem`
         } }
       >
-        { name }
+        { size < 10 ? null : <FolderName name={ name } type={ type }/> }
       </div>
       <div className="flex items-center justify-center absolute inset-0">
         <span className={ icon }
           style={ {
             color: color,
             fontSize: `${ 0.4 * size }rem`,
-            paddingTop: `${ size * 0.25 }rem`
+            paddingTop: `${ size * 0.275 }rem`
           } }/>
+      </div>
+      <div className="absolute inset-0">
+        { children }
       </div>
     </div>
   )
 }
 export default FolderIcon;
+
+const FolderName = ({ type, name }) => {
+  return (
+    <span>
+      { !name ? null : type === "group" ? "Group " : null }
+      { name }
+    </span>
+  )
+}

@@ -10,9 +10,9 @@ const ppdaf = () => {
     graphColors: [ '#1e40af','#93c5fd','#1d4ed8','#bfdbfe',],
     graphCategorical:  ['#fde72f','#95d840','#55a488','#2f708e','#453781','#472354'],
     // ['#e5496d', '#fad264', '#76d9a2'],
-    // ['#e96835','#f5dc50','#a63b6e','#e54249','#49969b'], 
+    // ['#e96835','#f5dc50','#a63b6e','#e54249','#49969b'],
     // ['#1e4b5a','#e75148','#0f1e37','#8c786e',],
-    // ['#fde72f','#95d840','#55a488','#2f708e','#453781','#472354'], 
+    // ['#fde72f','#95d840','#55a488','#2f708e','#453781','#472354'],
     //  ['#5fc0c8','#5559d3','#ed8534','#7e84fa','#7fe06a']
 
     sidenav: (opts={}) =>  {
@@ -43,7 +43,7 @@ const ppdaf = () => {
               textColorAccent: `text-slate-800`,
               highlightColor: `text-${primary}-800`,
             },
-             dark: {
+            dark: {
               contentBg: `bg-neutral-800`,
               contentBgAccent: `bg-neutral-900`,
               accentColor: `white`,
@@ -51,7 +51,9 @@ const ppdaf = () => {
               borderColor: `border-neutral-700`,
               textColor: `text-slate-300`,
               textColorAccent: `text-slate-100`,
-              highlightColor: `text-${highlight}`,
+              highlightColor: `text-slate-100`,
+              sideItem: 'text-slate-300 hover:text-white',
+              sideItemActive: 'text-slate-300 hover:text-white'
             },
             bright: {
               contentBg: `bg-${accent}-700`,
@@ -71,11 +73,14 @@ const ppdaf = () => {
           icon: "mr-3 text-lg",
         },
         compact: {
-          fixed: 'ml-0 md:ml-44',
-          wrapper: "w-44 p-1 pt-4",
-          sideItem: "flex mx-2 pr-4 py-2 text-base ",
+          fixed: 'ml-0 md:ml-40',
+          wrapper: "w-40",
+          itemWrapper: 'pt-5',
+          sideItem: "flex pr-4 text-base hover:pl-2",
+          sideItemActive: "", //"border-r-4 border-blue-500 ",
           topItem: "flex items-center text-sm px-4 border-r h-12",
-          icon: "mr-3 text-lg",
+          icon: "pl-5  pr-1 py-1 text-[13px]",
+          sideItemContent: 'py-1 px-1 mt-0.5  text-[14px] ',
         },
         full: {
           fixed: '',
@@ -86,7 +91,7 @@ const ppdaf = () => {
         },
         mini: {
           fixed: 'ml-0 md:ml-20',
-          wrapper: "w-20 overflow-x-hidden p-1 pt-4",
+          wrapper: "w-20 overflow-x-hidden  pt-4",
           sideItem: "flex pr-4 py-4 text-base font-base border-b",
           topItem: "flex px-4 items-center text-sm font-light ",
           icon: "w-20 mr-4 text-4xl",
@@ -98,7 +103,7 @@ const ppdaf = () => {
           itemWrapper: 'p-1',
           sideItem: "flex text-base font-base",
           topItem: "flex mx-6 pr-4 py-2 text-sm font-light",
-          icon: "w-12 text-2xl hover:bg-neutral-900 px-2 py-3 my-2 rounded-lg mr-4 hover:text-blue-500",
+          icon: "w-12 text-2xl hover:bg-neutral-900 px-1 py-3 my-2 rounded-lg mr-4 hover:text-blue-500",
           sideItemContent: 'hidden',
         },
 
@@ -106,14 +111,14 @@ const ppdaf = () => {
 
       let subMenuStyles = {
                 inline: {
-                    indicatorIcon: 'fa fa-angle-right',
-                    indicatorIconOpen: 'fa fa-angle-down',
-                    subMenuWrapper: `w-full`,
+                    indicatorIcon: 'fa fa-caret-right pt-2.5',
+                    indicatorIconOpen: 'fa fa-caret-down pt-2.5',
+                    subMenuWrapper: `pl-2 w-full`,
                     subMenuParentWrapper: `flex flex-col w-full`
                 },
                 flyout: {
-                    indicatorIcon: 'fa fa-angle-down',
-                    indicatorIconOpen: 'fa fa-angle-right',
+                    indicatorIcon: 'fa fa-caret-down',
+                    indicatorIconOpen: 'fa fa-caret-right',
                     subMenuWrapper: `absolute ml-${sizes[size].width - 8}`,
                     subMenuParentWrapper: `flex flex-row`,
                     subMenuWrapperTop: `absolute top-full`,
@@ -124,22 +129,22 @@ const ppdaf = () => {
         fixed: `md:${sizes[size].fixed}`,
         logoWrapper: `${sizes[size].wrapper} ${colors[color].contentBgAccent} ${colors[color].textColorAccent}`,
         sidenavWrapper: `${mobile[responsive]} ${colors[color].contentBg} ${sizes[size].wrapper} h-full z-20`,
-        menuIconSide: ` text-${colors[color].accentColor} ${sizes[size].icon} group-hover:${colors[color].highlightColor}`,
+        menuIconSide: `${sizes[size].icon} group-hover:${colors[color].highlightColor}`,
         itemsWrapper: `${colors[color].borderColor} ${sizes[size].itemWrapper}  `,
+        navItemContent: `${sizes[size].sideItemContent}`,
         navitemSide: `
             group font-sans flex flex-col
-            ${sizes[size].sideItem} ${colors[color].textColor} ${colors[color].borderColor}
-            hover:${colors[color].highlightColor}
+            ${sizes[size].sideItem} ${colors[color].sideItem}
             focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
             transition-all cursor-pointer
          `,
-        navItemContent: `${sizes[size].sideItemContent}`,
         navitemSideActive: `
             group font-sans flex flex-col
-            ${sizes[size].sideItem} text-blue-500 ${colors[color].borderColor}
+            ${sizes[size].sideItem} ${sizes[size].sideItemActive} ${colors[color].sideItemActive} 
             hover:${colors[color].highlightColor}
             focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
             transition-all cursor-pointer
+
           `,
           ...subMenuStyles[subMenuStyle],
           vars: {
@@ -148,7 +153,7 @@ const ppdaf = () => {
             mobile
           }
         }
-        
+
     },
 
 
@@ -276,7 +281,7 @@ const ppdaf = () => {
 
     tabpanel: (opts = {}) => {
             const { tabLocation = 'top' } = opts
-            
+
              let tabLocations = {
                 top:  {
                         tabpanelWrapper: 'flex-col',
@@ -324,13 +329,13 @@ const ppdaf = () => {
                     disabled:cursor-not-allowed
                 `,
                 primary: `
-                    border border-transparent shadow 
-                    text-sm leading-4 rounded-sm text-white bg-blue-600 hover:bg-blue-700 
+                    border border-transparent shadow
+                    text-sm leading-4 rounded-sm text-white bg-blue-600 hover:bg-blue-700
                     focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`,
                 danger: ''
             }
 
-            let sizes  = { 
+            let sizes  = {
                 base: 'px-4 py-4 leading-5 font-medium',
                 sm: 'text-sm px-2 py-2 leading-5 font-medium',
                 lg: 'text-lg px-6 py-6 leading-5 font-medium',
@@ -351,7 +356,7 @@ const ppdaf = () => {
                     size: sizes,
                     width: widths
                 }
-            } 
+            }
         },
         input: (opts = {}) => {
             const {color = 'white', size = 'small', width = 'block'} = opts
@@ -396,9 +401,9 @@ const ppdaf = () => {
                 xlarge: 'sm:max-w-8xl'
 
             }
-            
+
             return {
-                modalContainer: `${overlay === 'default' ? '' : 'pointer-events-none'} fixed bottom-0 inset-x-0 px-4 pb-4 inset-0 flex items-center justify-center`,
+                modalContainer: `${overlay === 'default' ? '' : 'pointer-events-none'} fixed bottom-0 inset-x-0 px-4 pb-4 inset-0 flex items-center justify-center z-50`,
                 modalOverlay: overlays[overlay],
                 modal: `${sizes[size]} w-full  pointer-events-auto bg-white rounded-lg overflow-hidden shadow-xl transform transition-all`,
                 vars: {
@@ -492,7 +497,7 @@ const ppdaf = () => {
     width: "",
 
     transition: "transition ease-in-out duration-150",
-    
+
     tableRow: "bg-gray-100 hover:bg-gray-200 transition ease-in-out duration-150",
     tableRowStriped:
       "bg-gray-100 even:bg-gray-200 hover:bg-gray-300 transition ease-in-out duration-150",

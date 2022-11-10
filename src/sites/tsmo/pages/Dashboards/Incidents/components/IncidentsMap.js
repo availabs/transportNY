@@ -13,6 +13,9 @@ const Map = ({ events, colorsForTypes, hoveredEvent }) => {
         zoom: 8.5,
         center: [-73.911895, 40.88],
         styles: [
+        {name: "Terrain",
+            style: 'mapbox://styles/am3081/cjgi6glse001h2sqgjqcuov28' 
+          },
           {name: "Dark",
             style: 'mapbox://styles/am3081/ckm85o7hq6d8817nr0y6ute5v' },
           {name: "Light",

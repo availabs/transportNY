@@ -13,14 +13,17 @@ const Map = ({ rawDelayData, hoveredTMCs }) => {
         zoom: 8.5,
         center: [-73.911895, 40.88],
         styles: [
-          {name: "Dark",
+        {name: "Terrain",
+            style: 'mapbox://styles/am3081/cjgi6glse001h2sqgjqcuov28' 
+          },
+        {name: "streets",
+            style: 'mapbox://styles/am3081/ckt3271or0nnu17oikkvl0eme' },
+        
+        {name: "Dark",
             style: 'mapbox://styles/am3081/ckm85o7hq6d8817nr0y6ute5v' },
+         
           {name: "Blank Road Labels",
             style: 'mapbox://styles/am3081/cl0ieiesd000514mop5fkqjox'},
-         {name: "Light",
-            style: 'mapbox://styles/am3081/ckm86j4bw11tj18o5zf8y9pou' },
-
-
             
         ]
     }

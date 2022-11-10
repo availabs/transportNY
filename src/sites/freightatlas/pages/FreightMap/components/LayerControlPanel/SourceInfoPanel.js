@@ -10,7 +10,7 @@ import { selectPgEnv } from "pages/DataManager/store"
 
 
 const Overview = ({source, views}) => {
-  return (
+  return React.useMemo(() => (
     <div className="overflow-hidden">
       <div className='flex flex-col'>
         <div className="flex-1">
@@ -57,11 +57,12 @@ const Overview = ({source, views}) => {
         </dl>
       </div>
     </div>
-  )
+  ), [source, views])
 }
 
 const Metadata = ({source}) => {
-  return (
+  const metadata = React.useMemo(() =>  get(source,'metadata',[]), [source])
+  return React.useMemo(() => (
     <div className="overflow-hidden">
       
       <div className="py-4 sm:py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 border-b-2">
@@ -78,7 +79,7 @@ const Metadata = ({source}) => {
       <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
         <dl className="sm:divide-y sm:divide-gray-200">
          
-          {get(source,'metadata',[])
+            {metadata
             .map((col,i) => (
             <div key={i} className={`py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 ${i % 2 === 1 ? 'bg-gray-100' : ''}`}>
               <dt className="text-sm text-gray-900">
@@ -97,7 +98,7 @@ const Metadata = ({source}) => {
         </dl>
       </div>
     </div>
-  )
+  ), [metadata])
 }
 
 
@@ -149,18 +150,16 @@ const Source = ({sourceId}) => {
 
 
 const SourceInfoPanel = (props) => {
-  console.log('LayerStylePane', props)
   const sourceId = React.useMemo(() => 
   	get(props.layer, 'layer_id', -1),
   	[props.layer]
   )
-
-  
-  return (
+    
+  return React.useMemo( () => (
     <div className='border-t border-gray-300 h-full bg-gray-100 w-full'> 
       {sourceId === -1 ? <span /> : <Source sourceId={sourceId} />}
     </div>
-  )
+  ), [sourceId])
 }
 
 export { SourceInfoPanel }

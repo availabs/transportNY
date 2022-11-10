@@ -8,24 +8,24 @@ const Home = () => (
       Welcome to NPMRDS
     </div>
     <div className="flex flex-col text-lg">
-      <Link to="/mystuff">My Stuff</Link>
-      <Link to="/mystuff/routes">My Routes</Link>
-      <Link to="/mystuff/reports">My Reports</Link>
-      <Link to="/mystuff/templates">My Templates</Link>
+      <Link to="/folders">My Stuff</Link>
+      <Link to="/folders/routes">My Routes</Link>
+      <Link to="/folders/reports">My Reports</Link>
+      <Link to="/folders/templates">My Templates</Link>
     </div>
+    <span className='hover:pl-4'/>
   </div>
 )
 const config = {
-  name:'TransportNY',
-  // title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
-  // icon: 'fa-duotone fa-home',
+  name:'Home',
+  icon: 'fa fa-home',
   path: "/",
   exact: true,
   auth: true,
-  mainNav: false,
+  mainNav: true,
   sideNav: {
     color: 'dark',
-    size: 'none'
+    size: 'compact'
   },
   component: Home
 }

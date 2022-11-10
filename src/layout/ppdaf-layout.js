@@ -62,6 +62,8 @@ const Layout = ({ children, menus, sideNav, title, site }) => {
     },
   ]
 
+  console.log('layout menus', menus, themeOptions)
+
 	return (
 		<div className='flex' >
 			<div className={`hidden md:block`}>

@@ -133,8 +133,8 @@ const SourcesList = (props) => {
               .filter(source => {
                 let output = true
                 if(cat1) {
-                  output = false
-                  get(source,'categories',[])
+                  output = false;
+                  (get(source,'categories',[]) || [])
                     .forEach(site => {
                       if(site[0] === cat1 && (!cat2 || site[1] === cat2)){
                         output = true
