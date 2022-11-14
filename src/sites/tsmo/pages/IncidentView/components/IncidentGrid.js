@@ -40,6 +40,20 @@ const displayFormats  = {
 
 }
 
+const compare1d = (arr1, arr2) => {
+	if(arr1.length === arr2.length) {
+		return arr1.reduce((out, elem, i) => {
+			if(elem !== arr2[i]){
+				return false
+			}
+			return out
+		},
+		true)
+	} else {
+		return false
+	}
+}
+
 const IncidentGrid = ({
 	event_id, 
   year,
@@ -54,10 +68,13 @@ const IncidentGrid = ({
 	const [requestKeys, setRequestKeys] = React.useState([]);
 
 
+
 	React.useEffect(() => {
 		if(congestionData && congestionData.dates) { 
-     	const [requestKeys,,] = makeNpmrdsRequestKeys(congestionData);
-    	setRequestKeys(requestKeys);
+			const [newRequestKeys,,] = makeNpmrdsRequestKeys(congestionData);
+     	if(!compare1d(newRequestKeys, requestKeys)){
+     		setRequestKeys(newRequestKeys);
+     	}
    	}
     if (requestKeys.length && tmcs.length && year) {
       falcor
@@ -66,7 +83,7 @@ const IncidentGrid = ({
           ["pm3", "measuresByTmc", tmcs, Math.max(year-1, 2016), "freeflow_tt"]
         )
     }
-  }, [falcor,falcorCache,requestKeys, congestionData, tmcs, year]);
+  }, [falcor,falcorCache,requestKeys,congestionData, tmcs, year]);
 	
 	const getFF = (tmc, year, falcorCache) => {
 	  const fftt = get(
@@ -88,7 +105,7 @@ const IncidentGrid = ({
 	  return (length / avg_speedlimit) * 3600;
 	};
 
-	const expandData = React.useMemo((tmcs, year, requestKeys, falcorCache) => {
+	const expandData = (tmcs, year, requestKeys, falcorCache) => {
 
 	  return (requestKeys || []).reduce((a, rk) => {
 	    const data = [...get(falcorCache, ["routes", "data", rk, "value"], [])];
@@ -136,15 +153,12 @@ const IncidentGrid = ({
 	    a[rk] = data;
 	    return a;
 	  }, {});
-	},[]);
+	}
 
 	const gridData = React.useMemo(() => {
 	   	if(!congestionData || !congestionData.dates) return []
 	    const { startTime, endTime, dates } = congestionData;
 	    
-
-	    
-
 	    let corridorTmcs = Object.values(
 	      get(corridors.filter(c => c.corridor === activeBranch),'[0].tmcs',{})
 	    )

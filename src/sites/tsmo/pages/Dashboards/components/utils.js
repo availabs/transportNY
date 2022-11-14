@@ -9,7 +9,7 @@ export const useGeographies = () => {
     falcor.get(["geo", 36, "geoLevels"]);
   }, [falcor]);
   return React.useMemo(() => {
-    return geo.sort((a, b) => {
+    return [...geo].sort((a, b) => {
       return +a.geoid - +b.geoid; 
     })
     .filter(geo => geo.geolevel === "REGION")

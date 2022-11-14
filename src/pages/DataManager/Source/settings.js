@@ -5,6 +5,8 @@ import { useFalcor } from "modules/avl-components/src";
 
 import { DataManagerHeader } from "../components/SourcesLayout";
 
+import get from 'lodash.get'
+
 import { queryPgEnvs, setPgEnv, selectPgEnv, selectPgEnvs } from "../store";
 
 const Settings = () => {
@@ -12,13 +14,15 @@ const Settings = () => {
   const dispatch = useDispatch();
 
   const pgEnv = useSelector(selectPgEnv);
-  const pgEnvs = useSelector(selectPgEnvs);
+  const pgEnvs = React.useMemo(() => {
+    get(falcorCache, ["dama-info", "pgEnvs", "value"], []);
+  },[falcorCache]);
 
   useEffect(() => {
     (async () => {
       falcor.get(queryPgEnvs());
     })();
-  }, [falcor, dispatch, falcorCache]);
+  }, []);
 
   if (!pgEnvs) {
     return (
