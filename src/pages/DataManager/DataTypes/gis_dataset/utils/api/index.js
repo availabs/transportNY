@@ -23,7 +23,7 @@ export function getDamaApiRoutePrefix(pgEnv) {
 export async function getNewEtlContextId(pgEnv) {
   const rtPfx = `${DAMA_HOST}/dama-admin/${pgEnv}`;
 
-  const newEtlCtxRes = await fetch(`${rtPfx}/new-etl-context-id`);
+  const newEtlCtxRes = await fetch(`${rtPfx}/etl/new-context-id`);
 
   await checkApiResponse(newEtlCtxRes);
 
@@ -33,6 +33,7 @@ export async function getNewEtlContextId(pgEnv) {
 }
 
 export async function stageLayerData(ctx) {
+  console.log("stageLayerData");
   const {
     meta: { rtPfx },
   } = ctx;
@@ -77,48 +78,58 @@ export async function approveQA(ctx) {
   await fetch(url);
 }
 
-export async function createNewDataSource(ctx) {
+export async function queueCreateDamaSource(ctx) {
   const {
     meta: { rtPfx },
   } = ctx;
 
-  const { dataSourceName, dataSourceDisplayName } =
-    createEtlContextPropsProxy(ctx);
+  const {
+    etlContextId,
+    userId,
+    damaSourceId,
+    damaSourceName,
+    damaSourceDisplayName,
+  } = createEtlContextPropsProxy(ctx);
 
-  const res = await fetch(`${rtPfx}/metadata/createNewDataSource`, {
+  if (damaSourceId) {
+    throw new Error("DamaSource already exists.");
+  }
+
+  const url = `${rtPfx}/etl/contextId/${etlContextId}/queueCreateDamaSource`;
+
+  const sourceMeta = {
+    name: damaSourceName,
+    display_name: damaSourceDisplayName,
+    user_id: userId,
+    type: "gis_dataset",
+  };
+
+  const res = await fetch(url, {
     method: "POST",
-    body: JSON.stringify({
-      name: dataSourceName,
-      display_name: dataSourceDisplayName,
-      type: "gis_dataset",
-    }),
+    body: JSON.stringify(sourceMeta),
     headers: {
       "Content-Type": "application/json",
     },
   });
 
   await checkApiResponse(res);
-
-  const newSrcMeta = await res.json();
-
-  return newSrcMeta;
 }
 
-export async function submitViewMeta(ctx) {
+export async function queueCreateDamaView(ctx) {
   const {
     meta: { rtPfx },
   } = ctx;
 
-  const { etlContextId, userId, dataSourceName } =
+  const { etlContextId, userId, damaSourceId } =
     createEtlContextPropsProxy(ctx);
 
-  const url = new URL(`${rtPfx}/staged-geospatial-dataset/submitViewMeta`);
-  url.searchParams.append("etl_context_id", etlContextId);
-  url.searchParams.append("user_id", userId);
+  console.log("=".repeat(100));
+  console.log({ etlContextId, userId, damaSourceId });
+  const url = `${rtPfx}/etl/contextId/${etlContextId}/queueCreateDamaView`;
 
   const viewMetadata = {
-    data_source_name: dataSourceName,
-    version: 1,
+    source_id: damaSourceId || null,
+    user_id: userId,
   };
 
   const res = await fetch(url, {
@@ -152,22 +163,28 @@ export async function publishGisDatasetLayer(ctx) {
   const res = await fetch(url);
 
   await checkApiResponse(res);
+
+  const result = await res.json();
+
+  return result;
 }
 
-export async function simpleUpdateExistingDataSource(ctx) {
+export async function simpleCreateNewDamaSource(ctx) {
+  await queueCreateDamaSource(ctx);
+
+  const {
+    payload: { damaSourceId },
+  } = await simpleUpdateExistingDamaSource(ctx);
+
+  return damaSourceId;
+}
+
+export async function simpleUpdateExistingDamaSource(ctx) {
   await stageLayerData(ctx);
+
+  await queueCreateDamaView(ctx);
 
   await approveQA(ctx);
 
-  await submitViewMeta(ctx);
-
-  await publishGisDatasetLayer(ctx);
-}
-
-export async function simpleCreateNewDataSource(ctx) {
-  const { id } = await createNewDataSource(ctx);
-
-  await simpleUpdateExistingDataSource(ctx);
-
-  return id;
+  return await publishGisDatasetLayer(ctx);
 }

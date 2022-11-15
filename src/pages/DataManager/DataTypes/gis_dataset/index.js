@@ -170,7 +170,7 @@ const MapPage = () => {
                         <Edit
                           startValue={val}
                           attr={attr}
-                          viewId={get(activeView, "id", null)}
+                          viewId={get(activeView, "view_id", null)}
                           parentData={get(activeView, "metadata", {})}
                           cancel={() => setEditing(null)}
                         />

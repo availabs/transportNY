@@ -5,9 +5,9 @@ import PublishStatus from "../../../constants/PublishStatus";
 import * as uploadGisDatasetSelectors from "../../uploadGisDataset/store/selectors";
 
 export const initialState = {
-  dataSourceId: null,
-  dataSourceName: null,
-  dataSourceDisplayName: null,
+  damaSourceId: null,
+  damaSourceName: null,
+  damaSourceDisplayName: null,
 
   etlContextId: null,
   maxSeenEventId: null,
@@ -24,9 +24,9 @@ export const initialState = {
 export function init(source) {
   const state = {
     ...initialState,
-    dataSourceId: source.id || null,
-    dataSourceName: source.name || null,
-    dataSourceDisplayName: source.display_name || null,
+    damaSourceId: source.source_id || null,
+    damaSourceName: source.name || null,
+    damaSourceDisplayName: source.display_name || null,
   };
 
   return state;
@@ -38,14 +38,14 @@ export default function reducer(state, action) {
   const { type, payload } = action;
 
   switch (type) {
-    case "dataSourceName/UPDATE":
-      return { ...state, dataSourceName: payload };
+    case "damaSourceName/UPDATE":
+      return { ...state, damaSourceName: payload };
 
-    case "dataSourceDisplayName/UPDATE":
-      return { ...state, dataSourceDisplayName: payload };
+    case "damaSourceDisplayName/UPDATE":
+      return { ...state, damaSourceDisplayName: payload };
 
-    case "dataSourceId/UPDATE":
-      return { ...state, dataSourceId: payload };
+    case "damaSourceId/UPDATE":
+      return { ...state, damaSourceId: payload };
 
     case "etlContextId/UPDATE":
       return { ...state, etlContextId: payload };

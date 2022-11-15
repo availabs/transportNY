@@ -34,12 +34,13 @@ const workflow = [
 ];
 
 const {
-  updateDataSourceName,
-  updateDataSourceDisplayName,
+  updateDamaSourceId,
+  updateDamaSourceName,
+  updateDamaSourceDisplayName,
   updateEtlContextId,
 } = actions;
 
-const { createNewDataSource, updateExistingDataSource } = operations;
+const { createNewDamaSource, updateExistingDamaSource } = operations;
 
 const {
   selectUploadGisDatasetState,
@@ -82,20 +83,20 @@ const GisDataset = (props) => {
 
   const { source } = props;
 
-  const { name: dataSourceName, display_name: dataSourceDisplayName } = source;
+  const { name: damaSourceName, display_name: damaSourceDisplayName } = source;
 
-  const [isCreatingNew] = useState(!!source.id);
+  const [isCreatingNew] = useState(!!source.source_id);
 
   const publishOperation = isCreatingNew
-    ? updateExistingDataSource
-    : createNewDataSource;
+    ? updateExistingDamaSource
+    : createNewDamaSource;
 
   const pgEnv = useSelector(selectPgEnv);
   const userId = useSelector(selectUserId);
 
   const [state, dispatch] = useReducer(
     reducer,
-    _.merge(source, { id: sourceId }),
+    _.merge(source, { source_id: sourceId }),
     init
   );
 
@@ -121,21 +122,25 @@ const GisDataset = (props) => {
 
   const etlCtxDeps = useEtlContextDependencies(ctx, [
     "etlContextId",
-    "dataSourceId",
+    "damaSourceId",
     "publishStatus",
   ]);
 
-  const { etlContextId, dataSourceId, publishStatus } = etlCtxDeps;
+  const { etlContextId, damaSourceId, publishStatus } = etlCtxDeps;
 
   ctx.assignMeta({ etlContextId, rtPfx });
 
   useEffect(() => {
-    dispatch(updateDataSourceName(dataSourceName));
-  }, [dataSourceName]);
+    dispatch(updateDamaSourceId(damaSourceId));
+  }, [damaSourceId]);
 
   useEffect(() => {
-    dispatch(updateDataSourceDisplayName(dataSourceDisplayName));
-  }, [dataSourceDisplayName]);
+    dispatch(updateDamaSourceName(damaSourceName));
+  }, [damaSourceName]);
+
+  useEffect(() => {
+    dispatch(updateDamaSourceDisplayName(damaSourceDisplayName));
+  }, [damaSourceDisplayName]);
 
   // Probably want to wait until the user takes an action that requires the etlContextId
   // Could do that by wrapping fetch in ctx.api
@@ -152,11 +157,11 @@ const GisDataset = (props) => {
 
   useEffect(() => {
     if (publishStatus === PublishStatus.PUBLISHED) {
-      history.push(`/datasources/source/${dataSourceId}`);
+      history.push(`/datasources/source/${damaSourceId}`);
     }
-  }, [publishStatus, dataSourceId, history]);
+  }, [publishStatus, damaSourceId, history]);
 
-  if (!sourceId && !dataSourceName) {
+  if (!sourceId && !damaSourceName) {
     return <RequestSourceName />;
   }
 

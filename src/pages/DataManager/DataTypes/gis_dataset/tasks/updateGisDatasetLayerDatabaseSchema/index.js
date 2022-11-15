@@ -24,6 +24,14 @@ export const taskName = "updateGisDatasetLayerDatabaseSchema";
 export default function UpdateGisDatasetLayerDatabaseDbSchema() {
   const parentCtx = useContext(EtlContextReact);
 
+  // FIXME: Could a useEtlContext hook take the store as it's only parameter
+  //          * and internally call useReducer to create the state
+  //          * and wrap
+  //                      * useRef,
+  //                      * setState,
+  //                      * parentCtx.dispatch STATE_UPDATE
+  //                      * useEtlContextDependencies
+  //        Could the useEtlContext hook call useContext ?
   const [state, dispatch] = useReducer(reducer, null, init);
 
   const { current: ctx } = useRef(
@@ -42,6 +50,7 @@ export default function UpdateGisDatasetLayerDatabaseDbSchema() {
     meta: { rtPfx },
   } = parentCtx;
 
+  // FIXME: Could/Should this go in the ctx.setState method?
   useEffect(() => {
     parentCtx.dispatch({
       type: `${taskName}:STATE_UPDATE`,
@@ -49,17 +58,27 @@ export default function UpdateGisDatasetLayerDatabaseDbSchema() {
     });
   }, [parentCtx, state]);
 
+  // FIXME: This could be simplified using a Proxy.
+  //
+  //        On first call to the hook, the returned object is a Proxy
+  //          that records the getter calls.
+  //        Because it is the first call, we know that
+  //          it MUST return a new object
+  //
+  //        On subsequent calls, it ONLY returns a new object
+  //          if the recorded get properties change.
   const etlCtxDeps = useEtlContextDependencies(ctx, [
-    "dataSourceId",
+    "damaSourceId",
     "databaseColumnNames",
     "gisUploadId",
     "layerName",
   ]);
 
-  const { dataSourceId, databaseColumnNames, gisUploadId, layerName } =
+  const { damaSourceId, databaseColumnNames, gisUploadId, layerName } =
     etlCtxDeps;
 
-  const [isCreatingNew] = useState(!dataSourceId);
+  // FIXME: isCreatingNew should be set using root EtlContext's reducer's init function.
+  const [isCreatingNew] = useState(!damaSourceId);
 
   const gisDatasetUploadedAndAnalyzed = gisUploadId && layerName;
 
@@ -75,7 +94,7 @@ export default function UpdateGisDatasetLayerDatabaseDbSchema() {
         const url = new URL(
           `${rtPfx}/metadata/datasource-latest-view-table-columns`
         );
-        url.searchParams.append("dataSourceId", dataSourceId);
+        url.searchParams.append("damaSourceId", damaSourceId);
 
         const res = await fetch(url);
 
@@ -90,7 +109,7 @@ export default function UpdateGisDatasetLayerDatabaseDbSchema() {
         dispatch(updateDatabaseColumnNames(dbColNames));
       }
     })();
-  }, [rtPfx, mustAwaitDbColNames, dataSourceId]);
+  }, [rtPfx, mustAwaitDbColNames, damaSourceId]);
 
   useEffect(() => {
     (async () => {

@@ -1,12 +1,12 @@
 import createSimpleSelector from "../../../utils/createSimpleSelector";
 
-export const selectDataSourceName = createSimpleSelector("dataSourceName");
+export const selectDamaSourceName = createSimpleSelector("damaSourceName");
 
-export const selectDataSourceDisplayName = createSimpleSelector(
-  "dataSourceDisplayName"
+export const selectDamaSourceDisplayName = createSimpleSelector(
+  "damaSourceDisplayName"
 );
 
-export const selectDataSourceId = createSimpleSelector("dataSourceId");
+export const selectDamaSourceId = createSimpleSelector("damaSourceId");
 
 export const selectEtlContextId = createSimpleSelector("etlContextId");
 

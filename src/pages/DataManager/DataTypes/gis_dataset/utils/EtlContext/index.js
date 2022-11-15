@@ -5,6 +5,8 @@
 
 import { useState, useRef, createContext } from "react";
 import { assign, cloneDeep, isEqual, merge, omit } from "lodash";
+import EventEmitter from "eventemitter3";
+import { pEventIterator } from "p-event";
 
 import { v4 as uuid } from "uuid";
 
@@ -120,6 +122,14 @@ export default class EtlContext {
 
     this.getState = this.getState.bind(this);
     this.setState = this.setState.bind(this);
+
+    this._stateUpdateEventEmitter = new EventEmitter();
+  }
+
+  _resetNextStatePromise() {
+    this._nextState = new Promise((resolve) => {
+      this._resolveNextState = resolve;
+    });
   }
 
   getState() {
@@ -129,6 +139,52 @@ export default class EtlContext {
   // state MUST be immutable
   setState(state) {
     this.state = state;
+    this._stateUpdateEventEmitter.emit("data", state);
+  }
+
+  //  Returns an event emitter that emits when any of the dependencies change.
+  makeDependenciesChangeEventEmitter(deps) {
+    const emitter = new EventEmitter();
+
+    let oldSlice = extractPropertiesFromEtlContextHierarchy(this, deps);
+
+    const fn = () => {
+      const newSlice = extractPropertiesFromEtlContextHierarchy(this, deps);
+
+      for (const dep of deps) {
+        if (!isEqual(oldSlice[dep], newSlice[dep])) {
+          emitter.emit("data", newSlice);
+          break;
+        }
+      }
+
+      oldSlice = newSlice;
+    };
+
+    this._stateUpdateEventEmitter.on("data", fn);
+
+    const finish = () => {
+      emitter.removeAllListeners();
+      this._stateUpdateEventEmitter.removeListener("data", fn);
+    };
+
+    return { emitter, finish };
+  }
+
+  //  This takes an array of dependencies and returns an iterator
+  //    that yields only when any of the dependencies change.
+  async *makeDependenciesChangeAsyncIterator(deps) {
+    const { emitter, finish } = this.makeDependenciesChangeEventEmitter(deps);
+
+    try {
+      const iter = pEventIterator(emitter, "data");
+
+      for await (const slice of iter) {
+        yield slice;
+      }
+    } finally {
+      finish();
+    }
   }
 
   // meta is mutable. This allow spawned ctx to get updates by reference.

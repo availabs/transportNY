@@ -92,8 +92,6 @@ export async function uploadGisDataset(ctx, file) {
 
     stopPolling = true;
 
-    console.log("==> gisUploadId:", id);
-
     ctx.dispatch(updateGisUploadId(id));
   } catch (err) {
     stopPolling = true;

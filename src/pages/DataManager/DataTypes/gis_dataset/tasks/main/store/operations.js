@@ -1,13 +1,13 @@
 import {
-  simpleCreateNewDataSource,
-  simpleUpdateExistingDataSource,
+  simpleCreateNewDamaSource,
+  simpleUpdateExistingDamaSource,
 } from "../../../utils/api";
 
 async function main(createNew, ctx) {
   console.log(ctx);
   const {
     actions: {
-      updateDataSourceId,
+      updateDamaSourceId,
       setPublishStatusToInProgress,
       setPublishStatusToPublished,
       setPublishStatusToError,
@@ -19,11 +19,11 @@ async function main(createNew, ctx) {
     ctx.dispatch(setPublishStatusToInProgress());
 
     if (createNew) {
-      const id = await simpleCreateNewDataSource(ctx);
+      const id = await simpleCreateNewDamaSource(ctx);
 
-      ctx.dispatch(updateDataSourceId(id));
+      ctx.dispatch(updateDamaSourceId(id));
     } else {
-      await simpleUpdateExistingDataSource(ctx);
+      await simpleUpdateExistingDamaSource(ctx);
     }
 
     ctx.dispatch(setPublishStatusToPublished());
@@ -34,5 +34,5 @@ async function main(createNew, ctx) {
   }
 }
 
-export const createNewDataSource = main.bind(null, true);
-export const updateExistingDataSource = main.bind(null, false);
+export const createNewDamaSource = main.bind(null, true);
+export const updateExistingDamaSource = main.bind(null, false);
