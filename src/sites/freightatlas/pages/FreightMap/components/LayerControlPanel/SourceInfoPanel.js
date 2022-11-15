@@ -37,7 +37,7 @@ const Overview = ({source, views}) => {
                 </div>
               </div>
             {Object.keys(SourceAttributes)
-              .filter(d => !['id','metadata','description','name','category', 'categories'].includes(d))
+              .filter(d => !['source_id','metadata','description','name','category', 'categories'].includes(d))
               .map((attr,i) => (
               <div className={`py-4 sm:py-5 sm:px-6`}>
                 <div className="text-sm font-medium text-gray-500">{attr}</div>

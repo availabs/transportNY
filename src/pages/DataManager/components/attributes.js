@@ -1,5 +1,5 @@
 export const SourceAttributes = {
-  "id": "id",
+  "source_id": "source_id",
   "name": "name",
   "display_name": "display_name",
   "type": "type",
@@ -12,8 +12,8 @@ export const SourceAttributes = {
 }
 
 export const ViewAttributes = {
-  "id": "id",
   "source_id": "source_id",
+  "view_id": "view_id",
   "data_type": "data_type",
   "interval_version": "interval_version",
   "geography_version": "geography_version",
