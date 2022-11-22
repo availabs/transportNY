@@ -92,6 +92,7 @@ const Incidents = props => {
 
     setLoading(1);
 
+    console.log('requests', requests)
     falcor.get(["transcom2", "eventsbyGeom", requests])
       .then(() => setLoading(-1));
   }, [falcor, requests, setLoading]);
@@ -357,7 +358,7 @@ const Incidents = props => {
       return a;
     }, {})
 
-    //console.log('colorsForTypes', colorsForTypes)
+    console.log('colorsForTypes', colorsForTypes)
     return {
       events: events
         .sort((a,b) => get(b,'congestion_data.value.vehicleDelay',0) - get(a,'congestion_data.value.vehicleDelay',0))
@@ -413,9 +414,9 @@ const Incidents = props => {
               keys={ data.keys }
               indexBy="index"
               data={ data.data.sort((a,b)=> a.index.localeCompare(b.index))}
-              margin={ { top: 5, right: 5, bottom: 25, left: 50 } }
+              margin={ { top: 5, right: 5, bottom: 40, left: 25 } }
               padding={ 0.2 }
-              axisBottom={ { tickDensity: 1 } }
+              axisBottom={ {  tickDensity: 7, format: d => d.split('-')[2].replace(/^0+/, ''), label : 'Date' } }
               axisLeft={ { ticks: 5 } }/>
 
           </div>
@@ -451,7 +452,7 @@ const Incidents = props => {
               keys={ data.keys }
               indexBy="index"
               data={ data.durationData }
-              margin={ { top: 5, right: 5, bottom: 25, left: 50 } }
+              margin={ { top: 5, right: 5, bottom: 25, left: 30 } }
               padding={ 0.2 }
               axisBottom={ { tickDensity: 2 } }
               axisLeft={ { ticks: 5 } }/>

@@ -97,13 +97,13 @@ const Route = ({ id, forFolder, ...props }) => {
     return [
       { item: (
           <ListItem>
-            <span className="fa fa-eye mr-1"/>View in Report
+            <span className="fad fa-eye mr-1 px-2 text-blue-500"/>View in Report
           </ListItem>
         )
       },
       { item: (
           <ListItem>
-            <span className="fa fa-pen-to-square mr-1"/>Edit
+            <span className="fad fa-pen-to-square mr-1 px-2 text-blue-500" />Edit
           </ListItem>
         )
       }
@@ -139,13 +139,13 @@ const Report = ({ id, forFolder, ...props }) => {
     return [
       { item: (
           <ListItem>
-            <span className="fa fa-eye mr-1"/>View
+            <span className="fad fa-eye mr-1 px-2 text-blue-500"/>View
           </ListItem>
         )
       },
       { item: (
           <ListItem>
-            <span className="fa fa-pen-to-square mr-1"/>Edit
+            <span className="fad fa-pen-to-square mr-1 px-2 text-blue-500"/>Edit
           </ListItem>
         )
       }
@@ -181,13 +181,13 @@ const Template = ({ id, forFolder, ...props }) => {
     return [
       { item: (
           <ListItem>
-            <span className="fa fa-eye mr-1"/>View
+            <span className="fad fa-eye mr-1 px-2 text-blue-500"/>View
           </ListItem>
         )
       },
       { item: (
           <ListItem>
-            <span className="fa fa-pen-to-square mr-1"/>Edit
+            <span className="fad fa-pen-to-square mr-1 px-2 text-blue-500"/>Edit
           </ListItem>
         )
       }
@@ -389,7 +389,7 @@ const FolderStuffContainer = props => {
       ...items,
       { item: (
           <ListItem>
-            <span className="fa fa-copy mr-1"/>Copy to folder
+            <span className="fad fa-copy mr-1 px-2 text-blue-500"/>Copy to folder
           </ListItem>
         ),
         children: (
@@ -413,7 +413,7 @@ const FolderStuffContainer = props => {
       },
       { item: (
           <ListItem>
-            <span className="fa fa-arrow-up-from-bracket mr-1"/>Move to folder
+            <span className="fad fa-arrow-up-from-bracket mr-1 px-2 text-blue-500"/>Move to folder
           </ListItem>
         ),
         children: (
@@ -437,7 +437,7 @@ const FolderStuffContainer = props => {
       },
       { item: (
           <ListItem onClick={ confirmDelete }>
-            <span className="fa fa-trash text-red-400 mr-1"/>Delete { type }
+            <span className="fad fa-trash text-red-400 mr-1 px-2"/>Delete { type }
           </ListItem>
         )
       },
@@ -455,7 +455,7 @@ const FolderStuffContainer = props => {
   }, []);
 
   return (
-    <div className="flex items-center border-b px-1 hover:bg-blue-100 py-1">
+    <div className="flex items-center border-b px-1 hover:bg-blue-50 py-1">
       <div className="flex-1">
         <div className="font-medium text-gray-600">
           { children }
@@ -463,14 +463,14 @@ const FolderStuffContainer = props => {
         <div className="text-sm px-2">
           { description }
         </div>
-        <div className="text-xs italic text-gray-500 px-2">
+        <div className="text-xs italic text-slate-500 px-2">
           <span className='text-xs'>last updated: </span> 
           { new Date(updated_at).toLocaleString() }
         </div>
       </div>
       <div className="flex-0 flex items-center px-1">
         <span onClick={ openInfoModal }
-          className="fa-regular fa-circle-info mr-4 cursor-pointer"
+          className="fa-regular fa-circle-info mr-4 cursor-pointer text-gray-600"
         />
         <input type="checkbox"
           className="cursor-pointer"
@@ -482,7 +482,7 @@ const FolderStuffContainer = props => {
           <div className="flex-0"
             onClick={ stopPropagation }>
             <Dropdown items={ StuffItems }>
-              <span className="fa text-lg fa-list mr-1"/>
+              <span className="fa text-lg fa-list mr-1 text-gray-600"/>
             </Dropdown>
           </div>
         </div>
@@ -512,7 +512,7 @@ const FolderStuffContainer = props => {
 const ListItem = ({ children, onClick = null }) => {
   return (
     <div onClick={ onClick }
-      className="w-52 px-2 hover:bg-gray-300"
+      className="w-52 px-2 py-1 hover:bg-blue-100"
     >
       { children }
     </div>
