@@ -32,6 +32,14 @@ export async function getNewEtlContextId(pgEnv) {
   return etlContextId;
 }
 
+export async function getDamaTileServerUrl() {
+  const res = await fetch(`${DAMA_HOST}/dama-info/getTileServerUrl`);
+  // const damaTileServerUrl = await res.text();
+  const damaTileServerUrl = await res.json();
+
+  return damaTileServerUrl;
+}
+
 export async function stageLayerData(ctx) {
   console.log("stageLayerData");
   const {
