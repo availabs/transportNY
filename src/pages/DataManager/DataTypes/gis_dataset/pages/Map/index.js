@@ -169,6 +169,7 @@ function ConfigurationEditor({ startValue, updateValue }) {
   }, [value]);
 
   const configChanged =
+    value &&
     isValidJSON(value) &&
     (!isValidJSON(startValue) ||
       !_.isEqual(JSON.parse(startValue), JSON.parse(value)));
