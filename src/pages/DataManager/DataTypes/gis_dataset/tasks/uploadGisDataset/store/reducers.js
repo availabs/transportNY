@@ -1,15 +1,13 @@
-import deepFreeze from "deep-freeze-strict";
-
 import cloneDeep from "lodash.clonedeep";
 import assign from "lodash.assign";
 
-export const initialState = deepFreeze({
+export const initialState = {
   gisUploadId: null,
   fileUploadStatus: null,
   maxSeenEventId: null,
   uploadedFile: null,
   uploadErrMsg: null,
-});
+};
 
 export function init(config) {
   const clone = cloneDeep(initialState);
