@@ -20,22 +20,22 @@ const SourceThumb = ({source}) => {
   
   useEffect(() => {
     async function fetchData () {
-      const lengthPath = ["dama", pgEnv,"sources","byId",source.id,"views","length"]
+      const lengthPath = ["dama", pgEnv,"sources","byId",source.source_id,"views","length"]
       const resp = await falcor.get(lengthPath);
       return await falcor.get([
         "dama", pgEnv,"sources","byId",
-        source.id, "views","byIndex",
+        source.source_id, "views","byIndex",
         {from:0, to:  get(resp.json, lengthPath, 0)-1},
         "attributes", Object.values(ViewAttributes)
       ])
     }
     fetchData()
-  }, [falcor, source.id, pgEnv])
+  }, [falcor, source.source_id, pgEnv])
 
 
   return (
     <div className='w-full p-4 bg-white my-1 hover:bg-blue-50 block border shadow'>
-      <Link to={`/datasources/source/${source.id}`}  className='text-xl font-medium w-full block'>
+      <Link to={`/datasources/source/${source.source_id}`}  className='text-xl font-medium w-full block'>
         <span>{source.display_name || source.name }</span>
       </Link>
       <div>
@@ -45,7 +45,7 @@ const SourceThumb = ({source}) => {
           )))
           }
       </div>
-      <Link to={`/datasources/source/${source.id}`} className='py-2 block'>
+      <Link to={`/datasources/source/${source.source_id}`} className='py-2 block'>
         {source.description}
       </Link>
     </div>

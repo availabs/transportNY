@@ -61,7 +61,7 @@ const OverviewEdit = withAuth(({source, views, user}) => {
             <Edit 
               startValue={get(source,'description', '')}
               attr={'description'}
-              sourceId={source.id}
+              sourceId={source.source_id}
               cancel={() => setEditing(null)}/> : 
             get(source,'description', false) || 'No Description'}
         </div>
@@ -73,7 +73,7 @@ const OverviewEdit = withAuth(({source, views, user}) => {
       <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
         <dl className="sm:divide-y sm:divide-gray-200">
           {Object.keys(SourceAttributes)
-            .filter(d => !['id','metadata','description', 'statistics', 'category'].includes(d))
+            .filter(d => !['source_id','metadata','description', 'statistics', 'category'].includes(d))
             .map((attr,i) => {
               let val = typeof source[attr] === 'object' ? JSON.stringify(source[attr]) : source[attr]
               return (
@@ -86,7 +86,7 @@ const OverviewEdit = withAuth(({source, views, user}) => {
                           <Edit 
                             startValue={val} 
                             attr={attr}
-                            sourceId={source.id} 
+                            sourceId={source.source_id}
                             cancel={() => setEditing(null)}
                           />
                         </div> :  

@@ -30,7 +30,6 @@ export const {
   actions: { setPgEnv },
 } = datamanagerSlice;
 
-
 export const selectIsPwrUsr = (state) => {
   const { user } = state;
   const isPwrUsr =

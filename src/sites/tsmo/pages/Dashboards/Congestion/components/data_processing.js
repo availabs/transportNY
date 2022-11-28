@@ -11,6 +11,7 @@ export const getTMCs = (rawDelayData,year,month,region,f_systems,prevYearMonth) 
       return out
     },{})
 
+    // console.log('total', total)
     f_systems.forEach((fclass,i) => {
       get(rawDelayData,`[${prevYearMonth.split('-')[0]}][${+prevYearMonth.split('-')[1]}][${region}][${fclass}].delay.value`,[])
         .forEach(tmc => {
