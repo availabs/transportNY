@@ -1,9 +1,11 @@
+import deepFreeze from "deep-freeze-strict";
+
 import { assign, cloneDeep, get, isEqual } from "lodash";
 
-export const initialState = {
+export const initialState = deepFreeze({
   databaseColumnNames: null,
   tableDescriptor: null,
-}
+});
 
 export function init(config) {
   const clone = cloneDeep(initialState);

@@ -1,13 +1,13 @@
-
+import deepFreeze from "deep-freeze-strict";
 
 import { assign, cloneDeep } from "lodash";
 
-export const initialState = {
+export const initialState = deepFreeze({
   layerNames: null,
   layerName: null,
   lyrAnlysErrMsg: null,
   layerAnalysis: null,
-};
+});
 
 export function init(config) {
   const clone = cloneDeep(initialState);
