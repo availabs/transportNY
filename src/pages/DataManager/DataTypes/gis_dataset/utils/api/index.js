@@ -177,6 +177,21 @@ export async function publishGisDatasetLayer(ctx) {
   return result;
 }
 
+// FIXME: damaViewId should be in ctx. Once implement, then publish with export.
+async function generateMbTiles(ctx, damaViewId) {
+  const {
+    meta: { rtPfx },
+  } = ctx;
+
+  const url = `${rtPfx}/gis/create-mbtiles/damaViewId/${damaViewId}`;
+
+  const res = await fetch(url);
+
+  await checkApiResponse(res);
+
+  return res;
+}
+
 export async function simpleCreateNewDamaSource(ctx) {
   await queueCreateDamaSource(ctx);
 
@@ -194,5 +209,13 @@ export async function simpleUpdateExistingDamaSource(ctx) {
 
   await approveQA(ctx);
 
-  return await publishGisDatasetLayer(ctx);
+  const publishFinalEvent = await publishGisDatasetLayer(ctx);
+
+  const {
+    payload: { damaViewId },
+  } = publishFinalEvent;
+
+  await generateMbTiles(ctx, damaViewId);
+
+  return publishFinalEvent;
 }
