@@ -175,6 +175,8 @@ const MonthGrid = () => {
   }, [falcorCache, counties, year]);
 
   React.useEffect(() => {
+    console.log('test 123',  ["tmc", "tmclinear", year, geo, tmclinear, direction],
+        ["tmclinear", "meta", year, geo, tmclinear, direction, 'roadname'])
     falcor.get(
         ["tmc", "tmclinear", year, geo, tmclinear, direction],
         ["tmclinear", "meta", year, geo, tmclinear, direction, 'roadname']

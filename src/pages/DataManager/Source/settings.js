@@ -7,7 +7,7 @@ import { DataManagerHeader } from "../components/SourcesLayout";
 
 import get from 'lodash.get'
 
-import { queryPgEnvs, setPgEnv, selectPgEnv, selectPgEnvs } from "../store";
+import { setPgEnv, selectPgEnv, selectPgEnvs } from "../store";
 
 const Settings = () => {
   const { falcor, falcorCache } = useFalcor();
@@ -15,12 +15,12 @@ const Settings = () => {
 
   const pgEnv = useSelector(selectPgEnv);
   const pgEnvs = React.useMemo(() => {
-    get(falcorCache, ["dama-info", "pgEnvs", "value"], []);
+    return get(falcorCache, ["dama-info", "pgEnvs", "value"], []);
   },[falcorCache]);
 
   useEffect(() => {
     (async () => {
-      falcor.get(queryPgEnvs());
+      falcor.get(["dama-info", "pgEnvs"])
     })();
   }, []);
 
