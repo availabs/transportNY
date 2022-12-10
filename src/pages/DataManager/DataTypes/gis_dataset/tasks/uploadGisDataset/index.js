@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useReducer, useRef } from "react";
 
 import EtlContext, {
-  useEtlContextDependencies,
   EtlContextReact,
+  useEtlContext,
 } from "../../utils/EtlContext";
-import reducer, { init, actions, selectors, operations } from "./store";
+import reducer, * as store from "./store";
 
 import {
   GisDatasetUploadErrorMessage,
@@ -12,7 +12,9 @@ import {
   GisDatasetFileMeta,
 } from "./components";
 
-const { uploadGisDataset } = operations;
+const {
+  operations: { uploadGisDataset },
+} = store;
 
 export const taskName = "uploadGisDataset";
 
@@ -23,14 +25,13 @@ export default function UploadGisDataset() {
     reducer,
     // Fixme: maxSeenEventId belongs on damaEtlAdmin
     { maxSeenEventId: parentCtx.getState().maxSeenEventId || -1 },
-    init
+    store.init
   );
 
   const { current: ctx } = useRef(
     new EtlContext({
       name: taskName,
-      actions,
-      selectors,
+      ...store,
       dispatch,
       parentCtx,
     })
@@ -45,17 +46,8 @@ export default function UploadGisDataset() {
     });
   }, [parentCtx, state]);
 
-  const etlCtxDeps = useEtlContextDependencies(ctx, [
-    "etlContextId",
-    "fileUploadStatus",
-    "uploadedFile",
-    "uploadErrMsg",
-  ]);
-
-  // console.log("==> uploadGisDataset", { etlCtxDeps });
-
   const { etlContextId, fileUploadStatus, uploadedFile, uploadErrMsg } =
-    etlCtxDeps;
+    useEtlContext(ctx);
 
   if (!etlContextId) {
     return "";

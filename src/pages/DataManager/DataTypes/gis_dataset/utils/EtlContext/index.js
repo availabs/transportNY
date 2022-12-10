@@ -112,6 +112,61 @@ export function useEtlContextDependencies(_ctx, deps) {
   return prevSlice;
 }
 
+export function useEtlContext(_ctx) {
+  const { current: ctx } = useRef(_ctx);
+  const { current: dependencies } = useRef(new Set());
+
+  const prevSliceRef = useRef(null);
+
+  // The first time useEtlContext is used, we collect all the properties accessed.
+  if (prevSliceRef.current === null) {
+    // Need a non-proxied object because the proxy always has the context's current state.
+    //   This means the prevSlice/newSlice comparison never finds a difference when prevSlice is proxy.
+    const initialSlice = {};
+    prevSliceRef.current = initialSlice;
+
+    const proxy = new Proxy(
+      {},
+      {
+        get(_target, prop) {
+          dependencies.add(prop);
+
+          const { [prop]: value } = extractPropertiesFromEtlContextHierarchy(
+            ctx,
+            [prop]
+          );
+
+          // If the prop has never been set, set it.
+          if (!(prop in initialSlice)) {
+            initialSlice[prop] = value;
+          }
+
+          return value;
+        },
+      }
+    );
+
+    return proxy;
+  }
+
+  const { current: prevSlice } = prevSliceRef;
+
+  const newSlice = extractPropertiesFromEtlContextHierarchy(ctx, [
+    ...dependencies,
+  ]);
+
+  for (const dep of dependencies) {
+    if (!isEqual(prevSlice[dep], newSlice[dep])) {
+      prevSliceRef.current = newSlice;
+
+      console.log("useEtlContext for", ctx.name, "dependency", dep, "changed");
+      return newSlice;
+    }
+  }
+
+  return prevSliceRef.current;
+}
+
 export default class EtlContext {
   constructor(config) {
     assign(this, omit(config, ["getState", "setState", "assignMeta"]));

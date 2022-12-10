@@ -5,7 +5,7 @@ import { useHistory, useParams } from "react-router-dom";
 import _ from "lodash";
 
 import EtlContext, {
-  useEtlContextDependencies,
+  useEtlContext,
   EtlContextReact,
 } from "../../utils/EtlContext";
 import { selectPgEnv, selectUserId } from "pages/DataManager/store";
@@ -120,13 +120,7 @@ const GisDataset = (props) => {
 
   ctx.setState(state);
 
-  const etlCtxDeps = useEtlContextDependencies(ctx, [
-    "etlContextId",
-    "damaSourceId",
-    "publishStatus",
-  ]);
-
-  const { etlContextId, damaSourceId, publishStatus } = etlCtxDeps;
+  const { etlContextId, damaSourceId, publishStatus } = useEtlContext(ctx);
 
   ctx.assignMeta({ etlContextId, rtPfx });
 

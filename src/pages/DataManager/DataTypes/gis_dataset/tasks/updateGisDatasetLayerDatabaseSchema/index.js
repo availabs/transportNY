@@ -7,17 +7,19 @@ import React, {
 } from "react";
 
 import EtlContext, {
-  useEtlContextDependencies,
+  useEtlContext,
   EtlContextReact,
 } from "../../utils/EtlContext";
 
 import { checkApiResponse } from "../../utils/api";
 
-import reducer, { init, selectors, actions } from "./store";
+import reducer, * as store from "./store";
 
 import { GisDatasetLayerDatabaseDbSchemaForm } from "./components";
 
-const { updateTableDescriptor, updateDatabaseColumnNames } = actions;
+const {
+  actions: { updateTableDescriptor, updateDatabaseColumnNames },
+} = store;
 
 export const taskName = "updateGisDatasetLayerDatabaseSchema";
 
@@ -32,13 +34,12 @@ export default function UpdateGisDatasetLayerDatabaseDbSchema() {
   //                      * parentCtx.dispatch STATE_UPDATE
   //                      * useEtlContextDependencies
   //        Could the useEtlContext hook call useContext ?
-  const [state, dispatch] = useReducer(reducer, null, init);
+  const [state, dispatch] = useReducer(reducer, null, store.init);
 
   const { current: ctx } = useRef(
     new EtlContext({
       name: taskName,
-      actions,
-      selectors,
+      ...store,
       dispatch,
       parentCtx,
     })
@@ -58,24 +59,8 @@ export default function UpdateGisDatasetLayerDatabaseDbSchema() {
     });
   }, [parentCtx, state]);
 
-  // FIXME: This could be simplified using a Proxy.
-  //
-  //        On first call to the hook, the returned object is a Proxy
-  //          that records the getter calls.
-  //        Because it is the first call, we know that
-  //          it MUST return a new object
-  //
-  //        On subsequent calls, it ONLY returns a new object
-  //          if the recorded get properties change.
-  const etlCtxDeps = useEtlContextDependencies(ctx, [
-    "damaSourceId",
-    "databaseColumnNames",
-    "gisUploadId",
-    "layerName",
-  ]);
-
   const { damaSourceId, databaseColumnNames, gisUploadId, layerName } =
-    etlCtxDeps;
+    useEtlContext(ctx);
 
   // FIXME: isCreatingNew should be set using root EtlContext's reducer's init function.
   const [isCreatingNew] = useState(!damaSourceId);

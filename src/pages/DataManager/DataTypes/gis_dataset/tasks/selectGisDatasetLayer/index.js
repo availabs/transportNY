@@ -1,26 +1,27 @@
 import React, { useContext, useEffect, useReducer, useRef } from "react";
 
 import EtlContext, {
-  useEtlContextDependencies,
+  useEtlContext,
   EtlContextReact,
 } from "../../utils/EtlContext";
 
-import reducer, { init, operations, selectors, actions } from "./store";
+import reducer, * as store from "./store";
 
 import { LayerSelector, LayerAnalysisSection } from "./components";
 
-const { getLayerNames, getLayerAnalysis } = operations;
+const {
+  operations: { getLayerNames, getLayerAnalysis },
+} = store;
 
 export default function SelectGisDatasetLayer() {
   const parentCtx = useContext(EtlContextReact);
 
-  const [state, dispatch] = useReducer(reducer, null, init);
+  const [state, dispatch] = useReducer(reducer, null, store.init);
 
   const { current: ctx } = useRef(
     new EtlContext({
       name: "SelectGisDatasetLayer",
-      actions,
-      selectors,
+      ...store,
       dispatch,
       parentCtx,
     })
@@ -35,14 +36,8 @@ export default function SelectGisDatasetLayer() {
     });
   }, [parentCtx, state]);
 
-  const etlCtxDeps = useEtlContextDependencies(ctx, [
-    "gisUploadId",
-    "uploadedFile",
-    "layerNames",
-    "layerName",
-  ]);
-
-  const { gisUploadId, uploadedFile, layerNames, layerName } = etlCtxDeps;
+  const { gisUploadId, uploadedFile, layerNames, layerName } =
+    useEtlContext(ctx);
 
   useEffect(() => {
     if (gisUploadId && uploadedFile) {
