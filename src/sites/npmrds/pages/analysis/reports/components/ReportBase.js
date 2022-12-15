@@ -61,6 +61,7 @@ class ReportBase extends React.Component {
 
     const reportId = get(this.props, 'match.params.reportId', ""),
       templateId = get(this.props, 'match.params.templateId', ""),
+      defaultType = get(this.props, 'match.params.defaultType', ""),
       routeId = get(this.props, 'match.params.routeId', ""),
       stationId = get(this.props, 'match.params.stationId', ""),
       path = get(this.props, 'match.path', "");
@@ -111,35 +112,25 @@ class ReportBase extends React.Component {
     }
     else if (templateId && (routeId || stationId)) {
       this.props.loadRoutesAndTemplate(
-                  routeId.split("_").filter(Boolean),
-                  templateId,
-                  stationId.split("_").filter(Boolean)
-                );
+        routeId.split("_").filter(Boolean),
+        templateId,
+        stationId.split("_").filter(Boolean)
+      );
+    }
+    else if (defaultType && (routeId || stationId)) {
+      this.props.loadRoutesAndTemplateByType(
+        routeId.split("_").filter(Boolean),
+        defaultType,
+        stationId.split("_").filter(Boolean)
+      );
     }
   }
 
   componentDidUpdate(oldProps, oldState) {
-    const { owner, type, user, redirect, history } = this.props;
-
-    if ((owner === "not-set") &&
-      (type === "personal") &&
-      user.authed) {
-
-      this.updateReport({ owner: user.id });
-    }
-    else if ((owner === "not-set") &&
-      (type === "group") &&
-      user.authed) {
-
-      this.updateReport({ owner: user.groups[0] });
-    }
+    const { owner, redirect, history } = this.props;
 
     if (redirect) {
-
-console.log("REDIRECT:", redirect);
-
       history.replace(redirect);
-
       this.updateReport({ redirect: false });
     }
 
@@ -191,7 +182,7 @@ console.log("REDIRECT:", redirect);
       .get(
         ['routes2', 'user', 'length'],
         ['templates2', 'user', 'length'],
-        ['templates2', 'user', 'defaultTypes'],
+        ['templates2', 'defaultTypes'],
         ['folders2', 'user', 'length'],
         ['hds', 'continuous', 'stations', 'length']
       )
@@ -566,28 +557,27 @@ console.log("REDIRECT:", redirect);
           report={ {
             name: this.props.name,
             description: this.props.description,
-            // type: this.props.type,
-            // owner: this.props.owner,
             folder: this.props.folder,
             colorRange: this.props.colorRange
           } }/>
 
         <TemplateModal show={ this.state.showTemplateModal }
           saveTemplate={ this.saveTemplate.bind(this) }
-          templateId={ this.props.defaultTypes.includes(this.props.templateId) ? (this.props.user.groups.includes("AVAIL") ? this.props.templateId : null) : this.props.templateId }
+          templateId={ this.props.templateId }
           onHide={ this.hideTemplateModal.bind(this) }
           defaultTypes={ this.props.defaultTypes }
           user={ this.props.user }
-          report={ {
+          folders={ this.props.folders.filter(f => f.type !== "default") }
+          template={ {
             name: this.props.name,
             description: this.props.description,
-            type: this.props.type,
-            owner: this.props.owner,
+            folder: this.props.folder,
+            colorRange: this.props.colorRange,
+            defaultType: this.props.defaultType,
+            saveYearsAsRecent: this.props.saveYearsAsRecent,
             route_comps: this.props.route_comps,
             graph_comps: this.props.graphs,
-            station_comps: this.props.station_comps,
-            saveYearsAsRecent: this.props.saveYearsAsRecent,
-            colorRange: this.props.colorRange
+            station_comps: this.props.station_comps
           } }/>
 
         <LoadModal show={ this.state.showLoadModal }
@@ -616,11 +606,10 @@ class ViewReportClass extends ReportBase {
 }
 
 const mapStateToProps = (state, props) => ({
-  router: state.router,
   user: state.user,
   // availableRoutes: getAvailableRoutes(state, props),
   // templates: getTemplatesFromState(state),
-  defaultTypes: get(state, 'graph.templates.defaultTypes.value', []),
+  // defaultTypes: get(state, 'graph.templates.defaultTypes.value', []),
   // folders: getFoldersFromState(state),
   // availableStations: getStationsFromState(state, props),
   ...state.report
@@ -636,6 +625,7 @@ const mapCacheToProps = (falcorCache, props) => {
     templates: getTemplates(falcorCache, props),
     folders: getFolders(falcorCache),
     availableStations: getStations(falcorCache),
+    defaultTypes: get(falcorCache, ["templates2", "defaultTypes", "value"], [])
   };
 }
 
@@ -864,8 +854,8 @@ const ReportSaveModal = props => {
   )
 }
 
-const TemplateInit = report => ({
-  ...report
+const TemplateInit = template => ({
+  ...template
 });
 const TemplateReducer = (state, action) => {
   const { type, ...payload } = action;
@@ -880,42 +870,28 @@ const TemplateReducer = (state, action) => {
 }
 
 const TemplateModal = props => {
-  const [state, dispatch] = React.useReducer(TemplateReducer, props.report, TemplateInit);
-  const [defaultType, setDefaultType] = React.useState("none");
-  const [saveYearsAsRecent, setSaveYearsAsRecent] = React.useState(false);
+  const [state, dispatch] = React.useReducer(TemplateReducer, props.template, TemplateInit);
   const setState = React.useCallback(update => {
-    if ("defaultType" in update) {
-      setDefaultType(update.defaultType);
-    }
-    else if ("saveYearsAsRecent" in update) {
-      setDefaultType(update.saveYearsAsRecent);
-    }
-    else {
-      dispatch({
-        type: "update",
-        update
-      });
-    }
+    dispatch({
+      type: "update",
+      update
+    });
   }, []);
 
   React.useEffect(() => {
-    if (!props.show && !deepequal(state, props.report)) {
+    if (!props.show && !deepequal(state, props.template)) {
       dispatch({
         type: "reset",
-        state: { ...props.report }
+        state: { ...props.template }
       });
     }
-  }, [props.show, props.report, state]);
+  }, [props.show, props.template, state]);
 
   const save = React.useCallback(() => {
-    props.updateReport({ ...state });
-    props.saveReport({ ...state }, props.reportId);
-  }, [props.updateReport, state]);
+  }, [state]);
 
   const saveAs = React.useCallback(() => {
-    props.updateReport({ ...state });
-    props.saveReport({ ...state });
-  }, [props.updateReport, state]);
+  }, [state]);
 
   const cancel = React.useCallback(e => {
     props.onHide();
@@ -968,7 +944,7 @@ const TemplateModal = props => {
           <input type="checkbox" id="recent"
             className="px-2 py-1 border rounded col-span-3"
             onChange={ e => setState({ saveYearsAsRecent: e.target.checked }) }
-            value={ saveYearsAsRecent }/>
+            value={ state.saveYearsAsRecent }/>
         </div>
 
       </div>

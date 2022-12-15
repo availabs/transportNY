@@ -109,7 +109,7 @@ class CongestionLayer extends LayerContainer {
           "interpolate",
           ["linear"],
           ["number", ["get", "delay"], 0],
-          0, 3,
+          0, 6,
           1000, 20,
           4000, 40
         ],
@@ -125,8 +125,8 @@ class CongestionLayer extends LayerContainer {
           "#d92",
           ["get", "color"]
         ],
-        "circle-stroke-width": 0,
-        "circle-stroke-color": "#d92"
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "#333"
       },
     },
     {
@@ -261,6 +261,7 @@ class CongestionLayer extends LayerContainer {
   }
 
   fetchData(falcor) {
+    console.log('falcor',falcor)
     const {region} = this.props
     const [geolevel, value] = region.split('|')
 
@@ -291,9 +292,7 @@ class CongestionLayer extends LayerContainer {
         }]
     };
     map.getSource("geo-boundaries-source").setData(collection);
-    map.getSource("geo-boundaries-source").setData(collection);
     if(geom){
-      console.log('going to zoom')
       this.doZoom = true;
       this.zoomToGeography(geom)
     }
@@ -302,12 +301,12 @@ class CongestionLayer extends LayerContainer {
       map.setPaintProperty("events-points", "circle-stroke-width",
         ["case",
           ["boolean", ["==", ["get", "id"], hoveredEvent], false],
-          4, 0
+          4, 2
         ]
       )
     }
     else {
-      map.setPaintProperty("events-points", "circle-stroke-width", 0)
+      map.setPaintProperty("events-points", "circle-stroke-width", 2)
     }
 
 console.log('events', events)

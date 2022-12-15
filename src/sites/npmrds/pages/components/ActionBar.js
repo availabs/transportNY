@@ -76,17 +76,10 @@ const useStuffActions = (selectedStuff, parent) => {
   }, [deleteSelected])
 
   const StuffActions = [
-    { key: "delete-selected",
-      label: "Delete",
-      sourceAuth: true,
-      multiple: true,
-      types: new Set(["route", "report", "template", "folder"]),
-      color: "red-400",
-      action: confirmDelete,
-      Comp: ActionButton
-    },
+   
     { key: "move-to",
       label: "Move to folder",
+      icon: 'fad fa-folder-open text-sm pr-1 text-gray-500 group-hover:text-blue-300',
       sourceAuth: true,
       targetAuth: true,
       multiple: true,
@@ -96,6 +89,7 @@ const useStuffActions = (selectedStuff, parent) => {
     },
     { key: "copy-to",
       label: "Copy to folder",
+      icon: 'fad fa-folder-open text-sm pr-1 text-gray-500 group-hover:text-blue-300',
       targetAuth: true,
       multiple: true,
       types: new Set(["route", "report", "template", "folder"]),
@@ -112,9 +106,21 @@ const useStuffActions = (selectedStuff, parent) => {
     //   Comp: ActionButton
     // },
     { key: "open-in-template",
+      label: "Open in Template",
+      icon: 'fa fa-file-chart-line pr-1 text-gray-500 group-hover:text-blue-300',
       sourceAuth: true,
       multiple: true,
       types: new Set(["route"]),
+      Comp: ActionButton
+    },
+     { key: "delete-selected",
+      label: "Delete",
+      icon: 'fad fa-trash text-sm pr-1 text-red-400 group-hover:text-blue-300',
+      sourceAuth: true,
+      multiple: true,
+      types: new Set(["route", "report", "template", "folder"]),
+      color: "red-400",
+      action: confirmDelete,
       Comp: ActionButton
     },
     // { key: "open-in-report",
@@ -246,15 +252,15 @@ const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
 
   return (
     <div className={ `
-        py-1 border-y-4 rounded-lg mb-2
-        ${ selectedStuff.length ? "border-current" : "" }
+        py-1 bg-white shadow rounded-sm border border-gray-100 mb-2
+        
       ` }
     >
       <div className="px-1 flex">
         <div className="flex-1 flex">
           { !stuffActions.length ?
-            <div className="pl-1 text-gray-400 border border-transparent">
-              select stuff...
+            <div className="pl-2 py-2 text-gray-400 border border-transparent">
+              &nbsp;
             </div> :
             stuffActions.map(({ action, key, Comp, label, ...rest }) => (
               <Comp key={ key }
@@ -281,20 +287,19 @@ const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
 }
 export default ActionBar;
 
-const ActionButton = ({ action, children, color = "gray-300" }) => {
+const ActionButton = ({ action, children, icon, color = "gray-300" }) => {
   return (
     <button onClick={ action }
       className={ `
-        px-4 mr-1 rounded cursor-pointer
-        hover:bg-${ color }
-        border border-${ color }
+        px-4 py-2 mr-1 rounded cursor-pointer group
+        hover:text-blue-300
       ` }
     >
-      { children }
+     {icon ? <i className={`${icon}`}/> : ''} { children }
     </button>
   )
 }
-const ActionDropdown = ({ children, items }) => {
+const ActionDropdown = ({ children, icon, items }) => {
   const [show, setShow] = React.useState(false);
   const onMouseOver = React.useCallback(e => {
     setShow(true);
@@ -308,7 +313,7 @@ const ActionDropdown = ({ children, items }) => {
       onMouseLeave={ onMouseLeave }
     >
       <ActionButton>
-        { children }
+       {icon ? <i className={`${icon}`}/> : ''} { children }
       </ActionButton>
       { !show ? null :
         <div className="absolute bg-white shadow-lg"
@@ -323,9 +328,10 @@ const ActionDropdown = ({ children, items }) => {
     </div>
   )
 }
-const FoldersDropdown = ({ action, folders, children }) => {
+const FoldersDropdown = ({ action, folders, icon, children }) => {
   return (
     <ActionDropdown
+      icon={icon}
       items={
         folders.map(f => (
           <div key={ f.id } className="px-2 flex items-center hover:bg-gray-300 w-52"

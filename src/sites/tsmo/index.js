@@ -9,7 +9,7 @@ import Home from './pages/Home'
 
 const Routes = [
   Home,
-  ...Incidents,
+  Incidents,
   Workzones,
   Congestion,
   IncidentView,

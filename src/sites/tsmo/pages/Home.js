@@ -33,7 +33,6 @@ const Home = () => {
     {
       title: 'Reliability Dashboard  (Anticipated)',
       description: `Dashboard showing the reliability metrics by corridors by Region by month.`,
-      to: `Reliability`,
       icon: '',
     }
     

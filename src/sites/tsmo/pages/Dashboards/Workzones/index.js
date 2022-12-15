@@ -283,9 +283,9 @@ const Incidents = props => {
               keys={ data.keys }
               indexBy="index"
               data={ data.data.sort((a,b)=> a.index.localeCompare(b.index))}
-              margin={ { top: 5, right: 5, bottom: 25, left: 50 } }
+              margin={ { top: 5, right: 5, bottom: 40, left: 30 } }
               padding={ 0.2 }
-              axisBottom={ { tickDensity: 1 } }
+              axisBottom={ {  tickDensity: 7, format: d => d.split('-')[2].replace(/^0+/, ''), label : 'Day of Month' } }
               axisLeft={ { ticks: 5 } }/>
 
           </div>

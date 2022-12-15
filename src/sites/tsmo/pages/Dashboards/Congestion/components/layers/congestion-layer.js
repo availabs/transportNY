@@ -100,6 +100,7 @@ class CongestionLayer extends LayerContainer {
 
   state = {
     zoom: 6.6,
+    region: null
   };
 
 
@@ -301,8 +302,10 @@ class CongestionLayer extends LayerContainer {
         }]
     };
     map.getSource("geo-boundaries-source").setData(collection);
-    if(geom){
+    if(geom && region !== this.state.region){
+      console.log('zoomToGeography', region, this.state.region)
       this.zoomToGeography(geom)
+      this.updateState({...this.state, region: region})
     }
     // --- Process and Map Congestion Data
     const tmcMap = this.getTMCs(this.props.rawDelayData)

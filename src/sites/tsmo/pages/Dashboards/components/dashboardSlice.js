@@ -9,7 +9,7 @@ const onLoad = {
   fsystem:  localStorage.getItem('tsmo-dashboard-fsystem') || 'All'
 }
 
-// console.log('testing', onLoad)
+console.log('testing', onLoad)
 
 export const dashboardSlice = createSlice({
   name: 'dashboard',

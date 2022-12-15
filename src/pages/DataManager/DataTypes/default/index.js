@@ -1,18 +1,17 @@
-import Overview from './Overview'
-import Metadata from './Metadata'
+import Overview from "./Overview";
+import Metadata from "./Metadata";
 
-
-const Pages =  {
+const Pages = {
   overview: {
-    name: 'Overview',
-    path: '',
-    component: Overview
+    name: "Overview",
+    path: "",
+    component: Overview,
   },
   meta: {
-    name: 'Metadata',
-    path: '/meta',
-    component: Metadata
-  }
-}
+    name: "Metadata",
+    path: "/meta",
+    component: Metadata,
+  },
+};
 
-export default Pages    
+export default Pages;

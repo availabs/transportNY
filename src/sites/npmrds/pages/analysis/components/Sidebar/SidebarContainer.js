@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 // import {ArrowRight} from 'components/common/icons';
 
-import onClickOutside from 'react-onclickoutside';
-
 import get from "lodash.get"
 
 const StyledSidePanelContainer = styled.div`

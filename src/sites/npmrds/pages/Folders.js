@@ -112,7 +112,7 @@ const Folders = ({ user }) => {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto my-8">
+    <div className="max-w-screen-xl mx-auto my-8">
       { !openedFolders.length ? null :
         <StuffInFolder filter={ filter }
           deleteFolder={ deleteFolder }
@@ -262,6 +262,18 @@ const config = [
     exact: true,
     auth: true,
     mainNav: true,
+    sideNav: {
+      color: 'dark',
+      size: 'compact'
+    },
+    component: withAuth(Folders)
+  },
+  { name:'Folders',
+    icon: 'fa fa-folder',
+    path: "/folders/:stuff",
+    exact: true,
+    auth: true,
+    mainNav: false,
     sideNav: {
       color: 'dark',
       size: 'compact'

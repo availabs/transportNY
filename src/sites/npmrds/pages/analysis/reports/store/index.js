@@ -125,19 +125,26 @@ const getStationData = stationIds =>
 
 const getTemplateData = templateId =>
   falcorGraph.get(
-    ["templates", "byId", templateId,
+    ["templates2", "id", templateId,
       ['name',
       	'description',
-      	'owner',
-      	'type',
       	'route_comps',
       	'graph_comps',
         'stations',
         'station_comps',
-        'color_range'
+        'color_range',
+        'created_by',
+        'folder',
+        'default_type'
       ]
     ]
-  ).then(res => console.log("RES:", res))
+  )
+const getTemplateIdByType = defaultType =>
+	falcorGraph.get(
+		['templates2', 'type', defaultType, 'id']
+	).then(res => {
+    return get(res, ["json", "templates2", "type", defaultType, "id"])
+  })
 
 const getReportData = reportId =>
 	falcorGraph.get(
@@ -176,6 +183,21 @@ export const loadRoutesAndTemplate = (routeIds, templateId, stationIds = []) =>
 					state: _loadTemplate(templateId, routeIds, getState().report, stationIds)
 				})
 			)
+export const loadRoutesAndTemplateByType = (routeIds, defaultType, stationIds = []) =>
+	(dispatch, getState) =>
+    Promise.resolve()
+      .then(() => stationIds.length && getStationData(stationIds))
+		  .then(() => routeIds.length && getRouteData(routeIds, getState().report))
+			.then(() => getTemplateIdByType(defaultType))
+			.then(templateId => {
+        return getTemplateData(templateId)
+    			.then(() =>
+    				dispatch({
+    					type: UPDATE_STATE,
+    					state: _loadTemplate(templateId, routeIds, getState().report, stationIds)
+    				})
+    			)
+      })
 export const loadTemplate = templateId =>
 	(dispatch, getState) =>
 		getTemplateData(templateId)
@@ -197,8 +219,7 @@ export const saveTemplate = (template, templateId = null) =>
     const {
       name,
       description,
-      type,
-      owner,
+      folder,
       defaultType,
       saveYearsAsRecent,
       colorRange
@@ -279,8 +300,7 @@ export const saveTemplate = (template, templateId = null) =>
     	templateId,
       name: saveYearsAsRecent ? setRecentText(name, mostRecent, yearsWithData) : name,
       description: saveYearsAsRecent ? setRecentText(description, mostRecent, yearsWithData) : description,
-      type,
-      owner,
+      folder,
       routes: routeIds.length,
       route_comps,
       graph_comps,
@@ -293,7 +313,7 @@ export const saveTemplate = (template, templateId = null) =>
 // console.log("SAVING TEMPLATE:",data)
 
 		return falcorGraph.call(
-			["templates", "save"],
+			["templates2", "save"],
 			[data], [], []
 		)
 		// .then(() => dispatch(update(falcorGraph.getCache())));
@@ -988,8 +1008,6 @@ export const selectColorRange = colorRange =>
 
 const INITIAL_STATE = {
   reportId: null,
-  // type: "personal",
-  // owner: "not-set",
   folder: null,
   name: "New Report",
   description: "",
@@ -1007,7 +1025,9 @@ const INITIAL_STATE = {
   dateExtent: DATE_EXTENT,
   yearsWithData: YEARS_WITH_DATA,
   allYearsWithData: YEARS_WITH_DATA,
+
   templateId: null,
+  defaultType: 'none',
   saveYearsAsRecent: false
 }
 
@@ -1239,16 +1259,16 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
 		mostRecent = Math.max(...yearsWithData);
 
 	const falcorCache = falcorGraph.getCache(),
-    template = get(falcorCache, `templates.byId.${ templateId }`, {});
+    template = get(falcorCache, `templates2.id.${ templateId }`, {});
 
 	let name = template.name,
 	  description = template.description,
-	  owner = template.owner,
-	  type = template.type,
+	  folder = template.folder,
 	  route_comps = get(template, ["route_comps", "value"], []),
 	  graph_comps = get(template, ["graph_comps", "value"], []),
     station_comps = get(template, ["station_comps", "value"], []),
-    colorRange = template.color_range.value || DEFAULT_COLOR_RANGE;
+    colorRange = get(template, ["color_range", "value"], DEFAULT_COLOR_RANGE),
+    defaultType = template.defaultType;
 
 	AVAILABLE_COLORS = [...COLORS];
 	ROUTE_COMP_ID = 0;
@@ -1352,8 +1372,7 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
   return {
     name,
     description,
-    owner,
-    type,
+    folder,
     route_comps,
     routes,
     graphs,
@@ -1361,7 +1380,8 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
     routeComponentSettings,
     templateId,
     saveYearsAsRecent,
-    colorRange
+    colorRange,
+    defaultType
 	};
 }
 

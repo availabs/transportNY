@@ -107,7 +107,8 @@ export const makeNpmrdsRequestKeys = (congestion_data) => {
     branches
   } = congestion_data;
 
-  const tmcArray = branches
+  console.log('utils makeNpmrdsRequestKeys', branches)
+  const tmcArray = [...branches]
     .sort((a, b) => a.branch.length - b.branch.length)
     .reduce((a, { branch }) => {
       branch.forEach((tmc) => {

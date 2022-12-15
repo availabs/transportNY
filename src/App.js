@@ -8,8 +8,6 @@ import Layout from 'layout/ppdaf-layout'
 import get from 'lodash.get'
 import {/*getDomain,*/getSubdomain} from 'utils'
 
-
-
 import {
   DefaultLayout,
   Messages
@@ -32,7 +30,6 @@ const Sites = {
 }
 
 const App = (props) => {
- 
   const SUBDOMAIN = getSubdomain(window.location.host)
   // const PROJECT_HOST = getDomain(window.location.host)
 

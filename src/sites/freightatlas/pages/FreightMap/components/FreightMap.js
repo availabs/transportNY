@@ -99,6 +99,7 @@ const Map = ({ events }) => {
                     name: get(sourceAttributes,'display_name', ''),
                     sources: get(views[0],'metadata.tiles.sources',[]),
                     layers: get(views[0],'metadata.tiles.layers',[]),
+                    symbology: get(views[0],'metadata.tiles.symbology',[]),
                     views: views,
                     source: sourceAttributes,
                     activeView: 0

@@ -34,7 +34,7 @@ export default function BreadCrumbs () {
 
     let catList = get(attr ,'categories[0]', false) || [cat1,cat2].filter(d => d)
 
-    console.log('BreadCrumbs', catList, cat1, cat2, get(attr ,'categories[0]', false))
+    // console.log('BreadCrumbs', catList, cat1, cat2, get(attr ,'categories[0]', false))
 
     let cats = typeof catList !== 'object' ? [] 
       : catList.map((d,i) => {

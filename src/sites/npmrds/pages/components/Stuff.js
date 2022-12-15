@@ -120,7 +120,7 @@ const Route = ({ id, forFolder, ...props }) => {
     <Container { ...props } { ...route } id={ id } type="route"
       items={ RouteItems }
     >
-      <span className="fa fa-road mr-1"/>
+      <span className="fad fa-road mr-1 text-slate-500 text-sm px-2"/>
       <span className="pt-1">
         { get(route, "name", "loading...") }
       </span>
@@ -166,7 +166,7 @@ const Report = ({ id, forFolder, ...props }) => {
     <Container { ...props } { ...report } id={ id } type="report"
       items={ ReportItems }
     >
-      <span className="fa fa-chart-column mr-1"/>
+      <span className="fad fa-file-chart-line mr-1 text-blue-500 text-sm px-2"/>
       <span className="pt-1">
         { get(report, "name", "loading...") }
       </span>
@@ -212,7 +212,7 @@ const Template = ({ id, forFolder, ...props }) => {
     <Container { ...props } { ...template } id={ id } type="template"
       items={ TemplateItems }
     >
-      <span className="fa fa-gear mr-1"/>
+      <span className="fad fa-file-invoice mr-1 text-lime-500 text-sm px-2"/>
       <span className="pt-1">
         { get(template, "name", "loading...") }
       </span>
@@ -477,21 +477,22 @@ const FolderStuffContainer = props => {
   }, []);
 
   return (
-    <div className="flex items-center border-b px-1 hover:bg-gray-200">
+    <div className="flex items-center border-b px-1 hover:bg-blue-50 py-1">
       <div className="flex-1">
-        <div className="font-bold">
+        <div className="font-medium text-gray-600">
           { children }
         </div>
-        <div className="text-sm">
+        <div className="text-sm px-2">
           { description }
         </div>
-        <div className="text-sm italic">
-          last update: { new Date(updated_at).toLocaleString() }
+        <div className="text-xs italic text-slate-500 px-2">
+          <span className='text-xs'>last updated: </span>
+          { new Date(updated_at).toLocaleString() }
         </div>
       </div>
       <div className="flex-0 flex items-center px-1">
         <span onClick={ openInfoModal }
-          className="fa-regular fa-circle-info mr-4 cursor-pointer"
+          className="fa-regular fa-circle-info mr-4 cursor-pointer text-gray-600"
         />
         <input type="checkbox"
           className="cursor-pointer"
@@ -533,7 +534,7 @@ const FolderStuffContainer = props => {
 const ListItem = ({ children, onClick = null }) => {
   return (
     <div onClick={ onClick }
-      className="w-52 px-2 hover:bg-gray-300"
+      className="w-52 px-2 py-1 hover:bg-blue-100"
     >
       { children }
     </div>
