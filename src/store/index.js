@@ -10,6 +10,8 @@ import data_manager from "pages/DataManager/store";
 
 import { configureStore } from "@reduxjs/toolkit";
 
+import report from "sites/npmrds/pages/analysis/reports/store"
+
 // const reducer = combineReducers({
 //   ...Reducers,
 //   messages
@@ -22,6 +24,8 @@ export default configureStore({
     data_manager,
     ...Reducers,
     messages,
+    report
   },
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({ serializableCheck: false })
 });
-

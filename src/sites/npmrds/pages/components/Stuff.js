@@ -10,7 +10,7 @@ import {
 } from "modules/avl-components/src"
 
 import ConfirmModal from "./ConfirmModal"
-import Dropdown from "./MultiLevelDropdown"
+import StuffDropdown from "./StuffDropdown"
 import FolderIcon from "./FolderIcon"
 import FolderModal from "./FolderModal"
 import StuffInfoModal from "./StuffInfoModal"
@@ -95,16 +95,20 @@ const Route = ({ id, forFolder, ...props }) => {
 
   const RouteItems = React.useMemo(() => {
     return [
-      { item: (
-          <ListItem>
-            <span className="fa fa-eye mr-1"/>View in Report
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <span className="fa fa-eye mr-1"/>View in Report
+            </ListItem>
+          )
         )
       },
-      { item: (
-          <ListItem>
-            <span className="fa fa-pen-to-square mr-1"/>Edit
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <span className="fa fa-pen-to-square mr-1"/>Edit
+            </ListItem>
+          )
         )
       }
     ]
@@ -137,16 +141,20 @@ const Report = ({ id, forFolder, ...props }) => {
 
   const ReportItems = React.useMemo(() => {
     return [
-      { item: (
-          <ListItem>
-            <span className="fa fa-eye mr-1"/>View
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <span className="fa fa-eye mr-1"/>View
+            </ListItem>
+          )
         )
       },
-      { item: (
-          <ListItem>
-            <span className="fa fa-pen-to-square mr-1"/>Edit
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <span className="fa fa-pen-to-square mr-1"/>Edit
+            </ListItem>
+          )
         )
       }
     ]
@@ -179,16 +187,20 @@ const Template = ({ id, forFolder, ...props }) => {
 
   const TemplateItems = React.useMemo(() => {
     return [
-      { item: (
-          <ListItem>
-            <span className="fa fa-eye mr-1"/>View
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <span className="fa fa-eye mr-1"/>View
+            </ListItem>
+          )
         )
       },
-      { item: (
-          <ListItem>
-            <span className="fa fa-pen-to-square mr-1"/>Edit
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <span className="fa fa-pen-to-square mr-1"/>Edit
+            </ListItem>
+          )
         )
       }
     ]
@@ -387,58 +399,68 @@ const FolderStuffContainer = props => {
   const StuffItems = React.useMemo(() => {
     return [
       ...items,
-      { item: (
-          <ListItem>
-            <span className="fa fa-copy mr-1"/>Copy to folder
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <span className="fa fa-copy mr-1"/>Copy to folder
+            </ListItem>
+          )
         ),
         children: (
           folders.map(f => ({
-            item: (
-              <ListItem key={ f.id } onClick={ e => copyToFolder(e, f.id) }>
-                <div className="flex items-center">
-                  <div className="mr-1">
-                    <FolderIcon size={ 1.25 }
-                      icon={ get(f, "icon", "") }
-                      color={ get(f, "color", "#000") }/>
+            Item: (
+              () => (
+                <ListItem key={ f.id } onClick={ e => copyToFolder(e, f.id) }>
+                  <div className="flex items-center">
+                    <div className="mr-1">
+                      <FolderIcon size={ 1.25 }
+                        icon={ get(f, "icon", "") }
+                        color={ get(f, "color", "#000") }/>
+                    </div>
+                    <span className="pt-1">
+                      { get(f, "name", "loading...") }
+                    </span>
                   </div>
-                  <span className="pt-1">
-                    { get(f, "name", "loading...") }
-                  </span>
-                </div>
-              </ListItem>
+                </ListItem>
+              )
             )
           }))
         )
       },
-      { item: (
-          <ListItem>
-            <span className="fa fa-arrow-up-from-bracket mr-1"/>Move to folder
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <span className="fa fa-arrow-up-from-bracket mr-1"/>Move to folder
+            </ListItem>
+          )
         ),
         children: (
           folders.map(f => ({
-            item: (
-              <ListItem key={ f.id } onClick={ e => moveToFolder(e, f.id) }>
-                <div className="flex items-center">
-                  <div className="mr-1">
-                    <FolderIcon size={ 1.25 }
-                      icon={ get(f, "icon", "") }
-                      color={ get(f, "color", "#000") }/>
+            Item: (
+              () => (
+                <ListItem key={ f.id } onClick={ e => moveToFolder(e, f.id) }>
+                  <div className="flex items-center">
+                    <div className="mr-1">
+                      <FolderIcon size={ 1.25 }
+                        icon={ get(f, "icon", "") }
+                        color={ get(f, "color", "#000") }/>
+                    </div>
+                    <span className="pt-1">
+                      { get(f, "name", "loading...") }
+                    </span>
                   </div>
-                  <span className="pt-1">
-                    { get(f, "name", "loading...") }
-                  </span>
-                </div>
-              </ListItem>
+                </ListItem>
+              )
             )
           }))
         )
       },
-      { item: (
-          <ListItem onClick={ confirmDelete }>
-            <span className="fa fa-trash text-red-400 mr-1"/>Delete { type }
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem onClick={ confirmDelete }>
+              <span className="fa fa-trash text-red-400 mr-1"/>Delete { type }
+            </ListItem>
+          )
         )
       },
     ]
@@ -480,9 +502,9 @@ const FolderStuffContainer = props => {
           onClick={ stopPropagation }>
           <div className="flex-0"
             onClick={ stopPropagation }>
-            <Dropdown items={ StuffItems }>
+            <StuffDropdown items={ StuffItems }>
               <span className="fa text-lg fa-list mr-1"/>
-            </Dropdown>
+            </StuffDropdown>
           </div>
         </div>
       </div>

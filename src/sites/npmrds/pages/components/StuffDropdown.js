@@ -1,19 +1,36 @@
 import React from "react"
 
-const DropDownContainer = ({ children }) => {
+const DefaultDropDownContainer = ({ children }) => {
   return (
-    <div className="bg-white shadow-lg">
+    <div className="bg-white shadow-lg w-fit">
+      { children }
+    </div>
+  )
+}
+const DefaultDropdownItem = ({ children }) => {
+  return (
+    <div className="px-2 hover:bg-gray-300">
+      { children }
+    </div>
+  )
+}
+const DefaultInputContainer = ({ children }) => {
+  return (
+    <div className="px-2 py-1">
       { children }
     </div>
   )
 }
 
-const MultiLevelDropdown = props => {
+const StuffDropdown = props => {
   const {
     items = [],
     zIndex = 5,
     xDirection = "right",
     yDirection = "down",
+    DropDownContainer = DefaultDropDownContainer,
+    DropdownItem = DefaultDropdownItem,
+    InputContainer = DefaultInputContainer,
     children
   } = props;
 
@@ -71,14 +88,19 @@ const MultiLevelDropdown = props => {
           } }
         >
           <DropDownContainer>
-            { items.map(({ item, children }, i) => (
-                <MultiLevelDropdown key={ i }
-                  xDirection={ xDir === 1 ? "right" : "left" }
-                  zIndex={ zIndex + 5 }
-                  items={ children }>
-                  { item }
-                </MultiLevelDropdown>
-              ))
+            { items
+                .map(({ Item = DropdownItem,
+                        value = null,
+                        children }, i) => (
+                  <StuffDropdown key={ i }
+                    xDirection={ xDir === 1 ? "right" : "left" }
+                    zIndex={ zIndex + 5 }
+                    items={ children }>
+                    <Item>
+                      { value }
+                    </Item>
+                  </StuffDropdown>
+                ))
             }
           </DropDownContainer>
         </div>
@@ -86,4 +108,4 @@ const MultiLevelDropdown = props => {
     </div>
   )
 }
-export default MultiLevelDropdown
+export default StuffDropdown;

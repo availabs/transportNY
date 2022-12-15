@@ -1,0 +1,115 @@
+.graph-container {
+	height: 100%;
+	max-height: 100%;
+	width: 100%;
+	max-width: 100%;
+	background-color: #ddd;
+}
+
+.graph-comp-icon {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 26px;
+	height: 26px;
+	padding: 3px;
+	transition: background-color 0.15s, color 0.15s;
+	border-radius: 4px;
+	cursor: pointer;
+}
+.graph-comp-icon:hover {
+	color: #f2f4f8;
+	background-color: #999;
+}
+.graph-comp-icon .icon-tooltip,
+.my-drag-handle .icon-tooltip {
+	opacity: 1;
+	white-space: nowrap;
+}
+
+.my-drag-handle {
+	cursor: grab;
+	width: 26px;
+	height: 26px;
+	margin: 2px;
+	border-radius: 4px;
+	transition: background-color 0.15s, color 0.15s;
+}
+.my-drag-handle:hover {
+	color: #f2f4f8;
+	background-color: #999;
+}
+.my-drag-handle.grabbing {
+	cursor: grabbing;
+}
+
+.comp-title {
+	font-size: 18px;
+	font-weight: bold;
+	border-bottom: 2px solid #000;
+	margin: 0px 10px;
+	height: 30px;
+	line-height: 30px;
+}
+
+.menubar {
+	display: flex;
+}
+.menubar > * {
+	margin-left: 5px;
+}
+.menubar > *:first-child {
+	margin-left: 0px;
+}
+
+.dropdown > .menu {
+	position: absolute;
+	left: 0;
+	top: calc(100% + 3px);
+	float: left;
+	color: #ccc;
+	z-index: 5000;
+	overflow: hidden;
+	transition: height 0.3s;
+}
+.dropdown > .menu > .item {
+	padding: 3px 20px 3px 10px;
+	min-width: 150px;
+	white-space: nowrap;
+	transition: background-color 0.15s;
+}
+.dropdown > .menu > .item.active {
+	background-color: #ccc;
+	color: #3E4B5B;
+}
+.dropdown > .menu > .item:hover {
+	background-color: #ddd;
+	color: #3E4B5B;
+}
+/*
+	GRID GRAPH ANIMATION STUFF
+*/
+@keyframes fadeOut {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+@keyframes travelDown {
+	from {
+		top: 0%;
+	}
+	to {
+		top: calc(100% - 30px);
+	}
+}
+@keyframes travelUp {
+	from {
+		top: calc(100% - 30px);
+	}
+	to {
+		top: 0%;
+	}
+}
