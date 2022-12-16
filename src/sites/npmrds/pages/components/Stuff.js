@@ -2,6 +2,7 @@ import React from "react"
 
 import get from "lodash.get"
 import { range as d3range } from "d3-array"
+import { Link } from 'react-router-dom'
 
 import {
   useFalcor,
@@ -144,7 +145,9 @@ const Report = ({ id, forFolder, ...props }) => {
       { Item: (
           () => (
             <ListItem>
-              <span className="fa fa-eye mr-1"/>View
+              <Link to={`/report/view/${id}`}>
+                <span className="fa fa-eye mr-1"/>View
+              </Link>
             </ListItem>
           )
         )
@@ -152,7 +155,9 @@ const Report = ({ id, forFolder, ...props }) => {
       { Item: (
           () => (
             <ListItem>
-              <span className="fa fa-pen-to-square mr-1"/>Edit
+              <Link to={`/report/edit/${id}`}>
+                <span className="fa fa-pen-to-square mr-1"/>Edit
+              </Link>
             </ListItem>
           )
         )
