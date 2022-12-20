@@ -1,6 +1,6 @@
 import { DAMA_HOST } from "config";
 
-import { createEtlContextPropsProxy } from "../EtlContext";
+import { createEtlContextPropsProxy } from "../../../../utils/EtlContext";
 
 export async function checkApiResponse(res) {
   if (!res.ok) {

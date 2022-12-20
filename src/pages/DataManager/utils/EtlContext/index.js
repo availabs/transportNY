@@ -3,7 +3,15 @@
 // FIXME: Need to decide how to handle getState and setState
 //        Simple cloneDeep means cloned/spawned contexts mutate original.
 
-import { useState, useRef, createContext } from "react";
+import {
+  // useEffect,
+  useState,
+  useRef,
+  // useContext,
+  // useReducer,
+  createContext,
+} from "react";
+
 import { assign, cloneDeep, isEqual, merge, omit } from "lodash";
 import EventEmitter from "eventemitter3";
 import { pEventIterator } from "p-event";
@@ -167,6 +175,43 @@ export function useEtlContext(_ctx) {
   return prevSliceRef.current;
 }
 
+/* // This currently doesn't work
+export function useEtlContextFactory(store, parentCtx, initialArg) {
+  const { default: reducer, init } = store;
+
+  const [state, dispatch] = useReducer(
+    reducer,
+    // Fixme: maxSeenEventId belongs on damaEtlAdmin
+    initialArg,
+    init
+  );
+
+  const { __taskName__ } = state;
+
+  const { current: ctx } = useRef(
+    new EtlContext({
+      name: __taskName__,
+      ...store,
+      dispatch,
+      parentCtx,
+    })
+  );
+
+  ctx.setState(state);
+
+  useEffect(() => {
+    if (parentCtx) {
+      parentCtx.dispatch({
+        type: `${__taskName__}:STATE_UPDATE`,
+        payload: state,
+      });
+    }
+  }, [parentCtx, state, __taskName__]);
+
+  return ctx;
+}
+*/
+
 export default class EtlContext {
   constructor(config) {
     assign(this, omit(config, ["getState", "setState", "assignMeta"]));
@@ -242,7 +287,7 @@ export default class EtlContext {
     }
   }
 
-  // meta is mutable. This allow spawned ctx to get updates by reference.
+  // Currently meta is mutable. This allow spawned ctx to get updates by reference.
   // Should meta also be immutable?
   assignMeta(meta) {
     assign(this.meta, meta);

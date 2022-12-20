@@ -9,7 +9,7 @@ import React, {
 import EtlContext, {
   useEtlContext,
   EtlContextReact,
-} from "../../utils/EtlContext";
+} from "../../../../utils/EtlContext";
 
 import { checkApiResponse } from "../../utils/api";
 
@@ -32,7 +32,7 @@ export default function UpdateGisDatasetLayerDatabaseDbSchema() {
   //                      * useRef,
   //                      * setState,
   //                      * parentCtx.dispatch STATE_UPDATE
-  //                      * useEtlContextDependencies
+  //                      * useEtlContext
   //        Could the useEtlContext hook call useContext ?
   const [state, dispatch] = useReducer(reducer, null, store.init);
 

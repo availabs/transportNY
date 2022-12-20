@@ -7,7 +7,8 @@ import _ from "lodash";
 import EtlContext, {
   useEtlContext,
   EtlContextReact,
-} from "../../utils/EtlContext";
+} from "../../../../utils/EtlContext";
+
 import { selectPgEnv, selectUserId } from "pages/DataManager/store";
 
 import { getNewEtlContextId, getDamaApiRoutePrefix } from "../../utils/api";
