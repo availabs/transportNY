@@ -3,8 +3,6 @@ import React from "react"
 import { range as d3range } from "d3-array"
 import get from "lodash.get"
 
-import Fuse from "fuse.js"
-
 import {
   useFalcor,
   withAuth,
@@ -21,13 +19,7 @@ import ActionBar from "./ActionBar"
 import FolderIcon from "./FolderIcon"
 import ConfirmModal from "./ConfirmModal"
 
-const FuseWrapper = (stuff, options) => {
-  const fuse = new Fuse(stuff, options)
-  return search => {
-    if (!search) return stuff;
-    return fuse.search(search).map(f => f.item);
-  }
-}
+import { FuseWrapper } from "sites/npmrds/components"
 
 const StuffOrder = {
   folder: 0,
@@ -144,7 +136,7 @@ const StuffInFolder = ({ openedFolders, setOpenedFolders, filter, deleteFolder }
   const [search, setSearch] = React.useState("");
   const clearSearch = React.useCallback(() => {
     setSearch("");
-  }, [])
+  }, []);
 
   const fuse = React.useMemo(() => {
     return FuseWrapper(stuff, { keys: ["name", "description"] });

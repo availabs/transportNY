@@ -2,6 +2,7 @@ import React from "react"
 
 import get from "lodash.get"
 import { range as d3range } from "d3-array"
+import { Link } from 'react-router-dom'
 
 import {
   useFalcor,
@@ -10,7 +11,7 @@ import {
 } from "modules/avl-components/src"
 
 import ConfirmModal from "./ConfirmModal"
-import Dropdown from "./MultiLevelDropdown"
+import StuffDropdown from "./StuffDropdown"
 import FolderIcon from "./FolderIcon"
 import FolderModal from "./FolderModal"
 import StuffInfoModal from "./StuffInfoModal"
@@ -95,16 +96,20 @@ const Route = ({ id, forFolder, ...props }) => {
 
   const RouteItems = React.useMemo(() => {
     return [
-      { item: (
-          <ListItem>
-            <span className="fad fa-eye mr-1 px-2 text-blue-500"/>View in Report
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <span className="fa fa-eye mr-1"/>View in Report
+            </ListItem>
+          )
         )
       },
-      { item: (
-          <ListItem>
-            <span className="fad fa-pen-to-square mr-1 px-2 text-blue-500" />Edit
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <span className="fa fa-pen-to-square mr-1"/>Edit
+            </ListItem>
+          )
         )
       }
     ]
@@ -137,16 +142,24 @@ const Report = ({ id, forFolder, ...props }) => {
 
   const ReportItems = React.useMemo(() => {
     return [
-      { item: (
-          <ListItem>
-            <span className="fad fa-eye mr-1 px-2 text-blue-500"/>View
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <Link to={`/report/view/${id}`}>
+                <span className="fa fa-eye mr-1"/>View
+              </Link>
+            </ListItem>
+          )
         )
       },
-      { item: (
-          <ListItem>
-            <span className="fad fa-pen-to-square mr-1 px-2 text-blue-500"/>Edit
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <Link to={`/report/edit/${id}`}>
+                <span className="fa fa-pen-to-square mr-1"/>Edit
+              </Link>
+            </ListItem>
+          )
         )
       }
     ]
@@ -179,16 +192,20 @@ const Template = ({ id, forFolder, ...props }) => {
 
   const TemplateItems = React.useMemo(() => {
     return [
-      { item: (
-          <ListItem>
-            <span className="fad fa-eye mr-1 px-2 text-blue-500"/>View
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <span className="fa fa-eye mr-1"/>View
+            </ListItem>
+          )
         )
       },
-      { item: (
-          <ListItem>
-            <span className="fad fa-pen-to-square mr-1 px-2 text-blue-500"/>Edit
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <span className="fa fa-pen-to-square mr-1"/>Edit
+            </ListItem>
+          )
         )
       }
     ]
@@ -387,58 +404,68 @@ const FolderStuffContainer = props => {
   const StuffItems = React.useMemo(() => {
     return [
       ...items,
-      { item: (
-          <ListItem>
-            <span className="fad fa-copy mr-1 px-2 text-blue-500"/>Copy to folder
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <span className="fa fa-copy mr-1"/>Copy to folder
+            </ListItem>
+          )
         ),
         children: (
           folders.map(f => ({
-            item: (
-              <ListItem key={ f.id } onClick={ e => copyToFolder(e, f.id) }>
-                <div className="flex items-center">
-                  <div className="mr-1">
-                    <FolderIcon size={ 1.25 }
-                      icon={ get(f, "icon", "") }
-                      color={ get(f, "color", "#000") }/>
+            Item: (
+              () => (
+                <ListItem key={ f.id } onClick={ e => copyToFolder(e, f.id) }>
+                  <div className="flex items-center">
+                    <div className="mr-1">
+                      <FolderIcon size={ 1.25 }
+                        icon={ get(f, "icon", "") }
+                        color={ get(f, "color", "#000") }/>
+                    </div>
+                    <span className="pt-1">
+                      { get(f, "name", "loading...") }
+                    </span>
                   </div>
-                  <span className="pt-1">
-                    { get(f, "name", "loading...") }
-                  </span>
-                </div>
-              </ListItem>
+                </ListItem>
+              )
             )
           }))
         )
       },
-      { item: (
-          <ListItem>
-            <span className="fad fa-arrow-up-from-bracket mr-1 px-2 text-blue-500"/>Move to folder
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem>
+              <span className="fa fa-arrow-up-from-bracket mr-1"/>Move to folder
+            </ListItem>
+          )
         ),
         children: (
           folders.map(f => ({
-            item: (
-              <ListItem key={ f.id } onClick={ e => moveToFolder(e, f.id) }>
-                <div className="flex items-center">
-                  <div className="mr-1">
-                    <FolderIcon size={ 1.25 }
-                      icon={ get(f, "icon", "") }
-                      color={ get(f, "color", "#000") }/>
+            Item: (
+              () => (
+                <ListItem key={ f.id } onClick={ e => moveToFolder(e, f.id) }>
+                  <div className="flex items-center">
+                    <div className="mr-1">
+                      <FolderIcon size={ 1.25 }
+                        icon={ get(f, "icon", "") }
+                        color={ get(f, "color", "#000") }/>
+                    </div>
+                    <span className="pt-1">
+                      { get(f, "name", "loading...") }
+                    </span>
                   </div>
-                  <span className="pt-1">
-                    { get(f, "name", "loading...") }
-                  </span>
-                </div>
-              </ListItem>
+                </ListItem>
+              )
             )
           }))
         )
       },
-      { item: (
-          <ListItem onClick={ confirmDelete }>
-            <span className="fad fa-trash text-red-400 mr-1 px-2"/>Delete { type }
-          </ListItem>
+      { Item: (
+          () => (
+            <ListItem onClick={ confirmDelete }>
+              <span className="fa fa-trash text-red-400 mr-1"/>Delete { type }
+            </ListItem>
+          )
         )
       },
     ]
@@ -464,7 +491,7 @@ const FolderStuffContainer = props => {
           { description }
         </div>
         <div className="text-xs italic text-slate-500 px-2">
-          <span className='text-xs'>last updated: </span> 
+          <span className='text-xs'>last updated: </span>
           { new Date(updated_at).toLocaleString() }
         </div>
       </div>
@@ -481,9 +508,9 @@ const FolderStuffContainer = props => {
           onClick={ stopPropagation }>
           <div className="flex-0"
             onClick={ stopPropagation }>
-            <Dropdown items={ StuffItems }>
-              <span className="fa text-lg fa-list mr-1 text-gray-600"/>
-            </Dropdown>
+            <StuffDropdown items={ StuffItems }>
+              <span className="fa text-lg fa-list mr-1"/>
+            </StuffDropdown>
           </div>
         </div>
       </div>

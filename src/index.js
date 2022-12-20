@@ -12,12 +12,14 @@ import PPDAF_THEME from "./theme"
 import {
   FalcorProvider,
   ThemeContext,
-  falcorGraph,
+  // falcorGraph,
   addComponents,
   addWrappers
 } from "modules/avl-components/src"
 
 import reportWebVitals from './reportWebVitals';
+
+import { falcorGraph } from "store/falcorGraph"
 
 //
 // import DmsComponents from "components/dms"
@@ -43,7 +45,7 @@ const AuthEnabledApp = enableAuth(App, { AUTH_HOST, PROJECT_NAME, CLIENT_HOST })
 ReactDOM.render(
   <React.StrictMode>
    	<Provider store={ store }>
-  		<FalcorProvider falcor={ falcorGraph(API_HOST) }>
+  		<FalcorProvider falcor={ falcorGraph }>
         <ThemeContext.Provider value={PPDAF_THEME}>
           <AuthEnabledApp />
         </ThemeContext.Provider>
