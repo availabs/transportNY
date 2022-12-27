@@ -1,3 +1,5 @@
+// Consider:  Should this be a class so that tasks can extend and override methods?
+
 import { DAMA_HOST } from "config";
 
 export async function checkApiResponse(res) {
@@ -28,4 +30,12 @@ export async function getNewEtlContextId(pgEnv) {
   const etlContextId = +(await newEtlCtxRes.text());
 
   return etlContextId;
+}
+
+export async function getDamaTileServerUrl() {
+  const res = await fetch(`${DAMA_HOST}/dama-info/getTileServerUrl`);
+  // const damaTileServerUrl = await res.text();
+  const damaTileServerUrl = await res.json();
+
+  return damaTileServerUrl;
 }

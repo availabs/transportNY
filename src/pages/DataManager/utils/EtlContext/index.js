@@ -214,7 +214,22 @@ export function useEtlContextFactory(store, parentCtx, initialArg) {
 
 export default class EtlContext {
   constructor(config) {
-    assign(this, omit(config, ["getState", "setState", "assignMeta"]));
+    assign(
+      this,
+      omit(config, ["getState", "setState", "assignMeta", "operations"])
+    );
+
+    if (config.operations) {
+      const boundOperations = Object.keys(config.operations).reduce(
+        (acc, op) => {
+          acc[op] = config.operations[op].bind(this);
+          return acc;
+        },
+        {}
+      );
+
+      this.operations = boundOperations;
+    }
 
     this.id = uuid();
 

@@ -1,6 +1,6 @@
 import PublishStatus from "../../../constants/PublishStatus";
 
-import createSimpleIdentityAction from "../../../utils/createSimpleIdentityAction";
+import { createSimpleIdentityAction } from "pages/DataManager/utils/Reducks";
 
 export const resetState = createSimpleIdentityAction("RESET_STATE");
 

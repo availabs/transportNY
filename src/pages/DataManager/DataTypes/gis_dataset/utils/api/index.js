@@ -1,44 +1,13 @@
-import { DAMA_HOST } from "config";
+import { createEtlContextPropsProxy } from "pages/DataManager/utils/EtlContext";
 
-import { createEtlContextPropsProxy } from "../../../../utils/EtlContext";
+import { checkApiResponse } from "pages/DataManager/utils/DamaControllerApi";
 
-export async function checkApiResponse(res) {
-  if (!res.ok) {
-    let errMsg = res.statusText;
-    try {
-      const { message } = await res.json();
-      errMsg = message;
-    } catch (err) {
-      console.error(err);
-    }
-
-    throw new Error(errMsg);
-  }
-}
-
-export function getDamaApiRoutePrefix(pgEnv) {
-  return `${DAMA_HOST}/dama-admin/${pgEnv}`;
-}
-
-export async function getNewEtlContextId(pgEnv) {
-  const rtPfx = `${DAMA_HOST}/dama-admin/${pgEnv}`;
-
-  const newEtlCtxRes = await fetch(`${rtPfx}/etl/new-context-id`);
-
-  await checkApiResponse(newEtlCtxRes);
-
-  const etlContextId = +(await newEtlCtxRes.text());
-
-  return etlContextId;
-}
-
-export async function getDamaTileServerUrl() {
-  const res = await fetch(`${DAMA_HOST}/dama-info/getTileServerUrl`);
-  // const damaTileServerUrl = await res.text();
-  const damaTileServerUrl = await res.json();
-
-  return damaTileServerUrl;
-}
+export {
+  checkApiResponse,
+  getNewEtlContextId,
+  getDamaApiRoutePrefix,
+  getDamaTileServerUrl,
+} from "pages/DataManager/utils/DamaControllerApi";
 
 export async function stageLayerData(ctx) {
   console.log("stageLayerData");

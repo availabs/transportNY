@@ -1,4 +1,4 @@
-import createSimpleSelector from "../../../utils/createSimpleSelector";
+import { createSimpleSelector } from "pages/DataManager/utils/Reducks";
 
 export const selectMaxSeenId = createSimpleSelector("maxSeenEventId");
 export const selectGisUploadId = createSimpleSelector("gisUploadId");

@@ -3,7 +3,7 @@ import { useContext } from "react";
 import {
   useEtlContext,
   EtlContextReact,
-} from "../../../../../utils/EtlContext";
+} from "pages/DataManager/utils/EtlContext";
 
 import PublishStatus from "../../../constants/PublishStatus";
 
