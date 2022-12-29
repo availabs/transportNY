@@ -167,7 +167,7 @@ export function useEtlContext(_ctx) {
     if (!isEqual(prevSlice[dep], newSlice[dep])) {
       prevSliceRef.current = newSlice;
 
-      console.log("useEtlContext for", ctx.name, "dependency", dep, "changed");
+      // console.log("useEtlContext for", ctx.name, "dependency", dep, "changed");
       return newSlice;
     }
   }

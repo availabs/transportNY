@@ -15,6 +15,7 @@ import * as _store_ from "./store";
 
 import NpmrdsTravelTimeExportForm from "./components/NpmrdsTravelTimeExportForm";
 import ErrorMessage from "./components/ErrorMessage";
+import RequestStatusMessage from "./components/RequestStatusDisplay";
 
 const Main = ({ store = _store_ }) => {
   const { reducer, init } = store;
@@ -54,6 +55,7 @@ const Main = ({ store = _store_ }) => {
   return (
     <EtlContextReact.Provider key={key} className="w-full" value={ctx}>
       <NpmrdsTravelTimeExportForm />
+      <RequestStatusMessage />
       <ErrorMessage />
     </EtlContextReact.Provider>
   );

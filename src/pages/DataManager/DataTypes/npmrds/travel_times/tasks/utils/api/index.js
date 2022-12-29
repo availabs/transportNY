@@ -50,5 +50,26 @@ export async function queueNpmrdsExportRequest(ctx) {
 
   await checkApiResponse(updTblDscRes);
 
-  return await updTblDscRes.text();
+  const {
+    etl_context_id: etlContextId,
+    npmrds_download_name: npmrdsDownloadName,
+  } = await updTblDscRes.json();
+
+  return { etlContextId, npmrdsDownloadName };
+}
+
+export async function getOpenRequestsStatuses(ctx) {
+  const {
+    meta: { rtPfx },
+  } = ctx;
+
+  const url = `${rtPfx}/data-sources/npmrds/travel-times/downloader/getOpenRequestsStatuses`;
+
+  const res = await fetch(url);
+
+  await checkApiResponse(res);
+
+  const openRequestsStatuses = await res.json();
+
+  return openRequestsStatuses;
 }

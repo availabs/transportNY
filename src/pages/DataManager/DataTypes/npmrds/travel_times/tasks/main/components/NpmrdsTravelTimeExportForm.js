@@ -17,8 +17,6 @@ const toDateObj = (s) => {
 
   const d = new Date(year, month - 1, date);
 
-  console.log({ s, d, year, month, date });
-
   return d;
 };
 

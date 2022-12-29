@@ -16,7 +16,10 @@ export const initialState = deepFreeze({
   expandedMap: true,
 
   requestStatus: RequestStatus.INITIAL,
+  requestStatusMsg: null,
   requestErrMsg: null,
+
+  npmrdsDownloadName: null,
 });
 
 export function init(config) {
@@ -30,12 +33,12 @@ export function init(config) {
 export default function reducer(state, action) {
   const { type, payload } = action;
 
-  console.log({ reducer: { action } });
+  // console.log({ reducer: { action } });
 
   switch (type) {
     case "configuration/UPDATE": {
       const {
-        npmrdsDataDateExtent: [,dataMaxDate],
+        npmrdsDataDateExtent: [, dataMaxDate],
       } = payload;
 
       const requestStatus =
@@ -88,10 +91,20 @@ export default function reducer(state, action) {
         ? state
         : { ...state, etlContextId: payload };
 
+    case "npmrdsDownloadName/UPDATE":
+      return state.npmrdsDownloadName === payload
+        ? state
+        : { ...state, npmrdsDownloadName: payload };
+
     case "requestStatus/UPDATE":
       return state.requestStatus === payload
         ? state
         : { ...state, requestStatus: payload };
+
+    case "requestStatusMsg/UPDATE":
+      return state.requestStatus === payload
+        ? state
+        : { ...state, requestStatusMsg: payload };
 
     case "requestErrMsg/UPDATE":
       return state.requestErrMsg === payload

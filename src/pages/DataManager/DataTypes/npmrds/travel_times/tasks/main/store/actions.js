@@ -17,6 +17,10 @@ export const updateEtlContextId = createSimpleIdentityAction(
   "etlContextId/UPDATE"
 );
 
+export const updateNpmrdsDownloadName = createSimpleIdentityAction(
+  "npmrdsDownloadName/UPDATE"
+);
+
 export const updateConfiguration = createSimpleIdentityAction(
   "configuration/UPDATE"
 );
@@ -46,6 +50,10 @@ export const setRequestStatusToDone = createSimpleIdentityAction(
 export const setRequestStatusToError = createSimpleIdentityAction(
   "requestStatus/UPDATE"
 ).bind(null, RequestStatus.ERROR);
+
+export const updateRequestStatusMsg = createSimpleIdentityAction(
+  "requestStatusMsg/UPDATE"
+);
 
 export const updateRequestErrMsg = createSimpleIdentityAction(
   "requestErrMsg/UPDATE"

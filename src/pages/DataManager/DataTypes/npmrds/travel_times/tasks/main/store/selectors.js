@@ -20,4 +20,9 @@ export const selectRequestStatus = createSimpleSelector("requestStatus");
 
 export const selectEtlContextId = createSimpleSelector("etlContextId");
 
+export const selectNpmrdsDownloadName =
+  createSimpleSelector("npmrdsDownloadName");
+
+export const selectRequestStatusMsg = createSimpleSelector("requestStatusMsg");
+
 export const selectRequestErrMsg = createSimpleSelector("requestErrMsg");

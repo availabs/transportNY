@@ -5,14 +5,12 @@ import {
   EtlContextReact,
 } from "pages/DataManager/utils/EtlContext";
 
-import RequestStatus from "../constants/RequestStatus";
-
-export default function ErrorMessage() {
+export default function RequestStatusMessage() {
   const ctx = useContext(EtlContextReact);
 
-  const { etlContextId, requestStatus, requestErrMsg } = useEtlContext(ctx);
+  const { etlContextId, requestStatusMsg } = useEtlContext(ctx);
 
-  if (requestStatus !== RequestStatus.ERROR) {
+  if (!requestStatusMsg) {
     return "";
   }
 
@@ -29,7 +27,7 @@ export default function ErrorMessage() {
       <thead
         style={{
           color: "black",
-          backgroundColor: "red",
+          backgroundColor: "green",
           fontWeight: "bolder",
           textAlign: "center",
           marginTop: "40px",
@@ -41,7 +39,7 @@ export default function ErrorMessage() {
         <tr>
           <th style={{ border: "1px solid", borderColor: "black" }}>
             {" "}
-            Request Error
+            Request Status
           </th>
           <th style={{ border: "1px solid", borderColor: "black" }}>
             {" "}
@@ -59,7 +57,7 @@ export default function ErrorMessage() {
               color: "darkred",
             }}
           >
-            {requestErrMsg}
+            {requestStatusMsg}
           </td>
           <td style={{ border: "1px solid", backgroundColor: "white" }}>
             {etlContextId}
