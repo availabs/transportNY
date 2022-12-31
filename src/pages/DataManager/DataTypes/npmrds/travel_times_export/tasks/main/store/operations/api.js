@@ -18,7 +18,7 @@ export async function getNpmrdsDataDateExtent(ctx) {
 
   const rtPfx = getDamaApiRoutePrefix(pgEnv);
 
-  const url = `${rtPfx}/data-sources/npmrds/travel-times/downloader/getNpmrdsDataDateExtent`;
+  const url = `${rtPfx}/data-sources/npmrds/travel-times-export/downloader/getNpmrdsDataDateExtent`;
 
   const res = await fetch(url);
 
@@ -39,7 +39,7 @@ export async function queueNpmrdsExportRequest(ctx) {
 
   const rtPfx = getDamaApiRoutePrefix(pgEnv);
 
-  const url = `${rtPfx}/data-sources/npmrds/travel-times/downloader/queueNpmrdsExportRequest`;
+  const url = `${rtPfx}/data-sources/npmrds/travel-times-export/downloader/queueNpmrdsExportRequest`;
 
   const updTblDscRes = await fetch(url, {
     method: "POST",
@@ -78,7 +78,7 @@ export async function getOpenRequestsStatuses(ctx) {
 
   const rtPfx = getDamaApiRoutePrefix(pgEnv);
 
-  const url = `${rtPfx}/data-sources/npmrds/travel-times/downloader/getOpenRequestsStatuses`;
+  const url = `${rtPfx}/data-sources/npmrds/travel-times-export/downloader/getOpenRequestsStatuses`;
 
   const res = await fetch(url);
 

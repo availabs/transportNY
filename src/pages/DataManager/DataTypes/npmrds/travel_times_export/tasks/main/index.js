@@ -12,11 +12,11 @@ import RequestStatus from "./constants/RequestStatus";
 
 import * as _store_ from "./store";
 
-import NpmrdsTravelTimeExportForm from "./components/NpmrdsTravelTimeExportForm";
+import NpmrdsTravelTimesExportForm from "./components/NpmrdsTravelTimesExportForm";
 import ErrorMessage from "./components/ErrorMessage";
 import RequestStatusMessage from "./components/RequestStatusDisplay";
 
-const Main = ({ store = _store_ }) => {
+const NpmrdsTravelTimesExportRequester = ({ store = _store_ }) => {
   const { reducer, init } = store;
 
   const pgEnv = useSelector(selectPgEnv);
@@ -51,11 +51,11 @@ const Main = ({ store = _store_ }) => {
 
   return (
     <EtlContextReact.Provider key={key} className="w-full" value={ctx}>
-      <NpmrdsTravelTimeExportForm />
+      <NpmrdsTravelTimesExportForm />
       <RequestStatusMessage />
       <ErrorMessage />
     </EtlContextReact.Provider>
   );
 };
 
-export default Main;
+export default NpmrdsTravelTimesExportRequester;

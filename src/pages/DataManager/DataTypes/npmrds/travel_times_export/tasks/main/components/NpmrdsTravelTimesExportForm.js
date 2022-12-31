@@ -85,7 +85,7 @@ export function FormInputs() {
           fontWeight: "bold",
         }}
       >
-        NPMRDS Travel Time Data Request Form
+        NPMRDS Travel Times Export Request Form
       </h2>
 
       <table className="w-full">
@@ -175,7 +175,7 @@ export function RequestButton() {
   }
 
   const {
-    operations: { requestNpmrdsTravelTimesData },
+    operations: { requestNpmrdsTravelTimesExport },
   } = ctx;
 
   let requestButtonText = "Submit";
@@ -213,7 +213,7 @@ export function RequestButton() {
       }}
       onClick={() => {
         if (requestStatus === RequestStatus.CONFIGURED) {
-          requestNpmrdsTravelTimesData();
+          requestNpmrdsTravelTimesExport();
         }
       }}
     >

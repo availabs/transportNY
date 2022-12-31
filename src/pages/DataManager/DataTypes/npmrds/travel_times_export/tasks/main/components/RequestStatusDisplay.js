@@ -28,7 +28,7 @@ export default function RequestStatusMessage() {
       <thead
         style={{
           color: "black",
-          backgroundColor: "#2590eb",
+          backgroundColor: "#d5e7ff",
           fontWeight: "bolder",
           textAlign: "center",
           marginTop: "40px",

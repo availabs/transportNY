@@ -13,6 +13,8 @@ import {
 } from "react";
 
 import { assign, cloneDeep, isEqual, merge, omit } from "lodash";
+import _ from "lodash";
+
 import EventEmitter from "eventemitter3";
 import { pEventIterator } from "p-event";
 
@@ -304,8 +306,14 @@ export default class EtlContext {
 
   // Currently meta is mutable. This allow spawned ctx to get updates by reference.
   // Should meta also be immutable?
+
+  // From lodash docs:
+  //    _.assign: Assigns own enumerable string keyed properties of source objects to
+  //              the destination object. Source objects are applied from left to right.
+  //              Subsequent sources overwrite property assignments of previous sources.
+  //
   assignMeta(meta) {
-    assign(this.meta, meta);
+    _.assign(this.meta, meta);
   }
 
   clone() {

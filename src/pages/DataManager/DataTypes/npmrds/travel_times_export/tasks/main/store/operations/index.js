@@ -105,7 +105,7 @@ export async function monitorForStatusUpdates(ctx = this) {
   interval = setInterval(fn, 1000);
 }
 
-export async function requestNpmrdsTravelTimesData(ctx = this) {
+export async function requestNpmrdsTravelTimesExport(ctx = this) {
   const {
     actions: {
       updateEtlContextId,
