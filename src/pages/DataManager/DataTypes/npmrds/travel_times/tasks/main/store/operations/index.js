@@ -6,12 +6,10 @@
 import { createEtlContextPropsProxy } from "pages/DataManager/utils/EtlContext";
 
 import {
-  checkApiResponse,
   getNpmrdsDataDateExtent,
   queueNpmrdsExportRequest,
   getOpenRequestsStatuses,
-} from "../../utils/api";
-import { updateRequestStatusMsg } from "./actions";
+} from "./api";
 
 export async function configure(ctx = this) {
   const {
@@ -43,17 +41,20 @@ export async function monitorForStatusUpdates(ctx = this) {
 
   const fn = async () => {
     const {
-      actions: { updateRequestStatusMsg },
+      actions: { updateRequestStatusMsg, updateNpmrdsDownloadName },
       dispatch,
     } = ctx;
 
-    const { etlContextId } = createEtlContextPropsProxy(ctx);
+    const { etlContextId, npmrdsDownloadName } =
+      createEtlContextPropsProxy(ctx);
 
     if (!etlContextId) {
       return;
     }
 
     const openRequestsStatuses = await getOpenRequestsStatuses(ctx);
+
+    console.log(JSON.stringify({ openRequestsStatuses }, null, 4));
 
     // console.log(JSON.stringify(openRequestsStatuses, null, 4));
 
@@ -63,6 +64,12 @@ export async function monitorForStatusUpdates(ctx = this) {
 
     if (idx === -1) {
       dispatch(updateRequestStatusMsg("This request has finished processing"));
+      /*
+       *  We'll need to navigate to a summary view once processing is done.
+       *  We will need the DamaViewId.
+       *  We will be able to get that using the etlContextId.
+       *    The event_store FINAL event will have both the etlContextId and the damaViewId
+       */
       clearInterval(interval);
       return;
     }
@@ -82,8 +89,14 @@ export async function monitorForStatusUpdates(ctx = this) {
       );
     } else {
       const {
-        payload: { status },
+        payload: { status, npmrdsDownloadName: _npmrdsDownloadName },
       } = openRequestsStatuses[idx];
+
+      // Could leave this to the store to check, but why waste cycles
+      if (!npmrdsDownloadName && _npmrdsDownloadName) {
+        dispatch(updateNpmrdsDownloadName(_npmrdsDownloadName));
+      }
+
       dispatch(updateRequestStatusMsg(`Request status: ${status}`));
     }
   };
@@ -96,7 +109,6 @@ export async function requestNpmrdsTravelTimesData(ctx = this) {
   const {
     actions: {
       updateEtlContextId,
-      updateNpmrdsDownloadName,
       setRequestStatusToSending,
       setRequestStatusToReceived,
       setRequestStatusToError,
@@ -115,13 +127,10 @@ export async function requestNpmrdsTravelTimesData(ctx = this) {
   try {
     dispatch(setRequestStatusToSending());
 
-    const { etlContextId, npmrdsDownloadName } = await queueNpmrdsExportRequest(
-      ctx
-    );
+    const { etlContextId } = await queueNpmrdsExportRequest(ctx);
 
     dispatch(setRequestStatusToReceived());
     dispatch(updateEtlContextId(etlContextId));
-    dispatch(updateNpmrdsDownloadName(npmrdsDownloadName));
 
     monitorForStatusUpdates(ctx);
   } catch (err) {

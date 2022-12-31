@@ -1,6 +1,9 @@
 import { createEtlContextPropsProxy } from "pages/DataManager/utils/EtlContext";
 
-import { checkApiResponse } from "pages/DataManager/utils/DamaControllerApi";
+import {
+  checkApiResponse,
+  getDamaApiRoutePrefix,
+} from "pages/DataManager/utils/DamaControllerApi";
 
 export {
   checkApiResponse,
@@ -10,8 +13,10 @@ export {
 
 export async function getNpmrdsDataDateExtent(ctx) {
   const {
-    meta: { rtPfx },
+    meta: { pgEnv },
   } = ctx;
+
+  const rtPfx = getDamaApiRoutePrefix(pgEnv);
 
   const url = `${rtPfx}/data-sources/npmrds/travel-times/downloader/getNpmrdsDataDateExtent`;
 
@@ -26,11 +31,13 @@ export async function getNpmrdsDataDateExtent(ctx) {
 
 export async function queueNpmrdsExportRequest(ctx) {
   const {
-    meta: { rtPfx, userId },
+    meta: { pgEnv, userId },
   } = ctx;
 
   const { dataState, dataStartDate, dataEndDate, expandedMap } =
     createEtlContextPropsProxy(ctx);
+
+  const rtPfx = getDamaApiRoutePrefix(pgEnv);
 
   const url = `${rtPfx}/data-sources/npmrds/travel-times/downloader/queueNpmrdsExportRequest`;
 
@@ -50,18 +57,26 @@ export async function queueNpmrdsExportRequest(ctx) {
 
   await checkApiResponse(updTblDscRes);
 
-  const {
-    etl_context_id: etlContextId,
-    npmrds_download_name: npmrdsDownloadName,
-  } = await updTblDscRes.json();
+  const res = await updTblDscRes.json();
 
-  return { etlContextId, npmrdsDownloadName };
+  console.log(JSON.stringify({ res }, null, 4));
+
+  const {
+    etl_context: { etl_context_id: etlContextId },
+  } = res;
+
+  // WARNING: MUTATION
+  ctx.assignMeta({ etlContextId });
+
+  return { etlContextId };
 }
 
 export async function getOpenRequestsStatuses(ctx) {
   const {
-    meta: { rtPfx },
+    meta: { pgEnv },
   } = ctx;
+
+  const rtPfx = getDamaApiRoutePrefix(pgEnv);
 
   const url = `${rtPfx}/data-sources/npmrds/travel-times/downloader/getOpenRequestsStatuses`;
 

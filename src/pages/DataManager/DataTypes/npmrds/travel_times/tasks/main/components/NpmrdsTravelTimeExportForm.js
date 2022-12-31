@@ -185,6 +185,10 @@ export function RequestButton() {
     return "";
   }
 
+  if (requestStatus > RequestStatus.SENT) {
+    return "";
+  }
+
   if (requestStatus === RequestStatus.CONFIGURED) {
     requestButtonText = "Send";
     requestButtonBgColor = "#e5e7eb";
@@ -193,16 +197,6 @@ export function RequestButton() {
   if (requestStatus === RequestStatus.SENT) {
     requestButtonText = "Sending...";
     requestButtonBgColor = "#e5e7eb";
-  }
-
-  if (requestStatus === RequestStatus.RECEIVED) {
-    requestButtonText = "Received";
-    requestButtonBgColor = "#e5e7eb";
-  }
-
-  if (requestStatus === RequestStatus.ERROR) {
-    requestButtonText = "Error";
-    requestButtonBgColor = "red";
   }
 
   return (

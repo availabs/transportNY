@@ -8,7 +8,6 @@ import EtlContext, {
 
 import { selectPgEnv, selectUserId } from "pages/DataManager/store";
 
-import { getDamaApiRoutePrefix } from "../utils/api";
 import RequestStatus from "./constants/RequestStatus";
 
 import * as _store_ from "./store";
@@ -25,14 +24,12 @@ const Main = ({ store = _store_ }) => {
 
   const [state, dispatch] = useReducer(reducer, null, init);
 
-  const rtPfx = pgEnv ? getDamaApiRoutePrefix(pgEnv) : null;
-
   const { current: ctx } = useRef(
     new EtlContext({
-      name: "NpmrdsTravelTimesDownloadRequester",
+      name: "NpmrdsTravelTimesExportRequester",
       ...store,
       dispatch,
-      meta: { userId, pgEnv, rtPfx },
+      meta: { userId, pgEnv },
     })
   );
 
@@ -40,7 +37,7 @@ const Main = ({ store = _store_ }) => {
 
   const { etlContextId, requestStatus } = useEtlContext(ctx);
 
-  ctx.assignMeta({ etlContextId, rtPfx, userId, pgEnv });
+  ctx.assignMeta({ etlContextId, userId, pgEnv });
 
   useEffect(() => {
     ctx.operations.configure();
@@ -50,7 +47,7 @@ const Main = ({ store = _store_ }) => {
     return <div>Initializing</div>;
   }
 
-  const key = `${pgEnv}-${etlContextId || "fresh-request"}`;
+  const key = `${pgEnv}-${userId}-${etlContextId || "fresh-request"}`;
 
   return (
     <EtlContextReact.Provider key={key} className="w-full" value={ctx}>

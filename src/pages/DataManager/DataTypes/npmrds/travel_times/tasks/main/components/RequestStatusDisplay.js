@@ -8,7 +8,8 @@ import {
 export default function RequestStatusMessage() {
   const ctx = useContext(EtlContextReact);
 
-  const { etlContextId, requestStatusMsg } = useEtlContext(ctx);
+  const { etlContextId, npmrdsDownloadName, requestStatusMsg } =
+    useEtlContext(ctx);
 
   if (!requestStatusMsg) {
     return "";
@@ -27,7 +28,7 @@ export default function RequestStatusMessage() {
       <thead
         style={{
           color: "black",
-          backgroundColor: "green",
+          backgroundColor: "#2590eb",
           fontWeight: "bolder",
           textAlign: "center",
           marginTop: "40px",
@@ -40,6 +41,10 @@ export default function RequestStatusMessage() {
           <th style={{ border: "1px solid", borderColor: "black" }}>
             {" "}
             Request Status
+          </th>
+          <th style={{ border: "1px solid", borderColor: "black" }}>
+            {" "}
+            NPMRDS TravelTimes Export Name
           </th>
           <th style={{ border: "1px solid", borderColor: "black" }}>
             {" "}
@@ -58,6 +63,16 @@ export default function RequestStatusMessage() {
             }}
           >
             {requestStatusMsg}
+          </td>
+          <td
+            style={{
+              border: "1px solid",
+              backgroundColor: "white",
+              paddingLeft: "10px",
+              paddingRight: "10px",
+            }}
+          >
+            {npmrdsDownloadName || "unassigned"}
           </td>
           <td style={{ border: "1px solid", backgroundColor: "white" }}>
             {etlContextId}
