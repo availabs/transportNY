@@ -15,6 +15,7 @@ import * as _store_ from "./store";
 import NpmrdsTravelTimesExportForm from "./components/NpmrdsTravelTimesExportForm";
 import ErrorMessage from "./components/ErrorMessage";
 import RequestStatusMessage from "./components/RequestStatusDisplay";
+import EtlProcessDoneDataDisplay from "./components/EtlProcessDoneDataDisplay";
 
 const NpmrdsTravelTimesExportRequester = ({ store = _store_ }) => {
   const { reducer, init } = store;
@@ -54,6 +55,7 @@ const NpmrdsTravelTimesExportRequester = ({ store = _store_ }) => {
       <NpmrdsTravelTimesExportForm />
       <RequestStatusMessage />
       <ErrorMessage />
+      <EtlProcessDoneDataDisplay />
     </EtlContextReact.Provider>
   );
 };

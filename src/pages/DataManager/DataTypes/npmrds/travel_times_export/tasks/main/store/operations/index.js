@@ -9,6 +9,7 @@ import {
   getNpmrdsDataDateExtent,
   queueNpmrdsExportRequest,
   getOpenRequestsStatuses,
+  getEtlProcessFinalEvent as getEtlProcessFinalEventFromDamaController,
 } from "./api";
 
 export async function configure(ctx = this) {
@@ -54,9 +55,7 @@ export async function monitorForStatusUpdates(ctx = this) {
 
     const openRequestsStatuses = await getOpenRequestsStatuses(ctx);
 
-    console.log(JSON.stringify({ openRequestsStatuses }, null, 4));
-
-    // console.log(JSON.stringify(openRequestsStatuses, null, 4));
+    // console.log(openRequestsStatuses);
 
     const idx = openRequestsStatuses.findIndex(
       (e) => e.etl_context_id === etlContextId
@@ -71,6 +70,7 @@ export async function monitorForStatusUpdates(ctx = this) {
        *    The event_store FINAL event will have both the etlContextId and the damaViewId
        */
       clearInterval(interval);
+      getEtlProcessFinalEvent(ctx);
       return;
     }
 
@@ -137,5 +137,22 @@ export async function requestNpmrdsTravelTimesExport(ctx = this) {
     console.error(err);
     dispatch(setRequestStatusToError());
     dispatch(updateRequestErrMsg(err.message));
+  }
+}
+
+export async function getEtlProcessFinalEvent(ctx = this) {
+  const {
+    actions: { updateEtlProcessFinalEvent },
+    dispatch,
+  } = ctx;
+
+  try {
+    const finalEvent = await getEtlProcessFinalEventFromDamaController(ctx);
+
+    console.log(finalEvent);
+
+    dispatch(updateEtlProcessFinalEvent(finalEvent));
+  } catch (err) {
+    console.error(err);
   }
 }

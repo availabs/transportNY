@@ -20,6 +20,7 @@ export const initialState = deepFreeze({
   requestErrMsg: null,
 
   npmrdsDownloadName: null,
+  etlProcessFinalEvent: null,
 });
 
 export function init(config) {
@@ -110,6 +111,11 @@ export default function reducer(state, action) {
       return state.requestErrMsg === payload
         ? state
         : { ...state, requestErrMsg: payload };
+
+    case "etlProcessFinalEvent/UPDATE":
+      return _.isEqual(state.etlProcessFinalEvent, payload)
+        ? state
+        : { ...state, etlProcessFinalEvent: payload };
 
     default:
       return state;

@@ -88,3 +88,24 @@ export async function getOpenRequestsStatuses(ctx) {
 
   return openRequestsStatuses;
 }
+
+export async function getEtlProcessFinalEvent(ctx) {
+  const {
+    meta: { pgEnv },
+  } = ctx;
+
+  const { etlContextId } = createEtlContextPropsProxy(ctx);
+
+  const rtPfx = getDamaApiRoutePrefix(pgEnv);
+
+  const url = new URL(`${rtPfx}/getEtlProcessFinalEvent`);
+  url.searchParams.append("etlContextId", etlContextId);
+
+  const res = await fetch(url);
+
+  await checkApiResponse(res);
+
+  const finalEvent = await res.json();
+
+  return finalEvent;
+}

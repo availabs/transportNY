@@ -1,3 +1,5 @@
+// NOTE: Could dynamically create using the initialState object
+
 import _ from "lodash";
 
 import { createSimpleSelector } from "pages/DataManager/utils/Reducks";
@@ -26,3 +28,7 @@ export const selectNpmrdsDownloadName =
 export const selectRequestStatusMsg = createSimpleSelector("requestStatusMsg");
 
 export const selectRequestErrMsg = createSimpleSelector("requestErrMsg");
+
+export const selectEtlProcessFinalEvent = createSimpleSelector(
+  "etlProcessFinalEvent"
+);

@@ -1,3 +1,5 @@
+// NOTE: Could dynamically create using the initialState object
+
 import { createSimpleIdentityAction } from "pages/DataManager/utils/Reducks";
 import RequestStatus from "../constants/RequestStatus";
 
@@ -57,4 +59,8 @@ export const updateRequestStatusMsg = createSimpleIdentityAction(
 
 export const updateRequestErrMsg = createSimpleIdentityAction(
   "requestErrMsg/UPDATE"
+);
+
+export const updateEtlProcessFinalEvent = createSimpleIdentityAction(
+  "etlProcessFinalEvent/UPDATE"
 );

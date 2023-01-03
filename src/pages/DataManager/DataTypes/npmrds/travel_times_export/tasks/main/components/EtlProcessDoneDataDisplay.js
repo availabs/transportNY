@@ -8,22 +8,15 @@ import {
 export default function RequestStatusMessage() {
   const ctx = useContext(EtlContextReact);
 
-  const {
-    etlContextId,
-    npmrdsDownloadName,
-    requestStatusMsg,
-    etlProcessFinalEvent,
-  } = useEtlContext(ctx);
+  const { etlProcessFinalEvent } = useEtlContext(ctx);
 
-  // We use the EtlProcessDoneDataDisplay once we have the etlProcessFinalEvent.
-  if (etlProcessFinalEvent) {
+  if (!etlProcessFinalEvent) {
     return "";
   }
 
-  if (!requestStatusMsg) {
-    return "";
-  }
+  return <pre>{JSON.stringify({ etlProcessFinalEvent }, null, 4)}</pre>;
 
+  /*
   return (
     <table
       className="w-2/3"
@@ -90,4 +83,5 @@ export default function RequestStatusMessage() {
       </tbody>
     </table>
   );
+  */
 }
