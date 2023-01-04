@@ -74,7 +74,11 @@ export async function monitorForStatusUpdates(ctx = this) {
       return;
     }
 
-    if (idx) {
+    const {
+      payload: { status: etlReqStatus },
+    } = openRequestsStatuses[idx];
+
+    if (idx > 0 && etlReqStatus === "QUEUED") {
       const plural = idx > 1 ? ["are", "s"] : ["is", ""];
       const [
         {

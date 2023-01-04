@@ -68,7 +68,7 @@ export default function RequestStatusMessage() {
               border: "1px solid",
               padding: "10px",
               backgroundColor: "white",
-              color: "darkred",
+              color: "darkblue",
             }}
           >
             {requestStatusMsg}
