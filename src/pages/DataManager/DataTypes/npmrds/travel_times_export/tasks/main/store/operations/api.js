@@ -1,5 +1,3 @@
-import { createEtlContextPropsProxy } from "pages/DataManager/utils/EtlContext";
-
 import {
   checkApiResponse,
   getDamaApiRoutePrefix,
@@ -18,7 +16,7 @@ export async function getNpmrdsDataDateExtent(ctx) {
 
   const rtPfx = getDamaApiRoutePrefix(pgEnv);
 
-  const url = `${rtPfx}/data-sources/npmrds/travel-times-export/downloader/getNpmrdsDataDateExtent`;
+  const url = `${rtPfx}/data-sources/npmrds/travel-times-export/etl/getNpmrdsDataDateExtent`;
 
   const res = await fetch(url);
 
@@ -34,12 +32,13 @@ export async function queueNpmrdsExportRequest(ctx) {
     meta: { pgEnv, userId },
   } = ctx;
 
-  const { dataState, dataStartDate, dataEndDate, expandedMap } =
-    createEtlContextPropsProxy(ctx);
+  const {
+    state: { dataState, dataStartDate, dataEndDate, expandedMap },
+  } = ctx;
 
   const rtPfx = getDamaApiRoutePrefix(pgEnv);
 
-  const url = `${rtPfx}/data-sources/npmrds/travel-times-export/downloader/queueNpmrdsExportRequest`;
+  const url = `${rtPfx}/data-sources/npmrds/travel-times-export/etl/queueNpmrdsExportRequest`;
 
   const updTblDscRes = await fetch(url, {
     method: "POST",
@@ -78,7 +77,7 @@ export async function getOpenRequestsStatuses(ctx) {
 
   const rtPfx = getDamaApiRoutePrefix(pgEnv);
 
-  const url = `${rtPfx}/data-sources/npmrds/travel-times-export/downloader/getOpenRequestsStatuses`;
+  const url = `${rtPfx}/data-sources/npmrds/travel-times-export/etl/getOpenRequestsStatuses`;
 
   const res = await fetch(url);
 
@@ -94,7 +93,9 @@ export async function getEtlProcessFinalEvent(ctx) {
     meta: { pgEnv },
   } = ctx;
 
-  const { etlContextId } = createEtlContextPropsProxy(ctx);
+  const {
+    state: { etlContextId },
+  } = ctx;
 
   const rtPfx = getDamaApiRoutePrefix(pgEnv);
 

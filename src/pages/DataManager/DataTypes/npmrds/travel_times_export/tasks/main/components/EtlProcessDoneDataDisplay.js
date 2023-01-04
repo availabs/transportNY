@@ -14,9 +14,46 @@ export default function RequestStatusMessage() {
     return "";
   }
 
-  return <pre>{JSON.stringify({ etlProcessFinalEvent }, null, 4)}</pre>;
+  const {
+    payload: { toposortedDamaViewInfo },
+  } = etlProcessFinalEvent;
 
-  /*
+  const tableRows = toposortedDamaViewInfo.map(
+    ({ name, source_id, view_id, source_dependencies, view_dependencies }) => (
+      <tr key={name} style={{ border: "1px solid" }}>
+        <td
+          style={{
+            border: "1px solid",
+            padding: "10px",
+            backgroundColor: "white",
+            color: "darkblue",
+          }}
+        >
+          {name}
+        </td>
+        <td
+          style={{
+            border: "1px solid",
+            backgroundColor: "white",
+            paddingLeft: "10px",
+            paddingRight: "10px",
+          }}
+        >
+          {source_id}
+        </td>
+        <td style={{ border: "1px solid", backgroundColor: "white" }}>
+          {view_id}
+        </td>
+        <td style={{ border: "1px solid", backgroundColor: "white" }}>
+          {(source_dependencies || []).join(", ")}
+        </td>
+        <td style={{ border: "1px solid", backgroundColor: "white" }}>
+          {(view_dependencies || []).join(", ")}
+        </td>
+      </tr>
+    )
+  );
+
   return (
     <table
       className="w-2/3"
@@ -42,46 +79,27 @@ export default function RequestStatusMessage() {
         <tr>
           <th style={{ border: "1px solid", borderColor: "black" }}>
             {" "}
-            Request Status
+            Data Source Name
           </th>
           <th style={{ border: "1px solid", borderColor: "black" }}>
             {" "}
-            NPMRDS TravelTimes Export Name
+            Source ID
           </th>
           <th style={{ border: "1px solid", borderColor: "black" }}>
             {" "}
-            ETL Context ID
+            View ID
+          </th>
+          <th style={{ border: "1px solid", borderColor: "black" }}>
+            {" "}
+            Source Dependencies
+          </th>
+          <th style={{ border: "1px solid", borderColor: "black" }}>
+            {" "}
+            View Dependencies
           </th>
         </tr>
       </thead>
-      <tbody style={{ border: "1px solid" }}>
-        <tr style={{ border: "1px solid" }}>
-          <td
-            style={{
-              border: "1px solid",
-              padding: "10px",
-              backgroundColor: "white",
-              color: "darkred",
-            }}
-          >
-            {requestStatusMsg}
-          </td>
-          <td
-            style={{
-              border: "1px solid",
-              backgroundColor: "white",
-              paddingLeft: "10px",
-              paddingRight: "10px",
-            }}
-          >
-            {npmrdsDownloadName || "unassigned"}
-          </td>
-          <td style={{ border: "1px solid", backgroundColor: "white" }}>
-            {etlContextId}
-          </td>
-        </tr>
-      </tbody>
+      <tbody style={{ border: "1px solid" }}>{tableRows}</tbody>
     </table>
   );
-  */
 }

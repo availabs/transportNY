@@ -34,8 +34,7 @@ export function FormInputs() {
   } = useEtlContext(ctx);
 
   const {
-    dispatch,
-    actions: {
+    dispatchers: {
       updateDataState,
       updateDataStartDate,
       updateDataEndDate,
@@ -61,20 +60,6 @@ export function FormInputs() {
   const startDate = toDateObj(dataStartDate);
   const endDate = toDateObj(dataEndDate);
 
-  // console.log({
-  // dataState,
-  // dataMinDate,
-  // dataMaxDate,
-  // dataStartDate,
-  // dataEndDate,
-  // expandedMap,
-
-  // minDate,
-  // maxDate,
-  // startDate,
-  // endDate,
-  // });
-
   return (
     <div>
       <h2
@@ -98,7 +83,7 @@ export function FormInputs() {
                 value={dataState}
                 onChange={(e) => {
                   console.log("selected dataState", e.target.value);
-                  dispatch(updateDataState(e.target.value));
+                  updateDataState(e.target.value);
                 }}
               >
                 {Object.entries(stateNameToAbbreviation).map(([k, v]) => (
@@ -118,10 +103,10 @@ export function FormInputs() {
                 onChange={(date) => {
                   const d = date.toISOString().replace(/T.*/, "");
 
-                  dispatch(updateDataStartDate(d));
+                  updateDataStartDate(d);
 
                   if (date > endDate) {
-                    dispatch(updateDataEndDate(d));
+                    updateDataEndDate(d);
                   }
                 }}
                 minDate={minDate}
@@ -138,9 +123,9 @@ export function FormInputs() {
                 onChange={(date) => {
                   const d = date.toISOString().replace(/T.*/, "");
 
-                  dispatch(updateDataEndDate(d));
+                  updateDataEndDate(d);
                   if (date < startDate) {
-                    dispatch(updateDataStartDate(d));
+                    updateDataStartDate(d);
                   }
                 }}
                 minDate={minDate}
@@ -155,7 +140,7 @@ export function FormInputs() {
               <input
                 type="checkbox"
                 checked={expandedMap}
-                onChange={() => dispatch(updateExpandedMap(!expandedMap))}
+                onChange={() => updateExpandedMap(!expandedMap)}
               />
             </td>
           </tr>
@@ -171,6 +156,10 @@ export function RequestButton() {
   const { requestStatus } = useEtlContext(ctx);
 
   if (requestStatus === RequestStatus.INCOMPLETE) {
+    return "";
+  }
+
+  if (requestStatus >= RequestStatus.RECEIVED) {
     return "";
   }
 

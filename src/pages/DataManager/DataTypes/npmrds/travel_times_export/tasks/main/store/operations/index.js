@@ -3,8 +3,6 @@
 //          then the hook's dependencies array must contain the operation's deps.
 //        Not sure how to resolve this at the moment.
 
-import { createEtlContextPropsProxy } from "pages/DataManager/utils/EtlContext";
-
 import {
   getNpmrdsDataDateExtent,
   queueNpmrdsExportRequest,
@@ -14,26 +12,24 @@ import {
 
 export async function configure(ctx = this) {
   const {
-    actions: {
+    dispatchers: {
       setRequestStatusToRequestingConfiguration,
       updateConfiguration,
       setRequestStatusToError,
       updateRequestErrMsg,
     },
-    dispatch,
   } = ctx;
 
   try {
-    dispatch(setRequestStatusToRequestingConfiguration());
+    setRequestStatusToRequestingConfiguration();
 
     const npmrdsDataDateExtent = await getNpmrdsDataDateExtent(ctx);
 
-    dispatch(updateConfiguration({ npmrdsDataDateExtent }));
+    updateConfiguration({ npmrdsDataDateExtent });
   } catch (err) {
-    console.log("ERROR ".repeat(10));
     console.error(err);
-    dispatch(setRequestStatusToError());
-    dispatch(updateRequestErrMsg(err.message));
+    setRequestStatusToError();
+    updateRequestErrMsg(err.message);
   }
 }
 
@@ -42,12 +38,9 @@ export async function monitorForStatusUpdates(ctx = this) {
 
   const fn = async () => {
     const {
-      actions: { updateRequestStatusMsg, updateNpmrdsDownloadName },
-      dispatch,
+      state: { etlContextId, npmrdsDownloadName },
+      dispatchers: { updateRequestStatusMsg, updateNpmrdsDownloadName },
     } = ctx;
-
-    const { etlContextId, npmrdsDownloadName } =
-      createEtlContextPropsProxy(ctx);
 
     if (!etlContextId) {
       return;
@@ -55,20 +48,12 @@ export async function monitorForStatusUpdates(ctx = this) {
 
     const openRequestsStatuses = await getOpenRequestsStatuses(ctx);
 
-    // console.log(openRequestsStatuses);
-
     const idx = openRequestsStatuses.findIndex(
       (e) => e.etl_context_id === etlContextId
     );
 
     if (idx === -1) {
-      dispatch(updateRequestStatusMsg("This request has finished processing"));
-      /*
-       *  We'll need to navigate to a summary view once processing is done.
-       *  We will need the DamaViewId.
-       *  We will be able to get that using the etlContextId.
-       *    The event_store FINAL event will have both the etlContextId and the damaViewId
-       */
+      updateRequestStatusMsg("This request has finished processing");
       clearInterval(interval);
       getEtlProcessFinalEvent(ctx);
       return;
@@ -86,10 +71,8 @@ export async function monitorForStatusUpdates(ctx = this) {
         },
       ] = openRequestsStatuses;
 
-      dispatch(
-        updateRequestStatusMsg(
-          `There ${plural[0]} ${idx} request${plural[1]} ahead of this one in the queue. The currently processing request's status is: ${status}`
-        )
+      updateRequestStatusMsg(
+        `There ${plural[0]} ${idx} request${plural[1]} ahead of this one in the queue. The currently processing request's status is: ${status}`
       );
     } else {
       const {
@@ -98,10 +81,10 @@ export async function monitorForStatusUpdates(ctx = this) {
 
       // Could leave this to the store to check, but why waste cycles
       if (!npmrdsDownloadName && _npmrdsDownloadName) {
-        dispatch(updateNpmrdsDownloadName(_npmrdsDownloadName));
+        updateNpmrdsDownloadName(_npmrdsDownloadName);
       }
 
-      dispatch(updateRequestStatusMsg(`Request status: ${status}`));
+      updateRequestStatusMsg(`Request status: ${status}`);
     }
   };
 
@@ -111,43 +94,39 @@ export async function monitorForStatusUpdates(ctx = this) {
 
 export async function requestNpmrdsTravelTimesExport(ctx = this) {
   const {
-    actions: {
+    state: { dataState, dataStartDate, dataEndDate },
+    dispatchers: {
       updateEtlContextId,
       setRequestStatusToSending,
       setRequestStatusToReceived,
       setRequestStatusToError,
       updateRequestErrMsg,
     },
-    dispatch,
   } = ctx;
-
-  const { dataState, dataStartDate, dataEndDate } =
-    createEtlContextPropsProxy(ctx);
 
   if (!(dataState && dataStartDate && dataEndDate)) {
     throw new Error("Incomplete data to throw request.");
   }
 
   try {
-    dispatch(setRequestStatusToSending());
+    setRequestStatusToSending();
 
     const { etlContextId } = await queueNpmrdsExportRequest(ctx);
 
-    dispatch(setRequestStatusToReceived());
-    dispatch(updateEtlContextId(etlContextId));
+    setRequestStatusToReceived();
+    updateEtlContextId(etlContextId);
 
     monitorForStatusUpdates(ctx);
   } catch (err) {
     console.error(err);
-    dispatch(setRequestStatusToError());
-    dispatch(updateRequestErrMsg(err.message));
+    setRequestStatusToError();
+    updateRequestErrMsg(err.message);
   }
 }
 
 export async function getEtlProcessFinalEvent(ctx = this) {
   const {
-    actions: { updateEtlProcessFinalEvent },
-    dispatch,
+    dispatchers: { updateEtlProcessFinalEvent },
   } = ctx;
 
   try {
@@ -155,7 +134,7 @@ export async function getEtlProcessFinalEvent(ctx = this) {
 
     console.log(finalEvent);
 
-    dispatch(updateEtlProcessFinalEvent(finalEvent));
+    updateEtlProcessFinalEvent(finalEvent);
   } catch (err) {
     console.error(err);
   }

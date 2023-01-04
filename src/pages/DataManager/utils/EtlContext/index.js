@@ -7,7 +7,7 @@ import {
   // useEffect,
   useState,
   useRef,
-  // useContext,
+  useContext,
   // useReducer,
   createContext,
 } from "react";
@@ -177,6 +177,65 @@ export function useEtlContext(_ctx) {
   return prevSliceRef.current;
 }
 
+/*
+
+  NOTE: useEtlContext2 appears to works in React functional components.
+        However, we should improve it a bit.
+
+  But, we can replace this:
+
+      const ctx = useContext(EtlContextReact);
+
+      const {
+        dataState,
+        dataMinDate,
+        dataMaxDate,
+        dataStartDate,
+        dataEndDate,
+        expandedMap,
+        requestStatus,
+      } = useEtlContext(ctx);
+
+      const {
+        dispatch,
+        actions: {
+          updateDataState,
+          updateDataStartDate,
+          updateDataEndDate,
+          updateExpandedMap,
+        },
+      } = ctx;
+
+  With this;
+
+      const {
+        dispatchers: {
+          updateDataState,
+          updateDataStartDate,
+          updateDataEndDate,
+          updateExpandedMap,
+        },
+        // The subset of state that triggers renders aux useEtlContext
+        state: {
+          dataState,
+          dataMinDate,
+          dataMaxDate,
+          dataStartDate,
+          dataEndDate,
+          expandedMap,
+          requestStatus,
+        }
+      } = useEtlContext2();
+
+    Where the overall object return by useEtlContext2 changes
+      IFF any state props change as with useEtlContext.
+
+export function useEtlContext2() {
+  const ctx = useContext(EtlContextReact);
+  return useEtlContext(ctx);
+}
+*/
+
 /* // This currently doesn't work
 export function useEtlContextFactory(store, parentCtx, initialArg) {
   const { default: reducer, init } = store;
@@ -214,12 +273,27 @@ export function useEtlContextFactory(store, parentCtx, initialArg) {
 }
 */
 
+// CONSIDER: should this be an abstract class that must be extended.
 export default class EtlContext {
   constructor(config) {
     assign(
       this,
-      omit(config, ["getState", "setState", "assignMeta", "operations"])
+      // TODO: Warn if reserved words used in config.
+      omit(config, [
+        "getState",
+        "setState",
+        "assignMeta",
+        "operations",
+        "dispatchers",
+        "state",
+      ])
     );
+
+    // NOTE:  For use in operations, NOT React components.
+    //        DOES NOT replace useEtlContext.
+    //          Getting properties from this.state will not trigger re-renders
+    //          when the state changes.
+    this.state = createEtlContextPropsProxy(this);
 
     if (config.operations) {
       const boundOperations = Object.keys(config.operations).reduce(
@@ -231,6 +305,14 @@ export default class EtlContext {
       );
 
       this.operations = boundOperations;
+    }
+
+    if (config.dispatch && config.actions) {
+      this.dispatchers = Object.keys(config.actions).reduce((acc, act) => {
+        const action = config.actions[act];
+        acc[act] = (...args) => config.dispatch(action(...args));
+        return acc;
+      }, {});
     }
 
     this.id = uuid();

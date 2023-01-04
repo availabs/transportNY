@@ -34,8 +34,6 @@ export function init(config) {
 export default function reducer(state, action) {
   const { type, payload } = action;
 
-  // console.log({ reducer: { action } });
-
   switch (type) {
     case "configuration/UPDATE": {
       const {
