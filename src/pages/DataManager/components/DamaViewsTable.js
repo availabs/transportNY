@@ -8,7 +8,7 @@ import { useHistory } from "react-router-dom";
 
 import { DAMA_HOST } from "config";
 
-import _, { filter } from "lodash";
+import _ from "lodash";
 
 import { useFalcor } from "modules/avl-components/src";
 
@@ -135,8 +135,6 @@ export default function DamaViewsTable() {
     return "";
   }
 
-  console.log(viewsMetaWithDeps);
-
   const tableRows = viewsMetaWithDeps
     .sort((a, b) => +b.attributes.view_id - +a.attributes.view_id)
     .map((meta) => {
@@ -236,19 +234,47 @@ export default function DamaViewsTable() {
         }}
       >
         <tr>
-          <th style={{ border: "1px solid", borderColor: "black" }}>
+          <th
+            style={{
+              border: "1px solid",
+              borderColor: "black",
+              paddingLeft: "10px",
+              paddingRight: "10px",
+            }}
+          >
             {" "}
             View ID
           </th>
-          <th style={{ border: "1px solid", borderColor: "black" }}>
+          <th
+            style={{
+              border: "1px solid",
+              borderColor: "black",
+              paddingLeft: "10px",
+              paddingRight: "10px",
+            }}
+          >
             {" "}
             Version Name
           </th>
-          <th style={{ border: "1px solid", borderColor: "black" }}>
+          <th
+            style={{
+              border: "1px solid",
+              borderColor: "black",
+              paddingLeft: "10px",
+              paddingRight: "10px",
+            }}
+          >
             {" "}
             Dependencies
           </th>
-          <th style={{ border: "1px solid", borderColor: "black" }}>
+          <th
+            style={{
+              border: "1px solid",
+              borderColor: "black",
+              paddingLeft: "10px",
+              paddingRight: "10px",
+            }}
+          >
             {" "}
             Download
           </th>
