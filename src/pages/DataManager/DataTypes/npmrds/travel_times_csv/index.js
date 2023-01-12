@@ -1,9 +1,9 @@
 import React from "react";
 
-import main from "./tasks/main";
+import DamaViewsTable from "./components/DamaViewsTable";
 
 const Table = (/*{ source }*/) => {
-  return <div> Table View </div>;
+  return <div> Table View Foo </div>;
 };
 
 const pages = [
@@ -13,9 +13,9 @@ const pages = [
     component: Table,
   },
   {
-    name: "Request",
-    path: "/request",
-    component: main,
+    name: "Dama Views Table",
+    path: "/foo",
+    component: DamaViewsTable,
   },
 ];
 
