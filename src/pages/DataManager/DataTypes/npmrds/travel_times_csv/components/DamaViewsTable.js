@@ -147,7 +147,7 @@ export default function DamaViewsTable() {
 
       const { filelocation: { path = null } = {} } = metadata;
       const downloadLink = path ? (
-        <a href={`${DAMA_HOST}/files${path}`}>download</a>
+        <a href={`${DAMA_HOST}/files${path}`}>link</a>
       ) : (
         ""
       );
@@ -250,7 +250,7 @@ export default function DamaViewsTable() {
           </th>
           <th style={{ border: "1px solid", borderColor: "black" }}>
             {" "}
-            Download Link
+            Download
           </th>
         </tr>
       </thead>
