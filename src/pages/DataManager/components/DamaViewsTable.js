@@ -161,7 +161,7 @@ export default function DamaViewsTable() {
                     `/datasources/source/${depSrcId}/view/${depViewId}`
                   );
                 }}
-              >{`s${depSrcId}: v${depViewId}`}</li>
+              >{`s${depSrcId}:v${depViewId}`}</li>
             );
           })}
         </ul>
