@@ -1,5 +1,7 @@
 import { useContext } from "react";
 
+import { DAMA_HOST } from "config";
+
 import {
   useEtlContext,
   EtlContextReact,
@@ -15,43 +17,68 @@ export default function RequestStatusMessage() {
   }
 
   const {
-    payload: { toposortedDamaViewInfo },
+    payload: { damaIntegrationDoneData },
   } = etlProcessFinalEvent;
 
-  const tableRows = toposortedDamaViewInfo.map(
-    ({ name, source_id, view_id, source_dependencies, view_dependencies }) => (
-      <tr key={name} style={{ border: "1px solid" }}>
-        <td
-          style={{
-            border: "1px solid",
-            padding: "10px",
-            backgroundColor: "white",
-            color: "darkblue",
-          }}
-        >
-          {name}
-        </td>
-        <td
-          style={{
-            border: "1px solid",
-            backgroundColor: "white",
-            paddingLeft: "10px",
-            paddingRight: "10px",
-          }}
-        >
-          {source_id}
-        </td>
-        <td style={{ border: "1px solid", backgroundColor: "white" }}>
-          {view_id}
-        </td>
-        <td style={{ border: "1px solid", backgroundColor: "white" }}>
-          {(source_dependencies || []).join(", ")}
-        </td>
-        <td style={{ border: "1px solid", backgroundColor: "white" }}>
-          {(view_dependencies || []).join(", ")}
-        </td>
-      </tr>
-    )
+  const tableRows = damaIntegrationDoneData.map(
+    ({
+      name,
+      source_id,
+      view_id,
+      source_dependencies,
+      view_dependencies,
+      metadata = {},
+    }) => {
+      const { filelocation: { path = null } = {} } = metadata;
+      const downloadLink = path ? (
+        <a href={`${DAMA_HOST}/files${path}`}>download</a>
+      ) : (
+        ""
+      );
+
+      return (
+        <tr key={name} style={{ border: "1px solid" }}>
+          <td
+            style={{
+              border: "1px solid",
+              padding: "10px",
+              backgroundColor: "white",
+              color: "darkblue",
+            }}
+          >
+            {name}
+          </td>
+          <td
+            style={{
+              border: "1px solid",
+              backgroundColor: "white",
+              paddingLeft: "10px",
+              paddingRight: "10px",
+            }}
+          >
+            {source_id}
+          </td>
+          <td style={{ border: "1px solid", backgroundColor: "white" }}>
+            {view_id}
+          </td>
+          <td style={{ border: "1px solid", backgroundColor: "white" }}>
+            {(source_dependencies || []).join(", ")}
+          </td>
+          <td style={{ border: "1px solid", backgroundColor: "white" }}>
+            {(view_dependencies || []).join(", ")}
+          </td>
+          <td
+            style={{
+              border: "1px solid",
+              backgroundColor: "white",
+              color: "blue",
+            }}
+          >
+            {downloadLink}
+          </td>
+        </tr>
+      );
+    }
   );
 
   return (
@@ -96,6 +123,10 @@ export default function RequestStatusMessage() {
           <th style={{ border: "1px solid", borderColor: "black" }}>
             {" "}
             View Dependencies
+          </th>
+          <th style={{ border: "1px solid", borderColor: "black" }}>
+            {" "}
+            Download Link
           </th>
         </tr>
       </thead>
