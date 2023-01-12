@@ -159,9 +159,11 @@ export default function DamaViewsTable() {
               <li
                 style={{ cursor: "pointer" }}
                 onClick={() => {
-                  history.push(`/datasources/source/${depSrcId}`);
+                  history.push(
+                    `/datasources/source/${depSrcId}/view/${depViewId}`
+                  );
                 }}
-              >{`${depSrcId}:${depViewId}`}</li>
+              >{`s${depSrcId}: v${depViewId}`}</li>
             );
           })}
         </ul>

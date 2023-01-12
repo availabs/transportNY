@@ -121,6 +121,18 @@ const config = [{
     size: 'micro'
   },
   component: withAuth(Source)
+},{
+  name:'View Source',
+  path: "/datasources/source/:sourceId/view/:viewId",
+  exact: true,
+  auth: false,
+  mainNav: false,
+  title: <DataManagerHeader />,
+  sideNav: {
+    color: 'dark',
+    size: 'micro'
+  },
+  component: withAuth(Source)
 }
 ]
 
