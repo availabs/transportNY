@@ -1,6 +1,7 @@
 import React from "react";
 
 import main from "./tasks/main";
+import ViewsTable from "./components/ViewsTable";
 
 const Table = (/*{ source }*/) => {
   return <div> Table View </div>;
@@ -11,6 +12,11 @@ const pages = [
     name: "Table",
     path: "/table",
     component: Table,
+  },
+  {
+    name: "Views",
+    path: "/views-table",
+    component: ViewsTable,
   },
   {
     name: "Request",

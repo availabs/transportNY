@@ -13,8 +13,8 @@ const pages = [
     component: Table,
   },
   {
-    name: "Dama Views Table",
-    path: "/dama-views-table",
+    name: "Views",
+    path: "/views-table",
     component: DamaViewsTable,
   },
 ];
