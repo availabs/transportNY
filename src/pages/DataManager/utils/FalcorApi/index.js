@@ -1,7 +1,5 @@
 import _ from "lodash";
 
-import { DAMA_HOST } from "config";
-
 import { falcorGraph } from "store/falcorGraph";
 import { getAttributes } from "pages/DataManager/components/attributes";
 
@@ -14,14 +12,23 @@ refreshCache();
 let falcorGet = async (path) => {
   await falcorGraph.get(path);
   await new Promise((resolve) => {
-    setInterval(() => {
+    setTimeout(() => {
       refreshCache();
       resolve();
     });
   });
 };
 
-export async function getViewsDependenciesForSource(pgEnv, sourceId) {
+export async function getViewsDependenciesForSource(
+  pgEnv,
+  sourceId,
+  config = {}
+) {
+  sourceId = +sourceId;
+
+  const { immediateDependenciesOnly = true, removeSelfFromDependents = true } =
+    config;
+
   const viewsLenPath = [
     "dama",
     pgEnv,
@@ -95,51 +102,57 @@ export async function getViewsDependenciesForSource(pgEnv, sourceId) {
       const { value: { dependencies = null, dependents = null } = {} } =
         viewsDepGraphsById[view_id] || {};
 
-      let immediateDependenciesData = null;
-      let immediateDependentsData = null;
+      let dependenciesData = null;
+      let dependentsData = null;
 
       if (dependencies) {
         const immediateDependenciesSet = new Set(
           dependencies.find((d) => d.view_id === view_id).view_dependencies
         );
 
-        immediateDependenciesData = dependencies.filter(
-          ({ source_id, view_id: vid }) => {
-            const isImmediate = immediateDependenciesSet.has(vid);
+        dependenciesData = immediateDependenciesOnly
+          ? dependencies.filter(
+              ({ source_id, view_id: vid }) =>
+                source_id !== sourceId && immediateDependenciesSet.has(vid)
+            )
+          : dependencies;
 
-            if (!isImmediate) {
-              return false;
-            }
+        if (removeSelfFromDependents) {
+          dependenciesData = dependenciesData.filter(
+            ({ source_id }) => source_id !== sourceId
+          );
+        }
 
-            seenSourceIds.add(source_id);
-            return true;
-          }
-        );
+        for (const { source_id } of dependenciesData) {
+          seenSourceIds.add(source_id);
+        }
       }
 
       if (dependents) {
-        immediateDependentsData = dependents.filter(
-          ({ source_id, view_dependencies }) => {
-            if (!Array.isArray(view_dependencies)) {
-              return false;
-            }
+        dependentsData = immediateDependenciesOnly
+          ? dependents.filter(
+              ({ source_id, view_dependencies }) =>
+                source_id !== sourceId &&
+                Array.isArray(view_dependencies) &&
+                view_dependencies.includes(view_id)
+            )
+          : dependents;
 
-            const isImmediate = view_dependencies.includes(view_id);
+        if (removeSelfFromDependents) {
+          dependentsData = dependentsData.filter(
+            ({ source_id }) => source_id !== sourceId
+          );
+        }
 
-            if (!isImmediate) {
-              return false;
-            }
-
-            seenSourceIds.add(source_id);
-            return true;
-          }
-        );
+        for (const { source_id } of dependentsData) {
+          seenSourceIds.add(source_id);
+        }
       }
 
       return {
         attributes: meta,
-        dependencies: immediateDependenciesData,
-        dependents: immediateDependentsData,
+        dependencies: dependenciesData,
+        dependents: dependentsData,
       };
     })
     .filter(Boolean);
@@ -154,7 +167,7 @@ export async function getViewsDependenciesForSource(pgEnv, sourceId) {
     ["name", "display_name"],
   ];
 
-  const sourcesMeta = await falcorGet(sourceNamePath);
+  await falcorGet(sourceNamePath);
   const sourceNamesById = _.get(falcorCache, sourceNamePath.slice(0, 4), {});
 
   viewsMetaWithDeps.forEach(({ dependencies, dependents }) => {
@@ -186,8 +199,6 @@ export async function getViewsDependenciesForSource(pgEnv, sourceId) {
       });
     }
   });
-
-  // console.log({ sourceNamesById, viewsMetaWithDeps });
 
   return viewsMetaWithDeps;
 }

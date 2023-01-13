@@ -20,7 +20,10 @@ export default function DamaViewsTable() {
   React.useEffect(() => {
     (async () =>
       setViewsMetaWithDeps(
-        await getViewsDependenciesForSource(pgEnv, sourceId)
+        await getViewsDependenciesForSource(pgEnv, sourceId, {
+          immediateDependenciesOnly: false,
+          removeSelf: true,
+        })
       ))();
   }, [pgEnv, sourceId]);
 
