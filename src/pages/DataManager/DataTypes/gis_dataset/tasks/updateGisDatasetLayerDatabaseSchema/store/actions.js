@@ -1,4 +1,4 @@
-import createSimpleIdentityAction from "../../../utils/createSimpleIdentityAction";
+import { createSimpleIdentityAction } from "pages/DataManager/utils/Reducks";
 
 export const updateDatabaseColumnNames = createSimpleIdentityAction(
   "databaseColumnNames/UPDATE_DATABASE_COLUMN_NAMES"

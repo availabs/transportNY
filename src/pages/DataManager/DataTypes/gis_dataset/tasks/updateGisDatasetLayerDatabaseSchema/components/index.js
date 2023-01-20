@@ -7,9 +7,9 @@ import "react-dropdown/style.css";
 import PublishStatus from "../../../constants/PublishStatus";
 
 import {
-  useEtlContextDependencies,
+  useEtlContext,
   EtlContextReact,
-} from "../../../utils/EtlContext";
+} from "../../../../../utils/EtlContext";
 
 const FreeFormColumnNameInput = ({ publishStatus, field, col, onChange }) => {
   return (
@@ -70,15 +70,8 @@ export const GisDatasetLayerDatabaseDbSchemaForm = () => {
     actions: { updateGisDatasetLayerDatabaseColumnName },
   } = ctx;
 
-  const etlCtxDeps = useEtlContextDependencies(ctx, [
-    "layerName",
-    "tableDescriptor",
-    "publishStatus",
-    "databaseColumnNames",
-  ]);
-
   const { layerName, tableDescriptor, publishStatus, databaseColumnNames } =
-    etlCtxDeps;
+    useEtlContext(ctx);
 
   const [omittedFields, setOmittedFields] = useState(null);
   const [defaultMappings, setDefaultMappings] = useState(null);

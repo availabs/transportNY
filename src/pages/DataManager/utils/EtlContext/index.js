@@ -3,8 +3,18 @@
 // FIXME: Need to decide how to handle getState and setState
 //        Simple cloneDeep means cloned/spawned contexts mutate original.
 
-import { useState, useRef, createContext } from "react";
+import {
+  // useEffect,
+  useState,
+  useRef,
+  useContext,
+  // useReducer,
+  createContext,
+} from "react";
+
 import { assign, cloneDeep, isEqual, merge, omit } from "lodash";
+import _ from "lodash";
+
 import EventEmitter from "eventemitter3";
 import { pEventIterator } from "p-event";
 
@@ -159,7 +169,7 @@ export function useEtlContext(_ctx) {
     if (!isEqual(prevSlice[dep], newSlice[dep])) {
       prevSliceRef.current = newSlice;
 
-      console.log("useEtlContext for", ctx.name, "dependency", dep, "changed");
+      // console.log("useEtlContext for", ctx.name, "dependency", dep, "changed");
       return newSlice;
     }
   }
@@ -167,9 +177,143 @@ export function useEtlContext(_ctx) {
   return prevSliceRef.current;
 }
 
+/*
+
+  NOTE: useEtlContext2 appears to works in React functional components.
+        However, we should improve it a bit.
+
+  But, we can replace this:
+
+      const ctx = useContext(EtlContextReact);
+
+      const {
+        dataState,
+        dataMinDate,
+        dataMaxDate,
+        dataStartDate,
+        dataEndDate,
+        expandedMap,
+        requestStatus,
+      } = useEtlContext(ctx);
+
+      const {
+        dispatch,
+        actions: {
+          updateDataState,
+          updateDataStartDate,
+          updateDataEndDate,
+          updateExpandedMap,
+        },
+      } = ctx;
+
+  With this;
+
+      const {
+        dispatchers: {
+          updateDataState,
+          updateDataStartDate,
+          updateDataEndDate,
+          updateExpandedMap,
+        },
+        // The subset of state that triggers renders aux useEtlContext
+        state: {
+          dataState,
+          dataMinDate,
+          dataMaxDate,
+          dataStartDate,
+          dataEndDate,
+          expandedMap,
+          requestStatus,
+        }
+      } = useEtlContext2();
+
+    Where the overall object return by useEtlContext2 changes
+      IFF any state props change as with useEtlContext.
+
+export function useEtlContext2() {
+  const ctx = useContext(EtlContextReact);
+  return useEtlContext(ctx);
+}
+*/
+
+/* // This currently doesn't work
+export function useEtlContextFactory(store, parentCtx, initialArg) {
+  const { default: reducer, init } = store;
+
+  const [state, dispatch] = useReducer(
+    reducer,
+    // Fixme: maxSeenEventId belongs on damaEtlAdmin
+    initialArg,
+    init
+  );
+
+  const { __taskName__ } = state;
+
+  const { current: ctx } = useRef(
+    new EtlContext({
+      name: __taskName__,
+      ...store,
+      dispatch,
+      parentCtx,
+    })
+  );
+
+  ctx.setState(state);
+
+  useEffect(() => {
+    if (parentCtx) {
+      parentCtx.dispatch({
+        type: `${__taskName__}:STATE_UPDATE`,
+        payload: state,
+      });
+    }
+  }, [parentCtx, state, __taskName__]);
+
+  return ctx;
+}
+*/
+
+// CONSIDER: should this be an abstract class that must be extended.
 export default class EtlContext {
   constructor(config) {
-    assign(this, omit(config, ["getState", "setState", "assignMeta"]));
+    assign(
+      this,
+      // TODO: Warn if reserved words used in config.
+      omit(config, [
+        "getState",
+        "setState",
+        "assignMeta",
+        "operations",
+        "dispatchers",
+        "state",
+      ])
+    );
+
+    // NOTE:  For use in operations, NOT React components.
+    //        DOES NOT replace useEtlContext.
+    //          Getting properties from this.state will not trigger re-renders
+    //          when the state changes.
+    this.state = createEtlContextPropsProxy(this);
+
+    if (config.operations) {
+      const boundOperations = Object.keys(config.operations).reduce(
+        (acc, op) => {
+          acc[op] = config.operations[op].bind(this);
+          return acc;
+        },
+        {}
+      );
+
+      this.operations = boundOperations;
+    }
+
+    if (config.dispatch && config.actions) {
+      this.dispatchers = Object.keys(config.actions).reduce((acc, act) => {
+        const action = config.actions[act];
+        acc[act] = (...args) => config.dispatch(action(...args));
+        return acc;
+      }, {});
+    }
 
     this.id = uuid();
 
@@ -242,10 +386,16 @@ export default class EtlContext {
     }
   }
 
-  // meta is mutable. This allow spawned ctx to get updates by reference.
+  // Currently meta is mutable. This allow spawned ctx to get updates by reference.
   // Should meta also be immutable?
+
+  // From lodash docs:
+  //    _.assign: Assigns own enumerable string keyed properties of source objects to
+  //              the destination object. Source objects are applied from left to right.
+  //              Subsequent sources overwrite property assignments of previous sources.
+  //
   assignMeta(meta) {
-    assign(this.meta, meta);
+    _.assign(this.meta, meta);
   }
 
   clone() {

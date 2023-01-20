@@ -1,20 +1,17 @@
 import { useContext } from "react";
 import {
-  useEtlContextDependencies,
+  useEtlContext,
   EtlContextReact,
-} from "../../../utils/EtlContext";
+} from "pages/DataManager/utils/EtlContext";
 
 import { operations } from "../store";
 
 const { selectLayer } = operations;
 
 export const LayerSelector = () => {
-  const ctx = useContext(EtlContextReact);
+  const parentCtx = useContext(EtlContextReact);
 
-  const { layerNames, layerName } = useEtlContextDependencies(ctx, [
-    "layerNames",
-    "layerName",
-  ]);
+  const { layerNames, layerName } = useEtlContext(parentCtx);
 
   if (!layerNames) {
     return "";
@@ -25,7 +22,7 @@ export const LayerSelector = () => {
   if (layerNames.length === 1) {
     if (!layerName) {
       // FIXME: Momentarily renders row with undefined Layer Name
-      selectLayer(ctx, layerNames[0]);
+      selectLayer(parentCtx, layerNames[0]);
     }
 
     layerRow = (
@@ -42,7 +39,7 @@ export const LayerSelector = () => {
           <select
             className="text-center w-1/2 bg-white p-2 shadow bg-grey-50 focus:bg-blue-100 border-gray-300"
             value={layerName || ""}
-            onChange={(e) => selectLayer(ctx, e.target.value)}
+            onChange={(e) => selectLayer(parentCtx, e.target.value)}
           >
             {["", ...layerNames].map((l) => (
               <option key={l} value={l}>
@@ -92,15 +89,10 @@ export const LayerSelector = () => {
 };
 
 export const LayerAnalysisSection = () => {
-  const ctx = useContext(EtlContextReact);
+  const parentCtx = useContext(EtlContextReact);
 
   const { etlContextId, layerName, lyrAnlysErrMsg, layerAnalysis } =
-    useEtlContextDependencies(ctx, [
-      "etlContextId",
-      "layerName",
-      "lyrAnlysErrMsg",
-      "layerAnalysis",
-    ]);
+    useEtlContext(parentCtx);
 
   if (!layerName) {
     return "";

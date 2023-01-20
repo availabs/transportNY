@@ -1,9 +1,9 @@
 import { useContext } from "react";
 
 import {
-  useEtlContextDependencies,
+  useEtlContext,
   EtlContextReact,
-} from "../../../utils/EtlContext";
+} from "pages/DataManager/utils/EtlContext";
 
 import PublishStatus from "../../../constants/PublishStatus";
 
@@ -16,13 +16,7 @@ export function PublishButton({ publishOperation }) {
     uploadErrMsg,
     lyrAnlysErrMsg,
     tableDescriptor,
-  } = useEtlContextDependencies(ctx, [
-    "layerName",
-    "publishStatus",
-    "uploadErrMsg",
-    "lyrAnlysErrMsg",
-    "tableDescriptor",
-  ]);
+  } = useEtlContext(ctx);
 
   if (!layerName || uploadErrMsg || lyrAnlysErrMsg || !tableDescriptor) {
     return "";
@@ -71,12 +65,7 @@ export function PublishButton({ publishOperation }) {
 export function PublishErrorMessage() {
   const ctx = useContext(EtlContextReact);
 
-  const { etlContextId, publishStatus, publishErrMsg } =
-    useEtlContextDependencies(ctx, [
-      "etlContextId",
-      "publishStatus",
-      "publishErrMsg",
-    ]);
+  const { etlContextId, publishStatus, publishErrMsg } = useEtlContext(ctx);
 
   if (publishStatus !== PublishStatus.ERROR) {
     return "";
