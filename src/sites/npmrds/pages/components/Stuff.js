@@ -2,11 +2,7 @@ import React from "react"
 
 import get from "lodash.get"
 import { range as d3range } from "d3-array"
-<<<<<<< HEAD
 import { Link } from "react-router-dom"
-=======
-import { Link } from 'react-router-dom'
->>>>>>> 535f97bf3c355a2084ee97b1922f258bcf477962
 
 import {
   useFalcor,
