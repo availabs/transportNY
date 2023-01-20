@@ -500,16 +500,21 @@ class GeneralGraphComp extends React.Component {
 			mWidth = location === "bottom" ? 0 : get(message, "width", 0),
 			mHeight = location === "bottom" ? get(message, "height", 0) : 0;
 
+console.log("ROUTE COMPS:", this.getActiveRouteComponents());
+console.log("DISPLAY DATA:", this.getDisplayData());
+
 		return (
 			<GraphContainer id={ this.props.id }
 				headerData={ this.expandHeaderData(headerData, graphData, routeComps, displayData, resolution) }
 				viewing={ this.props.viewing }
 				previewing={ this.props.previewing }
-				title={ this.props.state.title }
 				type={ this.props.type }
 				updateTitle={ this.updateTitle }
+				title={ this.props.state.title }
+				routeComps={ routeComps }
+				displayData={ displayData }
 				remove={ () => this.props.removeGraphComp(this.props.index, this.props.id) }
-				add={ () => this.props.addGraphComp(this.props.type, { x, y, w, h }) }
+				add={ () => this.props.addGraphComp(this.props.type, { x, y, w, h }, this.props.state) }
 				loading={ Boolean(this.state.loading) }
 				showTableModal={ () => this.props.showTableModal(this.generateTableData(graphData, routeComps, displayData, resolution)) }
 				saveImage={ saveImage }

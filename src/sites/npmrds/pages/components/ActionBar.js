@@ -76,7 +76,7 @@ const useStuffActions = (selectedStuff, parent) => {
   }, [deleteSelected])
 
   const StuffActions = [
-   
+
     { key: "move-to",
       label: "Move to folder",
       icon: 'fad fa-folder-open text-sm pr-1 text-gray-500 group-hover:text-blue-300',
@@ -220,7 +220,7 @@ const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
     const folders = refs.map(ref => get(falcorCache, ref, null))
       .filter(Boolean)
       .filter(f => f.id != parent)
-      .filter(f => f.type !== "default");
+      .filter(f => f.type !== "AVAIL");
 
     folders.sort((a, b) => {
       if (a.type === b.type) {
@@ -253,7 +253,7 @@ const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
   return (
     <div className={ `
         py-1 bg-white shadow rounded-sm border border-gray-100 mb-2
-        
+
       ` }
     >
       <div className="px-1 flex">

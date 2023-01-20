@@ -121,9 +121,10 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 		setState({ openCompId });
 	}, [props.extendSidebar, setState]);
 
-	const add = React.useCallback((e, routeId) => {
+	const add = React.useCallback((e, route) => {
 		e.stopPropagation();
-		props.add(routeId);
+console.log("ADDING ROUTE:", route)
+		props.add(route.routeId, route.settings);
 	}, [props.add]);
 	const remove = React.useCallback((e, compId) => {
 		e.stopPropagation();
@@ -266,7 +267,7 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 																		fa fa-plus hover:bg-gray-500 hover:text-white
 																		rounded flex justify-center items-center cursor-pointer
 																	` }
-																	onClick={ e => route.isValid && add(e, route.routeId) }/>
+																	onClick={ e => route.isValid && add(e, route) }/>
 																<div style={ { width: "26px" } }
 																	className={ `
 																		fa fa-minus hover:bg-gray-500 hover:text-white

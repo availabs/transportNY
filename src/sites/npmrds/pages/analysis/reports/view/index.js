@@ -15,6 +15,7 @@ const BASE = {
 }
 const PATHS = [
   '/report/view/:reportId',
+  
   '/template/view/:templateId/route/:routeId',
   '/template/view/:templateId/station/:routeId',
   '/template/view/:templateId/route/:routeId/station/:stationId'

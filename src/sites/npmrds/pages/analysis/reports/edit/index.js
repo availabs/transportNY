@@ -16,16 +16,17 @@ const BASE = {
 const PATHS = [
   '/report/edit/:reportId',
 
-  '/report/new',
   '/report/new/folder/:folderId',
+  '/report/new/route/:routeId',
+  '/report/new',
 
-  '/template/:templateId/route/:routeId',
-  '/template/:templateId/station/:stationId',
-  '/template/:templateId/route/:routeId/station/:stationId',
+  '/template/edit/:templateId/route/:routeId',
+  '/template/edit/:templateId/station/:stationId',
+  '/template/edit/:templateId/route/:routeId/station/:stationId',
 
-  '/template/type/:defaultType/route/:routeId',
-  '/template/type/:defaultType/station/:stationId',
-  '/template/type/:defaultType/route/:routeId/station/:stationId'
+  '/template/edit/type/:defaultType/route/:routeId',
+  '/template/edit/type/:defaultType/station/:stationId',
+  '/template/edit/type/:defaultType/route/:routeId/station/:stationId'
 ]
 
 export default PATHS.map(path => ({

@@ -29,6 +29,27 @@ const IconContainer = styled.div`
 	right: 2px;
 `
 
+const NAME_REGEX = /{name}/g;
+const YEAR_REGEX = /{year}/g;
+const MONTH_REGEX = /{month}/g;
+const DATE_REGEX = /{date}/g;
+const DATA_REGEX = /{data}/g;
+
+const getRouteCompsNames = routeComps => {
+	const names = new Set(routeComps.map(rc => rc.name));
+	return [...names].join(", ")
+}
+const getDisplayDataNames = displayData => {
+	const names = new Set(displayData.map(dd => dd.name));
+	return [...names].join(", ");
+}
+
+const getDisplayTitle = ({ title, type, routeComps, displayData }) => {
+	if (!title) return type;
+	return title.replace(NAME_REGEX, getRouteCompsNames(routeComps))
+							.replace(DATA_REGEX, getDisplayDataNames(displayData))
+}
+
 class GraphContainer extends React.Component {
 	static defaultProps = {
 		viewing: true,
@@ -121,35 +142,37 @@ class GraphContainer extends React.Component {
 				colorRange,
 				defaultColorRange,
 				// clearColorRange
-			}= this.props,
+			} = this.props,
 			{ width } = this.state,
 			headerHeight = this.getHeaderHeight(),
 			containerStyle = {
-					height: `${ headerHeight }px`,
-					display: "flex",
-					alignItems: "center",
-					flexWrap: "wrap",
-					flexDirection: "row"
-				},
+				height: `${ headerHeight }px`,
+				display: "flex",
+				alignItems: "center",
+				flexWrap: "wrap",
+				flexDirection: "row"
+			},
 			baseStyle = {
-					height: "30px"
-				},
+				height: "30px"
+			},
 			numIcons = this.getNumIcons(),
 			widthBreakPoint = this.getWidthBreakPoint(),
 			headerStyle = {
-					width: width <= widthBreakPoint || !headerData.length ? `calc(100% - ${ numIcons * 26 + 8 }px)` : "calc(50% - 30px)",
-					...baseStyle
-				},
+				width: width <= widthBreakPoint || !headerData.length ? `calc(100% - ${ numIcons * 26 + 8 }px)` : "calc(50% - 30px)",
+				...baseStyle
+			},
 			menuStyle = {
-					width: width <= widthBreakPoint || !headerData.length ? "100%" : "50%",
-					display: "flex",
-					alignItems: "center",
-					flexWrap: "wrap",
-					flexDirection: "row",
-					padding: "0px 5px",
-					...baseStyle
-				};
+				width: width <= widthBreakPoint || !headerData.length ? "100%" : "50%",
+				display: "flex",
+				alignItems: "center",
+				flexWrap: "wrap",
+				flexDirection: "row",
+				padding: "0px 5px",
+				...baseStyle
+			};
+
 		const VIEW_MODE = viewing || previewing;
+
 		return (
 			<div className="graph-container"
 				style={ {
@@ -159,13 +182,16 @@ class GraphContainer extends React.Component {
 				ref={ this.container }>
 
 				{ !(VIEW_MODE && title) ? null :
-					<div className="comp-title">{ title }</div>
+					<div className="comp-title">{ getDisplayTitle(this.props) }</div>
 				}
 				{ VIEW_MODE ? null :
 					<div style={ containerStyle }>
 						<GrabBox />
 						<div style={ headerStyle }>
-							<EditableTitleComp title={ title || type } updateTitle={ updateTitle }/>
+							<EditableTitleComp
+								title={ title }
+								displayTitle={ getDisplayTitle(this.props) }
+								updateTitle={ updateTitle }/>
 						</div>
 						{ !headerData.length ? null :
 							<div style={ menuStyle }>
@@ -277,81 +303,43 @@ const IconButton = ({ onClick, id, icon, tooltip }) =>
 		</Tooltip>
 	</div>
 
-class EditableTitleCompBase extends React.Component {
-	ref = React.createRef();
-	state = {
-		editing: false,
-		title: this.props.title
-	}
-	TIMEOUT = null;
-	componentDidMount() {
-		this.MOUNTED = true;
-		this.ref.current.addEventListener("click", e => e.stopPropagation(), true)
-	}
-	componentDidUpdate(oldProps) {
-		if (!this.state.editing && !this.state.title) {
-			this.setState({ title: this.props.title });
-		}
-	}
-	startEditing(e) {
-		e.stopPropagation();
-		e.preventDefault();
-		if (this.state.editing === false) {
-			this.setState({ editing: true });
-		}
-	}
-	onChange(e) {
-		this.setState({ title: e.target.value });
-		// this.props.updateTitle(e.target.value);
-	}
-	sendUpdate() {
-		clearTimeout(this.TIMEOUT);
-		this.props.updateTitle(this.state.title);
-	}
-	finishEditing() {
-		if (this.state.editing === true) {
-			this.setState({ editing: false });
-		}
-	}
-	// handleClickOutside(e) {
-	// 	this.finishEditing();
-	// }
-	onClickOutside(e) {
-		this.finishEditing();
-	}
-	render() {
-		return (
-			<input type="text" ref={ this.ref }
-				value={ this.state.editing ? this.state.title : this.props.title }
-				style={ { paddingBottom: "calc(0.25rem - 1px)" } }
-				className="form-control form-control-sm"
-				onFocus={ this.startEditing.bind(this) }
-				onKeyUp={ this.sendUpdate.bind(this) }
-				onChange={ this.onChange.bind(this) }/>
-		)
-	}
-}
-// const EditableTitleComp = onClickOutside(EditableTitleCompBase);
-
 const EditableTitleComp = props => {
-	const [ref, setRef] = React.useState(null);
+	const { updateTitle, title: propsTitle, displayTitle } = props;
 
-	const [title, _setTitle] = React.useState(props.title);
+	const [title, _setTitle] = React.useState(propsTitle);
+	const [editing, setEditing] = React.useState(false);
 
-	const sendUpdate = React.useCallback(debounce(title => {
-		props.updateTitle(title);
-	}, 1000), [props.updateTitle]);
+	const startEditing = React.useCallback(e => {
+		setEditing(true);
+	}, []);
+	const stopEditing = React.useCallback(e => {
+		setEditing(false);
+	}, []);
+
+	const sendUpdate = React.useCallback(
+		debounce(title => {
+			updateTitle(title);
+		}, 1000), [updateTitle]);
 
 	const setTitle = React.useCallback(e => {
 		_setTitle(e.target.value);
+		setEditing(true);
 		sendUpdate(e.target.value);
 	}, [_setTitle, sendUpdate]);
 
+	React.useEffect(() => {
+		if (!title && propsTitle && !editing) {
+			_setTitle(propsTitle);
+		}
+	}, [title, propsTitle, editing]);
+
 	return (
-		<input type="text" ref={ setRef }
-			value={ title }
-			className="px-2 py-1"
-			onChange={ setTitle }/>
+		<input type="text"
+			value={ editing ? title : displayTitle }
+			className="px-2 py-1 w-full"
+			onChange={ setTitle }
+			onFocus={ startEditing }
+			onBlur={ stopEditing }/>
 	)
 }
 
