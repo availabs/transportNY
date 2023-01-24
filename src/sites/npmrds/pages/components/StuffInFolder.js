@@ -14,6 +14,7 @@ import {
 } from "modules/avl-components/src"
 
 import { FolderStuff, stuffSorter } from "./Stuff"
+import { Link } from 'react-router-dom'
 import FolderModal from "./FolderModal"
 import ActionBar from "./ActionBar"
 import FolderIcon from "./FolderIcon"
@@ -537,9 +538,11 @@ const ButtonNew = ({ openedFolders }) => {
               <div className="p-2 hover:bg-blue-100">
                 <span className="fad fa-road mr-1 px-2 text-blue-500"/>Route
               </div>
-              <div className="p-2 hover:bg-blue-100">
-                <span className="fad fa-chart-column text-blue-500 mr-1 px-2"/>Report
-              </div>
+              <Link to='/report/new'>
+                <div className="p-2 hover:bg-blue-100">
+                    <span className="fad fa-chart-column text-blue-500 mr-1 px-2"/>Report
+                </div>
+               </Link>
             </div>
           </div>
         </div>
