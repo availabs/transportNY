@@ -2,11 +2,7 @@ import React from "react"
 
 import get from "lodash.get"
 import { range as d3range } from "d3-array"
-<<<<<<< HEAD
 import { Link } from "react-router-dom"
-=======
-import { Link } from 'react-router-dom'
->>>>>>> 535f97bf3c355a2084ee97b1922f258bcf477962
 
 import {
   useFalcor,
@@ -155,37 +151,21 @@ const Report = ({ id, forFolder, ...props }) => {
     return [
       { Item: (
           () => (
-<<<<<<< HEAD
             <Link to={ `/report/view/${ id }` }>
               <ListItem>
                 <span className="fa fa-eye mr-1"/>View
               </ListItem>
             </Link>
-=======
-            <ListItem>
-              <Link to={`/report/view/${id}`}>
-                <span className="fa fa-eye mr-1"/>View
-              </Link>
-            </ListItem>
->>>>>>> 535f97bf3c355a2084ee97b1922f258bcf477962
           )
         )
       },
       { Item: (
           () => (
-<<<<<<< HEAD
             <Link to={ `/report/edit/${ id }` }>
               <ListItem>
                 <span className="fa fa-pen-to-square mr-1"/>Edit
               </ListItem>
             </Link>
-=======
-            <ListItem>
-              <Link to={`/report/edit/${id}`}>
-                <span className="fa fa-pen-to-square mr-1"/>Edit
-              </Link>
-            </ListItem>
->>>>>>> 535f97bf3c355a2084ee97b1922f258bcf477962
           )
         )
       }
@@ -193,7 +173,7 @@ const Report = ({ id, forFolder, ...props }) => {
   }, [id]);
 
   const Container = forFolder ? FolderStuffContainer : StuffContainer;
-  
+
   return (
     <Container { ...props } { ...report } id={ id } type="report"
       items={ ReportItems }

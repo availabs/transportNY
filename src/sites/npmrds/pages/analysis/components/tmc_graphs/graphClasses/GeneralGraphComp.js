@@ -500,9 +500,6 @@ class GeneralGraphComp extends React.Component {
 			mWidth = location === "bottom" ? 0 : get(message, "width", 0),
 			mHeight = location === "bottom" ? get(message, "height", 0) : 0;
 
-console.log("ROUTE COMPS:", this.getActiveRouteComponents());
-console.log("DISPLAY DATA:", this.getDisplayData());
-
 		return (
 			<GraphContainer id={ this.props.id }
 				headerData={ this.expandHeaderData(headerData, graphData, routeComps, displayData, resolution) }

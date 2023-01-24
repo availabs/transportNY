@@ -27,5 +27,8 @@ export default configureStore({
     report
   },
   middleware: getDefaultMiddleware =>
-    getDefaultMiddleware({ serializableCheck: false })
+    getDefaultMiddleware({
+      serializableCheck: false,
+      immutableCheck: false
+    })
 });
