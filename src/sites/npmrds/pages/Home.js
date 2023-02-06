@@ -8,10 +8,10 @@ const Home = () => (
       Welcome to NPMRDS
     </div>
     <div className="flex flex-col text-lg">
-      <Link to="/folders">My Stuff</Link>
-      <Link to="/folders/routes">My Routes</Link>
-      <Link to="/folders/reports">My Reports</Link>
-      <Link to="/folders/templates">My Templates</Link>
+      <Link to="/folders">Folders</Link>
+      <Link to="/folders/routes">Routes</Link>
+      <Link to="/folders/reports">Reports</Link>
+      <Link to="/folders/templates">Templates</Link>
     </div>
     <span className='hover:pl-4'/>
   </div>

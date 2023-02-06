@@ -47,7 +47,7 @@ class RouteComponent extends React.Component {
 		super(props);
 
 		this.state = {
-			controls: props.settings.year === "advanced" ? "Advanced" : "Simple",
+			controls: "Advanced",//props.settings.year === "advanced" ? "Advanced" : "Simple",
 			PEAKS: this.loadPeaks(),
 			color: this.props.color
 		}
@@ -263,7 +263,12 @@ class RouteComponent extends React.Component {
 		}
 
 		return (
-			<div style={ { padding: "10px" } }>
+			<div style={ {
+				padding: "10px",
+				position: "absolute",
+				top: "0px", bottom: "0px",
+				overflow: "auto"
+			} }>
 				<EditableTitle color={ this.state.color }
 					onChange={ t => this.updateSettings("compTitle", t) }
 					title={ compTitle || compName }/>

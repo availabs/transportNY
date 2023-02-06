@@ -265,8 +265,8 @@ class ReportBase extends React.Component {
       .then(() => this.hideSaveModal());
   }
 
-  addRouteComp(routeId, settings = null) {
-    this.props.addRouteComp(routeId, settings, true);
+  addRouteComp(routeId, settings = null, groupId = null) {
+    this.props.addRouteComp(routeId, settings, groupId, true);
   }
   removeRouteComp(compId) {
     this.props.removeRouteComp(compId, true);
@@ -283,8 +283,8 @@ class ReportBase extends React.Component {
   updateAllComponents() {
     this.props.updateAllComponents();
   }
-  reorderRouteComps(srcIndex, dstIndex) {
-    this.props.reorderRouteComps(srcIndex, dstIndex);
+  reorderRouteComps(srcIndex, dstIndex, groupId = null) {
+    this.props.reorderRouteComps(srcIndex, dstIndex, groupId);
   }
 
   addStationComp(stationId) {
@@ -301,7 +301,6 @@ class ReportBase extends React.Component {
   }
 
   addGraphComp(type, layout = null, state = null) {
-console.log("REPORT BASE ADD GRAPH COMP:", state)
     this.props.addGraphComp(type, layout, state);
   }
   removeGraphComp(index, graphId) {
@@ -368,13 +367,24 @@ console.log("REPORT BASE ADD GRAPH COMP:", state)
   }
 
   needsUpdate() {
-    return this.props.route_comps.reduce((a, { compId, settings }) => {
-      const SETTINGS = this.props.routeComponentSettings.get(compId);
-      return a || this._needsUpdate(SETTINGS, settings);
-    }, false) ||
-    this.props.station_comps.reduce((a, c) =>
-      a || !deepequal(c.settings, c.workingSettings)
-    , false);
+    const route_comps_need_update = this.props.route_comps
+      .reduce((a, c) => {
+        if (get(c, "type", "route") === "group") {
+          return a || c.route_comps.reduce((aa, cc) => {
+            const SETTINGS = this.props.routeComponentSettings.get(cc.compId);
+            return a || this._needsUpdate(SETTINGS, cc.settings);
+          }, false);
+        }
+        const SETTINGS = this.props.routeComponentSettings.get(c.compId);
+        return a || this._needsUpdate(SETTINGS, c.settings);
+      }, false);
+
+    if (route_comps_need_update) return true;
+
+    return this.props.station_comps
+      .reduce((a, c) =>
+        a || !deepequal(c.settings, c.workingSettings)
+      , false);
   }
   _needsUpdate(SETTINGS, settings) {
     return SETTINGS.startDate !== settings.startDate ||
@@ -417,7 +427,7 @@ console.log("REPORT BASE ADD GRAPH COMP:", state)
       <div style={ { position: "relative" } }>
 
         <GraphLayoutContainer isOpen={ this.state.isOpen }>
-          <div className="container mx-auto">
+          <div className="container mx-auto px-2">
 
             { this.state.viewing ? null :
               <div className="grid grid-cols-10">
@@ -513,6 +523,10 @@ console.log("REPORT BASE ADD GRAPH COMP:", state)
           <Sidebar isOpen={ this.state.isOpen }
             graphs={ this.props.graphs }
             route_comps={ this.props.route_comps }
+            combineRouteComps={ this.props.combineRouteComps }
+            createNewRouteGroup={ this.props.createNewRouteGroup }
+            removeRouteFromGroup={ this.props.removeRouteFromGroup }
+            updateRouteGroupName={ this.props.updateRouteGroupName }
             routes={ this.props.routes }
             routeComponentSettings={ this.props.routeComponentSettings }
             onOpenOrClose={ this.onOpenOrClose.bind(this) }
@@ -522,7 +536,7 @@ console.log("REPORT BASE ADD GRAPH COMP:", state)
             updateRouteComp={ this.updateRouteComp.bind(this) }
             updateRouteCompColor={ this.updateRouteCompColor.bind(this) }
             updateAllComponents={ this.updateAllComponents.bind(this) }
-            reorderRouteComps={ this.reorderRouteComps.bind(this) }
+            reorderRouteComps={ this.props.reorderRouteComps }
             needsUpdate={ this.needsUpdate() }
             removeRouteComp={ this.removeRouteComp.bind(this) }
             addRouteComp={ this.addRouteComp.bind(this) }

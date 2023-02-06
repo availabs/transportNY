@@ -63,7 +63,8 @@ class BarGraphSummary extends GeneralGraphComp {
 		const indexFormat = compId => routes.reduce((a, c) => c.compId === compId ? c.name : a, "unknown");
 
 		return (
-			<BarGraph data={ graphData }
+			<BarGraph
+				data={ graphData }
 				indexBy="key"
 				keys={ ["value"] }
 				colors={ (v, i, data) => data.color }

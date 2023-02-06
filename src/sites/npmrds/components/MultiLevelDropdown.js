@@ -36,12 +36,13 @@ export const MultiLevelDropdown = props => {
   const {
     items = [],
     zIndex = 5,
-    xDirection = 0,
+    xDirection = 1,
     yDirection = 1,
     DropdownContainer = DefaultDropdownContainer,
     DropdownItem = DefaultDropdownItem,
     InputContainer = DefaultInputContainer,
     onClick = NoOp,
+    hideOnClick = false,
     labelAccessor = LabelAccessor,
     valueAccessor = ValueAccessor,
     searchable = false,
@@ -55,14 +56,14 @@ export const MultiLevelDropdown = props => {
 
   const [outter, setOutter] = React.useState();
   const [xDir, setXDirection] = React.useState(xDirection);
-  React.useEffect(() => {
-    if (!outter) return;
-    const rect = outter.getBoundingClientRect();
-    const width = window.innerWidth;
-    if ((rect.x + rect.width * 2) > width) {
-      setXDirection(xDir => -xDir);
-    }
-  }, [outter]);
+  // React.useEffect(() => {
+  //   if (!outter) return;
+  //   const rect = outter.getBoundingClientRect();
+  //   const width = window.innerWidth;
+  //   if ((rect.x + rect.width * 2) > width) {
+  //     setXDirection(xDir => -xDir);
+  //   }
+  // }, [outter]);
 
   const [inner, setInner] = React.useState();
   const [topOffset, setTopOffset] = React.useState(0);
@@ -70,6 +71,10 @@ export const MultiLevelDropdown = props => {
     if (!inner) return;
     const rect = inner.getBoundingClientRect();
     const height = window.innerHeight;
+    const width = window.innerWidth;
+    if ((rect.x + rect.width) > width) {
+      setXDirection(xDir => -xDir);
+    }
     if ((rect.y + rect.height) > height) {
       setTopOffset(height - (rect.y + rect.height))
     }
@@ -86,7 +91,10 @@ export const MultiLevelDropdown = props => {
   const doOnClick = React.useCallback((e, v) => {
     e.stopPropagation();
     onClick(v);
-  }, [onClick]);
+    if (hideOnClick) {
+      setShow(false);
+    }
+  }, [onClick, hideOnClick]);
 
   const hasChildren = React.useMemo(() => {
     return items.reduce((a, c) => {
@@ -117,7 +125,7 @@ export const MultiLevelDropdown = props => {
           style={ {
             zIndex,
             top: isChild ? "0%" : "100%",
-            left: xDir === 1 ? "100%" : xDir === 0 ? "0%" : null,
+            left: xDir === 1 ? "100%" : xDir == 0 ? "0%" : null,
             right: xDir === -1 ? "100%" : null
           } }
         >

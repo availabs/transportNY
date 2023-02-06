@@ -89,11 +89,11 @@ const SimpleControls = props => {
 				<div>
 					Peak Selector
 				</div>
-				<div className="btn-group" style={ { width: "85%", display: "flex" } }>
+				<div style={ { width: "85%", display: "flex" } }>
 					{
 						props.PEAKS.map(({ peak, name }) =>
 							<button key={ peak } style={ { flex: `0 0 ${ 100 / 3 }%` } }
-								className={ `btn btn-sm ${ SETTINGS[peak] ? 'btn-success' : 'btn-danger' }` }
+								className={ `rounded ${ SETTINGS[peak] ? 'bg-green-400' : 'bg-red-400' }` }
 								onClick={ () => props.togglePeaks(peak) }>
 								{ name }
 							</button>

@@ -38,28 +38,6 @@ const StuffDropdown = props => {
     e.stopPropagation();
   }, []);
 
-  const [outter, setOutter] = React.useState();
-  const [xDir, setXDirection] = React.useState(xDirection === "right" ? 1 : -1);
-  React.useEffect(() => {
-    if (!outter) return;
-    const rect = outter.getBoundingClientRect();
-    const width = window.innerWidth;
-    if ((rect.x + rect.width * 2) > width) {
-      setXDirection(xDir => -xDir);
-    }
-  }, [outter]);
-
-  const [inner, setInner] = React.useState();
-  const [topOffset, setTopOffset] = React.useState(0);
-  React.useEffect(() => {
-    if (!inner) return;
-    const rect = inner.getBoundingClientRect();
-    const height = window.innerHeight;
-    if ((rect.y + rect.height) > height) {
-      setTopOffset(height - (rect.y + rect.height))
-    }
-  }, [inner]);
-
   const [show, setShow] = React.useState(false);
   const onMouseOver = React.useCallback(e => {
     setShow(true);
@@ -67,6 +45,33 @@ const StuffDropdown = props => {
   const onMouseLeave = React.useCallback(e => {
     setShow(false);
   }, []);
+
+  const [outter, setOutter] = React.useState();
+  // const [xDir, setXDirection] = React.useState(xDirection === "right" ? 1 : -1);
+  // React.useEffect(() => {
+  //   if (!outter) return;
+  //   const rect = outter.getBoundingClientRect();
+  //   const width = window.innerWidth;
+  //   if ((rect.x + rect.width) > width) {
+  //     setXDirection(xDir => -xDir);
+  //   }
+  // }, [outter]);
+
+  const [inner, setInner] = React.useState();
+  const [xDir, setXDirection] = React.useState(xDirection === "right" ? 1 : -1);
+  const [topOffset, setTopOffset] = React.useState(0);
+  React.useEffect(() => {
+    if (!inner || !show) return;
+    const rect = inner.getBoundingClientRect();
+    const height = window.innerHeight;
+    const width = window.innerWidth;
+    if ((rect.x + rect.width) > width) {
+      setXDirection(xDir => -xDir);
+    }
+    if ((rect.y + rect.height) > height) {
+      setTopOffset(height - (rect.y + rect.height))
+    }
+  }, [inner, show]);
 
   return (
     <div ref={ setOutter }

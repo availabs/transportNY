@@ -50,7 +50,15 @@ class Sidebar extends React.Component {
     switch (this.state.extendedComponentMeta.comp) {
       case "RouteComponent": {
         const { compId } = this.state.extendedComponentMeta,
-          route_comp = this.props.route_comps.reduce((a, c) => c.compId === compId ? c : a, { compId: "invalid" });
+          route_comp = this.props.route_comps
+						.reduce((a, c) => {
+							if (c.type === "group") {
+								return c.route_comps.reduce((aa, cc) => {
+									return cc.compId === compId ? cc : aa;
+								}, a);
+							}
+							return c.compId === compId ? c : a;
+						}, { compId: "invalid" });
         return {
           ...route_comp,
           updateRouteCompSettings: this.props.updateRouteCompSettings,
@@ -95,7 +103,14 @@ class Sidebar extends React.Component {
     switch (comp) {
       case "RouteComponent":
         return this.props.route_comps
-          .reduce((a, c) => c.compId === compId ? true : a, false);
+          .reduce((a, c) => {
+						if (c.type === "group") {
+							return c.route_comps.reduce((aa, cc) => {
+								return aa || cc.compId === compId;
+							}, a)
+						}
+						return a || c.compId === compId;
+					}, false);
       case "StationComponent":
         return this.props.station_comps
           .reduce((a, c) => c.compId === compId ? true : a, false);
@@ -118,7 +133,10 @@ class Sidebar extends React.Component {
     const {
       addRouteComp,
       removeRouteComp,
+			createNewRouteGroup,
+			removeRouteFromGroup,
       updateAllRouteComps,
+			updateRouteGroupName,
       ...rest
     } = this.props;
 
@@ -143,6 +161,7 @@ class Sidebar extends React.Component {
             <ControlBox>
 							<Control>
 	              <MultiLevelDropdown
+									xDirection={ 0 }
 	                labelAccessor={ d => d.name }
 	                valueAccessor={ d => d.id }
 	                onClick={ id => this.props.loadTemplate(id) }
@@ -170,6 +189,9 @@ class Sidebar extends React.Component {
         <ActiveRouteComponents { ...rest }
           add={ addRouteComp }
           remove={ removeRouteComp }
+					createNewRouteGroup={ createNewRouteGroup }
+					removeFromGroup={ removeRouteFromGroup }
+					updateRouteGroupName={ updateRouteGroupName }
           extendSidebar={ compId =>
             this.extendSidebar(RouteComponent, { comp: "RouteComponent", compId })
           }/>

@@ -34,6 +34,7 @@ const YEAR_REGEX = /{year}/g;
 const MONTH_REGEX = /{month}/g;
 const DATE_REGEX = /{date}/g;
 const DATA_REGEX = /{data}/g;
+const TYPE_REGEX = /{type}/g;
 
 const getRouteCompsNames = routeComps => {
 	const names = new Set(routeComps.map(rc => rc.name));
@@ -48,6 +49,7 @@ const getDisplayTitle = ({ title, type, routeComps, displayData }) => {
 	if (!title) return type;
 	return title.replace(NAME_REGEX, getRouteCompsNames(routeComps))
 							.replace(DATA_REGEX, getDisplayDataNames(displayData))
+							.replace(TYPE_REGEX, type)
 }
 
 class GraphContainer extends React.Component {
@@ -207,15 +209,10 @@ class GraphContainer extends React.Component {
 				</div>
 
 				{ !loading ? null :
-					<div style={ {
-							position: "absolute",
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
+					<div className="absolute inset-0 z-30 flex items-center justify-center"
+						style={ {
 							backgroundImage: "radial-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25))",
-							zIndex: 5000,
-							borderRadius: "4px"
+							borderRadius: "4px",
 						} }>
 						<ScalableLoading/>
 					</div>
@@ -399,7 +396,8 @@ const Select = props => {
 
 	const Items = React.useMemo(() => {
 		return domain.map(d => ({
-			...d,
+			label: nameAccessor(d),
+			value: keyAccessor(d),
 			Item: ({ children, ...props }) => (
 				<div { ...props }
 					className={ `
@@ -416,15 +414,15 @@ const Select = props => {
 				</div>
 			)
 		}))
-	}, [domain, value, keyAccessor]);
+	}, [domain, value, keyAccessor, nameAccessor]);
 
 	return (
 		<MultiLevelDropdown
+			xDirection={ 0 }
 			searchable={ false }
-			labelAccessor={ nameAccessor }
-			valueAccessor={ keyAccessor }
 			items={ Items }
 			onClick={ onChange }
+			hideOnClick={ true }
 		>
 			<Control>
 				<div className="px-2">
@@ -446,7 +444,8 @@ const MultiSelect = props => {
 
 	const Items = React.useMemo(() => {
 		return domain.map(d => ({
-			...d,
+			label: nameAccessor(d),
+			value: keyAccessor(d),
 			Item: ({ children, ...props }) => (
 				<div { ...props }
 					className={ `
@@ -463,7 +462,7 @@ const MultiSelect = props => {
 				</div>
 			)
 		}))
-	}, [domain, value, keyAccessor]);
+	}, [domain, value, keyAccessor, nameAccessor]);
 
 	const doOnChange = React.useCallback(val => {
 		if (value.includes(val)) {
@@ -476,9 +475,8 @@ const MultiSelect = props => {
 
 	return (
 		<MultiLevelDropdown
+			xDirection={ 0 }
 			searchable={ false }
-			labelAccessor={ nameAccessor }
-			valueAccessor={ keyAccessor }
 			items={ Items }
 			onClick={ doOnChange }
 		>
