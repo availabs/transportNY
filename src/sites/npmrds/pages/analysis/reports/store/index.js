@@ -1372,17 +1372,18 @@ const _loadReport = report =>
 		const state = getState().report;
 
 		AVAILABLE_COLORS = [...COLORS];
-		// ROUTE_COMP_ID = 0;
+		ROUTE_COMP_ID = -1;
 
 	  report.route_comps.forEach(rc => {
       if (rc.type === "group") {
         rc.route_comps.forEach(rc => {
+          ROUTE_COMP_ID = Math.max(ROUTE_COMP_ID, +rc.compId.slice(5));
     	  	if (AVAILABLE_COLORS.includes(rc.color)) {
     	  		AVAILABLE_COLORS = AVAILABLE_COLORS.filter(c => c !== rc.color);
     	  	}
         })
       }
-	  	// ROUTE_COMP_ID = Math.max(ROUTE_COMP_ID, +rc.compId.slice(5));
+	  	ROUTE_COMP_ID = Math.max(ROUTE_COMP_ID, +rc.compId.slice(5));
 	  	if (AVAILABLE_COLORS.includes(rc.color)) {
 	  		AVAILABLE_COLORS = AVAILABLE_COLORS.filter(c => c !== rc.color);
 	  	}
