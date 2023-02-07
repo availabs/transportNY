@@ -14,11 +14,11 @@ function EtlEventsContextTable(etlContextsEvents) {
           payload: { state, start_date, end_date, is_expanded },
           meta: { etl_context_id },
         },
-        LATEST: { type },
+        LATEST: { type = "INITIAL" } = {},
       },
       i
     ) => {
-      const eventType = type.replace(/.*:/g, "");
+      const latestEventType = type.replace(/.*:/g, "");
 
       return (
         <tr key={`event=${i}`} style={{ border: "1px solid" }}>
@@ -38,7 +38,7 @@ function EtlEventsContextTable(etlContextsEvents) {
             {is_expanded ? "true" : "false"}
           </td>
           <td style={{ border: "1px solid", backgroundColor: "white" }}>
-            {eventType}
+            {latestEventType}
           </td>
         </tr>
       );
