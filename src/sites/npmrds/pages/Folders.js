@@ -21,8 +21,13 @@ const Folders = ({ user }) => {
   const { falcor, falcorCache } = useFalcor();
 
   const [folders, setFolders] = React.useState([]);
-  const [foldersByType, setFoldersByType] = React.useState([[], [], []]);
-  const [openedFolders, setOpenedFolders] = React.useState([]);
+  const [openedFolders, _setOpenedFolders] = React.useState([]);
+  const setOpenedFolders = React.useCallback(openedFolders => {
+    if (window.localStorage) {
+      window.localStorage.setItem("openedFolders", JSON.stringify(openedFolders.slice(0, 1)))
+    }
+    _setOpenedFolders(openedFolders);
+  }, []);
   const OpenedFolders = React.useMemo(() => {
     return openedFolders.map(fid => get(falcorCache, ["folders2", "id", fid]));
   }, [falcorCache, openedFolders]);
@@ -72,24 +77,27 @@ const Folders = ({ user }) => {
       return bDate.getTime() - aDate.getTime();
     });
     setFolders(folders);
-
-    const byType = folders.reduce((a, c) => {
-      if (c.type === "user") {
-        a[0].push(c);
-      }
-      else if (c.type === "group") {
-        a[1].push(c);
-      }
-      else if (c.type === "default") {
-        a[2].push(c);
-      }
-      return a;
-    }, [[], [], []]);
-    setFoldersByType(byType);
   }, [falcorCache]);
 
   React.useEffect(() => {
-    if (folders.length && !openedFolders.length) {
+    if (!folders.length) return;
+    falcor.get(["folders2", "stuff", folders.map(f => f.id)]);
+  }, [falcor, folders]);
+
+  React.useEffect(() => {
+    let set = false;
+    if (window.localStorage && folders.length && !openedFolders.length) {
+      const storedOpenedFolders = window.localStorage.getItem("openedFolders");
+      if (storedOpenedFolders) {
+        const [id] = JSON.parse(storedOpenedFolders);
+        const [folder] = folders.filter(f => f.id == id);
+        if (folder) {
+          setOpenedFolders([id]);
+          set = true;
+        }
+      }
+    }
+    if (!set && folders.length && !openedFolders.length) {
       setOpenedFolders([folders.filter(f => f.type === "user")[0].id]);
     }
   }, [folders, openedFolders]);
@@ -117,124 +125,12 @@ const Folders = ({ user }) => {
         <StuffInFolder filter={ filter }
           deleteFolder={ deleteFolder }
           openedFolders={ OpenedFolders }
-          setOpenedFolders={ setOpenedFolders }/>
+          setOpenedFolders={ setOpenedFolders }
+          folders={ folders }/>
       }
       <FolderModal isOpen={ open }
         close={ closeModal }/>
     </div>
-  )
-}
-
-const FolderIconWrapper = ({ opened, onClick, deleteFolder, userAuth, ...folder }) => {
-
-  const isEditable = userAuth >= folder.editable;
-
-  const [showTools, setShowTools] = React.useState(false);
-  const onMouseOver = React.useCallback(() => {
-    setShowTools(true);
-  }, []);
-  const onMouseLeave = React.useCallback(() => {
-    setShowTools(false);
-  }, []);
-
-  const [showConfirm, setShowConfirm] = React.useState(false);
-  const show = React.useCallback(e => {
-    e.stopPropagation();
-    setShowConfirm(true);
-  }, []);
-  const hide = React.useCallback(e => {
-    e.stopPropagation();
-    setShowConfirm(false);
-  }, []);
-
-  const doDeleteFolder = React.useCallback(e => {
-    e.stopPropagation();
-    deleteFolder(folder.id);
-  }, [deleteFolder, folder.id]);
-
-  const [open, setOpen] = React.useState(false);
-  const openModal = React.useCallback(e => {
-    e.stopPropagation();
-    setOpen(true);
-  }, []);
-  const closeModal = React.useCallback(e => {
-    e.stopPropagation();
-    setOpen(false);
-  }, []);
-
-  return (
-    <>
-      <div
-        onClick={ onClick }
-        onMouseOver={ isEditable ? onMouseOver : null }
-        onMouseLeave={ isEditable ? onMouseLeave : null }
-        className={ `
-          rounded-xl border-2 hover:border-current
-          cursor-pointer relative px-1 flex justify-center
-          ${ opened ? "border-current" : "border-transparent" }
-        ` }
-      >
-        { !showConfirm ? null :
-          <div
-            className={ `
-              absolute inset-0 bg-opacity-50 bg-gray-500 z-50
-              flex justify-center items-center
-              cursor-auto
-            ` }
-          >
-            <div className="text-5xl font-bold w-full grid grid-cols-2">
-              <div className="flex justify-center items-center">
-                <span className="fa fa-ban cursor-pointer hover:text-6xl"
-                  onClick={ hide }/>
-              </div>
-              <div className="flex justify-center items-center">
-                <span className="fa fa-trash cursor-pointer hover:text-6xl text-red-500"
-                  onClick={ doDeleteFolder }/>
-              </div>
-            </div>
-          </div>
-        }
-        <div className="relative pb-4">
-          <FolderIcon { ...folder }>
-            { !showTools || !isEditable ? null :
-              <div style={ { right: "-0.75rem" } }
-                className="absolute top-1 flex">
-                <div onClick={ show }
-                  className={ `
-                      w-8 h-8 rounded mr-1 text-red-500
-                      bg-gray-300 hover:bg-gray-400
-                      flex items-center justify-center
-                      text-xl hover:text-2xl
-                  ` }
-                >
-                  <span className="fa fa-trash"/>
-                </div>
-                <div onClick={ openModal }
-                  className={ `
-                      w-8 h-8 rounded text-blue-500
-                      bg-gray-300 hover:bg-gray-400
-                      flex items-center justify-center
-                      text-xl hover:text-2xl
-                  ` }
-                >
-                  <span className="fa fa-edit"/>
-                </div>
-              </div>
-            }
-          </FolderIcon>
-          <div style={ { left: "-0.5rem", right: "-0.5rem" } }
-            className="absolute bottom-0"
-          >
-            <div className="truncate whitespace-nowrap">
-              { folder.name }
-            </div>
-          </div>
-        </div>
-      </div>
-      <FolderModal folder={ folder }
-        isOpen={ open }
-        close={ closeModal }/>
-    </>
   )
 }
 

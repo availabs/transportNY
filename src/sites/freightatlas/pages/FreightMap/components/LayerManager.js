@@ -86,30 +86,30 @@ const LayerManager = ({ activeLayers, MapActions, ...rest }) => {
                 name: (
                   <div
                     className={`flex p-2 hover:bg-blue-100 border-r-4 ${
-                      b.id === displayLayer ? "border-blue-600" : "border-white"
+                      b.source_id === displayLayer ? "border-blue-600" : "border-white"
                     }`}
                   >
                     <div
                       className="flex-1 pl-6 cursor-pointer text-sm"
-                      onClick={() => setDisplayLayer(b.id)}
+                      onClick={() => setDisplayLayer(b.source_id)}
                     >
                       {b.display_name}
                     </div>
                     <div>
                       <i
                         onClick={(e) => {
-                          toggleLayer(b.id);
+                          toggleLayer(b.source_id);
                           if (
-                            activeLayers.map((d) => d.layer_id).includes(b.id)
+                            activeLayers.map((d) => d.layer_id).includes(b.source_id)
                           ) {
                             let removeLayer = activeLayers.filter(
-                              (d) => d.layer_id === b.id
+                              (d) => d.layer_id === b.source_id
                             )[0];
                             MapActions.removeLayer(removeLayer);
                           }
                         }}
                         className={`${
-                          layerList.includes(+b.id)
+                          layerList.includes(+b.source_id)
                             ? "fa fa-minus"
                             : "fa fa-plus"
                         } text-xs text-blue-700 cursor-pointer rounded-sm py-1 px-1.5 hover:bg-blue-400 hover:text-white`}

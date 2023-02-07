@@ -34,6 +34,7 @@ export const Header = styled.div`
 		color: ${ props => props.theme.textColorHl };
 		font-size: 1.5rem;
 		font-weight: bold;
+		flex-grow: 1;
 	}
 	span.fa {
 		color: ${ props => props.theme.textColorHl };
@@ -51,43 +52,6 @@ const OpenCloseButton = styled.div`
 	:hover span.fa {
 		color: ${ props => props.theme.sidePanelBg };
 		background-color: ${ props => props.theme.textColorHl };
-	}
-`
-
-const ActiveRouteItem = styled.div`
-	color: ${ props => props.color };
-	padding: 3px 0px 3px 30px;
-	border-radius: 4px;
-	cursor: pointer;
-	height: 30px;
-	line-height: 30px;
-	width: 100%;
-	transition: background-color 0.15s;
-	position: relative;
-
-	:hover {
-		background-color: ${ props => props.hoverColor };
-		font-weight: bold;
-	}
-`
-
-const DragHandle = styled.div`
-	position: absolute;
-	top: 2px;
-	bottom: 2px;
-	left: 2px;
-	width: 26px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	color: ${ props => props.color };
-	border-radius: 4px;
-	transition: color 0.15s, background-color 0.15s;
-
-	:hover,
-	&.isDragging {
-		background-color: ${ props => props.color };
-		color: white;
 	}
 `
 
@@ -121,9 +85,9 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 		setState({ openCompId });
 	}, [props.extendSidebar, setState]);
 
-	const add = React.useCallback((e, routeId) => {
+	const add = React.useCallback((e, route, groupId) => {
 		e.stopPropagation();
-		props.add(routeId);
+		props.add(route.routeId, route.settings, groupId);
 	}, [props.add]);
 	const remove = React.useCallback((e, compId) => {
 		e.stopPropagation();
@@ -133,7 +97,13 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 		props.remove(compId);
 	}, [props.remove, setState]);
 
-	const onDragEnd = React.useCallback(({ source, destination }) => {
+	const onDragEnd = React.useCallback(({ source, destination, combine, draggableId }) => {
+
+		if (combine) {
+			props.combineRouteComps(draggableId, combine.draggableId);
+			return;
+		}
+
 		if (destination === null) return;
 		if (source.index === destination.index) return;
 
@@ -181,7 +151,16 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 					<span onClick={ toggle }
 						className={ `fa fa-${ state.open ? "minus" : "plus" }` }/>
 				</OpenCloseButton>
-				<h4>Routes</h4>
+				<h4 className="">Routes</h4>
+				{ !state.open ? null :
+					<div className="flex-0 flex items-center text-sm"
+						onClick={ e => props.createNewRouteGroup() }
+					>
+						<Control>
+							<span className="px-1">Add New Group</span>
+						</Control>
+					</div>
+				}
 			</Header>
 
 			<div style={ {
@@ -196,6 +175,7 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 					<ControlBox>
 						<Control>
 							<MultiLevelDropdown
+								xDirection={ 0 }
 								searchable={ true }
 								labelAccessor={ d => d.name }
 								valueAccessor={ d => d.id }
@@ -211,6 +191,7 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 						</Control>
 						<Control>
 							<MultiLevelDropdown
+								xDirection={ 0 }
 								searchable={ true }
 								items={ folderData }
 								onClick={ ids => props.add(ids) }
@@ -225,218 +206,366 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 					</ControlBox>
 				</div>
 
-				<div style={ { position: "relative" } }>
-					<DragDropContext onDragEnd={ onDragEnd }>
-						<Droppable droppableId="drop-area">
-							{ (provided, snapshot) => (
+				<DragDropContext onDragEnd={ onDragEnd }>
 
-								<div ref={ provided.innerRef }
-									{ ...provided.droppableProps }
-									style={ {
-										background: snapshot.isDraggingOver ? "#555" : "none"
-									} }
-								>
+					<Droppable droppableId="route-comp-drop-area" isCombineEnabled={ true }>
+						{ (provided, snapshot) => (
+							<div ref={ provided.innerRef }
+								{ ...provided.droppableProps }
+								style={ {
+									background: snapshot.isDraggingOver ? "#600" : "none"
+								} }
+							>
+								{ props.route_comps.map((comp, i) =>
+										<Draggable key={ comp.compId } index={ i }
+											draggableId={ comp.compId }
+										>
+											{ (provided, snapshot) => (
+												<div ref={ provided.innerRef }
+													{ ...provided.draggableProps }
+												>
+													{ get(comp, "type", "route") === "route" ?
+														<RouteComp route={ comp }
+															extendSidebar={ extendSidebar }
+															dragHandleProps={ provided.dragHandleProps }
+															isDragging={ snapshot.isDragging }
+															add={ add }
+														 	remove={ remove }/>
+														:
+														<RouteGroup group={ comp }
+															updateName={ props.updateRouteGroupName }
+															extendSidebar={ extendSidebar }
+															dragHandleProps={ provided.dragHandleProps }
+															isDragging={ snapshot.isDragging }
+															add={ add }
+														 	remove={ remove }
+														 	removeComp={ props.removeFromGroup }
+															reorderRouteComps={ props.reorderRouteComps }/>
+													}
+												</div>
+											) }
+										</Draggable>
+									)
+								}
 
-									{ props.route_comps.map((route, i) =>
-											<Draggable key={ route.compId } index={ i } draggableId={ route.compId }>
-												{ (provided, snapshot) => (
-													<div ref={ provided.innerRef }
-														{ ...provided.draggableProps }
-													>
-														<div className="flex relative">
-															<ActiveRouteItem
-																color={ route.color }
-																hoverColor={ hexColorToRgb(route.color, 0.5) }
-																onClick={ e => route.isValid && extendSidebar(route.compId) }>
-																<div style={ { width: "200px", overflow: "hidden" } }>
-																	{ route.name }
-																</div>
-															</ActiveRouteItem>
-															<DragHandle { ...provided.dragHandleProps }
-																className={ snapshot.isDragging ? "isDragging" : "" }
-																color={ route.color }
-															>
-																<span className="fa fa-ellipsis-vertical"/>
-															</DragHandle>
-															<div className="grid grid-cols-2 gap-1"
-																style={ { position: "absolute", top: "2px", right: "2px", bottom: "2px" } }
-															>
-																<div style={ { width: "26px" } }
-																	className={ `
-																		fa fa-plus hover:bg-gray-500 hover:text-white
-																		rounded flex justify-center items-center cursor-pointer
-																	` }
-																	onClick={ e => route.isValid && add(e, route.routeId) }/>
-																<div style={ { width: "26px" } }
-																	className={ `
-																		fa fa-minus hover:bg-gray-500 hover:text-white
-																		rounded flex justify-center items-center cursor-pointer
-																	` }
-																	onClick={ e => remove(e, route.compId) }/>
-															</div>
-														</div>
+								{ provided.placeholder }
 
-													</div>
-												) }
-											</Draggable>
-										)
-									}
+							</div>
+						) }
+					</Droppable>
 
-									{ provided.placeholder }
+				</DragDropContext>
 
-								</div>
-							) }
-						</Droppable>
-					</DragDropContext>
-				</div>
 			</div>
 		</div>
 	)
 }
 
-/*
-class ActiveRouteComponentsOld extends React.Component {
-	state = {
-		openCompId: null,
-		open: true
+const ActiveRouteItem = styled.div`
+	color: ${ props => props.color };
+	padding: 3px;
+	border-radius: 4px;
+	cursor: pointer;
+	height: 30px;
+	line-height: 30px;
+	flex-grow: 1;
+	transition: background-color 0.15s;
+	position: relative;
+
+	:hover {
+		background-color: ${ props => props.hoverColor };
+		font-weight: bold;
 	}
-	extendSidebar(openCompId) {
-		this.props.extendSidebar(openCompId)
-		this.setState({ openCompId })
+`
+
+const CompContainerDiv = styled.div`
+	color: ${ props => props.color };
+
+	:hover {
+		background-color: ${ props => props.hoverColor };
 	}
-	add(e, routeId) {
-		e.stopPropagation();
-		this.props.add(routeId);
+`
+
+const DragHandle = styled.div`
+	width: 26px;
+	padding: 0.25rem 0rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: ${ props => props.color };
+	border-radius: 4px;
+	transition: color 0.15s, background-color 0.15s;
+
+	:hover,
+	&.isDragging {
+		background-color: ${ props => props.color };
+		color: white;
 	}
-	remove(e, compId) {
-		e.stopPropagation();
-		if (compId === this.state.openCompId) {
-			this.setState({ openCompId: null });
-		}
-		this.props.remove(compId);
-	}
-	onDragEnd({ source, destination }) {
+`
+
+const CompContainer = props => {
+	const {
+		color = "#666666",
+		dragHandleProps,
+		isDragging,
+		onClick = null,
+		children
+	} = props;
+
+	const hoverColor = React.useMemo(() => {
+		return hexColorToRgb(color, 0.5)
+	}, [color]);
+
+	return (
+		<CompContainerDiv
+			className="flex cursor-pointer items-center"
+			color={ color }
+			hoverColor={ hoverColor }
+			onClick={ onClick }
+		>
+			<DragHandle { ...dragHandleProps }
+				className={ isDragging ? "isDragging" : "" }
+				color={ color }
+			>
+				<span className="fa fa-ellipsis-vertical"/>
+			</DragHandle>
+			<div className="flex-1 ml-1">
+				{ children }
+			</div>
+		</CompContainerDiv>
+	)
+}
+
+const RouteGroup = props => {
+
+	const {
+		group,
+		dragHandleProps,
+		isDragging,
+		extendSidebar,
+		add,
+		remove,
+		removeComp,
+		reorderRouteComps,
+		updateName
+	} = props;
+
+	const [open, setOpen] = React.useState(false);
+	const openGroup = React.useCallback(e => {
+		setOpen(true);
+	}, []);
+	const closeGroup = React.useCallback(e => {
+		setOpen(false);
+	}, []);
+	const toggleOpen = React.useCallback(e => {
+		setOpen(open => !open);
+	}, []);
+
+	const onDragEnd = React.useCallback(({ source, destination }) => {
 		if (destination === null) return;
 		if (source.index === destination.index) return;
+		reorderRouteComps(source.index, destination.index, group.compId);
+	}, [reorderRouteComps, group.compId]);
 
-		this.props.reorderRouteComps(source.index, destination.index);
-	}
-	render() {
-		const foldersWithRoutes = this.props.folders.filter(f =>
-			f.stuff.reduce((a, c) => a || c.stuff_type === "collection", false)
-		)
-		const folderData = foldersWithRoutes.map(f =>
-			[f.name,
-				f.stuff.filter(s => s.stuff_type === "collection")
-					.map(s => ({ id: s.stuff_id, name: get(this.props.routesGraph, ["byId", s.stuff_id, "name"], s.stuff_id) }))
-			]
-		)
+	const doAdd = React.useCallback((e, route) => {
+		add(e, route, group.compId);
+	}, [add, group.compId]);
 
-// console.log("availableRoutes", this.props.availableRoutes)
-		return (
-			<div style={ {
-				padding: "10px",
-				whiteSpace: "nowrap",
-				display: "flex",
-				flexDirection: "column"
-			} }>
+	const doRemove = React.useCallback(e => {
+		remove(e, group.compId);
+	}, [group.compId, remove]);
 
-				<Header>
-					<OpenCloseButton>
-						<span onClick={ e => {
-							e.stopPropagation();
-							this.setState(state => ({ open: !state.open }));
-						} } className={ `fa fa-${ this.state.open ? "minus" : "plus" }` }/>
-					</OpenCloseButton>
-					<h4>Routes</h4>
-				</Header>
+	const doRemoveComp = React.useCallback((e, compId) => {
+		e.stopPropagation();
+		removeComp(group.compId, compId);
+	}, [removeComp, group.compId]);
 
-				<div style={ {
-					height: this.state.open ? "auto" : "0px",
-					overflow: this.state.open ? "visible" : "hidden",
-					flexGrow: 1
-				} }>
+	const [name, _setName] = React.useState(group.name);
+	const setName = React.useCallback(e => {
+		_setName(e.target.value);
+	}, [])
 
-					<div style={ {
-						borderBottom: `2px solid currentColor`
-					} }>
-						<ControlBox>
-							<DropDown className="control"
-		  					searchable={ true }
-		  					displayOption={ d => d.name }
-		  					getOptionValue={ d => d.id }
-								onChange={ id => this.props.add(id) }
-								options={ this.props.availableRoutes.sort((a, b) => a.name < b.name ? -1 : 1) }>
-								<span className="fa fa-road"/>
-								<span>Routes</span>
-							</DropDown>
-							<DoubleDropdown className="control"
-								data={ folderData }
-								disabled={ !folderData.length }
-								onSelect={ ids => this.props.add(ids) }>
-								<span className="fa fa-folder"/>
-								<span>Folders</span>
-							</DoubleDropdown>
-						</ControlBox>
+	const [editing, setEditing] = React.useState(false);
+	const prev = React.useRef(false);
+	const startEditing = React.useCallback(e => {
+		e.stopPropagation();
+		setEditing(true);
+	}, []);
+	const stopEditing = React.useCallback(e => {
+		e.stopPropagation();
+		setEditing(false);
+		if (group.name !== name) {
+			updateName(group.compId, name);
+		}
+	}, [group.compId, group.name, name, updateName]);
+
+	const [ref, _setRef] = React.useState(null);
+	const setRef = React.useCallback(ref => {
+		_setRef(ref);
+		ref && ref.focus();
+	}, []);
+
+	const onFocus = React.useCallback(e => {
+		e.target.select();
+	}, []);
+	const onKeyUp = React.useCallback(e => {
+		if ((e.key === "Enter") || (e.keyCode === 13)) {
+			stopEditing(e);
+		}
+	}, [stopEditing]);
+
+	const stopPropagation = React.useCallback(e => {
+		e.stopPropagation();
+	}, []);
+
+	return (
+		<div>
+			<CompContainer color={ group.color }
+				dragHandleProps={ dragHandleProps }
+				isDragging={ isDragging }
+				onClick={ toggleOpen }
+			>
+				<div className="relative">
+					{ editing ?
+						<input ref={ setRef }
+							className="w-full overflow-hidden"
+							value={ name } onChange={ setName }
+							onClick={ stopPropagation }
+							onFocus={ onFocus }
+							onKeyUp={ onKeyUp }
+						/> :
+						<div className="overflow-hidden">
+							{ group.name }
+						</div>
+					}
+					<div className="grid grid-cols-2 gap-1 "
+						style={ { position: "absolute", top: "0px", right: "0px", bottom: "0px" } }
+					>
+						{ editing ?
+							<div style={ { width: "26px" } }
+								className={ `
+									fa fa-floppy-disk hover:bg-gray-500 hover:text-white
+									rounded flex justify-center items-center cursor-pointer
+								` }
+								onClick={ stopEditing }/> :
+							<div style={ { width: "26px" } }
+								className={ `
+									fa fa-edit hover:bg-gray-500 hover:text-white
+									rounded flex justify-center items-center cursor-pointer
+								` }
+								onClick={ startEditing }/>
+						}
+						<div style={ { width: "26px" } }
+							className={ `
+								fa fa-minus hover:bg-gray-500 hover:text-white
+								rounded flex justify-center items-center cursor-pointer
+							` }
+							onClick={ doRemove }/>
 					</div>
+				</div>
+			</CompContainer>
+			<div className="ml-2">
+				{ !open ? null :
 
-					<div style={ { position: "relative" } }>
-						<DragDropContext onDragEnd={ this.onDragEnd.bind(this) }>
-							<Droppable droppableId="drop-area">
-								{ (provided, snapshot) => (
+					<DragDropContext onDragEnd={ onDragEnd }>
 
+						<Droppable droppableId={ group.compId }>
+							{ (provided, snapshot) => (
 									<div ref={ provided.innerRef }
 										{ ...provided.droppableProps }
-										style={ { background: snapshot.isDraggingOver ? "#555" : "none" } }>
-
-			    					{
-											this.props.route_comps.map((route, i) =>
-												<Draggable key={ route.compId } index={ i } draggableId={ route.compId }>
+										style={ {
+											background: snapshot.isDraggingOver ? "#555" : "none"
+										} }
+									>
+										{ group.route_comps.map((comp, i) =>
+												<Draggable key={ comp.compId } index={ i }
+													draggableId={ comp.compId }
+												>
 													{ (provided, snapshot) => (
-														<div ref={ provided.innerRef }
-															{ ...provided.draggableProps }>
-															<div style={ { height: "27px", position: "relative" } }>
-																<ActiveRouteItem
-																	color={ route.color }
-																	hoverColor={ hexColorToRgb(route.color, 0.5) }
-																	onClick={ e => route.isValid && this.extendSidebar(route.compId) }>
-																	<div style={ { width: "200px", overflow: "hidden" } }>
-																		{ route.name }
-																	</div>
-																</ActiveRouteItem>
-																<DragHandle { ...provided.dragHandleProps }
-																	className={ snapshot.isDragging ? "isDragging" : "" }
-																	color={ route.color }
-																>
-																	<span className="fa fa-ellipsis-vertical"/>
-																</DragHandle>
-																<div style={ { position: "absolute", top: "2px", right: "10px" } }>
-																	<Icon className="fa fa-plus"
-																		onClick={ e => route.isValid && this.add(e, route.routeId) }/>
-																	<Icon className="fa fa-minus"
-																		onClick={ e => this.remove(e, route.compId) }/>
-																</div>
+															<div ref={ provided.innerRef }
+																{ ...provided.draggableProps }
+															>
+																<RouteComp route={ comp }
+																	extendSidebar={ extendSidebar }
+																	dragHandleProps={ provided.dragHandleProps }
+																	isDragging={ snapshot.isDragging }
+																	add={ doAdd }
+																 	remove={ doRemoveComp }/>
 															</div>
-
-														</div>
-													) }
+														)
+													}
 												</Draggable>
 											)
 										}
 
 										{ provided.placeholder }
-
 									</div>
-								) }
-							</Droppable>
-						</DragDropContext>
-					</div>
+								)
+							}
+						</Droppable>
+
+					</DragDropContext>
+				}
+			</div>
+		</div>
+	)
+}
+
+const RouteComp = props => {
+
+	const {
+		route,
+		extendSidebar,
+		dragHandleProps,
+		isDragging,
+		add,
+	 	remove
+	} = props;
+
+	const extend = React.useCallback(e => {
+		extendSidebar(route.compId);
+	}, [extendSidebar, route.compId]);
+
+	const doAdd = React.useCallback(e => {
+		if (route.isValid) {
+			add(e, route);
+		}
+	}, [route, add]);
+	const doRemove = React.useCallback(e => {
+		remove(e, route.compId);
+	}, [route.compId, remove]);
+
+	return (
+		<CompContainer color={ route.color }
+			dragHandleProps={ dragHandleProps }
+			isDragging={ isDragging }
+			onClick={ extend }
+		>
+			<div className="relative">
+				<div className="overflow-hidden">
+					{ route.name }
+				</div>
+				<div className="grid grid-cols-2 gap-1 "
+					style={ { position: "absolute", top: "0px", right: "0px", bottom: "0px" } }
+				>
+					<div style={ { width: "26px" } }
+						className={ `
+							fa fa-plus hover:bg-gray-500 hover:text-white
+							rounded flex justify-center items-center cursor-pointer
+						` }
+						onClick={ doAdd }/>
+					<div style={ { width: "26px" } }
+						className={ `
+							fa fa-minus hover:bg-gray-500 hover:text-white
+							rounded flex justify-center items-center cursor-pointer
+						` }
+						onClick={ doRemove }/>
 				</div>
 			</div>
-		)
-	}
+		</CompContainer>
+	)
 }
-*/
+
 const mapStateToProps = state => ({
 	routesGraph: get(state, ["graph", "routes"], {})
 })

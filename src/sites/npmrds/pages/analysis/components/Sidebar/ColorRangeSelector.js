@@ -216,13 +216,24 @@ export default class ColorRangeSelector extends React.Component {
           <span>{ this.state.reversed ? "Normalize" : "Reverse" } Colors</span>
         </Control>
         <MultiLevelDropdown
-          searchable={ false }
-          displayOption={ d => d.name }
-          getOptionValue={ d => d.value }
-          onChange={ size => this.setState({ size }) }
-          options={
+          xDirection={ 0 }
+          labelAccessor={ d => d.name }
+          valueAccessor={ d => d.value }
+          onClick={ size => this.setState({ size }) }
+          items={
             range(MIN_LENGTH, MAX_LENGTH + 1)
               .map(l => ({
+                Item: ({ children }) => (
+                  <div
+                    className={ `
+                        w-40 px-2 hover:bg-gray-300
+                        ${ this.state.size === l ? "bg-gray-300" : "" }
+                      `
+                    }
+                  >
+                    { children }
+                  </div>
+                ),
                 name: `Length ${ l }`,
                 value: l
               }))

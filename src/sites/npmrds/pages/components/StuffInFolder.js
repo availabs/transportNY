@@ -13,7 +13,8 @@ import {
   // Select
 } from "modules/avl-components/src"
 
-import { FolderStuff } from "./Stuff"
+import { FolderStuff, stuffSorter } from "./Stuff"
+import { Link } from 'react-router-dom'
 import FolderModal from "./FolderModal"
 import ActionBar from "./ActionBar"
 import FolderIcon from "./FolderIcon"
@@ -21,32 +22,16 @@ import ConfirmModal from "./ConfirmModal"
 
 import { FuseWrapper } from "sites/npmrds/components"
 
-const StuffOrder = {
-  folder: 0,
-  report: 1,
-  route: 2,
-  template: 3
-}
-
-const stuffSorter = (a, b) => {
-  if (a.stuff_type === b.stuff_type) {
-    const aDate = new Date(a.updated_at);
-    const bDate = new Date(b.updated_at);
-    return bDate - aDate;
-  }
-  return StuffOrder[a.stuff_type] - StuffOrder[b.stuff_type];
-}
-
-const StuffInFolder = ({ openedFolders, setOpenedFolders, filter, deleteFolder }) => {
+const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, deleteFolder }) => {
   const { falcor, falcorCache } = useFalcor();
 
   const [stuff, setStuff] = React.useState([]);
 
   const folder = openedFolders[openedFolders.length - 1];
 
-  React.useEffect(() => {
-    falcor.get(["folders2", "stuff", folder.id])
-  }, [falcor, folder]);
+  // React.useEffect(() => {
+  //   falcor.get(["folders2", "stuff", folder.id])
+  // }, [falcor, folder]);
 
   React.useEffect(() => {
     const stuff = get(falcorCache, ["folders2", "stuff", folder.id, "value"], []);
@@ -112,7 +97,7 @@ const StuffInFolder = ({ openedFolders, setOpenedFolders, filter, deleteFolder }
             };
         }
       })
-      .filter(s => !filter || filter.includes(s.stuff_type))
+      .filter(s => !filter || (s.stuff_type === "folder") || filter.includes(s.stuff_type))
       .sort(stuffSorter);
 
     setStuff(stuff);
@@ -151,14 +136,14 @@ const StuffInFolder = ({ openedFolders, setOpenedFolders, filter, deleteFolder }
 
       <div className='flex items-center'>
         <div className="flex-1 flex border border-gray-100 mt-1">
-          
-          <Input type="text" className="w-full px-4 py-2 focus:outline-none 
+
+          <Input type="text" className="w-full px-4 py-2 focus:outline-none
             border-b-2 border-transparent focus:border-blue-400 focus:bg-blue-50
             shadow rounded-sm text-lg"
             value={ search }
             onChange={ setSearch }
             placeholder="Search..."/>
-        
+
           { !search.length ? null :
             <div onClick={ clearSearch }
               className={ `
@@ -174,10 +159,7 @@ const StuffInFolder = ({ openedFolders, setOpenedFolders, filter, deleteFolder }
           }
         </div>
         <div>
-          <ButtonNew 
-            filter={filter}
-            openFolders={openedFolders}
-          />
+          <ButtonNew openedFolders={ openedFolders }/>
         </div>
       </div>
       <div className='mt-2'>
@@ -185,7 +167,7 @@ const StuffInFolder = ({ openedFolders, setOpenedFolders, filter, deleteFolder }
           selectedStuff={ selectedStuff }
           deselectAll={ deselectAll }/>
       </div>
-      <div className='bg-white p-4 shadow rounded-sm border border-gray-100 mt-2'> 
+      <div className='bg-white p-4 shadow rounded-sm border border-gray-100 mt-2'>
       { fuse(search).map((s, i)=> (
           <FolderStuff key={ i }
             openedFolders={ openedFolders }
@@ -336,7 +318,7 @@ const FolderSelector = ({ folder, setOpenedFolders, deleteFolder }) => {
       else if (c.type === "group") {
         a[1].folders.push(c);
       }
-      else if (c.type === "default") {
+      else if (c.type === "AVAIL") {
         a[2].folders.push(c);
       }
       return a;
@@ -489,51 +471,28 @@ const PathItem = ({ openPath, setOpenedFolders, name }) => {
 }
 
 const FolderPath = ({ openedFolders, setOpenedFolders, filter, deleteFolder }) => {
-
-  const [show, setShow] = React.useState(false);
-  const onMouseOver = React.useCallback(e => {
-    setShow(true);
-  }, []);
-  const onMouseLeave = React.useCallback(e => {
-    setShow(false);
-  }, []);
-
-  const [open, setOpen] = React.useState(false);
-  const openModal = React.useCallback(e => {
-    setOpen(true);
-  }, []);
-  const closeModal = React.useCallback(e => {
-    setOpen(false);
-  }, []);
-
   return (
-    <>
-      <div className="text-3xl font-medium flex relative">
-        <div className="flex-1 flex items-end">
-          <FolderSelector folder={ openedFolders[0] }
-            setOpenedFolders={ setOpenedFolders }
-            deleteFolder={ deleteFolder }/>
-          { openedFolders.slice(1).map((f, i) => (
-              <div key={ f.id }>
-                <PathItem name={ f.name }
-                  openPath={ openedFolders.slice(0, i + 2) }
-                  setOpenedFolders={ setOpenedFolders }
-                />
-              </div>
-            ))
-          }
-        </div>
+    <div className="text-3xl font-medium flex relative">
+      <div className="flex-1 flex items-end">
+        <FolderSelector folder={ openedFolders[0] }
+          setOpenedFolders={ setOpenedFolders }
+          deleteFolder={ deleteFolder }/>
+        { openedFolders.slice(1).map((f, i) => (
+            <div key={ f.id }>
+              <PathItem name={ f.name }
+                openPath={ openedFolders.slice(0, i + 2) }
+                setOpenedFolders={ setOpenedFolders }
+              />
+            </div>
+          ))
+        }
+        { filter }
       </div>
-
-      <FolderModal isOpen={ open }
-        close={ closeModal }
-        openedFolders={ openedFolders }/>
-
-    </>
+    </div>
   )
 }
 
-const ButtonNew = ({filter, openedFolders}) => {
+const ButtonNew = ({ openedFolders }) => {
   const [show, setShow] = React.useState(false);
   const onMouseOver = React.useCallback(e => {
     setShow(true);
@@ -549,17 +508,16 @@ const ButtonNew = ({filter, openedFolders}) => {
   const closeModal = React.useCallback(e => {
     setOpen(false);
   }, []);
-
   return (
-      <div className='px-2 pt-0.5'> 
-        <div className='flex items-center bg-blue-500 border border-lime-300 text-gray-50 rounded-md'>
-          <div className='py-2 px-6 text-lg'> Add New </div>
-          <div className="flex items-center justify-center relative "
-            onMouseOver={ onMouseOver }
-            onMouseLeave={ onMouseLeave }
-          >
+      <div className='px-2 pt-0.5'>
+        <div className='flex items-center bg-blue-500 border border-lime-300 text-gray-50 rounded-md'
+          onMouseOver={ onMouseOver }
+          onMouseLeave={ onMouseLeave }
+        >
+          <div className='py-2 px-6 text-lg'>Add New</div>
+          <div className="flex items-center justify-center relative">
             <div className={ `
-                h-10 w-10 rounded 
+                h-10 w-10 rounded
                 flex items-center justify-center
                 text-xl hover:text-3xl cursor-pointer
               ` }
@@ -580,18 +538,19 @@ const ButtonNew = ({filter, openedFolders}) => {
               <div className="p-2 hover:bg-blue-100">
                 <span className="fad fa-road mr-1 px-2 text-blue-500"/>Route
               </div>
-              <div className="p-2 hover:bg-blue-100">
-                <span className="fad fa-chart-column text-blue-500 mr-1 px-2"/>Report
-              </div>
+              <Link to='/report/new'>
+                <div className="p-2 hover:bg-blue-100">
+                    <span className="fad fa-chart-column text-blue-500 mr-1 px-2"/>Report
+                </div>
+               </Link>
             </div>
           </div>
         </div>
-        <FolderModal 
-            isOpen={ open }
-            close={ closeModal }
-            openedFolders={ openedFolders }/>
+        <FolderModal isOpen={ open }
+          close={ closeModal }
+          openedFolders={ openedFolders }/>
       </div>
 
-     
+
   )
 }

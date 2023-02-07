@@ -10,7 +10,7 @@ const StyledSidePanelContainer = styled.div`
   transition: width 250ms;
   display: flex;
   position: fixed;
-  z-index: 25;
+  z-index: 40;
   left: 3.5rem;
   top: 50px;
   bottom: 0px;

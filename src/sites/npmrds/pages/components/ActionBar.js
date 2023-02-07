@@ -2,6 +2,7 @@ import React from "react"
 
 import get from "lodash.get"
 import { range as d3range } from "d3-array"
+import { Link } from "react-router-dom"
 
 import {
   useFalcor,
@@ -76,10 +77,10 @@ const useStuffActions = (selectedStuff, parent) => {
   }, [deleteSelected])
 
   const StuffActions = [
-   
+
     { key: "move-to",
       label: "Move to folder",
-      icon: 'fad fa-folder-open text-sm pr-1 text-gray-500 group-hover:text-blue-300',
+      icon: 'fad fa-folder-open text-sm pr-1',
       sourceAuth: true,
       targetAuth: true,
       multiple: true,
@@ -89,7 +90,7 @@ const useStuffActions = (selectedStuff, parent) => {
     },
     { key: "copy-to",
       label: "Copy to folder",
-      icon: 'fad fa-folder-open text-sm pr-1 text-gray-500 group-hover:text-blue-300',
+      icon: 'fad fa-folder-open text-sm pr-1',
       targetAuth: true,
       multiple: true,
       types: new Set(["route", "report", "template", "folder"]),
@@ -107,15 +108,15 @@ const useStuffActions = (selectedStuff, parent) => {
     // },
     { key: "open-in-template",
       label: "Open in Template",
-      icon: 'fa fa-file-chart-line pr-1 text-gray-500 group-hover:text-blue-300',
+      icon: 'fa fa-file-chart-line pr-1',
       sourceAuth: true,
       multiple: true,
       types: new Set(["route"]),
-      Comp: ActionButton
+      Comp: TemplatesDropdown
     },
      { key: "delete-selected",
       label: "Delete",
-      icon: 'fad fa-trash text-sm pr-1 text-red-400 group-hover:text-blue-300',
+      icon: 'fad fa-trash text-sm pr-',
       sourceAuth: true,
       multiple: true,
       types: new Set(["route", "report", "template", "folder"]),
@@ -199,14 +200,26 @@ const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
             ["name", "icon", "color", "id", "updated_at", "created_at", "type", "owner", "editable"]
           ])
         }
-        const folders = get(res, ["json", "folders2", "stuff", parent], [])
+        const stuff = get(res, ["json", "folders2", "stuff", parent], []);
+        const folders = stuff
           .filter(s => s.stuff_type === "folder")
           .map(s => s.stuff_id);
+
+        const templates = stuff
+          .filter(s => s.stuff_type === "template")
+          .map(s => s.stuff_id);
+
         if (folders.length) {
           requests.push([
             "folders2", "id", folders,
-            ["name", "icon", "color", "id", "updated_at", "created_at", "type", "owner", "editable"]
-          ])
+            ["id", "name", "icon", "color", "updated_at", "created_at", "type", "owner", "editable"]
+          ]);
+        }
+        if (templates.length) {
+          requests.push([
+            "template2", "id", templates,
+            ["id", "name", "routes", "stations", "updated_at"]
+          ]);
         }
         if (requests.length) {
           return falcor.get(...requests);
@@ -220,7 +233,7 @@ const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
     const folders = refs.map(ref => get(falcorCache, ref, null))
       .filter(Boolean)
       .filter(f => f.id != parent)
-      .filter(f => f.type !== "default");
+      .filter(f => f.type !== "AVAIL");
 
     folders.sort((a, b) => {
       if (a.type === b.type) {
@@ -248,12 +261,28 @@ const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
     setFolders([...folders, ...subFolders]);
   }, [falcorCache, parent, selectedStuff]);
 
+  const [templates, setTemplates] = React.useState([]);
+
+  React.useEffect(() => {
+    const stuff = get(falcorCache, ["folders2", "stuff", parent, "value"], []);
+    const templates = stuff
+      .filter(s => s.stuff_type === "template")
+      .reduce((a, c) => {
+        const template = get(falcorCache, ["templates2", "id", c.stuff_id], null);
+        if (template) {
+          a.push(template)
+        }
+        return a;
+      }, []);
+    setTemplates(templates);
+  }, [falcorCache, parent]);
+
   const [stuffActions, confirm] = useStuffActions(selectedStuff, parent)
 
   return (
     <div className={ `
         py-1 bg-white shadow rounded-sm border border-gray-100 mb-2
-        
+
       ` }
     >
       <div className="px-1 flex">
@@ -266,6 +295,8 @@ const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
               <Comp key={ key }
                 folders={ folders }
                 action={ action }
+                templates={ templates }
+                routes={ selectedStuff }
                 { ...rest }
               >
                 { label || key }
@@ -287,19 +318,23 @@ const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
 }
 export default ActionBar;
 
-const ActionButton = ({ action, children, icon, color = "gray-300" }) => {
+const NoOp = () => { console.log("CLICKED"); };
+
+const ActionButton = ({ action = NoOp, children, icon, color = "gray-300", disabled = false }) => {
   return (
-    <button onClick={ action }
+    <button onClick={ action } disabled={ disabled }
       className={ `
         px-4 py-2 mr-1 rounded cursor-pointer group
-        hover:text-blue-300
+        ${ disabled ? "" : "hover:text-blue-300" }
+        disabled:cursor-not-allowed
+        disabled:text-gray-300
       ` }
     >
-     {icon ? <i className={`${icon}`}/> : ''} { children }
+     { icon ? <i className={ `${ icon }` }/> : '' } { children }
     </button>
   )
 }
-const ActionDropdown = ({ children, icon, items }) => {
+const ActionDropdown = ({ children, icon, items, disabled = false }) => {
   const [show, setShow] = React.useState(false);
   const onMouseOver = React.useCallback(e => {
     setShow(true);
@@ -312,11 +347,11 @@ const ActionDropdown = ({ children, icon, items }) => {
       onMouseOver={ onMouseOver }
       onMouseLeave={ onMouseLeave }
     >
-      <ActionButton>
-       {icon ? <i className={`${icon}`}/> : ''} { children }
+      <ActionButton disabled={ disabled }>
+        { icon ? <i className={ `${ icon }` }/> : '' } { children }
       </ActionButton>
       { !show ? null :
-        <div className="absolute bg-white shadow-lg"
+        <div className="absolute bg-white shadow-lg z-10"
           style={ {
             top: "100%",
             left: "0%"
@@ -328,10 +363,10 @@ const ActionDropdown = ({ children, icon, items }) => {
     </div>
   )
 }
-const FoldersDropdown = ({ action, folders, icon, children }) => {
+const FoldersDropdown = ({ action = NoOp, folders, icon, children }) => {
   return (
     <ActionDropdown
-      icon={icon}
+      icon={ icon }
       items={
         folders.map(f => (
           <div key={ f.id } className="px-2 flex items-center hover:bg-gray-300 w-52"
@@ -347,6 +382,40 @@ const FoldersDropdown = ({ action, folders, icon, children }) => {
             </span>
           </div>
         ))
+      }
+    >
+      { children }
+    </ActionDropdown>
+  )
+}
+const TemplatesDropdown = ({ action = NoOp, templates, routes, icon, children }) => {
+
+  const Templates = React.useMemo(() => {
+    return templates.filter(t => (+t.stations === 0) && (+t.routes === +routes.length));
+  }, [templates, routes.length]);
+
+  const makeURL = React.useCallback(tid => {
+    return `/template/edit/${ tid }/route/${ routes.map(r => r.id).join("_") }`;
+  }, [routes]);
+
+  return (
+    <ActionDropdown
+      icon={ icon }
+      disabled={ !Templates.length }
+      items={
+        Templates
+          .map(t => (
+            <Link key={ t.id } to={ makeURL(t.id) }>
+              <div className="px-2 flex items-center hover:bg-gray-300 w-52">
+                <div className="mr-1">
+                  <i className={ `${ icon }` }/>
+                </div>
+                <span className="pt-1">
+                  { get(t, "name", "loading...") }
+                </span>
+              </div>
+            </Link>
+          ))
       }
     >
       { children }

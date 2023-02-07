@@ -109,12 +109,12 @@ export const getDataDateExtent = () =>
 
 const getRouteData = (routeIds, report) =>
 	falcorGraph.get(["routes2", "id", routeIds, ["tmc_array", "name"]])
-    // .then(() => falcorGraph.get(
-    //   ["routes", "byId", routeIds,
-    //     report.allYearsWithData,
-    //     "tmcArray"
-    //   ])
-    // )
+    // .then(res => console.log("ROUTE DATA RES:", routeIds, res))
+    .then(() =>
+      falcorGraph.get(
+        ["routes2", "id", routeIds, report.allYearsWithData, "tmc_array"]
+      )
+    )
 
 const getStationData = stationIds =>
   falcorGraph.get(
@@ -141,7 +141,7 @@ const getTemplateData = templateId =>
   )
 const getTemplateIdByType = defaultType =>
 	falcorGraph.get(
-		['templates2', 'type', defaultType, 'id']
+		['templates2', 'defaultType', defaultType, 'id']
 	).then(res => {
     return get(res, ["json", "templates2", "type", defaultType, "id"])
   })
@@ -170,6 +170,18 @@ const redirect = url =>
 				state: { redirect: url }
 			})
 		)
+
+export const loadRoutesForReport = routeIds =>
+  (dispatch, getState) =>
+    Promise.resolve()
+      .then(() => getDataDateExtent())
+      .then(() => routeIds.length && getRouteData(routeIds, getState().report))
+			.then(() => {
+        dispatch({
+          type: UPDATE_STATE,
+          state: _addRouteComp(getState().report, routeIds)
+        })
+			})
 
 export const loadRoutesAndTemplate = (routeIds, templateId, stationIds = []) =>
 	(dispatch, getState) =>
@@ -306,11 +318,9 @@ export const saveTemplate = (template, templateId = null) =>
       graph_comps,
       station_comps,
       stations: stationIds.length,
-      defaultType,
+      default_type: defaultType,
       colorRange
     }
-
-// console.log("SAVING TEMPLATE:",data)
 
 		return falcorGraph.call(
 			["templates2", "save"],
@@ -319,13 +329,13 @@ export const saveTemplate = (template, templateId = null) =>
 		// .then(() => dispatch(update(falcorGraph.getCache())));
 	}
 
-export const addRouteComp = (routeId, needsSnapShot = false) =>
+export const addRouteComp = (routeId, settings = null, groupId = null, needsSnapShot = false) =>
 	(dispatch, getState) =>
 		getRouteData(routeId, getState().report)
 			.then(() =>
 				dispatch({
 					type: UPDATE_STATE,
-					state: _addRouteComp(getState().report, routeId)
+					state: _addRouteComp(getState().report, routeId, settings, groupId)
 				})
 			)
 			.then(() => needsSnapShot && dispatch(takeSnapShot()))
@@ -362,15 +372,42 @@ export const updateRouteComp = (compId, update, reloadData=true) =>
 	    let settings = {};
 
 	    const route_comps = state.route_comps.map(rc => {
-	      if (rc.compId === compId) {
+        const type = get(rc, "type", "route");
+        if ((type === "route") && (rc.compId === compId)) {
 	        settings = { ...rc.settings, ...update };
-	        const name = get(getState(), `graph.routes.byId.${ rc.routeId }.name`, 'unknown');
+          const cache = falcorGraph.getCache();
+	        const name = get(cache, `routes2.id.${ rc.routeId }.name`, 'unknown');
 	        return {
 	          ...rc,
 	          settings,
 	          name: getRouteCompName(name, settings)
 	        }
-	      }
+        }
+        else if (type === "group") {
+          const hasComp = get(rc, "route_comps", [])
+            .reduce((a, c) => {
+              return a || (c.compId === compId);
+            }, false);
+          if (hasComp) {
+            return {
+              ...rc,
+              route_comps: get(rc, "route_comps", [])
+                .map(rc => {
+                  if (rc.compId === compId) {
+          	        settings = { ...rc.settings, ...update };
+                    const cache = falcorGraph.getCache();
+          	        const name = get(cache, `routes2.id.${ rc.routeId }.name`, 'unknown');
+                    return {
+          	          ...rc,
+          	          settings,
+          	          name: getRouteCompName(name, settings)
+          	        }
+                  }
+                  return rc;
+                })
+            }
+          }
+        }
 	      return rc;
 	    })
 
@@ -398,11 +435,23 @@ export const updateAllRouteComps = () =>
 		new Promise((resolve, reject) => {
 		  const state = getState().report;
 
-		  const route_comps = state.route_comps.map(rc => ({
-		    ...rc,
-		    settings: { ...state.routeComponentSettings.get(rc.compId) }
-		  }))
-
+		  const route_comps = state.route_comps.map(rc => {
+        if (get(rc, "type", "route") === "route") {
+          return {
+    		    ...rc,
+    		    settings: { ...state.routeComponentSettings.get(rc.compId) }
+          }
+        }
+        else {
+          return {
+            ...rc,
+            route_comps: rc.route_comps.map(rc => ({
+      		    ...rc,
+      		    settings: { ...state.routeComponentSettings.get(rc.compId) }
+            }))
+          }
+        }
+		  })
 	    // const routeDataMap = state.routes.reduce((a, c) => ({ ...a, [c.compId]: c.data }), {});
 		  const routes = route_comps.reduce((a, c) =>
 		  	[...a, ...getRoutesForRouteComp(c, null, true)]
@@ -477,25 +526,42 @@ export const updateRouteCompColor = (compId, color) =>
 				})
 			)
 		})
-		.then(() => dispatch(takeSnapShot()))
-export const reorderRouteComps = (srcIndex, dstIndex) =>
+		.then(() => dispatch(takeSnapShot()));
+
+export const reorderRouteComps = (srcIndex, dstIndex, groupId) =>
 	(dispatch, getState) =>
 		new Promise((resolve, reject) => {
-		  const state = getState().report,
+		  const state = getState().report;
 
-		  	routeDataMap = {};
+      const route_comps = [...state.route_comps];
 
-		  state.routes.forEach(r => {
-		    routeDataMap[r.compId] = r.data;
-		  })
+      if (groupId) {
+        const route_group = route_comps.reduce((a, c) => {
+          return c.compId === groupId ? c : a;
+        }, null);
+        if (route_group) {
+          route_group.route_comps = [...get(route_group, "route_comps", [])];
+    		  const [src] = route_group.route_comps.splice(srcIndex, 1);
+          if (src) {
+            route_group.route_comps.splice(dstIndex, 0, src);
+          }
+        }
+      }
+      else {
+  		  const [src] = route_comps.splice(srcIndex, 1);
+        if (src) {
+          route_comps.splice(dstIndex, 0, src);
+        }
+      }
 
-		  const route_comps = [...state.route_comps],
-		  	src = route_comps.splice(srcIndex, 1);
-		  route_comps.splice(dstIndex, 0, src[0]);
+      const routeDataMap = state.routes.reduce((a, c) => {
+        a[c.compId] = c.data;
+        return a;
+      }, {});
 
-		  const routes = route_comps.reduce((a, c) =>
-		  	[...a, ...getRoutesForRouteComp(c, routeDataMap, true)]
-		  , [])
+		  const routes = route_comps.reduce((a, c) => {
+		  	return [...a, ...getRoutesForRouteComp(c, routeDataMap, true)];
+		  }, []);
 
 			resolve(
 				dispatch({
@@ -784,7 +850,7 @@ const tryFit = (rects, base, layout) => {
 	const doesIntersect = rects.reduce((a, c) => a || intersects(c, layout), false);
 	return doesIntersect ? tryFit(rects, base, layout) : layout;
 }
-export const addGraphComp = (type, _layout = null) =>
+export const addGraphComp = (type, _layout = null, graphState = null) =>
 	(dispatch, getState) =>
 		new Promise((resolve, reject) => {
     	const state = getState().report,
@@ -810,8 +876,12 @@ export const addGraphComp = (type, _layout = null) =>
 	      type,
 	      id: getUniqueGraphCompId(),
 	      layout,
-	      state: { title: "" }
+	      state: graphState ?
+          JSON.parse(JSON.stringify(graphState)) :
+          { title: "{type}, {data}" }
 	    };
+
+      newGraphComp.state.title = newGraphComp.state.title || "{type}, {data}"
 
 	    resolve(
 	    	dispatch({
@@ -840,7 +910,8 @@ export const removeGraphComp = (index, needsSnapShot) =>
 				})
 			)
 		})
-		.then(() => needsSnapShot && dispatch(takeSnapShot()))
+		.then(() => needsSnapShot && dispatch(takeSnapShot()));
+
 export const updateGraphComp = (index, update) =>
 	(dispatch, getState) =>
 		new Promise((resolve, reject) => {
@@ -853,6 +924,7 @@ export const updateGraphComp = (index, update) =>
 	        }
 	      }
 	    }
+
 	    resolve(
 	    	dispatch({
 	    		type: UPDATE_STATE,
@@ -900,7 +972,16 @@ export const onLayoutChange = newLayouts =>
 export const loadReport = report =>
 	(dispatch, getState) => {
 		if (typeof report === "object") {
-			const routeIds = (get(report, "route_comps") || []).map(rc => rc.routeId),
+			const routeIds = (get(report, "route_comps") || [])
+              .reduce((a, rc) => {
+                if (get(rc, "type", "route") === "route") {
+                  a.push(rc.routeId)
+                }
+                else {
+                  a.push(...rc.route_comps.map(rc => rc.routeId));
+                }
+                return a;
+              }, []),
         stationIds = (get(report, "station_comps") || []).map(sc => sc.stationId);
 			return getStationData(stationIds)
         .then(() => getRouteData(routeIds, getState().report))
@@ -911,7 +992,6 @@ export const loadReport = report =>
 			return getReportData(report)
 				.then(res => {
 					const data = get(res, `json.reports2.id.${ report }`, null);
-					console.log('got reportData', res,data)
 
 					if (data) {
 						return dispatch(loadReport(data));
@@ -941,12 +1021,27 @@ export const saveReport = (report, reportId = null) =>
       reportId,
       ...report,
       route_comps: state.route_comps.map(rc =>
-        ({
-          compId: rc.compId,
-          routeId: rc.routeId,
-          settings: { ...rc.settings },
-          color: rc.color
-        })
+        get(rc, "type", "route") === "route" ?
+          ({
+            compId: rc.compId,
+            routeId: rc.routeId,
+            settings: { ...rc.settings },
+            color: rc.color,
+            type: "route"
+          }) :
+          ({
+            compId: rc.compId,
+            color: rc.color,
+            type: "group",
+            route_comps: get(rc, "route_comps", [])
+              .map(rc => ({
+                compId: rc.compId,
+                routeId: rc.routeId,
+                settings: { ...rc.settings },
+                color: rc.color,
+                type: "route"
+              }))
+          })
       ),
       station_comps: state.station_comps.map(sc =>
         ({
@@ -1002,6 +1097,162 @@ export const selectColorRange = colorRange =>
         })
       ).then(() => dispatch(takeSnapShot()))
 
+let groupId = -1;
+const getGroupId = () => ++groupId;
+
+export const createNewRouteGroup = (srcId = null, dstId = null) =>
+  (dispatch, getState) => {
+    const report = getState().report;
+
+    const route_comps = report.route_comps
+      .filter(rc => rc.compId !== srcId);
+
+    const dstIndex = route_comps.reduce((a, c, i) => {
+      return c.compId === dstId ? i : a;
+    }, route_comps.length);
+
+    const srcComp = report.route_comps.reduce((a, c) => {
+      return c.compId === srcId ? c : a;
+    }, null);
+    const dstComp = report.route_comps.reduce((a, c) => {
+      return c.compId === dstId ? c : a;
+    }, null);
+
+    const group = {
+      type: "group",
+      name: `Route Group ${ getGroupId() }`,
+      compId: getUniqueRouteCompId(),
+      route_comps: [srcComp, dstComp].filter(Boolean),
+      color: "#666666"
+    }
+
+    route_comps.splice(dstIndex, 1, group);
+
+    return Promise.resolve(
+      dispatch({
+        type: UPDATE_STATE,
+        state: { route_comps }
+      })
+    ).then(() => dispatch(takeSnapShot()))
+  }
+
+export const addRouteToGroup = (groupId, compId) =>
+  (dispatch, getState) => {
+    const report = getState().report;
+
+    const route_comp = report.route_comps.reduce((a, c) => {
+      return c.compId === compId ? c : a;
+    }, null);
+
+    const route_comps = report.route_comps.filter(rc => rc.compId !== compId);
+
+    const route_group = route_comps.reduce((a, c) => {
+      return c.compId === groupId ? c : a;
+    }, null);
+
+    route_group.route_comps = [...route_group.route_comps, route_comp];
+
+    return Promise.resolve(
+      dispatch({
+        type: UPDATE_STATE,
+        state: {
+          route_comps
+        }
+      })
+    ).then(() => dispatch(takeSnapShot()))
+  }
+
+export const combineRouteComps = (srcId, dstId) =>
+  (dispatch, getState) => {
+    const report = getState().report;
+    const { route_comps } = report;
+
+    const srcComp = route_comps.reduce((a, c) => {
+      return c.compId === srcId ? c : a;
+    }, null);
+    const srcType = get(srcComp, "type", "route");
+
+    const dstComp = route_comps.reduce((a, c) => {
+      return c.compId === dstId ? c : a;
+    }, null);
+    const dstType = get(dstComp, "type", "route");
+
+    if ((srcType === "route") && (dstType === "route")) {
+      return dispatch(createNewRouteGroup(srcId, dstId));
+    }
+
+    if (srcType === "group") {
+      return dispatch(addRouteToGroup(srcId, dstId));
+    }
+    if (dstType === "group") {
+      return dispatch(addRouteToGroup(dstId, srcId));
+    }
+
+    return Promise.resolve();
+  }
+
+export const removeRouteFromGroup = (groupId, compId) =>
+  (dispatch, getState) => {
+    const report = getState().report;
+
+    const [group, index] = report.route_comps.reduce((a, c, i) => {
+      return c.compId === groupId ? [c, i] : a;
+    }, [null, -1]);
+
+    if (group) {
+
+      const comp = group.route_comps.reduce((a, c) => {
+        return c.compId === compId ? c : a;
+      }, null);
+
+      group.route_comps = group.route_comps.filter(rc => rc.compId !== compId);
+
+      const route_comps = [...report.route_comps];
+      route_comps.splice(index, 0, comp);
+
+      const routeDataMap = report.routes.reduce((a, c) => {
+        a[c.compId] = c.data;
+        return a;
+      }, {});
+
+      const routes = route_comps.reduce((a, c) => {
+        return [...a, ...getRoutesForRouteComp(c, routeDataMap, Boolean(c.color))]
+      }, []);
+
+      return Promise.resolve(
+        dispatch({
+          type: UPDATE_STATE,
+          state: {
+            route_comps,
+            routes
+          }
+        })
+      ).then(() => dispatch(takeSnapShot()))
+    }
+
+    return Promise.resolve();
+  }
+
+export const updateRouteGroupName = (groupId, name) =>
+  (dispatch, getState) => {
+    const report = getState().report;
+    const route_comps = report.route_comps.map(rc => {
+      if (rc.compId === groupId) {
+        return {
+          ...rc,
+          name
+        }
+      }
+      return rc;
+    })
+    return Promise.resolve(
+      dispatch({
+        type: UPDATE_STATE,
+        state: { route_comps }
+      })
+    ).then(() => dispatch(takeSnapShot()))
+  }
+
 //****************************************************************************************
 //****************************************************************************************
 //****************************************************************************************
@@ -1034,7 +1285,6 @@ const INITIAL_STATE = {
 export default (state=INITIAL_STATE, action) => {
 	switch (action.type) {
 		case UPDATE_STATE:
-// console.log(action)
 			return {
 				...state,
 				...action.state
@@ -1066,12 +1316,25 @@ export const takeSnapShot = () =>
 	      description: state.description,
         color_range: state.colorRange,
 	      route_comps: state.route_comps.map(rc =>
-	        ({
+	        get(rc, "type", "route") === "route" ? ({
 	          compId: rc.compId,
 	          routeId: rc.routeId,
 	          settings: { ...rc.settings },
-          	color: rc.color
-	        })
+          	color: rc.color,
+            type: "route"
+	        }) : ({
+            compId: rc.compId,
+          	color: rc.color,
+            type: "group",
+            name: rc.name,
+            route_comps: rc.route_comps.map(rc => ({
+  	          compId: rc.compId,
+  	          routeId: rc.routeId,
+  	          settings: { ...rc.settings },
+            	color: rc.color,
+              type: "route"
+  	        }))
+          })
 	      ),
         station_comps: state.station_comps.map(sc =>
           ({
@@ -1109,8 +1372,17 @@ const _loadReport = report =>
 		const state = getState().report;
 
 		AVAILABLE_COLORS = [...COLORS];
-		ROUTE_COMP_ID = 0;
+		ROUTE_COMP_ID = -1;
+
 	  report.route_comps.forEach(rc => {
+      if (rc.type === "group") {
+        rc.route_comps.forEach(rc => {
+          ROUTE_COMP_ID = Math.max(ROUTE_COMP_ID, +rc.compId.slice(5));
+    	  	if (AVAILABLE_COLORS.includes(rc.color)) {
+    	  		AVAILABLE_COLORS = AVAILABLE_COLORS.filter(c => c !== rc.color);
+    	  	}
+        })
+      }
 	  	ROUTE_COMP_ID = Math.max(ROUTE_COMP_ID, +rc.compId.slice(5));
 	  	if (AVAILABLE_COLORS.includes(rc.color)) {
 	  		AVAILABLE_COLORS = AVAILABLE_COLORS.filter(c => c !== rc.color);
@@ -1118,8 +1390,17 @@ const _loadReport = report =>
 	  });
 
 	  const routeComponentSettings = new Map();
-	  report.route_comps.forEach(({ compId, settings, routeId }) => {
-	    routeComponentSettings.set(compId, { ...settings, routeId });
+	  report.route_comps.forEach(({ compId, type, ...rest }) => {
+      if (type === "group") {
+        const { route_comps } = rest;
+        route_comps.forEach(({ compId, settings, routeId }) => {
+          routeComponentSettings.set(compId, { ...settings, routeId });
+        });
+      }
+      else {
+        const { settings, routeId } = rest;
+        routeComponentSettings.set(compId, { ...settings, routeId });
+      }
 	  })
 
 	  const routes = report.route_comps.reduce((a, c) =>
@@ -1139,7 +1420,14 @@ const _loadReport = report =>
 			  	name: report.name,
 			  	description: report.description,
 			  	route_comps: report.route_comps,
-			  	graphs: report.graph_comps.map(g => ({ ...g, id: getUniqueGraphCompId() })),
+			  	graphs: report.graph_comps.map(g => {
+            const gc = {
+              ...g,
+              id: getUniqueGraphCompId()
+            };
+            gc.state.title = gc.state.title || "{type}, {data}"
+            return gc;
+          }),
           colorRange: report.color_range || DEFAULT_COLOR_RANGE,
 			  	routes,
 			  	routeComponentSettings,
@@ -1149,7 +1437,7 @@ const _loadReport = report =>
 		)
 	}
 
-const _addRouteComp = (state, routeIds) => {
+const _addRouteComp = (state, routeIds, settings, groupId = null) => {
   routeIds = Array.isArray(routeIds) ? routeIds : [routeIds];
 
 	const { yearsWithData } = state,
@@ -1170,7 +1458,7 @@ const _addRouteComp = (state, routeIds) => {
         compId,
         routeId,
         name: data.name,
-        settings: {
+        settings: settings ? { ...settings } : {
           startDate: +`${ yearsWithData[yearsWithData.length - 1] }0101`,
           endDate: +`${ yearsWithData[yearsWithData.length - 1] }1231`,
           year: yearsWithData[yearsWithData.length - 1],
@@ -1201,6 +1489,28 @@ const _addRouteComp = (state, routeIds) => {
     newRoutes.push(...getRoutesForRouteComp(newRouteComp));
   }
 
+  if (groupId) {
+    return {
+      route_comps: state.route_comps.map(rc => {
+        if (rc.compId === groupId) {
+          return {
+            ...rc,
+            route_comps: [
+              ...rc.route_comps,
+              ...newRouteComps
+            ]
+          }
+        }
+        return rc;
+      }),
+      routes: [
+        ...state.routes,
+        ...newRoutes
+      ],
+      routeComponentSettings
+    }
+  }
+
 	return {
     route_comps: [
       ...state.route_comps,
@@ -1217,7 +1527,9 @@ const _removeRouteComp = (state, compId) => {
 	const routeComponentSettings = new Map(state.routeComponentSettings);
   routeComponentSettings.delete(compId);
 
-  const { color } = state.route_comps.find(rc => rc.compId === compId);
+  const color = state.route_comps.reduce((a, c) => {
+    return c.compId === compId ? c.color : a;
+  }, null);
   if (!AVAILABLE_COLORS.includes(color) && COLORS.includes(color)) {
     AVAILABLE_COLORS.push(color);
   }
@@ -1225,27 +1537,38 @@ const _removeRouteComp = (state, compId) => {
   const routeDataMap = {};
   state.routes.forEach(r => {
     routeDataMap[r.compId] = r.data;
-  })
+  });
 
-  const route_comps = state.route_comps.filter(rc => rc.compId !== compId),
-    routes = route_comps.reduce((a, c) =>
-    	[...a, ...getRoutesForRouteComp(c, routeDataMap, true)]
-    , []),
+  const route_comps = state.route_comps.reduce((a, c) => {
+    if ((c.type === "group") && (c.compId === compId)) {
+      a.push(...c.route_comps);
+      return a;
+    }
+    else if (c.compId === compId) {
+      return a;
+    }
+    a.push(c);
+    return a;
+  }, []);
 
-    graphs = state.graphs.map(g => {
-      const { state } = g;
-      const newState = { ...state };
-      if (get(state, 'activeRouteComponents.length', 0)) {
-        newState.activeRouteComponents = state.activeRouteComponents.filter(arc => !arc.includes(compId));
-        if (newState.activeRouteComponents.length === 0) {
-          delete newState.activeRouteComponents;
-        }
+  const routes = route_comps.reduce((a, c) => {
+  	return [...a, ...getRoutesForRouteComp(c, routeDataMap, true)]
+  }, []);
+
+  const graphs = state.graphs.map(g => {
+    const { state } = g;
+    const newState = { ...state };
+    if (get(state, 'activeRouteComponents.length', 0)) {
+      newState.activeRouteComponents = state.activeRouteComponents.filter(arc => !arc.includes(compId));
+      if (newState.activeRouteComponents.length === 0) {
+        delete newState.activeRouteComponents;
       }
-      return {
-        ...g,
-        state: newState
-      }
-    });
+    }
+    return {
+      ...g,
+      state: newState
+    }
+  });
 
   return {
   	route_comps,
@@ -1268,7 +1591,7 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
 	  graph_comps = get(template, ["graph_comps", "value"], []),
     station_comps = get(template, ["station_comps", "value"], []),
     colorRange = get(template, ["color_range", "value"], DEFAULT_COLOR_RANGE),
-    defaultType = template.defaultType;
+    defaultType = template.default_type;
 
 	AVAILABLE_COLORS = [...COLORS];
 	ROUTE_COMP_ID = 0;
@@ -1328,7 +1651,7 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
 
   const routes = route_comps.reduce((a, c) =>
   	[...a, ...getRoutesForRouteComp(c, null, Boolean(c.color))]
-  , [])
+  , []);
 
   // LOAD STATION COMPS
   station_comps = loadStationCompsFromTemplate(station_comps, falcorCache, stationIds);
@@ -1357,7 +1680,10 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
     id: getUniqueGraphCompId(),
     type: gc.type,
     layout: { ...gc.layout },
-    state: { ...gc.state }
+    state: {
+      ...gc.state,
+      title: gc.state.title || "{type}, {data}"
+    }
   }))
 
   if (RECENT_REGEX.test(name)) {
@@ -1386,6 +1712,18 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
 }
 
 const getRoutesForRouteComp = (routeComp, routeDataMap = null, preserveColors = false) => {
+
+  const type = get(routeComp, "type", "route");
+
+  if (type === "group") {
+    return get(routeComp, "route_comps", [])
+      .reduce((a, c) => {
+        const routes = getRoutesForRouteComp(c, routeDataMap, preserveColors);
+        a.push(...routes);
+        return a;
+      }, [])
+  }
+
   const cache = falcorGraph.getCache(),
 
     data = get(cache, `routes2.id.${ routeComp.routeId }`, null),
@@ -1394,12 +1732,13 @@ const getRoutesForRouteComp = (routeComp, routeDataMap = null, preserveColors = 
 
     { endDate } = routeComp.settings,
     year = +endDate.toString().slice(0, 4),
-    // tmcArray = [
-    //   ...get(cache, ["routes2", "id", routeComp.routeId, year, "tmcArray", "value"], fromData)
-    // ],
-    tmcArray = fromData,
+    routes = [];
 
-  	routes = [];
+  let tmcArray = get(cache, ["routes2", "id", routeComp.routeId, year, "tmc_array", "value"], fromData);
+
+  if (!Array.isArray(tmcArray)) {
+    tmcArray = [];
+  }
 
   if (data && tmcArray.length) {
     const color = preserveColors ? routeComp.color : getRouteColor();
@@ -1416,7 +1755,7 @@ const getRoutesForRouteComp = (routeComp, routeDataMap = null, preserveColors = 
     })
   }
   else {
-    routeComp.name = `Route (${ routeComp.routeId }) Does Not Exist.`;
+    routeComp.name = `Route ID "${ routeComp.routeId }" Does Not Exist.`;
     routeComp.isValid = false;
     routeComp.color = getRouteColor();
   }
@@ -1440,24 +1779,30 @@ const getRoutesForRouteComp = (routeComp, routeDataMap = null, preserveColors = 
   return routes;
 }
 
-const NAME_REGEX = /{name}/g;
-const YEAR_REGEX = /{year}/g;
-const MONTH_REGEX = /{month}/g;
-const DATE_REGEX = /{date}/g;
-
-const getRouteCompName = (name, settings) => {
-	if (!settings.compTitle) return name;
-
-	return settings.compTitle.replace(NAME_REGEX, name)
-		.replace(YEAR_REGEX, getYearString(settings))
-		.replace(MONTH_REGEX, getMonthString(settings))
-		.replace(DATE_REGEX, getDateString(settings));
-}
-
 export const RECENT_REGEX = /{recent-(\d+)}/g;
 export const replace = (string, mostRecent, test) =>(
 	string.replace(RECENT_REGEX, (match, capture) => `${ mostRecent - +capture }`)
 )
+
+const NAME_REGEX = /{name}/g;
+const YEAR_REGEX = /{year}/g;
+const MONTH_REGEX = /{month}/g;
+const DATE_REGEX = /{date}/g;
+const DATA_REGEX = /{data}/g;
+
+const getRouteCompName = (name, settings) => {
+  if (!settings.compTitle) return name;
+
+  return settings.compTitle.replace(NAME_REGEX, name)
+    .replace(YEAR_REGEX, getYearString(settings))
+    .replace(MONTH_REGEX, getMonthString(settings))
+    .replace(DATE_REGEX, getDateString(settings));
+}
+
+const getGraphCompTitle = (graphState, route_comps) => {
+  const { title } = graphState;
+}
+
 const getYearString = settings => {
 	if (settings.year !== 'advanced') return settings.year.toString();
 

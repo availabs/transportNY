@@ -110,6 +110,12 @@ class ReportBase extends React.Component {
         }
       }
     }
+    else if (path.includes("/report/new/route/") && routeId) {
+      console.log("NEW REPORT:", routeId)
+      this.props.loadRoutesForReport(
+        routeId.split("_").filter(Boolean)
+      );
+    }
     else if (templateId && (routeId || stationId)) {
       this.props.loadRoutesAndTemplate(
         routeId.split("_").filter(Boolean),
@@ -182,11 +188,12 @@ class ReportBase extends React.Component {
       .get(
         ['routes2', 'user', 'length'],
         ['templates2', 'user', 'length'],
-        ['templates2', 'defaultTypes'],
+        ['templates2', 'all', 'defaultTypes'],
         ['folders2', 'user', 'length'],
         ['hds', 'continuous', 'stations', 'length']
       )
       .then(res => {
+
         const requests = [],
           routes = get(res, 'json.routes2.user.length', 0),
           templates = get(res, 'json.templates2.user.length', 0),
@@ -258,8 +265,8 @@ class ReportBase extends React.Component {
       .then(() => this.hideSaveModal());
   }
 
-  addRouteComp(routeId) {
-    this.props.addRouteComp(routeId, true);
+  addRouteComp(routeId, settings = null, groupId = null) {
+    this.props.addRouteComp(routeId, settings, groupId, true);
   }
   removeRouteComp(compId) {
     this.props.removeRouteComp(compId, true);
@@ -276,8 +283,8 @@ class ReportBase extends React.Component {
   updateAllComponents() {
     this.props.updateAllComponents();
   }
-  reorderRouteComps(srcIndex, dstIndex) {
-    this.props.reorderRouteComps(srcIndex, dstIndex);
+  reorderRouteComps(srcIndex, dstIndex, groupId = null) {
+    this.props.reorderRouteComps(srcIndex, dstIndex, groupId);
   }
 
   addStationComp(stationId) {
@@ -293,8 +300,8 @@ class ReportBase extends React.Component {
     this.props.updateStation(compId, color, true);
   }
 
-  addGraphComp(type, layout = null) {
-    this.props.addGraphComp(type, layout);
+  addGraphComp(type, layout = null, state = null) {
+    this.props.addGraphComp(type, layout, state);
   }
   removeGraphComp(index, graphId) {
     this.props.removeGraphComp(index, true);
@@ -355,17 +362,29 @@ class ReportBase extends React.Component {
     this.props.loadTemplate(id);
   }
   saveTemplate(template, templateId) {
-    return this.props.saveTemplate(template, templateId);
+    return this.props.saveTemplate(template, templateId)
+      .then(() => this.hideTemplateModal());
   }
 
   needsUpdate() {
-    return this.props.route_comps.reduce((a, { compId, settings }) => {
-      const SETTINGS = this.props.routeComponentSettings.get(compId);
-      return a || this._needsUpdate(SETTINGS, settings);
-    }, false) ||
-    this.props.station_comps.reduce((a, c) =>
-      a || !deepequal(c.settings, c.workingSettings)
-    , false);
+    const route_comps_need_update = this.props.route_comps
+      .reduce((a, c) => {
+        if (get(c, "type", "route") === "group") {
+          return a || c.route_comps.reduce((aa, cc) => {
+            const SETTINGS = this.props.routeComponentSettings.get(cc.compId);
+            return a || this._needsUpdate(SETTINGS, cc.settings);
+          }, false);
+        }
+        const SETTINGS = this.props.routeComponentSettings.get(c.compId);
+        return a || this._needsUpdate(SETTINGS, c.settings);
+      }, false);
+
+    if (route_comps_need_update) return true;
+
+    return this.props.station_comps
+      .reduce((a, c) =>
+        a || !deepequal(c.settings, c.workingSettings)
+      , false);
   }
   _needsUpdate(SETTINGS, settings) {
     return SETTINGS.startDate !== settings.startDate ||
@@ -408,7 +427,7 @@ class ReportBase extends React.Component {
       <div style={ { position: "relative" } }>
 
         <GraphLayoutContainer isOpen={ this.state.isOpen }>
-          <div className="container mx-auto">
+          <div className="container mx-auto px-2">
 
             { this.state.viewing ? null :
               <div className="grid grid-cols-10">
@@ -504,6 +523,10 @@ class ReportBase extends React.Component {
           <Sidebar isOpen={ this.state.isOpen }
             graphs={ this.props.graphs }
             route_comps={ this.props.route_comps }
+            combineRouteComps={ this.props.combineRouteComps }
+            createNewRouteGroup={ this.props.createNewRouteGroup }
+            removeRouteFromGroup={ this.props.removeRouteFromGroup }
+            updateRouteGroupName={ this.props.updateRouteGroupName }
             routes={ this.props.routes }
             routeComponentSettings={ this.props.routeComponentSettings }
             onOpenOrClose={ this.onOpenOrClose.bind(this) }
@@ -513,7 +536,7 @@ class ReportBase extends React.Component {
             updateRouteComp={ this.updateRouteComp.bind(this) }
             updateRouteCompColor={ this.updateRouteCompColor.bind(this) }
             updateAllComponents={ this.updateAllComponents.bind(this) }
-            reorderRouteComps={ this.reorderRouteComps.bind(this) }
+            reorderRouteComps={ this.props.reorderRouteComps }
             needsUpdate={ this.needsUpdate() }
             removeRouteComp={ this.removeRouteComp.bind(this) }
             addRouteComp={ this.addRouteComp.bind(this) }
@@ -553,7 +576,7 @@ class ReportBase extends React.Component {
           saveReport={ this.saveReport.bind(this) }
           user={ this.props.user }
           reportId={ this.props.reportId }
-          folders={ this.props.folders.filter(f => f.type !== "default") }
+          folders={ this.props.folders.filter(f => f.type !== "AVAIL") }
           report={ {
             name: this.props.name,
             description: this.props.description,
@@ -567,7 +590,7 @@ class ReportBase extends React.Component {
           onHide={ this.hideTemplateModal.bind(this) }
           defaultTypes={ this.props.defaultTypes }
           user={ this.props.user }
-          folders={ this.props.folders.filter(f => f.type !== "default") }
+          folders={ this.props.folders.filter(f => f.type !== "AVAIL") }
           template={ {
             name: this.props.name,
             description: this.props.description,
@@ -625,7 +648,7 @@ const mapCacheToProps = (falcorCache, props) => {
     templates: getTemplates(falcorCache, props),
     folders: getFolders(falcorCache),
     availableStations: getStations(falcorCache),
-    defaultTypes: get(falcorCache, ["templates2", "defaultTypes", "value"], [])
+    defaultTypes: get(falcorCache, ["templates2", "all", "defaultTypes", "value"], [])
   };
 }
 
@@ -791,12 +814,12 @@ const ReportSaveModal = props => {
   const save = React.useCallback(() => {
     props.updateReport({ ...state });
     props.saveReport({ ...state }, props.reportId);
-  }, [props.updateReport, state]);
+  }, [props.updateReport, props.saveReport, props.reportId, state]);
 
   const saveAs = React.useCallback(() => {
     props.updateReport({ ...state });
     props.saveReport({ ...state });
-  }, [props.updateReport, state]);
+  }, [props.updateReport, props.saveReport, state]);
 
   const disabled = React.useMemo(() => {
     return !(state.name && state.folder);
@@ -888,10 +911,12 @@ const TemplateModal = props => {
   }, [props.show, props.template, state]);
 
   const save = React.useCallback(() => {
-  }, [state]);
+    props.saveTemplate({ ...state }, props.templateId);
+  }, [props.saveTemplate, props.templateId, state]);
 
   const saveAs = React.useCallback(() => {
-  }, [state]);
+    props.saveTemplate({ ...state });
+  }, [props.saveTemplate, state]);
 
   const cancel = React.useCallback(e => {
     props.onHide();
@@ -944,8 +969,16 @@ const TemplateModal = props => {
           <input type="checkbox" id="recent"
             className="px-2 py-1 border rounded col-span-3"
             onChange={ e => setState({ saveYearsAsRecent: e.target.checked }) }
-            value={ state.saveYearsAsRecent }/>
+            checked={ state.saveYearsAsRecent }/>
         </div>
+        { !get(props.user, 'groups', []).includes("AVAIL") ? null :
+          <>
+            <label className="font-bold text-right">Default Type</label>
+            <Select options={ props.defaultTypes }
+              value={ state.defaultType }
+              onChange={ defaultType => setState({ defaultType }) }/>
+          </>
+        }
 
       </div>
 

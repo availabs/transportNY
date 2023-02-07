@@ -129,11 +129,11 @@ const StationControls = props => {
 
       <Row>
         <div>Peak Selector</div>
-        <div className="btn-group" style={ { width: "85%", display: "flex" } }>
+        <div style={ { width: "85%", display: "flex" } }>
           {
             props.peaks.map(({ peak, name }) =>
               <button key={ peak } style={ { flex: `0 0 ${ 100 / 3 }%` } }
-                className={ `btn btn-sm ${ props.settings[peak] ? 'btn-success' : 'btn-danger' }` }
+                className={ `rounded ${ props.settings[peak] ? 'bg-green-400' : 'bg-red-400' }` }
                 onClick={ () => props.togglePeaks(peak) }>
                 { name }
               </button>
@@ -147,11 +147,11 @@ const StationControls = props => {
 
       <Row>
         <div>Weekday Selector</div>
-        <div className="btn-group" style={ { width: "85%", display: "flex" } }>
+        <div style={ { width: "85%", display: "flex" } }>
           {
             WEEKDAYS.map(({ day, key }) =>
               <button key={ key } style={ { flex: `0 0 ${ 100 / 7 }%` } }
-                className={ `btn btn-sm ${ weekdays.includes(day) ? 'btn-success' : 'btn-danger' }` }
+                className={ `rounded ${ weekdays.includes(day) ? 'bg-green-400' : 'bg-red-400' }` }
                 onClick={ e => props.toggleWeekday(day) }>
                 { key }
               </button>

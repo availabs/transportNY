@@ -144,7 +144,7 @@ const AdvancedControls = props => {
           })
 
           const blob = new Blob([rows.join("\n")], { type: "text/csv" }),
-            title = get(this.props, ["route", "name"], "");
+            title = get(route, "name", "");
 
           saveAs(blob, `npmrds${ title ? "_" : "" }${ title.replace(/\s/g, "_") }.csv`);
         }
@@ -239,11 +239,11 @@ const AdvancedControls = props => {
         <div>
           Peak Selector
         </div>
-        <div className="btn-group" style={ { width: "85%", display: "flex" } }>
+        <div style={ { width: "85%", display: "flex" } }>
           {
             PEAKS.map(({ peak, name }) =>
               <button key={ peak } style={ { flex: `0 0 ${ 100 / 3 }%` } }
-                className={ `btn btn-sm ${ SETTINGS[peak] ? 'btn-success' : 'btn-danger' }` }
+  								className={ `rounded ${ SETTINGS[peak] ? 'bg-green-400' : 'bg-red-400' }` }
                 onClick={ () => props.togglePeaks(peak) }>
                 { name }
               </button>
@@ -259,11 +259,11 @@ const AdvancedControls = props => {
         <div>
           Weekday Selector
         </div>
-        <div className="btn-group" style={ { width: "85%", display: "flex" } }>
+        <div style={ { width: "85%", display: "flex" } }>
           {
             WEEKDAYS.map(({ day, key }) =>
               <button key={ key } style={ { flex: `0 0 ${ 100 / 7 }%` } }
-                className={ `btn btn-sm ${ weekdays[day] ? 'btn-success' : 'btn-danger' }` }
+                className={ `rounded ${ weekdays[day] ? 'bg-green-400' : 'bg-red-400' }` }
                 onClick={ e => props.toggleWeekday(day) }>
                 { key }
               </button>

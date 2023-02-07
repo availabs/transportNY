@@ -34,11 +34,6 @@ const GisDatasetConfig = {
     path: "/gisDatasetUpdate",
     component: GisDatasetLoader,
   },
-  addView: {
-    name: 'Add View',
-    path: '/addview',
-    component: AddView
-  },
   pwrUsrOnly: false,
 };
 

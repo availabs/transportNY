@@ -106,7 +106,7 @@ class Graph extends GeneralGraphComp {
 
 		const resolutions = [];
 
-		data.forEach(({ resolution }) => resolutions.push(resolution));
+		data.forEach(({ resolution }) => resolutions.push(+resolution));
 
 		const extent = d3array.extent(resolutions);
 		return d3array.range(extent[0], extent[1] + 1);
@@ -126,14 +126,15 @@ class Graph extends GeneralGraphComp {
 		const [{
 			name,
 			label,
-			format
+			format,
+			key
 		}] = displayData;
 
 		const resFormat = getResolutionFormat(resolution),
 			resLabel = getResolutionLabel(resolution);
 
 		const [min, max] = register(this.props.type,
-												displayData,
+												{ key },
 												resolution,
 												this.props.id,
 												graphData.reduce((a, c) => [...a, ...c.data.map(({ value }) => value)], []));
@@ -144,6 +145,8 @@ class Graph extends GeneralGraphComp {
 		const colorScale = d3scale.scaleQuantize()
 			.domain([min, max])
 			.range(colorRange);
+
+console.log("TMC GRID GRAPH:", this.props.id, graphData, keys)
 
 		return (
 			<GridGraph data={ graphData }

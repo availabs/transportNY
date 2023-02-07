@@ -141,6 +141,7 @@ class ActiveStationComponents extends React.Component {
 						<ControlBox>
 							<Control>
 								<MultiLevelDropdown
+									xDirection={ 0 }
 			  					searchable={ true }
 			  					labelAccessor={ d =>
 	                  `${ d.stationId } (${ d.muni }) (${ d.data_type.split(",").map(s => s[0]).join(", ")})`
