@@ -2,6 +2,7 @@ import React from "react";
 
 import main from "./tasks/main";
 import ViewsTable from "./components/ViewsTable";
+import EtlContextsTable from "./components/EtlContextsTable";
 
 const Table = (/*{ source }*/) => {
   return <div> Table View </div>;
@@ -22,6 +23,11 @@ const pages = [
     name: "Request",
     path: "/request",
     component: main,
+  },
+  {
+    name: "ETL Processes",
+    path: "/etl-processes",
+    component: EtlContextsTable,
   },
 ];
 
