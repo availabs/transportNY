@@ -1,12 +1,53 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+
+import { Modal } from "modules/avl-components/src";
 
 import { getEtlContextsForDamaSourceId } from "pages/DataManager/utils/FalcorApi";
 
 import { selectPgEnv } from "pages/DataManager/store";
 
+const RawJsonModal = (props) => {
+  const { selectedEvent, close } = props;
+
+  const show = !!selectedEvent;
+
+  return (
+    <Modal style={{ width: "100%", overflow: "scroll" }} open={show}>
+      <div className="relative">
+        <div
+          onClick={close}
+          className={`
+            absolute top-1 right-1
+            rounded hover:bg-gray-400
+            flex items-center justify-center
+            cursor-pointer
+          `}
+        >
+          <span className="fa fa-close" />
+        </div>
+
+        <pre>{JSON.stringify(selectedEvent, null, 4)}</pre>
+      </div>
+    </Modal>
+  );
+};
+
 function EtlEventsContextTable(etlContextsEvents) {
+  const [eventIdx, setEventIdx] = useState(-1);
+
+  const selectedEvent =
+    (etlContextsEvents && etlContextsEvents[eventIdx]) || null;
+
+  const close = () => setEventIdx(-1);
+
+  const modal = RawJsonModal({ selectedEvent, close });
+
+  if (!etlContextsEvents) {
+    return "";
+  }
+
   const tableRows = etlContextsEvents.map(
     (
       {
@@ -37,7 +78,15 @@ function EtlEventsContextTable(etlContextsEvents) {
           <td style={{ border: "1px solid", backgroundColor: "white" }}>
             {is_expanded ? "true" : "false"}
           </td>
-          <td style={{ border: "1px solid", backgroundColor: "white" }}>
+          <td
+            style={{
+              border: "1px solid",
+              color: "blue",
+              backgroundColor: "white",
+              cursor: "pointer",
+            }}
+            onClick={() => setEventIdx(i)}
+          >
             {latestEventType}
           </td>
         </tr>
@@ -46,53 +95,59 @@ function EtlEventsContextTable(etlContextsEvents) {
   );
 
   return (
-    <table
-      className="w-2/3"
-      style={{
-        margin: "40px auto",
-        textAlign: "center",
-        border: "1px solid",
-        borderColor: "back",
-      }}
-    >
-      <thead
+    <div>
+      <table
+        className="w-2/3"
         style={{
-          color: "black",
-          backgroundColor: "#d5e7ff",
-          fontWeight: "bolder",
+          margin: "40px auto",
           textAlign: "center",
-          marginTop: "40px",
-          fontSize: "20px",
           border: "1px solid",
-          borderColor: "black",
+          borderColor: "back",
         }}
       >
-        <tr>
-          <th style={{ border: "1px solid", borderColor: "black" }}>
-            {" "}
-            ETL Context ID
-          </th>
-          <th style={{ border: "1px solid", borderColor: "black" }}> State</th>
-          <th style={{ border: "1px solid", borderColor: "black" }}>
-            {" "}
-            Start Date
-          </th>
-          <th style={{ border: "1px solid", borderColor: "black" }}>
-            {" "}
-            End Date
-          </th>
-          <th style={{ border: "1px solid", borderColor: "black" }}>
-            {" "}
-            Expanded Map
-          </th>
-          <th style={{ border: "1px solid", borderColor: "black" }}>
-            {" "}
-            Latest Event Type
-          </th>
-        </tr>
-      </thead>
-      <tbody style={{ border: "1px solid" }}>{tableRows}</tbody>
-    </table>
+        <thead
+          style={{
+            color: "black",
+            backgroundColor: "#d5e7ff",
+            fontWeight: "bolder",
+            textAlign: "center",
+            marginTop: "40px",
+            fontSize: "20px",
+            border: "1px solid",
+            borderColor: "black",
+          }}
+        >
+          <tr>
+            <th style={{ border: "1px solid", borderColor: "black" }}>
+              {" "}
+              ETL Context ID
+            </th>
+            <th style={{ border: "1px solid", borderColor: "black" }}>
+              {" "}
+              State
+            </th>
+            <th style={{ border: "1px solid", borderColor: "black" }}>
+              {" "}
+              Start Date
+            </th>
+            <th style={{ border: "1px solid", borderColor: "black" }}>
+              {" "}
+              End Date
+            </th>
+            <th style={{ border: "1px solid", borderColor: "black" }}>
+              {" "}
+              Expanded Map
+            </th>
+            <th style={{ border: "1px solid", borderColor: "black" }}>
+              {" "}
+              Latest Event Type
+            </th>
+          </tr>
+        </thead>
+        <tbody style={{ border: "1px solid" }}>{tableRows}</tbody>
+      </table>
+      {modal}
+    </div>
   );
 }
 
@@ -116,20 +171,23 @@ export default function EtlContextsStatusTable() {
     })();
   }, [pgEnv, sourceId, etlContextStatus]);
 
+  const table = EtlEventsContextTable(etlContexts);
+
   if (!etlContexts) {
     return "";
   }
 
-  const table = EtlEventsContextTable(etlContexts);
+  const buttonColor = etlContextStatus === "RUNNING" ? "red" : "green";
+  const buttonClassName = `text-white font-bold py-2 px-4 border rounded`;
 
-  const buttonColor = etlContextStatus === "RUNNING" ? "red" : "blue";
-  const buttonClassName = `bg-${buttonColor}-500 hover:bg-${buttonColor}-700 text-white font-bold py-2 px-4 border border-${buttonColor}-700 rounded`;
+  const titleColor = etlContextStatus === "RUNNING" ? "green" : "red";
 
-  const titleColor = etlContextStatus === "RUNNING" ? "blue" : "red";
+  console.log(buttonClassName);
 
   const toggle = (
     <div>
       <button
+        style={{ backgroundColor: buttonColor }}
         className={buttonClassName}
         onClick={() => setEtlContextStatus(otherStatus)}
       >
