@@ -234,6 +234,9 @@ class TmcDifferenceGrid extends GeneralGraphComp {
 
 		return (
 			<GridGraph data={ graphData }
+				shouldComponentUpdate={
+					["data", "colorRange"]
+				}
 				indexBy="tmc"
 				keys={ keys }
 				colors={ this.getColorScale(graphData, keys, colorRange) }

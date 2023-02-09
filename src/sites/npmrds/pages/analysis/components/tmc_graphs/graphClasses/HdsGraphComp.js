@@ -202,6 +202,10 @@ class HdsGraphComp extends GeneralGraphComp {
 		this.props.updateGraphComp(this.props.index, { state: { hdsData } });
 	}
 
+	updateTitle(title) {
+		this.props.updateGraphComp(this.props.index, { state: { title } });
+	}
+
 	render() {
 		const resolution = this.getResolution(),
 			station_comps = this.getActiveStationComponents(),
@@ -232,6 +236,7 @@ class HdsGraphComp extends GeneralGraphComp {
 				viewing={ this.props.viewing }
 				previewing={ this.props.previewing }
 				title={ this.props.state.title }
+				updateTitle={ this.updateTitle }
 				type={ this.props.type }
 				updateTitle={ title => this.props.updateGraphComp(this.props.index, { state: { title } }) }
 				remove={ () => this.props.removeGraphComp(this.props.index, this.props.id) }

@@ -122,6 +122,7 @@ class ExperientialTravelTime extends GeneralGraphComp {
     const resFormat = getResolutionFormat("5-minutes");
 		return (
 			<BarGraph data={ graphData }
+				shouldComponentUpdate={ ["data"] }
 				indexBy="start"
 				keys={ get(route, "tmcArray", []) }
 				axisLeft={ {

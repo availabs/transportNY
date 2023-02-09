@@ -77,6 +77,7 @@ class StackedTranscomGraph extends GeneralGraphComp {
 			.reduce((a, c) => compId === c.compId ? c.name : a, "unknown");
 		return (
 			<BarGraph data={ graphData }
+				shouldComponentUpdate={ ["data"] }
 				indexBy="compId"
 				padding={ 0.25 }
 				keys={ CATEGORIES }

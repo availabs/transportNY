@@ -205,6 +205,7 @@ class TrafficVolumeGraph extends GeneralGraphComp {
 
 		return (
 			<BarGraph data={ graphData }
+				shouldComponentUpdate={ ["data"] }
 				indexBy="resolution"
 				keys={ displayData.key === "vmt" ? tmcArray : ["value"] }
 				margin={ {

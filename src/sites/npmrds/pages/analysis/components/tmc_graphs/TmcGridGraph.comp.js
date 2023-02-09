@@ -146,10 +146,12 @@ class Graph extends GeneralGraphComp {
 			.domain([min, max])
 			.range(colorRange);
 
-console.log("TMC GRID GRAPH:", this.props.id, graphData, keys)
-
 		return (
 			<GridGraph data={ graphData }
+				shouldComponentUpdate={
+					["data", "colorRange"]
+				}
+				colorRange={ colorRange }
 				indexBy="tmc"
 				keys={ keys }
 				colors={ colorScale }

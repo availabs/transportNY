@@ -117,7 +117,7 @@ class RouteBarGraph extends GeneralGraphComp {
 				return domain;
 			};
 			default: {
-				return graphData.map(d => +d.resolution);
+				return graphData.map(d => d.resolution);
 				// const extent = d3array.extent(graphData.map(d => +d.resolution));
 				// return d3array.range(extent[0], extent[1] + 1);
 			}
@@ -130,14 +130,29 @@ class RouteBarGraph extends GeneralGraphComp {
 												this.props.id,
 												graphData.map(d => d.value));
 
+console.log("ROUTE BAR GRAPH:", min, max);
+
 		const colorScale = d3scale.scaleQuantize()
 			.domain([min, max])
 			.range(colorRange);
 
 		const resFormat = getResolutionFormat(resolution);
 
+		const xDomain = this.getScaleDomain(graphData, resolution);
+
+// if (!deepequal(oldProps.data, this.props.data) ||
+// !deepequal(oldProps.yScale, this.props.yScale) ||
+// !deepequal(oldProps.xScale, this.props.xScale) ||
+// !deepequal(oldProps.colorRange, this.props.colorRange)) {
+// 	this.updateGraph();
+// }
+
 		return (
 			<BarGraph data={ graphData }
+				shouldComponentUpdate={
+					["data", "xScale", "yScale", "colorRange"]
+				}
+				colorRange={ colorRange }
 				indexBy="resolution"
 				keys={ ["value"] }
 				colors={ colorScale }
@@ -152,13 +167,19 @@ class RouteBarGraph extends GeneralGraphComp {
 					valueFormat: ",.2f",
 					indexFormat: resFormat
 				} }
-			  axisLeft={ {
-			    "label": displayData.label
-			  } }
 			  axisBottom={ {
 			  	"format": resFormat,
 			  	"tickDensity": 2
-			  } }/>
+			  } }
+				xScale={ {
+					domain: xDomain
+				} }
+			  axisLeft={ {
+			    "label": displayData.label
+			  } }
+				yScale={ {
+					domain: [0, max]
+				} }/>
 		);
 	}
 }

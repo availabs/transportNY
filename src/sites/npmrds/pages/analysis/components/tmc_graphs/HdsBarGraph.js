@@ -64,6 +64,7 @@ class HdsBarGraph extends HdsGraphComp {
 		const resFormat = getResolutionFormat(resolution);
     return (
 			<BarGraph data={ graphData }
+				shouldComponentUpdate={ ["data"] }
 				indexBy="resolution"
 				keys={ key === "volume" ? ["value"] : CLASSES }
 				hoverComp={ {

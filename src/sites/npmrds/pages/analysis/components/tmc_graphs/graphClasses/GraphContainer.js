@@ -45,7 +45,7 @@ const getDisplayDataNames = displayData => {
 	return [...names].join(", ");
 }
 
-const getDisplayTitle = ({ title, type, routeComps, displayData }) => {
+const getDisplayTitle = ({ title, type, routeComps = [], displayData = [] }) => {
 	if (!title) return type;
 	return title.replace(NAME_REGEX, getRouteCompsNames(routeComps))
 							.replace(DATA_REGEX, getDisplayDataNames(displayData))

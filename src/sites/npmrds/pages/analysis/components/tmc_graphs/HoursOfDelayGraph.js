@@ -126,6 +126,7 @@ class HoursOfDelayGraph extends GeneralGraphComp {
 		const resFormat = getResolutionFormat(resolution);
 		return (
 			<BarGraph data={ graphData }
+				shouldComponentUpdate={ ["data"] }
 				indexBy="resolution"
 				keys={ get(route, "tmcArray", []) }
 				margin={ {

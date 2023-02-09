@@ -185,6 +185,7 @@ class RouteLineGraph extends HdsGraphComp {
 
 		return (
 			<LineGraph data={ leftGraphData }
+				shouldComponentUpdate={ ["data"] }
 				secondary={ rightGraphData }
 				colors={ d => d.color }
 				margin={ {

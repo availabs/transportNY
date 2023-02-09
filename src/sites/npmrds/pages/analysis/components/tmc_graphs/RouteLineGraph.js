@@ -33,6 +33,8 @@ const DATA_TYPES = [
 	...DEFAULT_DATA_TYPES
 ]
 
+const GraphColors = d => d.color;
+
 class RouteLineGraph extends GeneralGraphComp {
 	componentDidUpdate(oldProps) {
 		super.componentDidUpdate(...arguments);
@@ -140,7 +142,7 @@ class RouteLineGraph extends GeneralGraphComp {
 						data: []
 					};
 					rolled.forEach((y, x) => {
-						lineData.data.push({ x: +x, y: +y })
+						lineData.data.push({ x: isNaN(x) ? x : +x, y: +y })
 					})
 					lineData.data.sort(getResolutionSort(resolution, d => d.x))
 					a.push(lineData);
@@ -182,9 +184,18 @@ class RouteLineGraph extends GeneralGraphComp {
 		return (
 			<LineGraph data={ leftGraphData }
 				secondary={ rightGraphData }
-				colors={ d => d.color }
+				colors={ GraphColors }
+				shouldComponentUpdate={
+					["data", "secondary", "yScale", "secScale"]
+				}
 				xScale={ {
 					type: "point"
+				} }
+				yScale={ {
+					domain: [0, lMax]
+				} }
+				secScale={ {
+					domain: [0, rMax]
 				} }
 				margin={ {
 					top: 20,

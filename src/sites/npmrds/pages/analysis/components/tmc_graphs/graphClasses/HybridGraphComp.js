@@ -232,6 +232,10 @@ export default class HybridGraphComp extends GeneralGraphComp {
 		return { data: [], keys: [] };
 	}
 
+	updateTitle(title) {
+		this.props.updateGraphComp(this.props.index, { state: { title } });
+	}
+
 	render() {
 		const resolution = this.getResolution(),
 			routeComps = this.getActiveRouteComponents(),
@@ -264,6 +268,9 @@ export default class HybridGraphComp extends GeneralGraphComp {
 				viewing={ this.props.viewing }
 				previewing={ this.props.previewing }
 				title={ this.props.state.title }
+				updateTitle={ this.updateTitle }
+				routeComps={ routeComps }
+				displayData={ displayData }
 				type={ this.props.type }
 				updateTitle={ title => this.props.updateGraphComp(this.props.index, { state: { title } }) }
 				remove={ () => this.props.removeGraphComp(this.props.index, this.props.id) }
