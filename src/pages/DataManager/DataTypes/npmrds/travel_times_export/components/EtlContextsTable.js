@@ -14,7 +14,7 @@ const RawJsonModal = (props) => {
   const show = !!selectedEvent;
 
   return (
-    <Modal style={{ width: "100%", overflow: "scroll" }} open={show}>
+    <Modal open={show}>
       <div className="relative">
         <div
           onClick={close}
@@ -28,7 +28,9 @@ const RawJsonModal = (props) => {
           <span className="fa fa-close" />
         </div>
 
-        <pre>{JSON.stringify(selectedEvent, null, 4)}</pre>
+        <div className="w-full h-full overflow-y-auto">
+          <pre>{JSON.stringify(selectedEvent, null, 4)}</pre>
+        </div>
       </div>
     </Modal>
   );
