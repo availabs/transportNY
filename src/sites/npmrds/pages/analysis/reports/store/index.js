@@ -266,19 +266,42 @@ export const saveTemplate = (template, templateId = null) =>
     routeIds.forEach((id, i) => {
       idMap[id] = `$${ i }`;
     })
-    const route_comps = template.route_comps.map(rc => ({
-      routeId: idMap[rc.routeId],
-      compId: rc.compId,
-      color: rc.color,
-      settings: {
-      	...rc.settings,
-      	year: rc.settings.year === "advanced" ? "advanced" : saveYearsAsRecent ? setRecentYear(rc.settings.year, mostRecent) : rc.settings.year,
-      	startDate: saveYearsAsRecent ? setRecentDate(rc.settings.startDate, mostRecent) : rc.settings.startDate,
-      	endDate: saveYearsAsRecent ? setRecentDate(rc.settings.endDate, mostRecent) : rc.settings.endDate,
-      	compTitle: saveYearsAsRecent ? setRecentText(rc.settings.compTitle, mostRecent, yearsWithData) : rc.settings.compTitle,
-        overrides: {}
-      }
-    }))
+    const route_comps = template.route_comps.map(rc =>
+        rc.type === "group" ? ({
+          compId: rc.compId,
+          color: get(rc, "color", "#666666"),
+          type: "group",
+          name: rc.name,
+          route_comps: get(rc, "route_comps", [])
+            .map(rc => ({
+              compId: rc.compId,
+              routeId: rc.routeId,
+              color: rc.color,
+              type: "route",
+              settings: {
+              	...rc.settings,
+              	year: rc.settings.year === "advanced" ? "advanced" : saveYearsAsRecent ? setRecentYear(rc.settings.year, mostRecent) : rc.settings.year,
+              	startDate: saveYearsAsRecent ? setRecentDate(rc.settings.startDate, mostRecent) : rc.settings.startDate,
+              	endDate: saveYearsAsRecent ? setRecentDate(rc.settings.endDate, mostRecent) : rc.settings.endDate,
+              	compTitle: saveYearsAsRecent ? setRecentText(rc.settings.compTitle, mostRecent, yearsWithData) : rc.settings.compTitle,
+                overrides: { ...rc.overrides }
+              }
+            }))
+        }) : ({
+          routeId: idMap[rc.routeId],
+          compId: rc.compId,
+          color: rc.color,
+          type: "route",
+          settings: {
+          	...rc.settings,
+          	year: rc.settings.year === "advanced" ? "advanced" : saveYearsAsRecent ? setRecentYear(rc.settings.year, mostRecent) : rc.settings.year,
+          	startDate: saveYearsAsRecent ? setRecentDate(rc.settings.startDate, mostRecent) : rc.settings.startDate,
+          	endDate: saveYearsAsRecent ? setRecentDate(rc.settings.endDate, mostRecent) : rc.settings.endDate,
+          	compTitle: saveYearsAsRecent ? setRecentText(rc.settings.compTitle, mostRecent, yearsWithData) : rc.settings.compTitle,
+            overrides: { ...rc.overrides }
+          }
+        })
+    )
     const graph_comps = template.graph_comps.map(gc => ({
       type: gc.type,
       layout: {
@@ -1031,7 +1054,7 @@ export const saveReport = (report, reportId = null) =>
           }) :
           ({
             compId: rc.compId,
-            color: rc.color,
+            color: get(rc, "color", "#666666"),
             type: "group",
             route_comps: get(rc, "route_comps", [])
               .map(rc => ({
@@ -1594,8 +1617,16 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
     defaultType = template.default_type;
 
 	AVAILABLE_COLORS = [...COLORS];
-	ROUTE_COMP_ID = 0;
+	ROUTE_COMP_ID = -1;
   route_comps.forEach(rc => {
+    if (rc.type === "group") {
+      rc.route_comps.forEach(rc => {
+        ROUTE_COMP_ID = Math.max(ROUTE_COMP_ID, +rc.compId.slice(5));
+        if (AVAILABLE_COLORS.includes(rc.color)) {
+          AVAILABLE_COLORS = AVAILABLE_COLORS.filter(c => c !== rc.color);
+        }
+      })
+    }
   	ROUTE_COMP_ID = Math.max(ROUTE_COMP_ID, +rc.compId.slice(5));
   	if (AVAILABLE_COLORS.includes(rc.color)) {
   		AVAILABLE_COLORS = AVAILABLE_COLORS.filter(c => c !== rc.color);
@@ -1603,9 +1634,19 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
   });
 
   // LOAD ROUTE COMPS
-  let variables = route_comps.reduce((a, { routeId }) => {
-    if (!a.includes(routeId)) {
-      a.push(routeId);
+  let variables = route_comps.reduce((a, rc) => {
+    if (rc.type === "group") {
+      return get(rc, "route_comps", []).reduce((aa, rc) => {
+        if (!aa.includes(rc.routeId)) {
+          aa.push(rc.routeId);
+        }
+        return aa;
+      }, a);
+    }
+    else {
+      if (!a.includes(rc.routeId)) {
+        a.push(rc.routeId);
+      }
     }
     return a;
   }, [])
@@ -1615,38 +1656,79 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
     idMap[v] = routeIds[i];
   })
 
-  route_comps = route_comps.map(rc =>
-    ({ ...rc,
-      routeId: idMap[rc.routeId]
-    })
-  )
+  route_comps = route_comps.map(rc => {
+    if (rc.type === "group") {
+      return {
+        ...rc,
+        route_comps: rc.route_comps.map(rc => ({
+          ...rc,
+          routeId: idMap[rc.routeId]
+        }))
+      }
+    }
+    else {
+      return {
+        ...rc,
+        routeId: idMap[rc.routeId]
+      }
+    }
+  })
 
   let saveYearsAsRecent = false;
 
   const routeComponentSettings = new Map();
+
   route_comps.forEach(route_comp => {
-  	const {
-  		compId,
-  		settings
-  	} = route_comp;
-    settings.routeId = route_comp.routeId;
-  	if (RECENT_REGEX.test(settings.year)) {
-  		saveYearsAsRecent = true;
-  		settings.year = +replace(settings.year, mostRecent);
-  	}
-  	if (RECENT_REGEX.test(settings.startDate)) {
-  		saveYearsAsRecent = true;
-  		settings.startDate = +replace(settings.startDate, mostRecent);
-  	}
-  	if (RECENT_REGEX.test(settings.endDate)) {
-  		saveYearsAsRecent = true;
-  		settings.endDate = +replace(settings.endDate, mostRecent);
-  	}
-  	if (RECENT_REGEX.test(settings.compTitle)) {
-  		saveYearsAsRecent = true;
-  		settings.compTitle = replace(settings.compTitle, mostRecent);
-  	}
-    routeComponentSettings.set(compId, { ...settings });
+    if (route_comp.type === "group") {
+      route_comp.route_comps.forEach(route_comp => {
+      	const {
+      		compId,
+      		settings
+      	} = route_comp;
+        settings.routeId = route_comp.routeId;
+      	if (RECENT_REGEX.test(settings.year)) {
+      		saveYearsAsRecent = true;
+      		settings.year = +replace(settings.year, mostRecent);
+      	}
+      	if (RECENT_REGEX.test(settings.startDate)) {
+      		saveYearsAsRecent = true;
+      		settings.startDate = +replace(settings.startDate, mostRecent);
+      	}
+      	if (RECENT_REGEX.test(settings.endDate)) {
+      		saveYearsAsRecent = true;
+      		settings.endDate = +replace(settings.endDate, mostRecent);
+      	}
+      	if (RECENT_REGEX.test(settings.compTitle)) {
+      		saveYearsAsRecent = true;
+      		settings.compTitle = replace(settings.compTitle, mostRecent);
+      	}
+        routeComponentSettings.set(compId, { ...settings });
+      })
+    }
+    else {
+    	const {
+    		compId,
+    		settings
+    	} = route_comp;
+      settings.routeId = route_comp.routeId;
+    	if (RECENT_REGEX.test(settings.year)) {
+    		saveYearsAsRecent = true;
+    		settings.year = +replace(settings.year, mostRecent);
+    	}
+    	if (RECENT_REGEX.test(settings.startDate)) {
+    		saveYearsAsRecent = true;
+    		settings.startDate = +replace(settings.startDate, mostRecent);
+    	}
+    	if (RECENT_REGEX.test(settings.endDate)) {
+    		saveYearsAsRecent = true;
+    		settings.endDate = +replace(settings.endDate, mostRecent);
+    	}
+    	if (RECENT_REGEX.test(settings.compTitle)) {
+    		saveYearsAsRecent = true;
+    		settings.compTitle = replace(settings.compTitle, mostRecent);
+    	}
+      routeComponentSettings.set(compId, { ...settings });
+    }
   })
 
   const routes = route_comps.reduce((a, c) =>
