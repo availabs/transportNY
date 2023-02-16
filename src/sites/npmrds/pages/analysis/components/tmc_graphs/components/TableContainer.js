@@ -7,6 +7,10 @@ const TableContainer = styled.div`
 	padding: 10px 20px;
 	overflow-y: auto;
 
+	th {
+		text-align: left;
+	}
+
   ::-webkit-scrollbar {
     height: 10px;
     width: 10px;
@@ -39,7 +43,7 @@ const TableContainer = styled.div`
 
 export default ({ children }) =>
 	<TableContainer>
-		<table className="table table-sm">
+		<table className="w-full">
 			{ children }
 		</table>
 	</TableContainer>;

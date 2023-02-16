@@ -217,7 +217,8 @@ class RouteLineGraph extends GeneralGraphComp {
 			  } }
 			  hoverComp={ {
 					idFormat: (id, data) => data.name,
-					yFormat: ",.2f"
+					yFormat: ",.2f",
+					showTotals: false
 				} }/>
 		)
 	}

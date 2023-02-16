@@ -243,7 +243,7 @@ const Template = ({ id, forFolder = false, ...props }) => {
         )
       }
     ]
-  }, []);
+  }, [showViewModal, showEditModal]);
 
   const Container = forFolder ? FolderStuffContainer : StuffContainer;
 
@@ -399,7 +399,9 @@ const RouteSelectModal = ({ folders, template, action, ...props }) => {
 
             { !remainingRoutes ? null :
               <div className="mt-2">
-                <RouteSelector onClick={ addRoute }>
+                <RouteSelector onClick={ addRoute }
+                  selectedRoutes={ selectedRoutes }
+                >
                   Select { remainingRoutes } Route{ remainingRoutes > 1 ? "s" : "" }
                 </RouteSelector>
               </div>
@@ -510,7 +512,7 @@ const DefaultFoldersByType = [
   { type: "AVAIL Folders", folders: [] }
 ]
 
-const RouteSelector = ({ onClick, children }) => {
+const RouteSelector = ({ onClick, selectedRoutes, children }) => {
   const { falcor, falcorCache } = useFalcor();
 
   const [folders, setFolders] = React.useState([]);
@@ -660,6 +662,9 @@ const RouteSelector = ({ onClick, children }) => {
           { children }
         </div>
         { stuff.filter(({ type }) => type === "route")
+            .filter(({ id }) => selectedRoutes.reduce((a, c) => {
+              return a && (+c.id !== +id);
+            }, true))
             .map(s => {
               return (
                 <div key={ `${ s.type }-${ s.id }` }

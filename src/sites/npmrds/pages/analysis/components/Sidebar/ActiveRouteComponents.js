@@ -329,7 +329,7 @@ const CompContainer = props => {
 			>
 				<span className="fa fa-ellipsis-vertical"/>
 			</DragHandle>
-			<div className="flex-1 ml-1">
+			<div className="flex-1 ml-1 overflow-hidden">
 				{ children }
 			</div>
 		</CompContainerDiv>
@@ -425,22 +425,20 @@ const RouteGroup = props => {
 				isDragging={ isDragging }
 				onClick={ toggleOpen }
 			>
-				<div className="relative">
+				<div className="relative flex">
 					{ editing ?
 						<input ref={ setRef }
-							className="w-full overflow-hidden"
+							className="flex-1 overflow-hidden"
 							value={ name } onChange={ setName }
 							onClick={ stopPropagation }
 							onFocus={ onFocus }
 							onKeyUp={ onKeyUp }
 						/> :
-						<div className="overflow-hidden">
+						<div className="overflow-hidden flex-1 text-ellipsis">
 							{ group.name }
 						</div>
 					}
-					<div className="grid grid-cols-2 gap-1 "
-						style={ { position: "absolute", top: "0px", right: "0px", bottom: "0px" } }
-					>
+					<div className="grid grid-cols-2 gap-1 flex-0">
 						{ editing ?
 							<div style={ { width: "26px" } }
 								className={ `
@@ -541,13 +539,11 @@ const RouteComp = props => {
 			isDragging={ isDragging }
 			onClick={ extend }
 		>
-			<div className="relative">
-				<div className="overflow-hidden">
+			<div className="relative flex">
+				<div className="overflow-hidden text-ellipsis flex-1">
 					{ route.name }
 				</div>
-				<div className="grid grid-cols-2 gap-1 "
-					style={ { position: "absolute", top: "0px", right: "0px", bottom: "0px" } }
-				>
+				<div className="grid grid-cols-2 gap-1 flex-0">
 					<div style={ { width: "26px" } }
 						className={ `
 							fa fa-plus hover:bg-gray-500 hover:text-white

@@ -72,7 +72,11 @@ export async function queueCreateDamaSource(ctx) {
     throw new Error("DamaSource already exists.");
   }
 
-  const url = `${rtPfx}/etl/contextId/${etlContextId}/queueCreateDamaSource`;
+  const url = new URL(
+    `${rtPfx}/staged-geospatial-dataset/dispatchCreateDamaSourceEvent`
+  );
+
+  url.searchParams.append("etl_context_id", etlContextId);
 
   const sourceMeta = {
     name: damaSourceName,
@@ -100,9 +104,11 @@ export async function queueCreateDamaView(ctx) {
   const { etlContextId, userId, damaSourceId } =
     createEtlContextPropsProxy(ctx);
 
-  console.log("=".repeat(100));
-  console.log({ etlContextId, userId, damaSourceId });
-  const url = `${rtPfx}/etl/contextId/${etlContextId}/queueCreateDamaView`;
+  const url = new URL(
+    `${rtPfx}/staged-geospatial-dataset/dispatchCreateDamaViewEvent`
+  );
+
+  url.searchParams.append("etl_context_id", etlContextId);
 
   const viewMetadata = {
     source_id: damaSourceId || null,
