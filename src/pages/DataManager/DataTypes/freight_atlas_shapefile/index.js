@@ -70,13 +70,14 @@ const Edit = ({startValue, attr, viewId, parentData, cancel=()=>{}}) => {
   },[value])
 
   const save = async (attr, value) => {
+    console.log('click save', viewId, attr, value)
     if(viewId) {
-      try{
+      //try{
         let update = JSON.parse(value)
-        let val = parentData
+        let val = parentData || {tiles:{}}
         val.tiles[attr] = update
-        // console.log('testing',JSON.stringify(val), val)v
-        await falcor.set({
+        console.log('testing',JSON.stringify(val), val)
+        let response = await falcor.set({
             paths: [
               ['datamanager','views','byId',viewId,'attributes', 'metadata' ]
             ],
@@ -92,11 +93,11 @@ const Edit = ({startValue, attr, viewId, parentData, cancel=()=>{}}) => {
               }
             }
         })
-        // console.log('set run', response)
+        console.log('set run', response)
         cancel()
-      } catch (error) {
-        // console.log('error stuff',error,value, parentData);
-      }
+      // } catch (error) {
+      //   console.log('error stuff',error,value, parentData);
+      // }
     }
   }
 
@@ -143,12 +144,13 @@ const MapPage = ({source,views, user}) => {
 
   // console.log('testing', mapData, activeView)
   const save = async (attr, value) => {
+    console.log('click save', attr, value)
     if(viewId) {
       try{
         let update = value
-        let val = get(views,`[${activeView}].metadata`,{})
+        let val = get(views,`[${activeView}].metadata`,{tiles:{}}) || {tiles:{}}
         val.tiles[attr] = update
-        await falcor.set({
+        let response = await falcor.set({
             paths: [
               ['datamanager','views','byId',viewId,'attributes', 'metadata' ]
             ],
@@ -164,7 +166,7 @@ const MapPage = ({source,views, user}) => {
               }
             }
         })
-        // console.log('set run', response)
+        console.log('set run', response)
         // cancel()
       } catch (error) {
         // console.log('error stuff',error,value, parentData);
@@ -200,7 +202,7 @@ const MapPage = ({source,views, user}) => {
                             startValue={val} 
                             attr={attr}
                             viewId={get(views,`[${activeView}].view_id`,null)}
-                            parentData={get(views,`[${activeView}].metadata`,{})}
+                            parentData={get(views,`[${activeView}].metadata`,{tiles:{}})}
                             cancel={() => setEditing(null)}
                           />
                         </div> :  

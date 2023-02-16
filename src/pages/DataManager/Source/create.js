@@ -60,7 +60,7 @@ const Source = () => {
       <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
         <dl className="sm:divide-y sm:divide-gray-200">
           {Object.keys(SourceAttributes)
-            .filter(d => !['source_id','metadata','description', 'type','statistics', 'category', 'update_interval', 'categories'].includes(d))
+            .filter(d => !['source_id','metadata','description', 'type','statistics', 'category', 'update_interval', 'categories', 'display_name'].includes(d))
             .map((attr,i) => {
               // let val = typeof source[attr] === 'object' ? JSON.stringify(source[attr]) : source[attr]
               return (
