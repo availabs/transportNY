@@ -36,21 +36,22 @@ const RawJsonModal = (props) => {
   );
 };
 
-function EtlEventsContextTable(etlContextsEvents) {
+function EtlEventsContextTable(etlContexts) {
   const [eventIdx, setEventIdx] = useState(-1);
 
-  const selectedEvent =
-    (etlContextsEvents && etlContextsEvents[eventIdx]) || null;
+  const etlEvents = etlContexts && etlContexts.map(({ events }) => events);
+
+  const selectedEvent = (etlEvents && etlEvents[eventIdx]) || null;
 
   const close = () => setEventIdx(-1);
 
   const modal = RawJsonModal({ selectedEvent, close });
 
-  if (!etlContextsEvents) {
+  if (!etlContexts) {
     return "";
   }
 
-  const tableRows = etlContextsEvents.map(
+  const tableRows = etlEvents.map(
     (
       {
         INITIAL: {
