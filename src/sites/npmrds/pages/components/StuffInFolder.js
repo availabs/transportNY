@@ -97,7 +97,11 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
             };
         }
       })
-      .filter(s => !filter || (s.stuff_type === "folder") || filter.includes(s.stuff_type))
+      .filter(s => !filter ||
+                  (s.stuff_type === "folder") ||
+                  filter.includes(s.stuff_type) ||
+                  ((filter === "reports") && (s.stuff_type === "template"))
+      )
       .sort(stuffSorter);
 
     setStuff(stuff);

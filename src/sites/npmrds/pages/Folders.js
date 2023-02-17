@@ -139,21 +139,18 @@ const config = [
     icon: 'fa fa-folder',
     path: "/folders",
     subMenus: [
-      {
-        name: 'Routes',
+      { name: 'Routes',
         icon: 'fa fa-road',
         path: '/folders/routes'
       },
-      {
-        name: 'Reports',
+      { name: 'Reports',
         icon: 'fa fa-file-lines',
         path: '/folders/reports'
       },
-      {
-        name: 'Templates',
-        icon: 'fa fa-gear',
-        path: '/folders/templates'
-      }
+      // { name: 'Templates',
+      //   icon: 'fa fa-gear',
+      //   path: '/folders/templates'
+      // }
     ],
     exact: true,
     auth: true,

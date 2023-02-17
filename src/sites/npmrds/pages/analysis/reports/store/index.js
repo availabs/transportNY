@@ -234,7 +234,8 @@ export const saveTemplate = (template, templateId = null) =>
       folder,
       defaultType,
       saveYearsAsRecent,
-      colorRange
+      colorRange,
+      thumbnail
     } = template;
 
     const setRecentYear = (year, mostRecent) => {
@@ -342,7 +343,8 @@ export const saveTemplate = (template, templateId = null) =>
       station_comps,
       stations: stationIds.length,
       default_type: defaultType,
-      colorRange
+      colorRange,
+      thumbnail
     }
 
 		return falcorGraph.call(
