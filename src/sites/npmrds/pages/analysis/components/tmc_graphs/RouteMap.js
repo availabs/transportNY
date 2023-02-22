@@ -163,7 +163,8 @@ class RouteMap extends HybridGraphComp {
 			minZoom: 2,
 			maxZoom: 20,
 			zoom: 10,
-			attributionControl: false
+			attributionControl: false,
+			preserveDrawingBuffer: true
     });
     map.once('load', () => {
 			this.setState({ loading: --this.state.loading });
@@ -512,6 +513,8 @@ class RouteMap extends HybridGraphComp {
 			format
 		} = displayData;
 
+		const viewing = this.props.viewing || this.props.previewing;
+
 		return (
 			<div style={ { height: "100%", width: "100%", padding: "5px 10px 10px 10px" } } ref={ this.container }>
 				<div style={ { height: "100%", width: "100%", maxHeight: "100%" } } ref={ this.mapContainer }>
@@ -523,10 +526,12 @@ class RouteMap extends HybridGraphComp {
 						format={ format }
 						scale={ scale }
 						toggle={ () => this.toggle() }
-						hidden={ !this.showLegend() }/>
+						hidden={ !viewing && !this.showLegend() }/>
 
-					<FitBoundsButton id={ this.props.id }
-						fitBounds={ this.fitBounds.bind(this) }/>
+					{ viewing ? null :
+						<FitBoundsButton id={ this.props.id }
+							fitBounds={ this.fitBounds.bind(this) }/>
+					}
 
 					<HoverComp { ...this.state.point }
 						width={ this.state.width }
@@ -550,8 +555,10 @@ class RouteMap extends HybridGraphComp {
 							}/>
 					</HoverComp>
 
-					<SelectLayerButton select={ this.selectNewStyle.bind(this) }
-						current={ this.state.styleIndex }/>
+					{ viewing ? null :
+						<SelectLayerButton select={ this.selectNewStyle.bind(this) }
+							current={ this.state.styleIndex }/>
+					}
 
 				</div>
 			</div>
@@ -700,7 +707,7 @@ class SelectLayerButtonBase extends React.Component {
 					position: "absolute",
 					right: "5px",
 					bottom: "5px",
-					zIndex: 500,
+					zIndex: 1,
 					backgroundColor: "#fff",
 					padding: "10px 20px 10px 10px",
 					borderRadius: "4px"
@@ -734,7 +741,7 @@ class SelectLayerButtonBase extends React.Component {
 			)
 		:
 			(
-				<div style={ { position: "absolute", right: "5px", bottom: "5px", zIndex: 500 } }>
+				<div style={ { position: "absolute", right: "5px", bottom: "5px", zIndex: 1 } }>
 					<Button
 						data-tip data-for={ `tooltip-layer` }
 						onClick={ e => this.setState({ isOpen: true }) }>
@@ -753,7 +760,7 @@ class SelectLayerButtonBase extends React.Component {
 const SelectLayerButton = SelectLayerButtonBase
 
 const FitBoundsButton = ({ fitBounds, id }) =>
-	<div style={ { position: "absolute", left: "5px", top: "5px", zIndex: 500 } }>
+	<div style={ { position: "absolute", left: "5px", top: "5px", zIndex: 1 } }>
 		<Button
 			data-tip data-for={ `tooltip-${ id }` }
 			onClick={ e => fitBounds() }>
@@ -770,7 +777,7 @@ const FitBoundsButton = ({ fitBounds, id }) =>
 const MapLegend = ({ show, scale, name, label, format, colorRange, hidden, toggle }) =>
 		!show ? null :
 		hidden ? <ToggleButton toggle={ toggle }/> : (
-		<div style={ { position: "absolute", right: "5px", top: "5px", minWidth: "150px", backgroundColor: "#ccc", borderRadius: "4px", overflow: "hidden", zIndex: 500 } }>
+		<div style={ { position: "absolute", right: "5px", top: "5px", minWidth: "150px", backgroundColor: "#ccc", borderRadius: "4px", overflow: "hidden", zIndex: 1 } }>
 				<div style={ { textAlign: "center", padding: "3px 20px", fontSize: "15px", cursor: "pointer" } }
 					onClick={ toggle }>
 					{ name } { label ? `(${ label })` : "" }
@@ -791,7 +798,7 @@ const MapLegend = ({ show, scale, name, label, format, colorRange, hidden, toggl
 	)
 
 const ToggleButton = ({ toggle }) =>
-	<div style={ { position: "absolute", right: "5px", top: "5px", zIndex: 500 } }>
+	<div style={ { position: "absolute", right: "5px", top: "5px", zIndex: 1 } }>
 		<Button
 			data-tip data-for={ `tooltip-legend` }
 			onClick={ e => toggle() }>

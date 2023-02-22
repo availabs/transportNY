@@ -32,6 +32,9 @@ import * as DomainManager from "sites/npmrds/pages/analysis/components/tmc_graph
 //   getFoldersFromState
 // } from "pages/auth/MyStuff"
 
+import { toPng } from "html-to-image"
+import download from "downloadjs"
+
 import * as stuff from "../store"
 const {
   LOCAL_STORAGE_REPORT_KEY,
@@ -261,8 +264,12 @@ class ReportBase extends React.Component {
     this.props.updateReport(update);
   }
   saveReport(update, reportId = null) {
-    this.props.saveReport(update, reportId)
-      .then(() => this.hideSaveModal());
+    return this.getThumbail()
+      .then(dataUrl => {
+        update.thumbnail = dataUrl;
+        return this.props.saveReport(update, reportId)
+          .then(() => this.hideSaveModal());
+      });
   }
 
   addRouteComp(routeId, settings = null, groupId = null) {
@@ -361,9 +368,36 @@ class ReportBase extends React.Component {
   loadTemplate(id) {
     this.props.loadTemplate(id);
   }
+  getThumbail() {
+    const node = document.getElementById('react-grid-layout');
+    const width = node.clientWidth;
+    const height = node.clientHeight;
+    const options = {
+      width, height: width,
+      style: {
+        display: "flex",
+        alignItems: "center"
+      },
+      canvasWidth: 50, canvasHeight: 50
+    };
+
+    // const previewing = this.state.previewing;
+    //
+    // this.setState({ previewing: true });
+
+    return toPng(node, options)
+      // .then(dataUrl => {
+      //   this.setState({ previewing });
+      //   return dataUrl;
+      // });
+  }
   saveTemplate(template, templateId) {
-    return this.props.saveTemplate(template, templateId)
-      .then(() => this.hideTemplateModal());
+    return this.getThumbail()
+      .then(dataUrl => {
+        template.thumbnail = dataUrl;
+        return this.props.saveTemplate(template, templateId)
+          .then(() => this.hideTemplateModal())
+      });
   }
 
   needsUpdate() {
@@ -440,14 +474,16 @@ class ReportBase extends React.Component {
                 <div className="col-span-3">
                   <ControlBox className="grid grid-cols-2 gap-1 p-2">
                     <Control className="btn btn-sm btn-outline-primary"
-                      onClick={ e=> this.togglePreviewing() }
+                      onClick={ e => this.togglePreviewing() }
                     >
                       <div className="px-1">
                         <span className="fa fa-eye mr-1"/>
                         { this.state.previewing ? "Show Controls" : "Hide Controls" }
                       </div>
                     </Control>
+
                     <div />
+
                     <Control className="btn btn-sm btn-outline-success"
                       onClick={ e => this.showSaveModal() }
                       disabled={
@@ -461,6 +497,7 @@ class ReportBase extends React.Component {
                         Save as Report
                       </div>
                     </Control>
+
                     <Control className="btn btn-sm btn-outline-success"
                       onClick={ e => this.showTemplateModal() }
                       disabled={
@@ -496,25 +533,27 @@ class ReportBase extends React.Component {
               </div>
             }
 
-            <GraphLayout
-              viewing={ this.state.viewing }
-              previewing={ this.state.previewing }
-              routes={ this.props.routes }
-              graphs={ this.props.graphs }
-              updateRouteData={ this.props.updateRouteData }
-              updateStationData={ this.props.updateStationData }
-              updateGraphComp={ this.updateGraphComp.bind(this) }
-              removeGraphComp={ this.removeGraphComp.bind(this) }
-              addGraphComp={ this.addGraphComp.bind(this) }
-              onLayoutChange={ this.onLayoutChange.bind(this) }
-              highlightedTmcs={ this.state.highlightedTmcs }
-              highlightTmcs={ this.highlightTmcs.bind(this) }
-              unhighlightTmcs={ this.unhighlightTmcs.bind(this) }
-              setHighlightedTmcs={ this.setHighlightedTmcs.bind(this) }
-              showTableModal={ this.showTableModal.bind(this) }
-              hideTableModal={ this.hideTableModal.bind(this) }
-              colorRange={ this.props.colorRange }
-              station_comps={ this.props.station_comps }/>
+            <div id="react-grid-layout">
+              <GraphLayout
+                viewing={ this.state.viewing }
+                previewing={ this.state.previewing }
+                routes={ this.props.routes }
+                graphs={ this.props.graphs }
+                updateRouteData={ this.props.updateRouteData }
+                updateStationData={ this.props.updateStationData }
+                updateGraphComp={ this.updateGraphComp.bind(this) }
+                removeGraphComp={ this.removeGraphComp.bind(this) }
+                addGraphComp={ this.addGraphComp.bind(this) }
+                onLayoutChange={ this.onLayoutChange.bind(this) }
+                highlightedTmcs={ this.state.highlightedTmcs }
+                highlightTmcs={ this.highlightTmcs.bind(this) }
+                unhighlightTmcs={ this.unhighlightTmcs.bind(this) }
+                setHighlightedTmcs={ this.setHighlightedTmcs.bind(this) }
+                showTableModal={ this.showTableModal.bind(this) }
+                hideTableModal={ this.hideTableModal.bind(this) }
+                colorRange={ this.props.colorRange }
+                station_comps={ this.props.station_comps }/>
+            </div>
 
           </div>
         </GraphLayoutContainer>

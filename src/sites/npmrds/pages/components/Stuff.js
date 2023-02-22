@@ -128,18 +128,22 @@ const Route = ({ id, forFolder, ...props }) => {
     <Container { ...props } { ...route } id={ id } type="route"
       items={ RouteItems }
     >
-      <span className="fad fa-road mr-1 text-slate-500 text-sm px-2"/>
+      <span className="fad fa-road text-slate-500 text-sm px-2"/>
       <span className="pt-1">
         { get(route, "name", "loading...") }
       </span>
     </Container>
   )
 }
+
 const Report = ({ id, forFolder, ...props }) => {
   const { falcor, falcorCache } = useFalcor();
 
   React.useEffect(() => {
-    falcor.get(["reports2", "id", id, ["name", "description", "updated_at", "id"]]);
+    falcor.get([
+      "reports2", "id", id,
+      ["name", "description", "thumbnail", "updated_at", "id"]
+    ]);
   }, [falcor, id]);
 
   const [report, setReport] = React.useState({});
@@ -176,9 +180,9 @@ const Report = ({ id, forFolder, ...props }) => {
 
   return (
     <Container { ...props } { ...report } id={ id } type="report"
-      items={ ReportItems }
+      items={ ReportItems } showThumbnail
     >
-      <span className="fad fa-file-chart-line mr-1 text-blue-500 text-sm px-2"/>
+      <span className="fad fa-file-chart-line text-blue-500 text-sm px-2"/>
       <span className="pt-1">
         { get(report, "name", "loading...") }
       </span>
@@ -199,7 +203,7 @@ const Template = ({ id, forFolder = false, ...props }) => {
   React.useEffect(() => {
     falcor.get(
       ["templates2", "id", id,
-        ["name", "description", "updated_at", "routes", "stations", "id"]
+        ["name", "description", "thumbnail", "updated_at", "routes", "stations", "id"]
       ]
     );
   }, [falcor, id]);
@@ -249,9 +253,9 @@ const Template = ({ id, forFolder = false, ...props }) => {
 
   return (
     <Container { ...props } { ...template } id={ id } type="template"
-      items={ TemplateItems }
+      items={ TemplateItems } showThumbnail
     >
-      <span className="fad fa-file-invoice mr-1 text-lime-500 text-sm px-2"/>
+      <span className="fad fa-file-invoice text-lime-500 text-sm px-2"/>
       <span className="pt-1">
         { get(template, "name", "loading...") }
       </span>
@@ -835,6 +839,16 @@ const StuffContainer = ({ description, updated_at, children, ...rest }) => {
   )
 }
 
+const ThumbnailPlaceholder = () => {
+  return (
+    <div style={ { width: "50px", height: "50px" } }
+      className="flex items-center justify-center"
+    >
+      <span className="fa fa-notdef text-2xl"/>
+    </div>
+  )
+}
+
 const FolderStuffContainer = props => {
   const {
     description,
@@ -847,6 +861,8 @@ const FolderStuffContainer = props => {
     select,
     deselect,
     items = [],
+    showThumbnail = false,
+    thumbnail = null,
     children
   } = props;
 
@@ -1055,6 +1071,14 @@ const FolderStuffContainer = props => {
 
   return (
     <div className="flex items-center border-b px-1 hover:bg-blue-50 py-1">
+      { !showThumbnail ? null :
+          <div className="flex-0 bg-gray-200">
+            { ! thumbnail ?
+                <ThumbnailPlaceholder /> :
+                <img src={ thumbnail }/>
+            }
+          </div>
+      }
       <div className="flex-1">
         <div className="font-medium text-gray-600">
           { children }
