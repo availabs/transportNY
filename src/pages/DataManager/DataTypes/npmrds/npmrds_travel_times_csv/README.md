@@ -1,7 +1,7 @@
 # NPMRDS Travel Times Export
 
 NOTE: This DataType's Source page extensions render **IFF** the data\*source's
-type is _"npmrds_travel_times_export"_.
+type is _"npmrds_travel_times_export_ritis"_.
 
 ## Description
 

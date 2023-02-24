@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from "react-redux";
 
 import { /*useFalcor,*//*TopNav,*/ Input /*withAuth, Input, Button*/ } from 'modules/avl-components/src'
@@ -11,7 +11,7 @@ import SourcesLayout, {DataManagerHeader}  from '../components/SourcesLayout'
 
 import {SourceAttributes, /*ViewAttributes, getAttributes*/} from 'pages/DataManager/components/attributes'
     
-import { selectIsPwrUsr } from "pages/DataManager/store";
+import { selectPgEnv, selectIsPwrUsr } from "pages/DataManager/store";
 
 const Source = () => {
 // prettier canary
@@ -25,25 +25,51 @@ const Source = () => {
       }, {})
   )
 
+  const [dataTypes, setDataTypes] = useState(null);
+
+  const pgEnv = useSelector(selectPgEnv);
   const isPwrUsr = useSelector(selectIsPwrUsr);
 
-  const dataTypes = isPwrUsr
-    ? DataTypes
-    : Object.keys(DataTypes).reduce((acc, dType) => {
-        const component = DataTypes[dType];
-        if (component.pwrUsrOnly) {
-          return acc;
-        }
+  useEffect(() => {
+    (async () => {
+      const filteredDataTypeKeys = (
+        await Promise.all(
+          Object.keys(DataTypes).map(async (dt) => {
+            if (dt.pwrUsrOnly && !isPwrUsr) {
+              return null;
+            }
 
-        acc[dType] = component;
+            if (DataTypes[dt].getIsAlreadyCreated) {
+              const exclude = await DataTypes[dt].getIsAlreadyCreated(pgEnv);
 
+              if (exclude) {
+                return null;
+              }
+            }
+
+            return dt;
+          })
+        )
+      ).filter(Boolean);
+
+      const filteredDataTypes = filteredDataTypeKeys.reduce((acc, dt) => {
+        acc[dt] = DataTypes[dt];
         return acc;
       }, {});
 
+      setDataTypes(filteredDataTypes);
+    })();
+  }, [pgEnv, isPwrUsr]);
 
   const CreateComp = useMemo(() => get(dataTypes, `[${source.type}].sourceCreate.component`, () => <div />)
     ,[dataTypes, source.type])
   
+  // console.log('new source', CreateComp)
+
+  if (dataTypes === null) {
+    return <div>Requesting data types statuses</div>;
+  }
+
   // console.log('new source', CreateComp)
   
   return (
