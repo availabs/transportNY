@@ -38,12 +38,20 @@ export default function DamaViewsTable() {
         dependencies,
       } = meta;
 
-      const { filelocation: { path = null } = {} } = metadata;
-      const downloadLink = path ? (
-        <a href={`${DAMA_HOST}/files${path}`}>link</a>
-      ) : (
-        ""
-      );
+      const { files = {} } = metadata;
+      const fileTypes = Object.keys(files);
+
+      const dowloadLinks = fileTypes.map((name) => {
+        const { path } = files[name];
+
+        return (
+          <li>
+            <a key={name} href={`${DAMA_HOST}/files${path}`}>
+              {name}
+            </a>
+          </li>
+        );
+      });
 
       const dependenciesList = Array.isArray(dependencies) ? (
         <ul>
@@ -101,7 +109,7 @@ export default function DamaViewsTable() {
               color: "blue",
             }}
           >
-            {downloadLink}
+            <ul>{dowloadLinks}</ul>
           </td>
         </tr>
       );
