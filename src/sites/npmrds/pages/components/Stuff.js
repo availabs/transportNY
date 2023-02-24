@@ -190,12 +190,6 @@ const Report = ({ id, forFolder, ...props }) => {
   )
 }
 
-const defaultFoldersByType = () => ([
-  { type: "User Folders", folders: [] },
-  { type: "Group Folders", folders: [] },
-  { type: "Default Folders", folders: [] }
-])
-
 const Template = ({ id, forFolder = false, ...props }) => {
 
   const { falcor, falcorCache } = useFalcor();
@@ -495,8 +489,8 @@ const FolderStuff = ({ type, ...props }) => {
 const StuffOrder = {
   folder: 0,
   report: 1,
-  route: 2,
-  template: 3
+  template: 2,
+  route: 3
 }
 
 const stuffSorter = (a, b) => {
@@ -515,6 +509,12 @@ const DefaultFoldersByType = [
   { type: "Group Folders", folders: [] },
   { type: "AVAIL Folders", folders: [] }
 ]
+
+const getDefaultFoldersByType = () => ([
+  { type: "User Folders", folders: [] },
+  { type: "Group Folders", folders: [] },
+  { type: "Default Folders", folders: [] }
+])
 
 const RouteSelector = ({ onClick, selectedRoutes, children }) => {
   const { falcor, falcorCache } = useFalcor();
@@ -570,7 +570,7 @@ const RouteSelector = ({ onClick, selectedRoutes, children }) => {
         a[2].folders.push(c);
       }
       return a;
-    }, defaultFoldersByType());
+    }, getDefaultFoldersByType());
     setFoldersByType(foldersByType);
   }, [falcorCache]);
 
