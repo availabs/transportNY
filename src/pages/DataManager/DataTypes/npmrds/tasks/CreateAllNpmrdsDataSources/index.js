@@ -79,7 +79,14 @@ function LinksTable(damaSrcMeta) {
   };
 
   const tableRows = damaSrcMeta.map(
-    ({ source_id, display_name, description, type, source_dependencies }) => {
+    ({
+      source_id,
+      name,
+      display_name,
+      description,
+      type,
+      source_dependencies,
+    }) => {
       const link = source_id ? (
         <span
           key={`link-${source_id}`}
@@ -95,7 +102,7 @@ function LinksTable(damaSrcMeta) {
       );
 
       return (
-        <tr key={source_id} style={{ border: "1px solid" }}>
+        <tr key={name} style={{ border: "1px solid" }}>
           <td style={tdStyle}>{link}</td>
           <td
             style={{
@@ -178,11 +185,16 @@ export default function CreateAllNpmrdsDataSources() {
     [pgEnv]
   );
 
+  const { initialized = null, missing = null } = initializedAndMissing || {};
+
+  const table =
+    Array.isArray(missing) && missing.length
+      ? LinksTable(missing)
+      : LinksTable(initialized);
+
   if (!initializedAndMissing) {
     return <div>Querying NPMRDS Data Manager Source statuses</div>;
   }
-
-  const { initialized, missing } = initializedAndMissing;
 
   const titleStyle = {
     display: "inline-block",
@@ -200,7 +212,7 @@ export default function CreateAllNpmrdsDataSources() {
     return (
       <div>
         <span style={titleStyle}>Missing NPMRDS Data Manager Sources</span>
-        {LinksTable(missing)}
+        {table}
         <button
           style={{ backgroundColor: "green" }}
           className="text-white font-bold py-2 px-4 border rounded"
@@ -221,7 +233,7 @@ export default function CreateAllNpmrdsDataSources() {
   return (
     <div>
       <span style={titleStyle}>NPMRDS Data Manager Sources</span>
-      {LinksTable(initialized)}
+      {table}
     </div>
   );
 }

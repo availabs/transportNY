@@ -4,8 +4,11 @@ import Folders from "./pages/Folders"
 
 import Analysis from "./pages/analysis"
 
+import NewHome from "./pages/NewHome"
+
 const Routes = [
   Home,
+  NewHome,
   ...Folders,
   ...Analysis
 ]
