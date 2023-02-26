@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 
 import { Modal } from "modules/avl-components/src";
 
@@ -37,6 +37,8 @@ const RawJsonModal = (props) => {
 };
 
 function EtlEventsContextTable(etlContexts) {
+  const history = useHistory();
+
   const [eventIdx, setEventIdx] = useState(-1);
 
   const etlEvents = etlContexts && etlContexts.map(({ events }) => events);
@@ -51,23 +53,41 @@ function EtlEventsContextTable(etlContexts) {
     return "";
   }
 
-  const tableRows = etlEvents.map(
-    (
-      {
-        INITIAL: {
-          payload: { state, start_date, end_date, is_expanded },
-          meta: { etl_context_id },
-        },
-        LATEST: { type = "INITIAL" } = {},
-      },
-      i
-    ) => {
+  const tableRows = etlEvents
+    .map((events, i) => {
+      const { INITIAL: initialEvent, LATEST: { type = "INITIAL" } = {} } =
+        events;
+
+      if (
+        initialEvent.type !==
+        "dama/data_types/npmrds/dt-npmrds_travel_times_export_ritis:INITIAL"
+      ) {
+        return null;
+      }
+
+      const {
+        payload: {
+          state = null,
+          start_date = null,
+          end_date = null,
+          is_expanded = null,
+        } = {},
+        meta: { etl_context_id },
+      } = initialEvent;
+
       const latestEventType = type.replace(/.*:/g, "");
 
       return (
         <tr key={`event=${i}`} style={{ border: "1px solid" }}>
           <td style={{ border: "1px solid", backgroundColor: "white" }}>
-            {etl_context_id}
+            <span
+              style={{ cursor: "pointer", color: "blue" }}
+              onClick={() => {
+                history.push(`/etl-context/${etl_context_id}`);
+              }}
+            >
+              {etl_context_id}
+            </span>
           </td>
           <td style={{ border: "1px solid", backgroundColor: "white" }}>
             {state}
@@ -94,8 +114,8 @@ function EtlEventsContextTable(etlContexts) {
           </td>
         </tr>
       );
-    }
-  );
+    })
+    .filter(Boolean);
 
   return (
     <div>
@@ -168,9 +188,14 @@ export default function EtlContextsStatusTable() {
     (async () => {
       if (etlContextStatus !== null) {
       }
-      setEtlContexts(
-        await getEtlContextsForDamaSourceId(pgEnv, sourceId, etlContextStatus)
+
+      const ctxs = await getEtlContextsForDamaSourceId(
+        pgEnv,
+        sourceId,
+        etlContextStatus
       );
+
+      setEtlContexts(ctxs || []);
     })();
   }, [pgEnv, sourceId, etlContextStatus]);
 
