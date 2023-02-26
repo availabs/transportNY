@@ -115,7 +115,13 @@ export function EtlContextEventsView() {
 
   const eventsList = events.map((event) => (
     <div style={{ marginLeft: "15%", marginRight: "15%", padding: "10px" }}>
-      <ReactJson src={event} name={false} collapsed={2} theme="monokai" />
+      <ReactJson
+        src={event}
+        name={false}
+        collapsed={2}
+        theme="monokai"
+        collapseStringsAfterLength={80}
+      />
     </div>
   ));
 
