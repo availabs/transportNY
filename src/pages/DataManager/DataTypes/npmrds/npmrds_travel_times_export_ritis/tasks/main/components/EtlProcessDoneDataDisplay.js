@@ -31,12 +31,20 @@ export default function RequestStatusMessage() {
       view_dependencies,
       metadata = {},
     }) => {
-      const { filelocation: { path = null } = {} } = metadata;
-      const downloadLink = path ? (
-        <a href={`${DAMA_HOST}/files${path}`}>download</a>
-      ) : (
-        ""
-      );
+      const { files = {} } = metadata;
+      const fileTypes = Object.keys(files);
+
+      const dowloadLinks = fileTypes.map((name) => {
+        const { path } = files[name];
+
+        return (
+          <li>
+            <a key={name} href={`${DAMA_HOST}/files${path}`}>
+              {name}
+            </a>
+          </li>
+        );
+      });
 
       return (
         <tr key={name} style={{ border: "1px solid" }}>
@@ -80,7 +88,7 @@ export default function RequestStatusMessage() {
               color: "blue",
             }}
           >
-            {downloadLink}
+            <ul>{dowloadLinks}</ul>
           </td>
         </tr>
       );
@@ -132,7 +140,7 @@ export default function RequestStatusMessage() {
           </th>
           <th style={{ border: "1px solid", borderColor: "black" }}>
             {" "}
-            Download Link
+            Download Links
           </th>
         </tr>
       </thead>

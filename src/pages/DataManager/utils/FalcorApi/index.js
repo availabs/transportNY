@@ -1,2 +1,2 @@
 export * from "./getViewsDependenciesForSource";
-export * from "./getEtlContextEvents";
+export * from "./etlContexts";
