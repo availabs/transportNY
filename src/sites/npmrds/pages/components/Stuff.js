@@ -1069,6 +1069,8 @@ const FolderStuffContainer = props => {
     setImOpen(false);
   }, []);
 
+console.log("THUMBNAIL:", thumbnail);
+
   return (
     <div className="flex items-center border-b px-1 hover:bg-blue-50 py-1">
       { !showThumbnail ? null :
