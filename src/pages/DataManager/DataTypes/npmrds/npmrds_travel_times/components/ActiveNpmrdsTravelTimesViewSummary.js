@@ -187,7 +187,7 @@ function importSelectionTable(
     : new Set();
 
   const trows = [];
-  const states = Object.keys(importViewsByMonthByYearByState);
+  const states = Object.keys(importViewsByMonthByYearByState).sort();
 
   for (const state of states) {
     const years = Object.keys(importViewsByMonthByYearByState[state])
