@@ -1,6 +1,7 @@
 import React from "react";
 
 import DamaViewsTable from "pages/DataManager/components/DamaViewsTable";
+import ActiveNpmrdsTravelTimesViewSummary from "./components/ActiveNpmrdsTravelTimesViewSummary";
 
 const Table = (/*{ source }*/) => {
   return <div> Table View Foo </div>;
@@ -16,6 +17,11 @@ const pages = [
     name: "Dama Views Table",
     path: "/dama-views-table",
     component: DamaViewsTable,
+  },
+  {
+    name: "Active View",
+    path: "/active-npmrds-travel-times-view",
+    component: ActiveNpmrdsTravelTimesViewSummary,
   },
 ];
 
