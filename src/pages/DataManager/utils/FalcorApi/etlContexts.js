@@ -27,3 +27,20 @@ export async function getEtlContextsForDamaSourceId(
 
   return eventsForCtxStatus;
 }
+
+export async function getEtlContext(pgEnv, etlContextId) {
+  // dama[{keys:pgEnvs}].etlContexts.byEtlContextId[{keys:etlContextIds}]
+  const etlContextPath = [
+    "dama",
+    pgEnv,
+    "etlContexts",
+    "byEtlContextId",
+    etlContextId,
+  ];
+
+  await Falcor.get(etlContextPath);
+
+  const ctx = _.get(Falcor.cache, [...etlContextPath, "value"]);
+
+  return ctx;
+}

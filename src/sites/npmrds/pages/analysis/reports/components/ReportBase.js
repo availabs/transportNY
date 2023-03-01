@@ -32,7 +32,7 @@ import * as DomainManager from "sites/npmrds/pages/analysis/components/tmc_graph
 //   getFoldersFromState
 // } from "pages/auth/MyStuff"
 
-import { toPng } from "html-to-image"
+import { toPng, toBlob, toSvg, toJpeg } from "html-to-image"
 import download from "downloadjs"
 
 import * as stuff from "../store"
@@ -260,18 +260,6 @@ class ReportBase extends React.Component {
       })
   }
 
-  updateReport(update) {
-    this.props.updateReport(update);
-  }
-  saveReport(update, reportId = null) {
-    return this.getThumbail()
-      .then(dataUrl => {
-        update.thumbnail = dataUrl;
-        return this.props.saveReport(update, reportId)
-          .then(() => this.hideSaveModal());
-      });
-  }
-
   addRouteComp(routeId, settings = null, groupId = null) {
     this.props.addRouteComp(routeId, settings, groupId, true);
   }
@@ -372,13 +360,27 @@ class ReportBase extends React.Component {
     const node = document.getElementById('react-grid-layout');
     const width = node.clientWidth;
     const height = node.clientHeight;
+
+const nodeRect = node.getBoundingClientRect();
+
     const options = {
       width, height: width,
       style: {
-        display: "flex",
-        alignItems: "center"
+        display: height < width ? "flex" : null,
+        alignItems: height < width ? "center" : null,
+        overflow: "hidden"
       },
-      canvasWidth: 50, canvasHeight: 50
+      canvasWidth: 50, canvasHeight: 50,
+      filter: child => {
+        if (child.classList &&
+            child.getBoundingClientRect &&
+            child.classList.contains("react-grid-item")) {
+
+          const rect = child.getBoundingClientRect();
+          return (rect.top - nodeRect.top) < width;
+        }
+        return true;
+      }
     };
 
     // const previewing = this.state.previewing;
@@ -391,6 +393,19 @@ class ReportBase extends React.Component {
       //   return dataUrl;
       // });
   }
+
+  updateReport(update) {
+    this.props.updateReport(update);
+  }
+  saveReport(update, reportId = null) {
+    return this.getThumbail()
+      .then(dataUrl => {
+        update.thumbnail = dataUrl;
+        return this.props.saveReport(update, reportId)
+          .then(() => this.hideSaveModal());
+      });
+  }
+
   saveTemplate(template, templateId) {
     return this.getThumbail()
       .then(dataUrl => {

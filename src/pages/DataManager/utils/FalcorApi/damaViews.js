@@ -1,4 +1,4 @@
-import _ from "lodash";
+import get from "lodash/get";
 
 import { getAttributes } from "pages/DataManager/components/attributes";
 
@@ -26,7 +26,7 @@ export async function getViewsDependenciesForSource(
 
   await Falcor.get(viewsLenPath);
 
-  const viewsLen = _.get(Falcor.cache, viewsLenPath);
+  const viewsLen = get(Falcor.cache, viewsLenPath);
 
   const viewsMetaPath = [
     "dama",
@@ -44,14 +44,14 @@ export async function getViewsDependenciesForSource(
   await Falcor.get(viewsMetaPath);
 
   const viewsMeta = Object.values(
-    _.get(
+    get(
       Falcor.cache,
       ["dama", pgEnv, "sources", "byId", sourceId, "views", "byIndex"],
       {}
     )
   ).map((refPath) =>
     getAttributes(
-      _.get(Falcor.cache, refPath.value, { attributes: {} })["attributes"]
+      get(Falcor.cache, refPath.value, { attributes: {} })["attributes"]
     )
   );
 
@@ -67,7 +67,7 @@ export async function getViewsDependenciesForSource(
 
   await Falcor.get(viewsDepGraphsQuery);
 
-  const viewsDepGraphsById = _.get(
+  const viewsDepGraphsById = get(
     Falcor.cache,
     viewsDepGraphsQuery.slice(0, -1)
   );
@@ -153,7 +153,7 @@ export async function getViewsDependenciesForSource(
   ];
 
   await Falcor.get(sourceNamePath);
-  const sourceNamesById = _.get(Falcor.cache, sourceNamePath.slice(0, 4), {});
+  const sourceNamesById = get(Falcor.cache, sourceNamePath.slice(0, 4), {});
 
   viewsMetaWithDeps.forEach(({ dependencies, dependents }) => {
     if (dependencies) {
@@ -186,4 +186,73 @@ export async function getViewsDependenciesForSource(
   });
 
   return viewsMetaWithDeps;
+}
+
+export async function getAllDamaViewsForDamaSourceName(pgEnv, damaSrcName) {
+  const allViewAttributes = await Falcor.getValue([
+    "dama-info",
+    "viewAttributes",
+  ]);
+
+  const damaSrcId = await Falcor.getValue([
+    "dama",
+    pgEnv,
+    "sources",
+    "sourceIdsByName",
+    damaSrcName,
+  ]);
+
+  const damaViewsLen = await Falcor.getValue([
+    "dama",
+    pgEnv,
+    "sources",
+    "byId",
+    damaSrcId,
+    "views",
+    "length",
+  ]);
+
+  await Falcor.get([
+    "dama",
+    pgEnv,
+    "sources",
+    "byId",
+    damaSrcId,
+    "views",
+    "byIndex",
+    { from: 0, to: damaViewsLen - 1 },
+    "attributes",
+    allViewAttributes,
+  ]);
+
+  // Not necessarily for the requested damaSrcName
+  const viewsById = get(Falcor.cache, ["dama", pgEnv, "views", "byId"], {});
+
+  const damaSrcViews = Object.keys(viewsById)
+    .reduce((acc, id) => {
+      const { attributes } = viewsById[id];
+
+      const { source_id } = attributes;
+
+      if (source_id !== damaSrcId) {
+        return acc;
+      }
+
+      const props = Object.keys(attributes).reduce((acc2, k) => {
+        const d = attributes[k];
+
+        const v = d.$type === "atom" ? d.value : d;
+
+        acc2[k] = v;
+
+        return acc2;
+      }, {});
+
+      acc.push(props);
+
+      return acc;
+    }, [])
+    .sort((a, b) => a.view_id - b.view_id);
+
+  return damaSrcViews;
 }

@@ -1,2 +1,4 @@
-export * from "./getViewsDependenciesForSource";
-export * from "./getEtlContextEvents";
+export { default as Falcor } from "./FalcorWrapper";
+
+export * from "./damaViews";
+export * from "./etlContexts";
