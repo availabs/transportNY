@@ -178,7 +178,11 @@ function importSelectionTable(
   selectedImports,
   toggleImport
 ) {
-  if (!importViewsByMonthByYearByState) {
+  if (importViewsByMonthByYearByState === undefined) {
+    return <div>Requesting NPMRDS Travel Times Imports.</div>;
+  }
+
+  if (importViewsByMonthByYearByState === null) {
     return <div>No NPMRDS Travel Times Imports in the database.</div>;
   }
 
