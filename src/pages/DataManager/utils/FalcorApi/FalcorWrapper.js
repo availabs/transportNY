@@ -36,6 +36,17 @@ class FalcorWrapper {
 
     return v;
   }
+
+  async invalidate(path) {
+    falcorGraph.invalidate(path);
+
+    await new Promise((resolve) => {
+      setTimeout(() => {
+        this._refreshCache();
+        resolve();
+      });
+    });
+  }
 }
 
 export default new FalcorWrapper();

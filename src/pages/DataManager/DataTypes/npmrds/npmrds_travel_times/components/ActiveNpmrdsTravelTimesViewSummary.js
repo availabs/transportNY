@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-import { useHistory } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 
 import { selectPgEnv } from "pages/DataManager/store";
@@ -15,14 +14,26 @@ import {
 } from "pages/DataManager/utils/DamaControllerApi";
 
 import NpmrdsDataSources from "../../constants/NpmrdsDataSources";
-import { toArray } from "lodash";
+
+const getActiveNpmrdsTravelTimesDamaViewFalcorPath = (pgEnv) => [
+  "dama",
+  pgEnv,
+  "npmrds",
+  "activeNpmrdsTravelTimesDamaView",
+];
 
 async function getActiveNpmrdsTravelTimesDamaView(pgEnv) {
-  const path = ["dama", pgEnv, "npmrds", "activeNpmrdsTravelTimesDamaView"];
+  const path = getActiveNpmrdsTravelTimesDamaViewFalcorPath(pgEnv);
 
   const value = await Falcor.getValue(path);
 
   return value;
+}
+
+async function invalidateCachedActiveNpmrdsTravelTimesDamaView(pgEnv) {
+  const path = getActiveNpmrdsTravelTimesDamaViewFalcorPath(pgEnv);
+
+  await Falcor.invalidate(path);
 }
 
 async function getAllNpmrdsTravelTimeImportViews(pgEnv) {
@@ -49,9 +60,54 @@ async function updateAuthoritativeImports(pgEnv, damaViewIds) {
 
   await checkApiResponse(res);
 
+  await invalidateCachedActiveNpmrdsTravelTimesDamaView(pgEnv);
+
   const d = await res.json();
 
-  console.log(d);
+  return d;
+}
+
+function groupAndSortImportViews(importViews) {
+  const sortedImportsByMonthByYearByState =
+    importViews &&
+    importViews.reduce((acc, view) => {
+      const {
+        metadata: { state, data_start_date, data_end_date },
+      } = view;
+
+      const [startYear, startMonth] = data_start_date.split(/-/g);
+      const [endYear, endMonth] = data_end_date.split(/-/g);
+
+      if (startYear !== endYear || startMonth !== endMonth) {
+        return acc;
+      }
+
+      acc[state] = acc[state] || {};
+      acc[state][startYear] = acc[state][startYear] || {};
+      acc[state][startYear][startMonth] =
+        acc[state][startYear][startMonth] || [];
+
+      acc[state][startYear][startMonth].push(view);
+
+      return acc;
+    }, {});
+
+  for (const state of Object.keys(sortedImportsByMonthByYearByState)) {
+    for (const year of Object.keys(sortedImportsByMonthByYearByState[state])) {
+      for (const month of Object.keys(
+        sortedImportsByMonthByYearByState[state][year]
+      )) {
+        sortedImportsByMonthByYearByState[state][year][month].sort(
+          (
+            { metadata: { download_timestamp: aTs } },
+            { metadata: { download_timestamp: bTs } }
+          ) => bTs.localeCompare(aTs)
+        );
+      }
+    }
+  }
+
+  return sortedImportsByMonthByYearByState;
 }
 
 function activeNpmrdsTravelTimesMetadataTable(activeNpmrdsTravelTimesDamaView) {
@@ -297,10 +353,10 @@ function importSelectionTable(
                   {download_timestamp}
                 </td>
                 <td style={{ backgroundColor, borderBottom }}>
-                  {is_complete_month ? "\u2713" : ""}
+                  {is_complete_month ? "✓" : ""}
                 </td>
                 <td style={{ backgroundColor, borderBottom }}>
-                  {is_expanded ? "\u2713" : ""}
+                  {is_expanded ? "✓" : ""}
                 </td>
                 <td
                   style={{
@@ -434,6 +490,10 @@ export default function ActiveNpmrdsTravelTimesViewSummary() {
 
   const [selectedImports, setSelectedImports] = useState(new Set());
 
+  // Used to trigger a page reload after updating the Authoritative Travel Times Imports.
+  // https://stackoverflow.com/a/55862077/3970755
+  const [tick, setTick] = useState(0);
+
   const pgEnv = useSelector(selectPgEnv);
 
   const toggleImport = (view_id) => {
@@ -456,62 +516,21 @@ export default function ActiveNpmrdsTravelTimesViewSummary() {
       ]);
 
       const sortedImportsByMonthByYearByState =
-        importViews &&
-        importViews.reduce((acc, view) => {
-          const {
-            metadata: { state, data_start_date, data_end_date },
-          } = view;
-
-          const [startYear, startMonth] = data_start_date.split(/-/g);
-          const [endYear, endMonth] = data_end_date.split(/-/g);
-
-          if (startYear !== endYear || startMonth !== endMonth) {
-            return acc;
-          }
-
-          acc[state] = acc[state] || {};
-          acc[state][startYear] = acc[state][startYear] || {};
-          acc[state][startYear][startMonth] =
-            acc[state][startYear][startMonth] || [];
-
-          acc[state][startYear][startMonth].push(view);
-
-          return acc;
-        }, {});
-
-      for (const state of Object.keys(sortedImportsByMonthByYearByState)) {
-        for (const year of Object.keys(
-          sortedImportsByMonthByYearByState[state]
-        )) {
-          for (const month of Object.keys(
-            sortedImportsByMonthByYearByState[state][year]
-          )) {
-            sortedImportsByMonthByYearByState[state][year][month].sort(
-              (
-                { metadata: { download_timestamp: aTs } },
-                { metadata: { download_timestamp: bTs } }
-              ) => bTs.localeCompare(aTs)
-            );
-          }
-        }
-      }
-
-      console.log({ activeDamaView, sortedImportsByMonthByYearByState });
+        groupAndSortImportViews(importViews);
 
       setActiveNpmrdsTravelTimesDamaView(activeDamaView);
       setIimportViewsByMonthByYearByState(sortedImportsByMonthByYearByState);
     })();
-  }, [pgEnv]);
+  }, [pgEnv, tick]);
 
-  const Button = selectedImports.size ? (
+  const updateButton = selectedImports.size ? (
     <button
       style={{ backgroundColor: "green" }}
       className="text-white font-bold py-2 px-4 border rounded"
       onClick={async () => {
         await updateAuthoritativeImports(pgEnv, selectedImports);
-
-        // refreshed the Falcor cache
-        window.location.reload(true);
+        setSelectedImports(new Set());
+        setTick(tick + 1);
       }}
     >
       Make Selected Imports Authoritative
@@ -520,16 +539,21 @@ export default function ActiveNpmrdsTravelTimesViewSummary() {
     ""
   );
 
+  const metaTable = activeNpmrdsTravelTimesMetadataTable(
+    activeNpmrdsTravelTimesDamaView
+  );
+  const importsTable = importSelectionTable(
+    activeNpmrdsTravelTimesDamaView,
+    importViewsByMonthByYearByState,
+    selectedImports,
+    toggleImport
+  );
+
   return (
     <div>
-      {activeNpmrdsTravelTimesMetadataTable(activeNpmrdsTravelTimesDamaView)}
-      {importSelectionTable(
-        activeNpmrdsTravelTimesDamaView,
-        importViewsByMonthByYearByState,
-        selectedImports,
-        toggleImport
-      )}
-      {Button}
+      {metaTable}
+      {importsTable}
+      {updateButton}
     </div>
   );
 }
