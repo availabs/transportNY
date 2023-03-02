@@ -481,6 +481,52 @@ function importSelectionTable(
   return table;
 }
 
+export function InvariantViolationsFeedbackTable(invariantViolations) {
+  console.log(invariantViolations);
+  if (!(Array.isArray(invariantViolations) && invariantViolations.length)) {
+    return "";
+  }
+
+  const rows = invariantViolations.map((violation) => (
+    <tr key={violation} style={{ border: "1px solid" }}>
+      <td>{violation}</td>
+    </tr>
+  ));
+
+  return (
+    <table
+      className="w-2/3"
+      style={{
+        margin: "40px auto",
+        textAlign: "center",
+        border: "1px solid",
+        borderColor: "back",
+      }}
+    >
+      <thead
+        style={{
+          color: "black",
+          backgroundColor: "red",
+          fontWeight: "bolder",
+          textAlign: "center",
+          marginTop: "40px",
+          fontSize: "20px",
+          border: "1px solid",
+          borderColor: "black",
+        }}
+      >
+        <tr>
+          <th style={{ border: "1px solid", borderColor: "black" }}>
+            {" "}
+            NPMRDS Travel Times Invariant Violations
+          </th>
+        </tr>
+      </thead>
+      <tbody style={{ border: "1px solid" }}>{rows}</tbody>
+    </table>
+  );
+}
+
 export default function ActiveNpmrdsTravelTimesViewSummary() {
   const [activeNpmrdsTravelTimesDamaView, setActiveNpmrdsTravelTimesDamaView] =
     useState(undefined);
@@ -489,6 +535,8 @@ export default function ActiveNpmrdsTravelTimesViewSummary() {
     useState(undefined);
 
   const [selectedImports, setSelectedImports] = useState(new Set());
+
+  const [invariantViolations, setInvariantViolations] = useState(null);
 
   // Used to trigger a page reload after updating the Authoritative Travel Times Imports.
   // https://stackoverflow.com/a/55862077/3970755
@@ -505,6 +553,7 @@ export default function ActiveNpmrdsTravelTimesViewSummary() {
       newSelectedImports.add(view_id);
     }
 
+    setInvariantViolations(null);
     setSelectedImports(newSelectedImports);
   };
 
@@ -523,21 +572,40 @@ export default function ActiveNpmrdsTravelTimesViewSummary() {
     })();
   }, [pgEnv, tick]);
 
-  const updateButton = selectedImports.size ? (
-    <button
-      style={{ backgroundColor: "green" }}
-      className="text-white font-bold py-2 px-4 border rounded"
-      onClick={async () => {
-        await updateAuthoritativeImports(pgEnv, selectedImports);
-        setSelectedImports(new Set());
-        setTick(tick + 1);
-      }}
-    >
-      Make Selected Imports Authoritative
-    </button>
-  ) : (
-    ""
-  );
+  const hasViolations =
+    Array.isArray(invariantViolations) && invariantViolations.length;
+
+  const updateButton =
+    selectedImports.size && !hasViolations ? (
+      <button
+        style={{ backgroundColor: "green" }}
+        className="text-white font-bold py-2 px-4 border rounded"
+        onClick={async () => {
+          try {
+            await updateAuthoritativeImports(pgEnv, selectedImports);
+            setSelectedImports(new Set());
+            setTick(tick + 1);
+          } catch (err) {
+            const { message = "ERROR" } = err;
+
+            if (/^INVARIANT VIOLATIONS:/.test(message)) {
+              const violations = message
+                .split(/\n/)
+                .slice(1)
+                .map((s) => s.replace(/^[^a-z0-9]*/i, ""));
+
+              return setInvariantViolations(violations);
+            }
+
+            setInvariantViolations([message]);
+          }
+        }}
+      >
+        Make Selected Imports Authoritative
+      </button>
+    ) : (
+      ""
+    );
 
   const metaTable = activeNpmrdsTravelTimesMetadataTable(
     activeNpmrdsTravelTimesDamaView
@@ -549,11 +617,15 @@ export default function ActiveNpmrdsTravelTimesViewSummary() {
     toggleImport
   );
 
+  const invariantViolationsTable =
+    InvariantViolationsFeedbackTable(invariantViolations);
+
   return (
     <div>
       {metaTable}
       {importsTable}
       {updateButton}
+      {invariantViolationsTable}
     </div>
   );
 }
