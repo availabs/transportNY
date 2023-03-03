@@ -10,3 +10,6 @@
 [submodule "src/modules/ams"]
 	path = src/modules/ams
 	url = git@github.com:availabs/ams.git
+[submodule "src/pages/DataManagerClient"]
+	path = src/pages/DataManagerClient
+	url = git@github.com:availabs/DataManagerClient.git
