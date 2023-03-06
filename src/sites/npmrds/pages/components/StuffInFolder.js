@@ -13,7 +13,7 @@ import {
   // Select
 } from "modules/avl-components/src"
 
-import { FolderStuff, stuffSorter } from "./Stuff"
+import { FolderStuff, getStuffSorter } from "./Stuff"
 import { Link } from 'react-router-dom'
 import FolderModal from "./FolderModal"
 import ActionBar from "./ActionBar"
@@ -72,6 +72,11 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
   }, [falcor, falcorCache, folder, filter]);
 
   React.useEffect(() => {
+    if (!folder) {
+      setStuff([]);
+      return;
+    }
+
     const stuff = get(falcorCache, ["folders2", "stuff", folder.id, "value"], [])
       .map(s => {
         switch (s.stuff_type) {
@@ -102,7 +107,7 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
                   filter.includes(s.stuff_type) ||
                   ((filter === "reports") && (s.stuff_type === "template"))
       )
-      .sort(stuffSorter);
+      .sort(getStuffSorter(folder));
 
     setStuff(stuff);
   }, [falcorCache, folder, filter]);

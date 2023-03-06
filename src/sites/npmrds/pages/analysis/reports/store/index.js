@@ -138,7 +138,7 @@ const getTemplateData = templateId =>
         'default_type'
       ]
     ]
-  )
+  ).then(res => console.log("RES:", res))
 const getTemplateIdByType = defaultType =>
 	falcorGraph.get(
 		['templates2', 'defaultType', defaultType, 'id']
@@ -1608,6 +1608,8 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
 
 	const falcorCache = falcorGraph.getCache(),
     template = get(falcorCache, `templates2.id.${ templateId }`, {});
+
+console.log("LOAD TEMPLATE:", template);
 
 	let name = template.name,
 	  description = template.description,

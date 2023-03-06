@@ -361,7 +361,7 @@ class ReportBase extends React.Component {
     const width = node.clientWidth;
     const height = node.clientHeight;
 
-const nodeRect = node.getBoundingClientRect();
+    const nodeRect = node.getBoundingClientRect();
 
     const options = {
       width, height: width,
@@ -471,6 +471,8 @@ const nodeRect = node.getBoundingClientRect();
 
     const isNetwork = this.props.route_comps
         .reduce((a, c) => a || (c.colltype === "network"), false);
+
+// console.log("REPORT BASE FOLDER:", this.props.folder)
 
     return (
       <div style={ { position: "relative" } }>
@@ -955,6 +957,8 @@ const TemplateModal = props => {
     });
   }, []);
 
+// console.log("TEMPLATE STATE", state);
+
   React.useEffect(() => {
     if (!props.show && !deepequal(state, props.template)) {
       dispatch({
@@ -976,7 +980,9 @@ const TemplateModal = props => {
     props.onHide();
   }, [props.onHide]);
 
-  const disabled = false;
+  const disabled = React.useMemo(() => {
+    return !(state.name && state.folder);
+  }, [state]);
 
   return (
     <Modal isOpen={ props.show }>
@@ -1057,145 +1063,6 @@ const TemplateModal = props => {
       </div>
     </Modal>
   )
-}
-
-class TemplateModalOld extends React.Component {
-  state = {
-    ...this.props.report,
-    defaultType: "none"
-  }
-  componentDidUpdate(oldProps) {
-    const {
-      defaultType,
-      ...report
-    } = this.state;
-    if ((!this.props.show && !deepequal(report, this.props.report)) ||
-        (oldProps.defaultTypes.length !== this.props.defaultTypes.length)) {
-      this.setState({
-        ...this.props.report,
-        defaultType: this.props.defaultTypes.includes(this.props.templateId) && get(this.props.user, 'groups', []).includes("AVAIL") ? this.props.templateId : "none"
-      });
-    }
-  }
-  onChange(update) {
-    if ((update.type === "personal") && (this.state.type !== "personal")) {
-      update = {
-        ...update,
-        owner: this.props.user.id
-      }
-    }
-    else if ((update.type === "group") && (this.state.type !== "group")) {
-      update = {
-        ...update,
-        owner: this.props.user.groups[0]
-      }
-    }
-    else if ((update.type === "public") && (this.state.type !== "public")) {
-      update = {
-        ...update,
-        owner: this.props.user.id
-      }
-    }
-    else if (update.defaultType && (update.defaultType !== "none")) {
-      update = {
-        ...update,
-        type: "public",
-        owner: this.props.user.id
-      }
-    }
-    this.setState(update);
-  }
-  onSave() {
-    return this.props.saveTemplate(this.state, this.props.templateId);
-  }
-  onSaveAs() {
-    return this.props.saveTemplate(this.state);
-  }
-
-  render() {
-    return (
-      <Modal show={ this.props.show }
-        onHide={ this.props.onHide }
-        actions={
-          [
-            { label: this.props.templateId === null ? "Save Template" : "Save Changes",
-              action: this.onSave.bind(this),
-              type: "success" },
-            { label: "Save As New Template",
-              action: this.onSaveAs.bind(this),
-              type: "success" }
-          ].filter(({ label }) => (label !== "Save As New Template") || this.props.templateId)
-        }>
-
-        <div>
-          <label>Template Title</label>
-          <Input type="text"
-            onChange={ e => this.onChange({ name: e.target.value }) }
-            value={ this.state.name }/>
-        </div>
-
-        <div>
-          <label>Template Description</label>
-          <textarea placeholder="enter a description"
-            onChange={ e => this.onChange({ description: e.target.value }) }
-            value={ this.state.description }
-            rows="5"/>
-        </div>
-
-        <div>
-          <label>Template Type</label>
-          <Select
-            disabled={ this.state.defaultType !== "none" }
-            multiSelect={ false }
-            searchable={ false }
-            selectedItems={ this.state.type }
-            options={ ["personal", "group", "public"] }
-            displayOption={ d => d }
-            getOptionValue={ d => d }
-            onChange={ type => this.onChange({ type }) }/>
-        </div>
-
-        <div>
-          <label>Template Owner</label>
-          <Select
-            disabled={ (this.state.type === "personal") || (this.state.type === "public") }
-            multiSelect={ false }
-            searchable={ false }
-            selectedItems={ this.state.owner }
-            options={ [...this.props.user.groups] }
-            displayOption={ d => this.state.type !== "group" ? "self" : d }
-            getOptionValue={ d => d }
-            onChange={ group => this.onChange({ group }) }/>
-        </div>
-
-        <div style={ {
-            display: "flex",
-            alignItems: "center"
-          } }>
-          <label style={ { width: "45%" } }>Save Years As Recent</label>
-          <Input type="checkbox"
-            style={ { height: "1.25rem", width: "1.25rem" } }
-            checked={ this.state.saveYearsAsRecent }
-            onChange={ e => this.onChange({ saveYearsAsRecent: e.target.checked }) }/>
-        </div>
-
-        { !get(this.props.user, 'groups', []).includes("AVAIL") ? null :
-          <div>
-            <label>Default Type</label>
-            <Select
-              multiSelect={ false }
-              searchable={ false }
-              selectedItems={ this.state.defaultType }
-              options={ this.props.defaultTypes }
-              displayOption={ d => d }
-              getOptionValue={ d => d }
-              onChange={ defaultType => this.onChange({ defaultType }) }/>
-          </div>
-        }
-
-      </Modal>
-    )
-  }
 }
 
 const LoadModal = props => {
