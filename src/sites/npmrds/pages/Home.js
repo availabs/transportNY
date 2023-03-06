@@ -19,10 +19,10 @@ const Home = () => (
 const config = {
   name:'Home',
   icon: 'fa fa-home',
-  path: "/",
+  path: "/folders-home",
   exact: true,
   auth: true,
-  mainNav: true,
+  mainNav: false,
   sideNav: {
     color: 'dark',
     size: 'compact'

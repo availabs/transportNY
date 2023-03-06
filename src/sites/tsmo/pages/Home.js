@@ -103,7 +103,7 @@ const config = {
   // icon: 'fa-duotone fa-home',
   path: "/",
   exact: true,
-  auth: false,
+  auth: true,
   mainNav: false,
   sideNav: {
     color: 'dark',

@@ -1,28 +1,20 @@
 const FocusAnalysisConfig = [
-  { title: "Events",
-    Templates: [
-      { title: "Single Day",
-        description: "",
-        id: 225
-      }
-    ]
-  },
+
   { title: "Behavioral",
     Templates: [
-      { title: "Seasonality",
-        description: "",
-        id: 225
-      },
-      { title: "Holidays",
-        description: "",
-        id: 225
-      },
-      { title: "Weekly Average",
-        description: "",
-        id: 225
-      },
       { title: "Snapshot",
-        description: "",
+        id: 246
+      },
+      { title: "Seasonality",
+        id: 247
+      },
+      { title: "Bi-directional",
+        id: 228
+      },
+      /*{ title: "Holidays",
+        id: 225
+      },*/
+      { title: "Weekly Average",
         id: 225
       }
     ]
@@ -30,22 +22,32 @@ const FocusAnalysisConfig = [
   { title: "Before & After",
     Templates: [
       { title: "Single Route",
-        description: "",
-        id: 225
+        id: 221
       }
     ]
   },
   { title: "Change Over Time",
     Templates: [
       { title: "Year Over Year",
-        description: "",
-        id: 225
+        id: 244
       },
       { title: "This Month vs. Last Month vs. Last Year",
-        description: "",
-        id: 225
+        id: 239
+      },
+      { title: "Monthly Congestion",
+        id: 207
+      },
+      { title: "Monthly Speed Comparisons",
+        id: 77
+      },
+    ]
+  },
+  { title: "Events",
+    Templates: [
+      { title: "Single Day (Advanced)",
+        id: 245
       }
     ]
-  }
+  },
 ];
 export default FocusAnalysisConfig;

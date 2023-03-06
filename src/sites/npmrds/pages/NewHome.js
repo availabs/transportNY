@@ -24,7 +24,7 @@ import FocusAnalysis from "./FocusAnalysis.config"
 
 const Title = ({ children }) => {
   return (
-    <div className="mb-2 text-3xl font-bold border-b-2 border-current">
+    <div className="mb-2 text-2xl font-bold text-gray-800 border-current">
       { children }
     </div>
   )
@@ -32,11 +32,11 @@ const Title = ({ children }) => {
 
 const Section = ({ title, children }) => {
   return (
-    <div className="mb-1">
-      <div className="text-xl pl-2 font-bold w-3/4 border-b border-current">
+    <div className="pb-6">
+      <div className="text-xl font-bold w-3/4  border-current">
         { title }
       </div>
-      <div className="ml-4">
+      <div className="">
         { children }
       </div>
     </div>
@@ -51,14 +51,15 @@ const TemplateSelector = ({ id, title, onClick, children }) => {
     <div onClick={ doOnClick }
       className="cursor-pointer"
     >
-      <span className="fad fa-file-invoice text-lime-500 text-sm mr-1"/>{ children }
+      <span className="fad fa-file-invoice text-lime-500 text-2xl mr-1"/>
+      <span>{title[1]}</span>
     </div>
   )
 }
 const ReportLink = ({ id, name }) => {
   return (
     <Link to={ `/report/edit/${ id }`}>
-      <div>
+      <div className=''>
         <span className="fad fa-file-chart-line text-blue-500 text-sm mr-1"/>
         { name }
         <span className="fa fa-up-right-from-square ml-1"/>
@@ -100,7 +101,7 @@ const Home = () => {
 
   return (
     <div className="max-w-6xl mx-auto my-8">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 bg-white p-10">
 
         <div>
           <Title>
@@ -109,7 +110,7 @@ const Home = () => {
           { FocusAnalysis.map(({ title, Templates }) => {
               return (
                 <Section key={ title } title={ title }>
-                  { Templates.map(t => {
+                  { Templates.map((t,i) => {
                       return (
                         <TemplateSelector key={ t.title }
                           onClick={ setTemplateData }
@@ -630,9 +631,9 @@ const TemplateModal = ({ templateId, templateTitle = [], close }) => {
 }
 
 const config = {
-  name:'New Home',
+  name:'Home',
   icon: 'fa fa-home',
-  path: "/new-home",
+  path: "/",
   exact: true,
   auth: true,
   mainNav: true,
