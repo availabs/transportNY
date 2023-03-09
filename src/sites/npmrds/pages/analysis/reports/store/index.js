@@ -832,16 +832,21 @@ export const copyRouteCompSettings = (compId, keys = []) =>
 export const updateRouteData = routeData =>
   (dispatch, getState) => {
     const { routes } = getState().report;
-    dispatch({
-      type: UPDATE_STATE,
-      state: {
-        routes: routes.map(r => {
-          return {
-            ...r,
-            data: { ...r.data, ...get(routeData, r.compId, {}) }
-          };
+    const updatedRoutes = [];
+    routes.forEach(r => {
+      if (r.compId in routeData) {
+        updatedRoutes.push({
+          ...r,
+          data: { ...r.data, ...get(routeData, r.compId, {}) }
         })
       }
+      else {
+        updatedRoutes.push(r);
+      }
+    })
+    dispatch({
+      type: UPDATE_STATE,
+      state: { routes: updatedRoutes }
     })
   }
 export const updateStationData = stationData =>
