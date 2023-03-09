@@ -86,24 +86,21 @@ const Icon = styled.span`
 `
 
 class ActiveStationComponents extends React.Component {
-	state = {
-		openCompId: null,
-		open: true
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			openCompId: null,
+			open: true
+		}
+		this.headerRef = React.createRef();
+
+		this.extendSidebar = this.extendSidebar.bind(this);
 	}
+
 	extendSidebar(openCompId) {
 		this.props.extendSidebar(openCompId)
 		this.setState({ openCompId })
-	}
-	add(e, stationId) {
-		e.stopPropagation();
-		this.props.add(stationId);
-	}
-	remove(e, compId) {
-		e.stopPropagation();
-		if (compId === this.state.openCompId) {
-			this.setState({ openCompId: null });
-		}
-		this.props.remove(compId);
 	}
 	onDragEnd({ source, destination }) {
 		if (destination === null) return;
@@ -113,29 +110,31 @@ class ActiveStationComponents extends React.Component {
 	}
   render() {
 
+		const headerHeight = get(this.headerRef, ["current", "clientHeight"], 0);
+		const height = `calc(100% - ${ headerHeight }px)`;
+
     return (
 			<div style={ {
-        padding: "10px",
+        padding: "0px 10px",
         whiteSpace: "nowrap",
-        display: "flex",
-        flexDirection: "column"
+				position: "relative",
+				height: "100%",
+				maxHeight: "100%"
       } }>
 
-				<Header>
-					<OpenCloseButton>
-						<span onClick={ e => {
-							e.stopPropagation();
-							this.setState(state => ({ open: !state.open }));
-						} } className={ `fa fa-${ this.state.open ? "minus" : "plus" }` }/>
-					</OpenCloseButton>
-					<h4>Stations</h4>
-				</Header>
+				<div id="station-comps-header"
+					ref={ this.headerRef }
+				>
 
-				<div style={ {
-					height: this.state.open ? "auto" : "0px",
-					overflow: this.state.open ? "visible" : "hidden",
-          flexGrow: 1
-				} }>
+					<Header>
+						<OpenCloseButton>
+							<span onClick={ e => {
+								e.stopPropagation();
+								this.setState(state => ({ open: !state.open }));
+							} } className={ `fa fa-${ this.state.open ? "minus" : "plus" }` }/>
+						</OpenCloseButton>
+						<h4>Stations</h4>
+					</Header>
 
 					<div style={ { borderBottom: `2px solid currentColor` } }>
 						<ControlBox>
@@ -158,7 +157,18 @@ class ActiveStationComponents extends React.Component {
 							</Control>
 						</ControlBox>
 					</div>
-          <div style={ { position: "relative", display: "block" } }>
+
+				</div>
+
+				<div
+					style={ {
+						height: this.state.open ? height : "0px",
+						maxHeight: height,
+						overflow: this.state.open ? "auto" : "hidden"
+					} }
+				>
+
+          <div id="station-comps-container">
 						<DragDropContext onDragEnd={ this.onDragEnd.bind(this) }>
 							<Droppable droppableId="drop-area">
 								{ (provided, snapshot) => (
@@ -169,31 +179,19 @@ class ActiveStationComponents extends React.Component {
 
 			    					{
 											this.props.station_comps.map((station, i) =>
-												<Draggable key={ station.compId } index={ i } draggableId={ station.compId }>
+												<Draggable key={ station.compId }
+													index={ i } draggableId={ station.compId }
+												>
 													{ (provided, snapshot) => (
 														<div ref={ provided.innerRef }
 															{ ...provided.draggableProps }>
 
-								                <div key={ station.compId }
-								                  style={ { height: "27px", position: "relative" } }>
-								                  <ActiveStationItem
-								                    color={ station.color }
-								                    hoverColor={ hexColorToRgb(station.color, 0.5) }
-								                    onClick={ e => this.extendSidebar(station.compId) }>
-								                    { station.name }
-								                  </ActiveStationItem>
-																	<DragHandle { ...provided.dragHandleProps }
-																		className={ snapshot.isDragging ? "isDragging" : "" }
-																		color={ station.color }>
-																		<span className="fa fa-ellipsis-vertical"/>
-																	</DragHandle>
-								                  <div style={ { position: "absolute", top: "2px", right: "10px" } }>
-								                    <Icon className="fa fa-plus"
-								                      onClick={ e => this.props.addStationComp(station.stationId) }/>
-								                    <Icon className="fa fa-minus"
-								                      onClick={ e => this.props.removeStationComp(station.compId) }/>
-								                  </div>
-								                </div>
+																<StationComp station={ station }
+																	extendSidebar={ this.extendSidebar }
+																	dragHandleProps={ provided.dragHandleProps }
+																	isDragging={ snapshot.isDragging }
+																	add={ this.props.addStationComp }
+																 	remove={ this.props.removeStationComp }/>
 
 														</div>
 													) }
@@ -216,18 +214,113 @@ class ActiveStationComponents extends React.Component {
 }
 export default ActiveStationComponents
 
-const DragHandle = styled.div`
-	position: absolute;
-	top: 0px;
-	left: 0px;
+const CompContainerDiv = styled.div`
 	color: ${ props => props.color };
-	height: 24px;
+
+	:hover {
+		background-color: ${ props => props.hoverColor };
+	}
+`
+
+const DragHandle = styled.div`
+	width: 26px;
+	padding: 0.25rem 0rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: ${ props => props.color };
 	border-radius: 4px;
 	transition: color 0.15s, background-color 0.15s;
 
 	:hover,
 	&.isDragging {
 		background-color: ${ props => props.color };
-		color: ${ props => props.theme.sidePanelBg };
+		color: white;
 	}
 `
+
+const CompContainer = props => {
+	const {
+		color = "#666666",
+		dragHandleProps,
+		isDragging,
+		onClick = null,
+		children
+	} = props;
+
+	const hoverColor = React.useMemo(() => {
+		return hexColorToRgb(color, 0.5)
+	}, [color]);
+
+	return (
+		<CompContainerDiv
+			className="flex cursor-pointer items-center"
+			color={ color }
+			hoverColor={ hoverColor }
+			onClick={ onClick }
+		>
+			<DragHandle { ...dragHandleProps }
+				className={ isDragging ? "isDragging" : "" }
+				color={ color }
+			>
+				<span className="fa fa-ellipsis-vertical"/>
+			</DragHandle>
+			<div className="flex-1 ml-1 overflow-hidden">
+				{ children }
+			</div>
+		</CompContainerDiv>
+	)
+}
+
+const StationComp = props => {
+
+	const {
+		station,
+		extendSidebar,
+		dragHandleProps,
+		isDragging,
+		add,
+	 	remove
+	} = props;
+
+	const extend = React.useCallback(e => {
+		extendSidebar(station.compId);
+	}, [extendSidebar, station.compId]);
+
+	const doAdd = React.useCallback(e => {
+		e.stopPropagation();
+		add(station.stationId);
+	}, [station.stationId, add]);
+	const doRemove = React.useCallback(e => {
+		e.stopPropagation();
+		remove(station.compId);
+	}, [station.compId, remove]);
+
+	return (
+		<CompContainer color={ station.color }
+			dragHandleProps={ dragHandleProps }
+			isDragging={ isDragging }
+			onClick={ extend }
+		>
+			<div className="relative flex">
+				<div className="overflow-hidden text-ellipsis flex-1">
+					{ station.name }
+				</div>
+				<div className="grid grid-cols-2 gap-1 flex-0">
+					<div style={ { width: "26px" } }
+						className={ `
+							fa fa-plus hover:bg-gray-500 hover:text-white
+							rounded flex justify-center items-center cursor-pointer
+						` }
+						onClick={ doAdd }/>
+					<div style={ { width: "26px" } }
+						className={ `
+							fa fa-minus hover:bg-gray-500 hover:text-white
+							rounded flex justify-center items-center cursor-pointer
+						` }
+						onClick={ doRemove }/>
+				</div>
+			</div>
+		</CompContainer>
+	)
+}

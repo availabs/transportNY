@@ -489,20 +489,32 @@ const FolderStuff = ({ type, ...props }) => {
 const StuffOrder = {
   folder: 0,
   report: 1,
-  template: 2,
-  route: 3
+  template: 1,
+  route: 2
 }
 
-const stuffSorter = (a, b) => {
-  if (a.stuff_type === b.stuff_type) {
-    const aDate = new Date(a.updated_at);
-    const bDate = new Date(b.updated_at);
-    return bDate - aDate;
+const getStuffSorter = ({ type }) => {
+  if (type === "AVAIL") {
+    return (a, b) => {
+      if (a.stuff_type === b.stuff_type) {
+        return get(a, "name", "").localeCompare(get(b, "name", ""));
+      }
+      return StuffOrder[a.stuff_type] - StuffOrder[b.stuff_type];
+    }
   }
-  return StuffOrder[a.stuff_type] - StuffOrder[b.stuff_type];
+  return (a, b) => {
+    const aOrder = StuffOrder[a.stuff_type];
+    const bOrder = StuffOrder[b.stuff_type];
+    if (aOrder === bOrder) {
+      const aDate = new Date(a.updated_at);
+      const bDate = new Date(b.updated_at);
+      return bDate - aDate;
+    }
+    return aOrder - bOrder;
+  }
 }
 
-export { Stuff, FolderStuff, stuffSorter }
+export { Stuff, FolderStuff, getStuffSorter }
 
 const DefaultFoldersByType = [
   { type: "User Folders", folders: [] },
@@ -583,6 +595,7 @@ const RouteSelector = ({ onClick, selectedRoutes, children }) => {
 
   React.useEffect(() => {
     if (!Folder) return;
+
     const stuff = get(falcorCache, ["folders2", "stuff", Folder.id, "value"], []);
     const [folders, routes] = stuff.reduce((a, c) => {
       if (c.stuff_type === "folder") {
@@ -607,7 +620,11 @@ const RouteSelector = ({ onClick, selectedRoutes, children }) => {
   }, [falcor, falcorCache, Folder]);
 
   React.useEffect(() => {
-    if (!Folder) return;
+    if (!Folder) {
+      setStuff([]);
+      return;
+    }
+
     const stuff = get(falcorCache, ["folders2", "stuff", Folder.id, "value"], [])
       .filter(s => ["folder", "route"].includes(s.stuff_type))
       .map(s => {
@@ -626,7 +643,7 @@ const RouteSelector = ({ onClick, selectedRoutes, children }) => {
           });
         }
       })
-      .sort(stuffSorter);
+      .sort(getStuffSorter(Folder));
     setStuff(stuff);
   }, [falcorCache, Folder]);
 
@@ -839,12 +856,20 @@ const StuffContainer = ({ description, updated_at, children, ...rest }) => {
   )
 }
 
-const ThumbnailPlaceholder = () => {
+export const ThumbnailPlaceholder = () => {
   return (
-    <div style={ { width: "50px", height: "50px" } }
-      className="flex items-center justify-center"
+    <span className="fa fa-notdef text-2xl"/>
+  )
+}
+export const ThumbnailContainer = ({ children }) => {
+  return (
+    <div className="flex items-center justify-center bg-gray-200"
+      style={ {
+        width: "50px", height: "50px",
+        minWidth: "50px", minHeight: "50px"
+      } }
     >
-      <span className="fa fa-notdef text-2xl"/>
+      { children }
     </div>
   )
 }
@@ -1069,17 +1094,15 @@ const FolderStuffContainer = props => {
     setImOpen(false);
   }, []);
 
-console.log("THUMBNAIL:", thumbnail);
-
   return (
     <div className="flex items-center border-b px-1 hover:bg-blue-50 py-1">
       { !showThumbnail ? null :
-          <div className="flex-0 bg-gray-200">
-            { ! thumbnail ?
-                <ThumbnailPlaceholder /> :
-                <img src={ thumbnail }/>
-            }
-          </div>
+        <ThumbnailContainer>
+          { ! thumbnail ?
+              <ThumbnailPlaceholder /> :
+              <img src={ thumbnail }/>
+          }
+        </ThumbnailContainer>
       }
       <div className="flex-1">
         <div className="font-medium text-gray-600">

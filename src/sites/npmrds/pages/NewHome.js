@@ -13,7 +13,12 @@ import {
 import { Modal } from "sites/npmrds/components"
 
 import FolderIcon from "./components/FolderIcon"
-import { Stuff } from "./components/Stuff"
+import {
+  Stuff,
+  ThumbnailContainer,
+  ThumbnailPlaceholder,
+  getStuffSorter
+} from "./components/Stuff"
 
 import FocusAnalysis from "./FocusAnalysis.config"
 
@@ -44,9 +49,9 @@ const TemplateSelector = ({ id, title, onClick, children }) => {
   }, [id, title, onClick]);
   return (
     <div onClick={ doOnClick }
-      className="cursor-pointer" 
+      className="cursor-pointer"
     >
-      <span className="fad fa-file-invoice text-lime-500 text-2xl mr-1"/>
+      <span className="fad fa-file-invoice text-lime-500 text-sm mr-1"/>
       <span>{title[1]}</span>
     </div>
   )
@@ -107,13 +112,16 @@ const Home = () => {
                 <Section key={ title } title={ title }>
                   { Templates.map((t,i) => {
                       return (
-                        <div key={i} className={'py-0.5 text-xl'}>
-                          <TemplateSelector key={ t.title }
-                            onClick={ setTemplateData }
-                            title={ [title, t.title] }
-                            id={ t.id }
-                          />
-                        </div>
+                        <TemplateSelector key={ t.title }
+                          onClick={ setTemplateData }
+                          title={ [title, t.title] }
+                          id={ t.id }
+                        >
+                          { t.title }
+                          <div className="text-sm italic ml-2">
+                            { t.description }
+                          </div>
+                        </TemplateSelector>
                       )
                     })
                   }
@@ -303,16 +311,6 @@ const FolderSelector = ({ Folder, folders, foldersByType, OpenedFolders, setOpen
   )
 }
 
-const ThumbnailPlaceholder = () => {
-  return (
-    <div style={ { width: "50px", height: "50px" } }
-      className="flex items-center justify-center"
-    >
-      <span className="fa fa-notdef text-2xl"/>
-    </div>
-  )
-}
-
 const DefaultFoldersByType = [
   { type: "User Folders", folders: [] },
   { type: "Group Folders", folders: [] },
@@ -324,22 +322,6 @@ const getDefaultFoldersByType = () => ([
   { type: "Group Folders", folders: [] },
   { type: "Default Folders", folders: [] }
 ])
-
-const StuffOrder = {
-  folder: 0,
-  report: 1,
-  template: 2,
-  route: 3
-}
-
-const stuffSorter = (a, b) => {
-  if (a.stuff_type === b.stuff_type) {
-    const aDate = new Date(a.updated_at);
-    const bDate = new Date(b.updated_at);
-    return bDate - aDate;
-  }
-  return StuffOrder[a.stuff_type] - StuffOrder[b.stuff_type];
-}
 
 const TemplateLoader = ({ id, title }) => {
 
@@ -433,6 +415,7 @@ const TemplateLoader = ({ id, title }) => {
 
   React.useEffect(() => {
     if (!Folder) return;
+
     const stuff = get(falcorCache, ["folders2", "stuff", Folder.id, "value"], []);
     const [folders, routes] = stuff.reduce((a, c) => {
       if (c.stuff_type === "folder") {
@@ -457,7 +440,10 @@ const TemplateLoader = ({ id, title }) => {
   }, [falcor, falcorCache, Folder]);
 
   React.useEffect(() => {
-    if (!Folder) return;
+    if (!Folder) {
+      setStuff([]);
+      return;
+    }
     const stuff = get(falcorCache, ["folders2", "stuff", Folder.id, "value"], [])
       .filter(s => ["folder", "route"].includes(s.stuff_type))
       .map(s => {
@@ -476,7 +462,7 @@ const TemplateLoader = ({ id, title }) => {
           });
         }
       })
-      .sort(stuffSorter);
+      .sort(getStuffSorter(Folder));
     setStuff(stuff);
   }, [falcorCache, Folder]);
 
@@ -517,11 +503,12 @@ const TemplateLoader = ({ id, title }) => {
   }, [template, totalRoutes, selectedRoutes]);
 
   const routes = React.useMemo(() => {
-    return stuff.filter(s => s.type === "route")
+    const routes = stuff.filter(s => s.type === "route")
       .filter(r => !selectedRoutes.reduce((a, c) => {
         return a || (r.id === c.id);
       }, false));
-  }, [stuff, selectedRoutes]);
+    return routes;
+  }, [Folder, stuff, selectedRoutes]);
 
   return (
     <div className="grid grid-cols-1 gap-2">
@@ -536,13 +523,13 @@ const TemplateLoader = ({ id, title }) => {
       { !template ? null :
         <>
           <div className="flex items-center">
-            <div className="flex-0 bg-gray-200 mr-1">
-              { ! get(template, "thumbnail") ?
+            <ThumbnailContainer>
+              { !get(template, "thumbnail") ?
                   <ThumbnailPlaceholder /> :
                   <img src={ get(template, "thumbnail") }/>
               }
-            </div>
-            <div>
+            </ThumbnailContainer>
+            <div className="ml-1">
               <div>
                 { get(template, "name") }
               </div>

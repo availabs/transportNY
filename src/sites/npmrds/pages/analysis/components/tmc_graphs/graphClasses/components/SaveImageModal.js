@@ -9,6 +9,8 @@ import get from "lodash.get"
 import { saveSvgAsPng } from "save-svg-as-png"
 import * as d3 from "d3-selection"
 import styled from "styled-components"
+import { toPng } from "html-to-image"
+import download from "downloadjs"
 
 class SaveImageModalOld extends React.Component {
   state = {
@@ -54,25 +56,40 @@ class SaveImageModalOld extends React.Component {
 }
 
 const SaveImageModal = props => {
-  const { show, onHide } = props;
+  const { show, onHide, setSavingImage } = props;
 
   const close = React.useCallback(e => {
     e.stopPropagation();
     onHide();
   }, [onHide]);
 
-  const [title, setTitle] = React.useState(props.title.replace(/\s/g, "_"))
+  const [title, _setTitle] = React.useState(props.title.replace(/\s/g, "_"))
+  const setTitle = React.useCallback(e => {
+    e.stopPropagation();
+    _setTitle(e.target.value);
+  }, []);
 
   const saveImage = React.useCallback(e => {
     e.stopPropagation();
-    const svg = d3.select(`div#${ props.id } svg`).node();
-
-console.log("SVG:", svg)
-
-    if (!svg) return;
-    saveSvgAsPng(svg, title, { backgroundColor: "#ddd" })
-      .then(() => onHide());
-  }, [onHide, title]);
+    const div = d3.select(`div#${ props.id }-graph-container`).node();
+    setSavingImage(true);
+    onHide();
+    toPng(div)
+      .then(dataUrl => {
+        download(dataUrl, title);
+      })
+      .then(() => {
+        setSavingImage(false);
+      })
+//     const svg = d3.select(`div#${ props.id } svg`).node();
+//     if (!svg) {
+//       const canvas = d3.select(`div#${ props.id } canvas.mapboxgl-canvas`).node();
+// console.log("CANVAS:", canvas.toDataURL());
+//       return;
+//     }
+//     saveSvgAsPng(svg, title, { backgroundColor: "#ddd" })
+//       .then(() => onHide());
+}, [onHide, title, setSavingImage]);
 
   return (
     <Modal open={ show }>
@@ -88,8 +105,9 @@ console.log("SVG:", svg)
           <span className="fa fa-close"/>
         </div>
         <div className="font-bold text-2xl">Save Graph as...</div>
-        <div className="flex">
-          <Input type="text"
+        <div>
+          <input type="text"
+            className="w-full max-w-lg px-2 py-1 border-2 rounded mr-1"
             onChange={ setTitle }
             value={ title }/>
           <span>.png</span>

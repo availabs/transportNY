@@ -22,7 +22,7 @@ const dowFormat = dow => {
 };
 const dateFormat = date => {
 	date = date.toString();
-	return `${ date.slice(4, 6) }-${ date.slice(6, 8) }-${ date.slice(0, 4) }`;
+	return `${ +date.slice(4, 6) }-${ +date.slice(6, 8) }-${ +date.slice(0, 4) }`;
 }
 
 const RESOLUTIONS = {

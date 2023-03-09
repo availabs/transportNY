@@ -188,6 +188,7 @@ class RouteLineGraph extends GeneralGraphComp {
 				shouldComponentUpdate={
 					["data", "secondary", "yScale", "secScale"]
 				}
+				strokeWidth={ 1 }
 				xScale={ {
 					type: "point"
 				} }
@@ -205,7 +206,7 @@ class RouteLineGraph extends GeneralGraphComp {
 				} }
 			  axisBottom={ {
 			  	format: resFormat,
-					tickDensity: 2
+					tickDensity: 1
 			  } }
 			  axisLeft={ {
 			    label: dd1.label,

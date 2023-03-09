@@ -269,6 +269,8 @@ export default class HybridGraphComp extends GeneralGraphComp {
 				previewing={ this.props.previewing }
 				title={ this.props.state.title }
 				updateTitle={ this.updateTitle }
+				savingImage={ this.state.savingImage }
+				setSavingImage={ this.setSavingImage }
 				routeComps={ routeComps }
 				displayData={ displayData }
 				type={ this.props.type }

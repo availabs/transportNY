@@ -134,7 +134,8 @@ class GeneralGraphComp extends React.Component {
 			fileName: this.props.state.title || this.props.type,
 			resizing: false,
 			position: { x: 0, y: 0 },
-			direction: "none"
+			direction: "none",
+			savingImage: false
 		}
 
 		this.IS_ACTIVE = false;
@@ -144,6 +145,11 @@ class GeneralGraphComp extends React.Component {
 		this.graphDivRef = React.createRef();
 
 		this.updateTitle = this.updateTitle.bind(this);
+		this.setSavingImage = this.setSavingImage.bind(this);
+	}
+
+	setSavingImage(savingImage) {
+		this.setState({ savingImage });
 	}
 
 	mapRouteComps(routeComps) {
@@ -505,6 +511,8 @@ class GeneralGraphComp extends React.Component {
 				headerData={ this.expandHeaderData(headerData, graphData, routeComps, displayData, resolution) }
 				viewing={ this.props.viewing }
 				previewing={ this.props.previewing }
+				savingImage={ this.state.savingImage }
+				setSavingImage={ this.setSavingImage }
 				type={ this.props.type }
 				updateTitle={ this.updateTitle }
 				title={ this.props.state.title }

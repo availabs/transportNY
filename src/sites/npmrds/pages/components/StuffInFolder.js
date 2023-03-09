@@ -13,7 +13,7 @@ import {
   // Select
 } from "modules/avl-components/src"
 
-import { FolderStuff, stuffSorter } from "./Stuff"
+import { FolderStuff, getStuffSorter } from "./Stuff"
 import { Link } from 'react-router-dom'
 import FolderModal from "./FolderModal"
 import ActionBar from "./ActionBar"
@@ -29,9 +29,9 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
 
   const folder = openedFolders[openedFolders.length - 1];
 
-  // React.useEffect(() => {
-  //   falcor.get(["folders2", "stuff", folder.id])
-  // }, [falcor, folder]);
+  React.useEffect(() => {
+    falcor.get(["folders2", "stuff", folder.id])
+  }, [falcor, folder.id]);
 
   React.useEffect(() => {
     const stuff = get(falcorCache, ["folders2", "stuff", folder.id, "value"], []);
@@ -69,9 +69,14 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
     if (requests.length) {
       falcor.get(...requests);
     }
-  }, [falcor, falcorCache, folder, filter]);
+  }, [falcor, falcorCache, folder.id, filter]);
 
   React.useEffect(() => {
+    if (!folder) {
+      setStuff([]);
+      return;
+    }
+
     const stuff = get(falcorCache, ["folders2", "stuff", folder.id, "value"], [])
       .map(s => {
         switch (s.stuff_type) {
@@ -102,7 +107,7 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
                   filter.includes(s.stuff_type) ||
                   ((filter === "reports") && (s.stuff_type === "template"))
       )
-      .sort(stuffSorter);
+      .sort(getStuffSorter(folder));
 
     setStuff(stuff);
   }, [falcorCache, folder, filter]);
@@ -120,7 +125,7 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
 
   React.useEffect(() => {
     deselectAll();
-  }, [folder, deselectAll]);
+  }, [folder.id, deselectAll]);
 
   const [search, setSearch] = React.useState("");
   const clearSearch = React.useCallback(() => {
@@ -156,9 +161,7 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
                 text-large text-lg hover:text-2xl
               ` }
             >
-              <span className={ `
-                fa fa-close text-blue-500
-              ` }/>
+              <span className={ `fa fa-close text-blue-500` }/>
             </div>
           }
         </div>
@@ -172,22 +175,22 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
           deselectAll={ deselectAll }/>
       </div>
       <div className='bg-white p-4 shadow rounded-sm border border-gray-100 mt-2'>
-      { fuse(search).map((s, i)=> (
-          <FolderStuff key={ i }
-            openedFolders={ openedFolders }
-            setOpenedFolders={ setOpenedFolders }
-            type={ s.stuff_type }
-            id={ s.stuff_id }
-            selected={
-              selectedStuff.reduce((a, c) => {
-                return a || (c.id == s.stuff_id);
-              }, false)
-            }
-            select={ selectStuff }
-            deselect={ deselectStuff }
-            parent={ folder.id }/>
-        ))
-      }
+        { fuse(search).map((s, i)=> (
+            <FolderStuff key={ i }
+              openedFolders={ openedFolders }
+              setOpenedFolders={ setOpenedFolders }
+              type={ s.stuff_type }
+              id={ s.stuff_id }
+              selected={
+                selectedStuff.reduce((a, c) => {
+                  return a || ((c.id == s.stuff_id) && (c.type == s.stuff_type));
+                }, false)
+              }
+              select={ selectStuff }
+              deselect={ deselectStuff }
+              parent={ folder.id }/>
+          ))
+        }
       </div>
     </div>
   )
@@ -513,48 +516,46 @@ const ButtonNew = ({ openedFolders }) => {
     setOpen(false);
   }, []);
   return (
-      <div className='px-2 pt-0.5'>
-        <div className='flex items-center bg-blue-500 border border-lime-300 text-gray-50 rounded-md'
-          onMouseOver={ onMouseOver }
-          onMouseLeave={ onMouseLeave }
-        >
-          <div className='py-2 px-6 text-lg'>Add New</div>
-          <div className="flex items-center justify-center relative">
-            <div className={ `
-                h-10 w-10 rounded
-                flex items-center justify-center
-                text-xl hover:text-3xl cursor-pointer
-              ` }
+    <div className='px-2 pt-0.5'>
+      <div className='flex items-center bg-blue-500 border border-lime-300 text-gray-50 rounded-md'
+        onMouseOver={ onMouseOver }
+        onMouseLeave={ onMouseLeave }
+      >
+        <div className='py-2 px-6 text-lg'>Add New</div>
+        <div className="flex items-center justify-center relative">
+          <div className={ `
+              h-10 w-10 rounded
+              flex items-center justify-center
+              text-xl hover:text-3xl cursor-pointer
+            ` }
+          >
+            <span className="fa fa-caret-down"/>
+          </div>
+          <div className={ `
+              top-[42px] right-0 absolute bg-gray-50 text-gray-600 z-50
+              text-base font-normal whitespace-nowrap
+              ${ show ? "block" : "hidden" } cursor-pointer
+            ` }
+          >
+            <div className="p-2 hover:bg-blue-100 w-40"
+              onClick={ openModal }
             >
-              <span className="fa fa-caret-down"/>
+              <span className="fad fa-folder mr-1 px-2 text-blue-500"/>Sub Folder
             </div>
-            <div className={ `
-                top-[42px] right-0 absolute bg-gray-50 text-gray-600 z-50
-                text-base font-normal whitespace-nowrap
-                ${ show ? "block" : "hidden" } cursor-pointer
-              ` }
-            >
-              <div className="p-2 hover:bg-blue-100 w-40"
-                onClick={ openModal }
-              >
-                <span className="fad fa-folder mr-1 px-2 text-blue-500"/>Sub Folder
-              </div>
+            <div className="p-2 hover:bg-blue-100">
+              <span className="fad fa-road mr-1 px-2 text-blue-500"/>Route
+            </div>
+            <Link to='/report/new'>
               <div className="p-2 hover:bg-blue-100">
-                <span className="fad fa-road mr-1 px-2 text-blue-500"/>Route
+                  <span className="fad fa-chart-column text-blue-500 mr-1 px-2"/>Report
               </div>
-              <Link to='/report/new'>
-                <div className="p-2 hover:bg-blue-100">
-                    <span className="fad fa-chart-column text-blue-500 mr-1 px-2"/>Report
-                </div>
-               </Link>
-            </div>
+             </Link>
           </div>
         </div>
-        <FolderModal isOpen={ open }
-          close={ closeModal }
-          openedFolders={ openedFolders }/>
       </div>
-
-
+      <FolderModal isOpen={ open }
+        close={ closeModal }
+        openedFolders={ openedFolders }/>
+    </div>
   )
 }

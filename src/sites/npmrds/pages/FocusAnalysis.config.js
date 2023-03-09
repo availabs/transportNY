@@ -1,5 +1,5 @@
 const FocusAnalysisConfig = [
-  
+
   { title: "Behavioral",
     Templates: [
       { title: "Snapshot",

@@ -6,7 +6,6 @@ import styled from 'styled-components';
 import get from "lodash.get"
 
 const StyledSidePanelContainer = styled.div`
-  width: ${ props => Boolean(props.isOpen) ? props.width * props.isOpen : 50 }px;
   transition: width 250ms;
   display: flex;
   position: fixed;
@@ -121,9 +120,11 @@ class SideBar extends Component {
     return (
       <StyledSidePanelContainer
         isOpen={ isOpen }
-        width={ width }>
+        style={ {
+          width: `${ isOpen ? width * isOpen : 50 }px`
+        } }>
 
-        <SideBarContainer theme={ theme }
+        <SideBarContainer
           className="side-bar"
           style={ { width: `${ width }px` } }
           left={ horizontalOffset }>
@@ -133,7 +134,7 @@ class SideBar extends Component {
               isOpen={ isOpen > 0 }
               hideInner={ hideInner }>
 
-              <div style={ { width: `100%` } }>
+              <div style={ { width: "100%", height: "100%" } }>
                 { this.props.children }
               </div>
 

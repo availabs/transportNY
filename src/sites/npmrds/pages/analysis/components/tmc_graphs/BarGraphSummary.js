@@ -75,10 +75,11 @@ class BarGraphSummary extends GeneralGraphComp {
 					indexFormat
 				} }
 				axisLeft={ {
-					"label": displayData.label
+					label: displayData.label
 				} }
 				axisBottom={ {
-					"format": indexFormat
+					format: indexFormat,
+					tickDensity: 0.5
 				} }
 				margin={ {
 					top: 20,
