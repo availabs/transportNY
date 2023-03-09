@@ -167,29 +167,67 @@ class Sidebar extends React.Component {
 		const stationHeight = getSectionHeight("station");
 		const graphHeight = getSectionHeight("graph");
 
-		const routeAbove = routeHeight > oneThird ? 1 : 0;
-		const stationAbove = stationHeight > oneThird ? 1 : 0;
-		const graphAbove = graphHeight > oneThird ? 1 : 0;
-
 		const total = routeHeight + stationHeight + graphHeight;
 
-		const numAbove = routeAbove + stationAbove + graphAbove;
+		if (total < max) {
+			return [
+				{ height: null,
+					maxHeight: null
+				},
+				{ height: null,
+					maxHeight: null
+				},
+				{ height: null,
+					maxHeight: null
+				}
+			]
+		}
 
-		const temp = (routeAbove ? 0 : routeHeight)
-								+ (stationAbove ? 0 : stationHeight)
-								+ (graphAbove ? 0 : graphHeight);
+		let available = max;
+		let aboveOneThird = 0;
 
-		const available = max - temp;
+		let routeStyle = null;
+		let stationStyle = null;
+		let graphStyle = null;
+
+		if (routeHeight < oneThird) {
+			available -= routeHeight;
+		}
+		else {
+			aboveOneThird += routeHeight;
+		}
+		if (stationHeight < oneThird) {
+			available -= stationHeight;
+		}
+		else {
+			aboveOneThird += stationHeight;
+		}
+		if (graphHeight < oneThird) {
+			available -= graphHeight;
+		}
+		else {
+			aboveOneThird += graphHeight;
+		}
+
+		if (routeHeight >= oneThird) {
+			routeStyle = available * (routeHeight / aboveOneThird);
+		}
+		if (stationHeight >= oneThird) {
+			stationStyle = available * (stationHeight / aboveOneThird);
+		}
+		if (graphHeight >= oneThird) {
+			graphStyle = available * (graphHeight / aboveOneThird);
+		}
 
 		return [
-			{ height: (total > max) && routeAbove ? `${ available / numAbove }px` : null,
-				maxHeight: (total > max) && routeAbove ? `${ available / numAbove }px` : null
+			{ height: routeStyle,
+				maxHeight: routeStyle
 			},
-			{ height: (total > max) && stationAbove ? `${ available / numAbove }px` : null,
-				maxHeight: (total > max) && stationAbove ? `${ available / numAbove }px` : null
+			{ height: stationStyle,
+				maxHeight: stationStyle
 			},
-			{ height: (total > max) && graphAbove ? `${ available / numAbove }px` : null,
-				maxHeight: (total > max) && graphAbove ? `${ available / numAbove }px` : null
+			{ height: graphStyle,
+				maxHeight: graphStyle
 			}
 		]
 	}
@@ -266,7 +304,7 @@ class Sidebar extends React.Component {
 					>
 
 						<div id="route-comps"
-							className="relative h-fit"
+							className="relative"
 							style={ routeStyle }
 						>
 							<ActiveRouteComponents { ...rest }
@@ -281,7 +319,7 @@ class Sidebar extends React.Component {
 						</div>
 
 						<div id="station-comps"
-							className="relative h-fit"
+							className="relative"
 							style={ stationStyle }
 						>
 							<ActiveStationComponents { ...rest }
@@ -291,7 +329,7 @@ class Sidebar extends React.Component {
 						</div>
 
 						<div id="graph-comps"
-							className="relative h-fit"
+							className="relative"
 							style={ graphStyle }
 						>
 							<ActiveGraphComponents { ...rest }

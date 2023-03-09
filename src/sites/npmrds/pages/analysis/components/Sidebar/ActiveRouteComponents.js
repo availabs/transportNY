@@ -141,7 +141,7 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 	const [headerRef, setHeaderRef] = React.useState();
 	const height = React.useMemo(() => {
 		if (!headerRef) return "100%";
-		const headerHeight = get(headerRef, ["current", "clientHeight"], 0);
+		const headerHeight = get(headerRef, "clientHeight", 0);
 		return `calc(100% - ${ headerHeight }px)`;
 	}, [headerRef]);
 
@@ -213,63 +213,64 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 				</div>
 			</div>
 
-			<div id="route-comps-container"
+			<div
 				style={ {
 					height: state.open ? height : "0px",
 					maxHeight: height,
 					overflow: state.open ? "auto" : "hidden"
 				} }
 			>
+				<div id="route-comps-container">
+					<DragDropContext onDragEnd={ onDragEnd }>
 
-				<DragDropContext onDragEnd={ onDragEnd }>
+						<Droppable droppableId="route-comp-drop-area" isCombineEnabled={ true }>
+							{ (provided, snapshot) => (
+								<div ref={ provided.innerRef }
+									{ ...provided.droppableProps }
+									style={ {
+										background: snapshot.isDraggingOver ? "#555" : "none"
+									} }
+								>
+									{ props.route_comps.map((comp, i) =>
+											<Draggable key={ comp.compId } index={ i }
+												draggableId={ comp.compId }
+											>
+												{ (provided, snapshot) => (
+													<div ref={ provided.innerRef }
+														{ ...provided.draggableProps }
+													>
+														{ get(comp, "type", "route") === "route" ?
+															<RouteComp route={ comp }
+																extendSidebar={ extendSidebar }
+																dragHandleProps={ provided.dragHandleProps }
+																isDragging={ snapshot.isDragging }
+																add={ add }
+															 	remove={ remove }/>
+															:
+															<RouteGroup group={ comp }
+																updateName={ props.updateRouteGroupName }
+																extendSidebar={ extendSidebar }
+																dragHandleProps={ provided.dragHandleProps }
+																isDragging={ snapshot.isDragging }
+																add={ add }
+															 	remove={ remove }
+															 	removeComp={ props.removeFromGroup }
+																reorderRouteComps={ props.reorderRouteComps }/>
+														}
+													</div>
+												) }
+											</Draggable>
+										)
+									}
 
-					<Droppable droppableId="route-comp-drop-area" isCombineEnabled={ true }>
-						{ (provided, snapshot) => (
-							<div ref={ provided.innerRef }
-								{ ...provided.droppableProps }
-								style={ {
-									background: snapshot.isDraggingOver ? "#555" : "none"
-								} }
-							>
-								{ props.route_comps.map((comp, i) =>
-										<Draggable key={ comp.compId } index={ i }
-											draggableId={ comp.compId }
-										>
-											{ (provided, snapshot) => (
-												<div ref={ provided.innerRef }
-													{ ...provided.draggableProps }
-												>
-													{ get(comp, "type", "route") === "route" ?
-														<RouteComp route={ comp }
-															extendSidebar={ extendSidebar }
-															dragHandleProps={ provided.dragHandleProps }
-															isDragging={ snapshot.isDragging }
-															add={ add }
-														 	remove={ remove }/>
-														:
-														<RouteGroup group={ comp }
-															updateName={ props.updateRouteGroupName }
-															extendSidebar={ extendSidebar }
-															dragHandleProps={ provided.dragHandleProps }
-															isDragging={ snapshot.isDragging }
-															add={ add }
-														 	remove={ remove }
-														 	removeComp={ props.removeFromGroup }
-															reorderRouteComps={ props.reorderRouteComps }/>
-													}
-												</div>
-											) }
-										</Draggable>
-									)
-								}
+									{ provided.placeholder }
 
-								{ provided.placeholder }
+								</div>
+							) }
+						</Droppable>
 
-							</div>
-						) }
-					</Droppable>
-
-				</DragDropContext>
+					</DragDropContext>
+				</div>
 
 			</div>
 		</div>

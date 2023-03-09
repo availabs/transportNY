@@ -72,7 +72,7 @@ const ActiveGraphComponents = props => {
 	const [headerRef, setHeaderRef] = React.useState();
 	const height = React.useMemo(() => {
 		if (!headerRef) return "100%";
-		const headerHeight = get(headerRef, ["current", "clientHeight"], 0);
+		const headerHeight = get(headerRef, "clientHeight", 0);
 		return `calc(100% - ${ headerHeight }px)`;
 	}, [headerRef]);
 
@@ -119,23 +119,25 @@ const ActiveGraphComponents = props => {
 				</Header>
 			</div>
 
-			<div id="graph-comps-container"
+			<div
 				style={ {
 					height: open ? height : "0px",
 					maxHeight: height,
 					overflow: open ? "auto" : "hidden"
 				} }
 			>
-				{ props.graphs.map((graph, i) =>
-						<ActiveGraphItem key={ graph.id }>
-							{ graph.type }
-							<Icon className="fa fa-minus"
-								onClick={ e => props.removeGraphComp(i, graph.id) }/>
-							<Icon className="fa fa-plus"
-								onClick={ e => props.addGraphComp(graph.type) }/>
-						</ActiveGraphItem>
-					)
-				}
+				<div id="graph-comps-container">
+					{ props.graphs.map((graph, i) =>
+							<ActiveGraphItem key={ graph.id }>
+								{ graph.type }
+								<Icon className="fa fa-minus"
+									onClick={ e => props.removeGraphComp(i, graph.id) }/>
+								<Icon className="fa fa-plus"
+									onClick={ e => props.addGraphComp(graph.type) }/>
+							</ActiveGraphItem>
+						)
+					}
+				</div>
 			</div>
 		</div>
 	)
