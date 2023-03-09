@@ -107,13 +107,13 @@ class RouteBarGraph extends GeneralGraphComp {
 				const domain = [],
 					start = graphData[0].resolution,
 					end = graphData[graphData.length -1].resolution,
-
 					startDate = moment(start, "YYYYMMDD");
+
 				while (startDate.format("YYYYMMDD") != end) {
-					domain.push(+startDate.format("YYYYMMDD"));
+					domain.push(startDate.format("YYYYMMDD"));
 					startDate.add(1, "day");
 				}
-				domain.push(+startDate.format("YYYYMMDD"));
+				domain.push(startDate.format("YYYYMMDD"));
 				return domain;
 			};
 			default: {
@@ -166,14 +166,14 @@ class RouteBarGraph extends GeneralGraphComp {
 					indexFormat: resFormat
 				} }
 			  axisBottom={ {
-			  	"format": resFormat,
-			  	"tickDensity": 2
+			  	format: resFormat,
+			  	tickDensity: 1
 			  } }
 				xScale={ {
 					domain: xDomain
 				} }
 			  axisLeft={ {
-			    "label": displayData.label
+			    label: displayData.label
 			  } }
 				yScale={ {
 					domain: [0, max]

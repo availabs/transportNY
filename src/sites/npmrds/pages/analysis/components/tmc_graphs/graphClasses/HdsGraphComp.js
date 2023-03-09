@@ -237,6 +237,8 @@ class HdsGraphComp extends GeneralGraphComp {
 				previewing={ this.props.previewing }
 				title={ this.props.state.title }
 				updateTitle={ this.updateTitle }
+				savingImage={ this.state.savingImage }
+				setSavingImage={ this.setSavingImage }
 				type={ this.props.type }
 				updateTitle={ title => this.props.updateGraphComp(this.props.index, { state: { title } }) }
 				remove={ () => this.props.removeGraphComp(this.props.index, this.props.id) }

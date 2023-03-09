@@ -513,7 +513,7 @@ class RouteMap extends HybridGraphComp {
 			format
 		} = displayData;
 
-		const viewing = this.props.viewing || this.props.previewing;
+		const viewing = this.props.viewing || this.props.previewing || this.state.savingImage;
 
 		return (
 			<div style={ { height: "100%", width: "100%", padding: "5px 10px 10px 10px" } } ref={ this.container }>

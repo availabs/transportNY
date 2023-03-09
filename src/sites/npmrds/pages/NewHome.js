@@ -51,7 +51,7 @@ const TemplateSelector = ({ id, title, onClick, children }) => {
     <div onClick={ doOnClick }
       className="cursor-pointer"
     >
-      <span className="fad fa-file-invoice text-lime-500 text-2xl mr-1"/>
+      <span className="fad fa-file-invoice text-lime-500 text-sm mr-1"/>
       <span>{title[1]}</span>
     </div>
   )

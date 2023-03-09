@@ -489,8 +489,8 @@ const FolderStuff = ({ type, ...props }) => {
 const StuffOrder = {
   folder: 0,
   report: 1,
-  template: 2,
-  route: 3
+  template: 1,
+  route: 2
 }
 
 const getStuffSorter = ({ type }) => {
@@ -503,12 +503,14 @@ const getStuffSorter = ({ type }) => {
     }
   }
   return (a, b) => {
-    if (a.stuff_type === b.stuff_type) {
+    const aOrder = StuffOrder[a.stuff_type];
+    const bOrder = StuffOrder[b.stuff_type];
+    if (aOrder === bOrder) {
       const aDate = new Date(a.updated_at);
       const bDate = new Date(b.updated_at);
       return bDate - aDate;
     }
-    return StuffOrder[a.stuff_type] - StuffOrder[b.stuff_type];
+    return aOrder - bOrder;
   }
 }
 

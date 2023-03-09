@@ -42,7 +42,7 @@ const getRouteCompsNames = routeComps => {
 }
 const getDisplayDataNames = displayData => {
 	const names = new Set(displayData.map(dd => dd.name));
-	return [...names].join(", ");
+	return [...names].filter(n => n !== "None").join(", ");
 }
 
 const getDisplayTitle = ({ title, type, routeComps = [], displayData = [] }) => {
@@ -137,6 +137,8 @@ class GraphContainer extends React.Component {
 				add,
 				remove,
 				// id,
+				savingImage,
+				setSavingImage,
 				saveImage,
 				addMessageBox,
 				hasMessageBox,
@@ -173,10 +175,11 @@ class GraphContainer extends React.Component {
 				...baseStyle
 			};
 
-		const VIEW_MODE = viewing || previewing;
+		const VIEW_MODE = viewing || previewing || savingImage;
 
 		return (
-			<div className="graph-container"
+			<div id={ `${ this.props.id }-graph-container`}
+				className="graph-container"
 				style={ {
 					border: '1px dashed rgba(0, 0, 0, 0.25)',
 					borderRadius: "4px"
@@ -251,8 +254,9 @@ class GraphContainer extends React.Component {
 
         <SaveImageModal show={ this.state.showSaveImageModal }
           onHide={ () => this.setState({ showSaveImageModal: false }) }
-					title={ title || type }
-					id={ this.props.id }/>
+					title={ getDisplayTitle(this.props) }
+					id={ this.props.id }
+					setSavingImage={ setSavingImage }/>
 
 			</div>
 		)

@@ -296,12 +296,12 @@ const AdvancedControls = props => {
         <Label>Data</Label>
         <InputBox>
           <Select
-            value={ DATA_COLUMNS.reduce((a, c) => c.key === dataColumn ? c : a, {}) }
+            value={ dataColumn }
             multi={ false }
             searchable={ false }
             accessor={ d => d.display }
             valueAccessor={ d => d.key }
-            onChange={ v => this.props.updateSettings("dataColumn", v) }
+            onChange={ v => updateSettings("dataColumn", v) }
             options={ DATA_COLUMNS }/>
         </InputBox>
         <CopyIcon setting="dataColumn"

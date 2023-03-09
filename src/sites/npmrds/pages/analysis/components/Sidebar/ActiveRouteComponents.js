@@ -138,36 +138,42 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 			.sort((a, b) => a.name.localeCompare(b.name));
 	}, [props.availableRoutes]);
 
+	const [headerRef, setHeaderRef] = React.useState();
+	const height = React.useMemo(() => {
+		if (!headerRef) return "100%";
+		const headerHeight = get(headerRef, ["current", "clientHeight"], 0);
+		return `calc(100% - ${ headerHeight }px)`;
+	}, [headerRef]);
+
 	return (
 		<div style={ {
-			padding: "10px",
+			padding: "0px 10px",
 			whiteSpace: "nowrap",
-			display: "flex",
-			flexDirection: "column"
+			position: "relative",
+			height: "100%",
+			maxHeight: "100%"
 		} }>
 
-			<Header>
-				<OpenCloseButton>
-					<span onClick={ toggle }
-						className={ `fa fa-${ state.open ? "minus" : "plus" }` }/>
-				</OpenCloseButton>
-				<h4 className="">Routes</h4>
-				{ !state.open ? null :
-					<div className="flex-0 flex items-center text-sm"
-						onClick={ e => props.createNewRouteGroup() }
-					>
-						<Control>
-							<span className="px-1">Add New Group</span>
-						</Control>
-					</div>
-				}
-			</Header>
+			<div id="route-comps-header"
+				ref={ setHeaderRef }
+			>
 
-			<div style={ {
-				height: state.open ? "auto" : "0px",
-				overflow: state.open ? "visible" : "hidden",
-				flexGrow: 1
-			} }>
+				<Header>
+					<OpenCloseButton>
+						<span onClick={ toggle }
+							className={ `fa fa-${ state.open ? "minus" : "plus" }` }/>
+					</OpenCloseButton>
+					<h4 className="">Routes</h4>
+					{ !state.open ? null :
+						<div className="flex-0 flex items-center text-sm"
+							onClick={ e => props.createNewRouteGroup() }
+						>
+							<Control>
+								<span className="px-1">Add New Group</span>
+							</Control>
+						</div>
+					}
+				</Header>
 
 				<div style={ {
 					borderBottom: `2px solid currentColor`
@@ -205,6 +211,15 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 						</Control>
 					</ControlBox>
 				</div>
+			</div>
+
+			<div id="route-comps-container"
+				style={ {
+					height: state.open ? height : "0px",
+					maxHeight: height,
+					overflow: state.open ? "auto" : "hidden"
+				} }
+			>
 
 				<DragDropContext onDragEnd={ onDragEnd }>
 
@@ -213,7 +228,7 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 							<div ref={ provided.innerRef }
 								{ ...provided.droppableProps }
 								style={ {
-									background: snapshot.isDraggingOver ? "#600" : "none"
+									background: snapshot.isDraggingOver ? "#555" : "none"
 								} }
 							>
 								{ props.route_comps.map((comp, i) =>
@@ -488,7 +503,8 @@ const RouteGroup = props => {
 																	dragHandleProps={ provided.dragHandleProps }
 																	isDragging={ snapshot.isDragging }
 																	add={ doAdd }
-																 	remove={ doRemoveComp }/>
+																 	remove={ doRemoveComp }
+																	inGroup/>
 															</div>
 														)
 													}
@@ -517,7 +533,8 @@ const RouteComp = props => {
 		dragHandleProps,
 		isDragging,
 		add,
-	 	remove
+	 	remove,
+		inGroup = false
 	} = props;
 
 	const extend = React.useCallback(e => {
@@ -552,7 +569,8 @@ const RouteComp = props => {
 						onClick={ doAdd }/>
 					<div style={ { width: "26px" } }
 						className={ `
-							fa fa-minus hover:bg-gray-500 hover:text-white
+							${ inGroup ? "fa-regular fa-delete-right" : "fa fa-minus" }
+							hover:bg-gray-500 hover:text-white
 							rounded flex justify-center items-center cursor-pointer
 						` }
 						onClick={ doRemove }/>

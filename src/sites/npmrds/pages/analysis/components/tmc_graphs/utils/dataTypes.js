@@ -82,10 +82,10 @@ export const BASE_DATA_TYPES = [
 		label: 'Hours', transform: identity, format: format(",.2f"),
 		reducer: sumReducer, tmcReducer: meanReducer, allReducer: meanReducer },
 
-	{ key: 'co2Emissions', group: 'co2Emissions', name: <span>CO<sub>2</sub> Emissions</span>, reverseColors: true,
+	{ key: 'co2Emissions', group: 'co2Emissions', name: "CO\u2082 Emissions", reverseColors: true,
 		label: 'Tonnes', transform: identity, format: format(",.2f"),
 		reducer: sumReducer, tmcReducer: sumReducer, allReducer: sumReducer },
-	{ key: 'avgCo2Emissions', group: 'co2Emissions', name: <span>Avg. CO<sub>2</sub> Emissions</span>, reverseColors: true,
+	{ key: 'avgCo2Emissions', group: 'co2Emissions', name: "Avg. CO\u2082 Emissions", reverseColors: true,
 		label: 'Tonnes', transform: identity, format: format(",.2f"),
 		reducer: meanReducer, tmcReducer: meanReducer, allReducer: meanByTmc },
 

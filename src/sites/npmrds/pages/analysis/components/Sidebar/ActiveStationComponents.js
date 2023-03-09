@@ -90,6 +90,8 @@ class ActiveStationComponents extends React.Component {
 		openCompId: null,
 		open: true
 	}
+	headerRef = React.createRef();
+
 	extendSidebar(openCompId) {
 		this.props.extendSidebar(openCompId)
 		this.setState({ openCompId })
@@ -113,29 +115,31 @@ class ActiveStationComponents extends React.Component {
 	}
   render() {
 
+		const headerHeight = get(this.headerRef, ["current", "clientHeight"], 0);
+		const height = `calc(100% - ${ headerHeight }px)`;
+
     return (
 			<div style={ {
-        padding: "10px",
+        padding: "0px 10px",
         whiteSpace: "nowrap",
-        display: "flex",
-        flexDirection: "column"
+				position: "relative",
+				height: "100%",
+				maxHeight: "100%"
       } }>
 
-				<Header>
-					<OpenCloseButton>
-						<span onClick={ e => {
-							e.stopPropagation();
-							this.setState(state => ({ open: !state.open }));
-						} } className={ `fa fa-${ this.state.open ? "minus" : "plus" }` }/>
-					</OpenCloseButton>
-					<h4>Stations</h4>
-				</Header>
+				<div id="station-comps-header"
+					ref={ this.headerRef }
+				>
 
-				<div style={ {
-					height: this.state.open ? "auto" : "0px",
-					overflow: this.state.open ? "visible" : "hidden",
-          flexGrow: 1
-				} }>
+					<Header>
+						<OpenCloseButton>
+							<span onClick={ e => {
+								e.stopPropagation();
+								this.setState(state => ({ open: !state.open }));
+							} } className={ `fa fa-${ this.state.open ? "minus" : "plus" }` }/>
+						</OpenCloseButton>
+						<h4>Stations</h4>
+					</Header>
 
 					<div style={ { borderBottom: `2px solid currentColor` } }>
 						<ControlBox>
@@ -158,6 +162,17 @@ class ActiveStationComponents extends React.Component {
 							</Control>
 						</ControlBox>
 					</div>
+
+				</div>
+
+				<div id="station-comps-container"
+					style={ {
+						height: this.state.open ? height : "0px",
+						maxHeight: height,
+						overflow: this.state.open ? "auto" : "hidden"
+					} }
+				>
+
           <div style={ { position: "relative", display: "block" } }>
 						<DragDropContext onDragEnd={ this.onDragEnd.bind(this) }>
 							<Droppable droppableId="drop-area">

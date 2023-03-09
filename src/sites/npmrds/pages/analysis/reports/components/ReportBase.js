@@ -32,7 +32,7 @@ import * as DomainManager from "sites/npmrds/pages/analysis/components/tmc_graph
 //   getFoldersFromState
 // } from "pages/auth/MyStuff"
 
-import { toPng, toBlob, toSvg, toJpeg } from "html-to-image"
+import { toPng } from "html-to-image"
 import download from "downloadjs"
 
 import * as stuff from "../store"
