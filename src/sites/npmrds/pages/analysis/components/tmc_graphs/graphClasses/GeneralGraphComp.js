@@ -179,11 +179,13 @@ class GeneralGraphComp extends React.Component {
 			routeSettings = this.props.routes.map(r => r.settings);
 		if (!deepequal(oldProps.state, this.props.state) ||
 				!deepequal(oldRouteSettings, routeSettings)) {
+		// if (!deepequal(oldProps.state, this.props.state)) {
 			this.fetchFalcorDeps();
 		}
 	}
 
 	fetchFalcorDeps() {
+
 		const routes = this.getActiveRouteComponents().filter(r => get(r, 'tmcArray.length', 0));
 		if (!routes.length) return Promise.resolve();
 
@@ -192,7 +194,7 @@ class GeneralGraphComp extends React.Component {
 
 		this.setState({ loading: ++this.state.loading });
 
-		const routeData = {};
+		// const routeData = {};
 
 		return routes.reduce((promise, route) => {
 			const { tmcArray } = route,
@@ -200,7 +202,7 @@ class GeneralGraphComp extends React.Component {
 				requestKeys = displayData.map(dd => ({ dd: dd.key, alias: dd.alias, group: dd.group, key: getRequestKey(route, dd) }))
 					.filter(({ key }) => Boolean(key));
 
-			routeData[route.compId] = {};
+			// routeData[route.compId] = {};
 
 			return promise.then(() => {
 				return this.props.falcor.get(
@@ -215,84 +217,84 @@ class GeneralGraphComp extends React.Component {
 								['routes', 'data', key]
 							)
 							.then(res => {
-								if (group === "indices") {
-									INDICES.forEach(index => {
-										routeData[route.compId][index.key] = get(res, `json.routes.data.${ key }`, [])
-											.map(d => ({ tmc: d.tmc, resolution: d.resolution, value: d[index.key] }))
-											.filter(({ value }) => value !== undefined)
-									})
-								}
-								else if (group === "indices-byDateRange") {
-									INDICES_BY_DATE_RANGE.forEach(index => {
-										routeData[route.compId][index.key] = get(res, `json.routes.data.${ key }`, [])
-											.map(d => ({ tmc: d.tmc, value: d[index.key] }))
-											.filter(({ value }) => value !== undefined)
-									})
-								}
-								else if (group === "tmcAttribute") {
-									TMC_ATTRIBUTES.forEach(att => {
-										routeData[route.compId][att.key] = get(res, `json.routes.data.${ key }`, [])
-											.map(d => ({ tmc: d.tmc, value: d[att.alias || att.key] }))
-											.filter(({ value }) => value !== undefined)
-									})
-								}
-								else if (group === "hoursOfDelay") {
-									routeData[route.compId]["hoursOfDelay"] = get(res, `json.routes.data.${ key }`, [])
-										.map(d => ({ ...d, value: d["hoursOfDelay"] }));
-									routeData[route.compId]["avgHoursOfDelay"] = get(res, `json.routes.data.${ key }`, [])
-										.map(d => ({ ...d, value: d["avgHoursOfDelay"] }));
-								}
-								else if (group === "co2Emissions") {
-									routeData[route.compId]["co2Emissions"] = get(res, `json.routes.data.${ key }`, [])
-										.map(d => ({ ...d, value: d["co2Emissions"] }));
-									routeData[route.compId]["avgCo2Emissions"] = get(res, `json.routes.data.${ key }`, [])
-										.map(d => ({ ...d, value: d["avgCo2Emissions"] }));
-								}
-								else {
-									routeData[route.compId][dd] = get(res, `json.routes.data.${ key }`, []);
-									if (alias) {
-										routeData[route.compId][alias] = get(res, `json.routes.data.${ key }`, []);
-									}
-								}
 								// if (group === "indices") {
 								// 	INDICES.forEach(index => {
-								// 		route.data[index.key] = get(res, `json.routes.data.${ key }`, [])
+								// 		routeData[route.compId][index.key] = get(res, `json.routes.data.${ key }`, [])
 								// 			.map(d => ({ tmc: d.tmc, resolution: d.resolution, value: d[index.key] }))
 								// 			.filter(({ value }) => value !== undefined)
 								// 	})
 								// }
 								// else if (group === "indices-byDateRange") {
 								// 	INDICES_BY_DATE_RANGE.forEach(index => {
-								// 		route.data[index.key] = get(res, `json.routes.data.${ key }`, [])
+								// 		routeData[route.compId][index.key] = get(res, `json.routes.data.${ key }`, [])
 								// 			.map(d => ({ tmc: d.tmc, value: d[index.key] }))
 								// 			.filter(({ value }) => value !== undefined)
 								// 	})
 								// }
 								// else if (group === "tmcAttribute") {
 								// 	TMC_ATTRIBUTES.forEach(att => {
-								// 		route.data[att.key] = get(res, `json.routes.data.${ key }`, [])
+								// 		routeData[route.compId][att.key] = get(res, `json.routes.data.${ key }`, [])
 								// 			.map(d => ({ tmc: d.tmc, value: d[att.alias || att.key] }))
 								// 			.filter(({ value }) => value !== undefined)
 								// 	})
 								// }
 								// else if (group === "hoursOfDelay") {
-								// 	route.data["hoursOfDelay"] = get(res, `json.routes.data.${ key }`, [])
+								// 	routeData[route.compId]["hoursOfDelay"] = get(res, `json.routes.data.${ key }`, [])
 								// 		.map(d => ({ ...d, value: d["hoursOfDelay"] }));
-								// 	route.data["avgHoursOfDelay"] = get(res, `json.routes.data.${ key }`, [])
+								// 	routeData[route.compId]["avgHoursOfDelay"] = get(res, `json.routes.data.${ key }`, [])
 								// 		.map(d => ({ ...d, value: d["avgHoursOfDelay"] }));
 								// }
 								// else if (group === "co2Emissions") {
-								// 	route.data["co2Emissions"] = get(res, `json.routes.data.${ key }`, [])
+								// 	routeData[route.compId]["co2Emissions"] = get(res, `json.routes.data.${ key }`, [])
 								// 		.map(d => ({ ...d, value: d["co2Emissions"] }));
-								// 	route.data["avgCo2Emissions"] = get(res, `json.routes.data.${ key }`, [])
+								// 	routeData[route.compId]["avgCo2Emissions"] = get(res, `json.routes.data.${ key }`, [])
 								// 		.map(d => ({ ...d, value: d["avgCo2Emissions"] }));
 								// }
 								// else {
-								// 	route.data[dd] = get(res, `json.routes.data.${ key }`, []);
+								// 	routeData[route.compId][dd] = get(res, `json.routes.data.${ key }`, []);
 								// 	if (alias) {
-								// 		route.data[alias] = get(res, `json.routes.data.${ key }`, []);
+								// 		routeData[route.compId][alias] = get(res, `json.routes.data.${ key }`, []);
 								// 	}
 								// }
+								if (group === "indices") {
+									INDICES.forEach(index => {
+										route.data[index.key] = get(res, `json.routes.data.${ key }`, [])
+											.map(d => ({ tmc: d.tmc, resolution: d.resolution, value: d[index.key] }))
+											.filter(({ value }) => value !== undefined)
+									})
+								}
+								else if (group === "indices-byDateRange") {
+									INDICES_BY_DATE_RANGE.forEach(index => {
+										route.data[index.key] = get(res, `json.routes.data.${ key }`, [])
+											.map(d => ({ tmc: d.tmc, value: d[index.key] }))
+											.filter(({ value }) => value !== undefined)
+									})
+								}
+								else if (group === "tmcAttribute") {
+									TMC_ATTRIBUTES.forEach(att => {
+										route.data[att.key] = get(res, `json.routes.data.${ key }`, [])
+											.map(d => ({ tmc: d.tmc, value: d[att.alias || att.key] }))
+											.filter(({ value }) => value !== undefined)
+									})
+								}
+								else if (group === "hoursOfDelay") {
+									route.data["hoursOfDelay"] = get(res, `json.routes.data.${ key }`, [])
+										.map(d => ({ ...d, value: d["hoursOfDelay"] }));
+									route.data["avgHoursOfDelay"] = get(res, `json.routes.data.${ key }`, [])
+										.map(d => ({ ...d, value: d["avgHoursOfDelay"] }));
+								}
+								else if (group === "co2Emissions") {
+									route.data["co2Emissions"] = get(res, `json.routes.data.${ key }`, [])
+										.map(d => ({ ...d, value: d["co2Emissions"] }));
+									route.data["avgCo2Emissions"] = get(res, `json.routes.data.${ key }`, [])
+										.map(d => ({ ...d, value: d["avgCo2Emissions"] }));
+								}
+								else {
+									route.data[dd] = get(res, `json.routes.data.${ key }`, []);
+									if (alias) {
+										route.data[alias] = get(res, `json.routes.data.${ key }`, []);
+									}
+								}
 							})
 						})
 					}, Promise.resolve())
@@ -302,9 +304,9 @@ class GeneralGraphComp extends React.Component {
 		.then(() => {
 			this.setState({ loading: --this.state.loading });
 		})
-		.then(() => {
-			this.props.updateRouteData(routeData);
-		})
+		// .then(() => {
+		// 	this.props.updateRouteData(routeData);
+		// })
 	}
 	getMaxYear({ settings }) {
 		return +settings.endDate.toString().slice(0, 4);
