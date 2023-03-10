@@ -277,9 +277,13 @@ class GrabBox extends React.Component {
 	render() {
 		const { grabbing } = this.state;
 		return (
-			<div className={ classnames("my-drag-handle", { grabbing }) }
+			<div
+				className={
+					classnames("my-drag-handle flex items-center justify-center", { grabbing })
+				}
 				onMouseDown={ e => this.onMouseDown(e) }
-				onMouseUp={ e => this.onMouseUp(e) }>
+				onMouseUp={ e => this.onMouseUp(e) }
+			>
 				<span className="fa fa-ellipsis-vertical"/>
 				<Tooltip id="grab-box"
 					className="icon-tooltip"

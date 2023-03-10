@@ -6,6 +6,7 @@ import get from "lodash.get"
 
 import * as d3array from "d3-array"
 import * as d3scale from "d3-scale"
+import * as d3format from "d3-format"
 
 import {
 	getResolutionFormat,
@@ -21,6 +22,12 @@ import {
 } from "./utils/DomainManager"
 
 class Graph extends GeneralGraphComp {
+	constructor(props) {
+		super(props);
+
+		this.onHoverEnter = this.onHoverEnter.bind(this);
+		this.onHoverLeave = this.onHoverLeave.bind(this);
+	}
 	setReverseTMCs(reverseTMCs) {
 		this.props.updateGraphComp(this.props.index, { state: { reverseTMCs } });
 	}
@@ -60,6 +67,7 @@ class Graph extends GeneralGraphComp {
 			if (length) {
 				a.push({
 					tmc,
+					className: this.props.highlightedTmcs.includes(tmc) ? "hover" : null,
 					height: length,
 					data: data.map(d => ({ ...d, value: transform(d.value, length) })),
 					...data.reduce((a, c) => {
@@ -70,9 +78,6 @@ class Graph extends GeneralGraphComp {
 			}
 			return a;
 		}, []);
-	}
-	hoverTmc(tmc) {
-		this.props.setHighlightedTmcs(tmc ? [tmc] : [])
 	}
 	generateTableData(graphData, [route], [displayData], resolution) {
 		const data = graphData.reduce((a, c) => {
@@ -122,6 +127,12 @@ class Graph extends GeneralGraphComp {
 			.domain(d3array.extent(domain))
 			.range(colorRange)
 	}
+	onHoverEnter(e, tmc) {
+		this.props.highlightTmcs([tmc]);
+	}
+	onHoverLeave(e, tmc) {
+		this.props.unhighlightTmcs([tmc]);
+	}
 	renderGraph(graphData, routes, displayData, resolution, colorRange) {
 		const [{
 			name,
@@ -151,10 +162,18 @@ class Graph extends GeneralGraphComp {
 				shouldComponentUpdate={
 					["data", "colorRange"]
 				}
+				showAnimations={ false }
 				colorRange={ colorRange }
 				indexBy="tmc"
 				keys={ keys }
 				colors={ colorScale }
+				onHoverEnter={ this.onHoverEnter }
+				onHoverLeave={ this.onHoverLeave }
+				hoverComp={ {
+					keyFormat: resFormat,
+					valueFormat: format,
+					valueLabel: label
+				} }
 				axisLeft={ {
 					label: name
 				} }

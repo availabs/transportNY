@@ -13,7 +13,7 @@ const oneSixtieth = 1.0 / 60.0,
 	identity = v => v,
 	aadtToVmt = (aadt, l) => aadt * l,
 
-	toFixed2 = v => v && v.toFixed(2),
+	toFixed2 = format(",.2f"),
 	toMinutesWithSeconds = v => {
 		const isNegative = v < 0;
 		v = Math.abs(v);
