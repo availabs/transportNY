@@ -20,7 +20,7 @@ import {
 
 import {
 	FuseWrapper,
-	MultiLevelDropdown
+	MultiLevelSelect
 } from "sites/npmrds/components"
 
 import { useFalcor } from "modules/avl-components/src"
@@ -63,12 +63,24 @@ const OpenCloseButton = styled.div`
 // 		font-size: 1rem;
 // 	}
 // `
-const DropdownItem = ({ onClick = null, children }) => {
+export const DropdownItem = ({ children, hasChildren }) => {
   return (
-    <div className="px-2 hover:bg-gray-300 text-left"
-			style={ { minWidth: "15rem" } }
-      onClick={ onClick }
+    <div style={ { minWidth: "15rem" } }
+      className={ `
+        px-2 flex items-center text-left
+        hover:bg-gray-300 bg-gray-200
+      ` }
     >
+      <div className="flex-1">{ children }</div>
+      { !hasChildren ? null :
+        <span className="fa fa-caret-right ml-2"/>
+      }
+    </div>
+  )
+}
+export const InputContainer = ({ children }) => {
+  return (
+    <div className="bg-gray-200 px-2 pt-2 rounded-t pb-1">
       { children }
     </div>
   )
@@ -125,7 +137,7 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 		const routes = get(f, "stuff", []).filter(s => s.stuff_type === "route");
 		return {
 			label: f.name,
-			value: routes.map(r => r.stuff_id),
+			value: routes.length > 10 ? [] : routes.map(r => r.stuff_id),
 			children: routes.map(r => ({
 				label: get(falcorCache, ["routes2", "id", r.stuff_id, "name"], ""),
 				value: r.stuff_id
@@ -180,34 +192,38 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 				} }>
 					<ControlBox>
 						<Control>
-							<MultiLevelDropdown
+							<MultiLevelSelect isDropdown
 								xDirection={ 0 }
 								searchable={ true }
-								labelAccessor={ d => d.name }
+								displayAccessor={ d => d.name }
 								valueAccessor={ d => d.id }
-								onClick={ id => props.add(id) }
-								items={ availableRoutes }
-								DropdownItem={ DropdownItem }
+								onChange={ id => props.add(id) }
+								options={ availableRoutes }
+								DisplayItem={ DropdownItem }
+								InputContainer={ InputContainer }
 							>
 								<div className="px-1">
 									<span className="fa fa-road"/>
 									<span className="px-1">Routes</span>
 								</div>
-							</MultiLevelDropdown>
+							</MultiLevelSelect>
 						</Control>
 						<Control>
-							<MultiLevelDropdown
+							<MultiLevelSelect isDropdown
 								xDirection={ 0 }
 								searchable={ true }
-								items={ folderData }
-								onClick={ ids => props.add(ids) }
-								DropdownItem={ DropdownItem }
+								displayAccessor={ d => d.label }
+								valueAccessor={ d => d.value }
+								options={ folderData }
+								onChange={ ids => props.add(ids) }
+								DisplayItem={ DropdownItem }
+								InputContainer={ InputContainer }
 							>
 								<div className="px-1">
 									<span className="px-1">Folders</span>
 									<span className="fa fa-folder"/>
 								</div>
-							</MultiLevelDropdown>
+							</MultiLevelSelect>
 						</Control>
 					</ControlBox>
 				</div>

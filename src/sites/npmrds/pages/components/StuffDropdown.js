@@ -46,17 +46,6 @@ const StuffDropdown = props => {
     setShow(false);
   }, []);
 
-  const [outter, setOutter] = React.useState();
-  // const [xDir, setXDirection] = React.useState(xDirection === "right" ? 1 : -1);
-  // React.useEffect(() => {
-  //   if (!outter) return;
-  //   const rect = outter.getBoundingClientRect();
-  //   const width = window.innerWidth;
-  //   if ((rect.x + rect.width) > width) {
-  //     setXDirection(xDir => -xDir);
-  //   }
-  // }, [outter]);
-
   const [inner, setInner] = React.useState();
   const [xDir, setXDirection] = React.useState(xDirection === "right" ? 1 : -1);
   const [topOffset, setTopOffset] = React.useState(0);
@@ -74,8 +63,7 @@ const StuffDropdown = props => {
   }, [inner, show]);
 
   return (
-    <div ref={ setOutter }
-      onClick={ stopPropagation }
+    <div onClick={ stopPropagation }
       className="relative cursor-pointer"
       onMouseOver={ onMouseOver }
       onMouseLeave={ onMouseLeave }

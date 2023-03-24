@@ -20,8 +20,13 @@ import { Header } from "./ActiveRouteComponents"
 
 import {
 	FuseWrapper,
-	MultiLevelDropdown
+	MultiLevelSelect
 } from "sites/npmrds/components"
+
+import {
+	DropdownItem,
+	InputContainer
+} from "./ActiveRouteComponents"
 
 import get from "lodash.get"
 import { select as d3select } from "d3-selection"
@@ -270,18 +275,19 @@ class Sidebar extends React.Component {
 						<div style={ { borderBottom: `2px solid currentColor` } }>
 							<ControlBox>
 								<Control>
-									<MultiLevelDropdown
-										xDirection={ 0 }
-										labelAccessor={ d => d.name }
+									<MultiLevelSelect isDropdown
+										DisplayItem={ DropdownItem }
+										InputContainer={ InputContainer }
+										displayAccessor={ d => d.name }
 										valueAccessor={ d => d.id }
-										onClick={ id => this.props.loadTemplate(id) }
-										items={ this.props.templates }
+										onChange={ id => this.props.loadTemplate(id) }
+										options={ this.props.templates }
 									>
 										<div className="px-1">
 											<span className="fa fa-cog"/>
 											<span className="px-1">Templates</span>
 										</div>
-									</MultiLevelDropdown>
+									</MultiLevelSelect>
 								</Control>
 								<Control disabled={ !this.props.needsUpdate }
 									onClick={ this.props.updateAllComponents }

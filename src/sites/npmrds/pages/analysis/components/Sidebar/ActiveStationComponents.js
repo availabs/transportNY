@@ -18,11 +18,16 @@ import {
 	Control
 } from "./components/parts"
 
+import {
+	DropdownItem,
+	InputContainer
+} from "./ActiveRouteComponents"
+
 import { Header } from "./ActiveRouteComponents"
 
 import {
 	FuseWrapper,
-	MultiLevelDropdown
+	MultiLevelSelect
 } from "sites/npmrds/components"
 
 const ActiveStationItem = styled.div`
@@ -139,21 +144,22 @@ class ActiveStationComponents extends React.Component {
 					<div style={ { borderBottom: `2px solid currentColor` } }>
 						<ControlBox>
 							<Control>
-								<MultiLevelDropdown
-									xDirection={ 0 }
+								<MultiLevelSelect isDropdown
+									DisplayItem={ DropdownItem }
+									InputContainer={ InputContainer }
 			  					searchable={ true }
-			  					labelAccessor={ d =>
-	                  `${ d.stationId } (${ d.muni }) (${ d.data_type.split(",").map(s => s[0]).join(", ")})`
+			  					displayAccessor={ d =>
+	                  `${ d.muni } (${ d.stationId }) (${ d.data_type.split(",").map(s => s[0]).join(", ")})`
 	                }
 			  					valueAccessor={ d => d.stationId }
-									onClick={ id => this.props.addStationComp(id) }
-									items={ this.props.availableStations.sort((a, b) => a.muni.localeCompare(b.muni)) }
+									onChange={ id => this.props.addStationComp(id) }
+									options={ this.props.availableStations.sort((a, b) => a.muni.localeCompare(b.muni)) }
 								>
 									<div className="px-1">
 										<span className="fa fa-space-station-moon"/>
 										<span className="px-1">Stations</span>
 									</div>
-								</MultiLevelDropdown>
+								</MultiLevelSelect>
 							</Control>
 						</ControlBox>
 					</div>

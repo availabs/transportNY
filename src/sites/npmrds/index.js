@@ -6,9 +6,12 @@ import Analysis from "./pages/analysis"
 
 import NewHome from "./pages/NewHome"
 
+import RouteCreation from "./pages/route_creation"
+
 const Routes = [
   Home,
   NewHome,
+  ...RouteCreation,
   ...Folders,
   ...Analysis
 ]

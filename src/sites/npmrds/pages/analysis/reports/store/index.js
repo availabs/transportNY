@@ -109,7 +109,6 @@ export const getDataDateExtent = () =>
 
 const getRouteData = (routeIds, report) =>
 	falcorGraph.get(["routes2", "id", routeIds, ["tmc_array", "name"]])
-    // .then(res => console.log("ROUTE DATA RES:", routeIds, res))
     .then(() =>
       falcorGraph.get(
         ["routes2", "id", routeIds, report.allYearsWithData, "tmc_array"]
@@ -138,7 +137,8 @@ const getTemplateData = templateId =>
         'default_type'
       ]
     ]
-  ).then(res => console.log("RES:", res))
+  )
+
 const getTemplateIdByType = defaultType =>
 	falcorGraph.get(
 		['templates2', 'defaultType', defaultType, 'id']
@@ -1099,7 +1099,7 @@ export const saveReport = (report, reportId = null) =>
       [args], [], []
     )
     .then(res => {
-      const newReportId = get(res, 'json.reports.recentlySaved', reportId);
+      const newReportId = get(res, 'json.reports2.recentlySaved', reportId);
       if ((newReportId !== null) && (newReportId != reportId)) {
       	return dispatch(redirect(`/report/edit/${ newReportId }`));
       }
@@ -1614,8 +1614,6 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
 	const falcorCache = falcorGraph.getCache(),
     template = get(falcorCache, `templates2.id.${ templateId }`, {});
 
-console.log("LOAD TEMPLATE:", template);
-
 	let name = template.name,
 	  description = template.description,
 	  folder = template.folder,
@@ -1846,7 +1844,7 @@ const getRoutesForRouteComp = (routeComp, routeDataMap = null, preserveColors = 
     })
   }
   else {
-    routeComp.name = `Route ID "${ routeComp.routeId }" Does Not Exist.`;
+    routeComp.name = `Route ${ routeComp.routeId } Does Not Exist.`;
     routeComp.isValid = false;
     routeComp.color = getRouteColor();
   }

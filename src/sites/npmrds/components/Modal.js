@@ -14,7 +14,7 @@ export const Modal = ({ isOpen, close = null, children }) => {
             <div onClick={ close }
               className={ `
                 absolute top-1 right-1 h-6 w-6
-                rounded hover:bg-gray-400
+                rounded hover:bg-gray-300
                 flex items-center justify-center
                 cursor-pointer
               ` }
