@@ -59,80 +59,81 @@ class ReportBase extends React.Component {
   }
 
   componentDidMount() {
-    this.props.getDataDateExtent();
     this.props.resetState();
+    this.props.getDataDateExtent()
+      .then(() => {
+        const reportId = get(this.props, 'match.params.reportId', ""),
+          templateId = get(this.props, 'match.params.templateId', ""),
+          defaultType = get(this.props, 'match.params.defaultType', ""),
+          routeId = get(this.props, 'match.params.routeId', ""),
+          stationId = get(this.props, 'match.params.stationId', ""),
+          path = get(this.props, 'match.path', "");
 
-    const reportId = get(this.props, 'match.params.reportId', ""),
-      templateId = get(this.props, 'match.params.templateId', ""),
-      defaultType = get(this.props, 'match.params.defaultType', ""),
-      routeId = get(this.props, 'match.params.routeId', ""),
-      stationId = get(this.props, 'match.params.stationId', ""),
-      path = get(this.props, 'match.path', "");
+        const query = new URLSearchParams(this.props.location.search);
 
-    const query = new URLSearchParams(this.props.location.search);
-
-    if (reportId) {
-      let loadReport = true;
-      if (window.localStorage) {
-        const key = `report-${ reportId }`,
-          data = JSON.parse(window.localStorage.getItem(key));
-        if (data) {
-          loadReport = false;
-          this.setState({
-            showLoadModal: true,
-            loadData: {
-              key,
-              data,
-              onReject: () => this.props.loadReport(reportId)
+        if (reportId) {
+          let loadReport = true;
+          if (window.localStorage) {
+            const key = `report-${ reportId }`,
+              data = JSON.parse(window.localStorage.getItem(key));
+            if (data) {
+              loadReport = false;
+              this.setState({
+                showLoadModal: true,
+                loadData: {
+                  key,
+                  data,
+                  onReject: () => this.props.loadReport(reportId)
+                }
+              });
             }
-          });
+          }
+          // console.log('load report', reportId)
+          loadReport && this.props.loadReport(reportId);
         }
-      }
-      // console.log('load report', reportId)
-      loadReport && this.props.loadReport(reportId);
-    }
-    else if (path === "/report/new") {
-      const routeId = query.get("routeId");
+        else if (path === "/report/new") {
+          const routeId = query.get("routeId");
 
-      if (window.localStorage) {
-        const key = LOCAL_STORAGE_REPORT_KEY,
-          data = JSON.parse(window.localStorage.getItem(key)),
-          onReject = () => routeId && this.props.addRouteComp(routeId.split("_"));
-        if (data) {
-          this.setState({
-            showLoadModal: true,
-            loadData: {
-              key,
-              data,
-              onReject
+          if (window.localStorage) {
+            const key = LOCAL_STORAGE_REPORT_KEY,
+              data = JSON.parse(window.localStorage.getItem(key)),
+              onReject = () => routeId && this.props.addRouteComp(routeId.split("_"));
+            if (data) {
+              this.setState({
+                showLoadModal: true,
+                loadData: {
+                  key,
+                  data,
+                  onReject
+                }
+              });
             }
-          });
+            else {
+              onReject();
+            }
+          }
         }
-        else {
-          onReject();
+        else if (path.includes("/report/new/route/") && routeId) {
+          console.log("NEW REPORT:", routeId)
+          this.props.loadRoutesForReport(
+            routeId.split("_").filter(Boolean)
+          );
         }
-      }
-    }
-    else if (path.includes("/report/new/route/") && routeId) {
-      console.log("NEW REPORT:", routeId)
-      this.props.loadRoutesForReport(
-        routeId.split("_").filter(Boolean)
-      );
-    }
-    else if (templateId && (routeId || stationId)) {
-      this.props.loadRoutesAndTemplate(
-        routeId.split("_").filter(Boolean),
-        templateId,
-        stationId.split("_").filter(Boolean)
-      );
-    }
-    else if (defaultType && (routeId || stationId)) {
-      this.props.loadRoutesAndTemplateByType(
-        routeId.split("_").filter(Boolean),
-        defaultType,
-        stationId.split("_").filter(Boolean)
-      );
-    }
+        else if (templateId && (routeId || stationId)) {
+          this.props.loadRoutesAndTemplate(
+            routeId.split("_").filter(Boolean),
+            templateId,
+            stationId.split("_").filter(Boolean)
+          );
+        }
+        else if (defaultType && (routeId || stationId)) {
+          this.props.loadRoutesAndTemplateByType(
+            routeId.split("_").filter(Boolean),
+            defaultType,
+            stationId.split("_").filter(Boolean)
+          );
+        }
+      });
   }
 
   componentDidUpdate(oldProps, oldState) {
@@ -481,15 +482,20 @@ class ReportBase extends React.Component {
           <div className="container mx-auto px-2">
 
             { this.state.viewing ? null :
-              <div className="grid grid-cols-10">
-                <div className="col-span-7 flex items-center">
+              <div className="relative">
+                <div className="flex items-center">
                   <TitleContainer>
                     { this.props.name }
                   </TitleContainer>
                 </div>
 
-                <div className="col-span-3">
-                  <ControlBox className="grid grid-cols-2 gap-1 p-2">
+                <div className="absolute"
+                  style={ {
+                    top: "-0.5rem",
+                    right: "0rem"
+                  } }
+                >
+                  <ControlBox className="grid grid-cols-2 gap-1">
                     <Control className="btn btn-sm btn-outline-primary"
                       onClick={ e => this.togglePreviewing() }
                     >
@@ -531,6 +537,7 @@ class ReportBase extends React.Component {
                     </Control>
                   </ControlBox>
                 </div>
+
               </div>
             }
 

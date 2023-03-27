@@ -18,6 +18,7 @@
 .scrollbar::-webkit-scrollbar {
   height: 10px;
   width: 10px;
+  border-radius: 5px;
   background-color: #bbb;
 }
 .scrollbar::-webkit-scrollbar-thumb {
@@ -27,9 +28,11 @@
 .scrollbar::-webkit-scrollbar-thumb:hover {
 
 }
+
 .scrollbar-sm::-webkit-scrollbar {
   height: 8px;
   width: 8px;
+  border-radius: 4px;
   background-color: #bbb;
 }
 .scrollbar-sm::-webkit-scrollbar-thumb {
@@ -40,12 +43,13 @@
 }
 
 .scrollbar-xs::-webkit-scrollbar {
-  height: 4px;
-  width: 4px;
-  background-color: #f5f5f5;
+  height: 6px;
+  width: 6px;
+  border-radius: 3px;
+  background-color: #bbb;
 }
 .scrollbar-xs::-webkit-scrollbar-thumb {
-  border-radius: 2px;
+  border-radius: 3px;
   background-color: #888;
 }
 .scrollbar-xs::-webkit-scrollbar-thumb:hover {
@@ -100,4 +104,3 @@
   font-weight:900;
   font-style:normal
 }
-

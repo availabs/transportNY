@@ -113,9 +113,11 @@ const Route = ({ id, forFolder, ...props }) => {
       },
       { Item: (
           () => (
-            <ListItem>
-              <span className="fa fa-pen-to-square mr-1"/>Edit
-            </ListItem>
+            <Link to={ `/route/creation/${ id }` }>
+              <ListItem>
+                <span className="fa fa-pen-to-square mr-1"/>Edit
+              </ListItem>
+            </Link>
           )
         )
       }
