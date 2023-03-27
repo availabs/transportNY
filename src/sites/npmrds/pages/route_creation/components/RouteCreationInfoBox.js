@@ -70,7 +70,7 @@ const InfoBox = props => {
             <div className="border-b-2 border-current mb-1 font-bold text-lg">
               TMC List
             </div>
-            <div className="overflow-auto"
+            <div className="overflow-auto scrollbar-sm"
               style={ { maxHeight: "300px" } }
             >
               { tmcs.map(tmc => (

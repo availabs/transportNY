@@ -15,7 +15,7 @@ import {
 } from "./ConflationStyles"
 
 import InfoBox from "./RouteCreationInfoBox"
-import WayCache from "./WayCache"
+// import WayCache from "./WayCache"
 
 const COLORS = ["#1a9641", "#ffffbf", "#d7191c"];
 
@@ -78,7 +78,7 @@ class RouteCreationLayer extends LayerContainer {
     property: "tmc"
   }
 
-  wayCache = new WayCache();
+  // wayCache = new WayCache();
 
   init(mapboxMap, falcor) {
     return falcor.get(['geo', '36', 'geoLevels'])
@@ -203,17 +203,11 @@ class RouteCreationLayer extends LayerContainer {
   }
 
   getWays(markers = this.state.markers) {
-    return this.wayCache.getWays(this.falcor, markers, this.getYear());
 
     if (markers.length < 2) {
-      return Promise.resolve([]);
+      return Promise.resolve({ tmcs: [], ways: [] });
     }
-
-    // const url = `https://routing.availabs.org/0_4_2/route`;
-
     const year = this.getYear();
-    const version = `?conflation_map_version=${ year }_v${ VERSION }`;
-    const url = `https://routing2.availabs.org/route${ version }`;
 
     const locations = markers.map(m => {
       const p = m.getLngLat();
@@ -223,31 +217,13 @@ class RouteCreationLayer extends LayerContainer {
       }
     });
 
-    return fetch(url, {
-      method: 'POST',
-      cache: 'no-cache',
-      headers: {
-          'Accept': 'application/json, text/plain, */*',
-          'Content-Type': 'application/json'
-      },
-      redirect: 'follow',
-      referrer: 'no-referrer',
-      body: JSON.stringify({ locations })
-    })
-    .then((res, error) => {
-      if (error) return [];
-      return res.json();
-    })
-    .then(res => {
-      return get(res, "ways", []);
-    })
-    .then(ways => {
-      return this.falcor.call(["conflation", "tmcs", "from", "ways"], [ways, [year]])
-        .then(res => {
-          const tmcs = get(res, ["json", "conflation", "tmcs", "from", "ways", year], []);
-          return { ways, tmcs };
-        });
-    })
+    const request = [JSON.stringify(locations), year].join("|");
+
+    return this.falcor.get(["routes2", "get", "route", request])
+      .then(res => {
+        const tmcs = get(res, ["json", "routes2", "get", "route", request], [])
+        return { tmcs, ways: [] };
+      })
   }
 
   toggleVisibility(mapboxMap) {
@@ -292,21 +268,23 @@ class RouteCreationLayer extends LayerContainer {
 
   render(mapboxMap) {
     const ways = get(this, ["state", "ways"], []);
+    const tmcs = get(this, ["state", "tmcs"], []);
+    const geoTmcs = this.getTmcsForGeos();
 
     const year = this.getYear();
-
-    const tmcs = this.getTmcsForGeos();
 
     this.layers.forEach(({ id, filter }) => {
       const visibility = id.includes(year) ? "visible" : "none";
       mapboxMap.setLayoutProperty(id, "visibility", visibility);
+
       if (visibility === "visible") {
         mapboxMap.setFilter(id, [
           "all",
           filter,
           ["any",
             ["in", ["get", "id"], ["literal", ways]],
-            ["in", ["get", "tmc"], ["literal", tmcs]]
+            ["in", ["get", "tmc"], ["literal", tmcs]],
+            ["in", ["get", "tmc"], ["literal", geoTmcs]]
           ]
         ])
         const LineColor = [

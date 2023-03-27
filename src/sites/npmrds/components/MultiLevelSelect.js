@@ -175,7 +175,7 @@ const MultiLevelSelect = props => {
             No options available...
           </DisplayItem>
         }
-        <div className="w-fit"
+        <div className="w-fit scrollbar-xs"
           style={ {
             maxHeight: hasChildren ? null : "24rem",
             overflow: hasChildren ? null : "auto"
@@ -291,7 +291,7 @@ const Dropdown = props => {
           right: xDir === -1 ? "100%" : null
         } }
       >
-        <div className="w-fit"
+        <div className="w-fit scrollbar-xs"
           style={ {
             maxHeight: hasChildren ? null : "24rem",
             overflow: hasChildren ? null : "auto"
