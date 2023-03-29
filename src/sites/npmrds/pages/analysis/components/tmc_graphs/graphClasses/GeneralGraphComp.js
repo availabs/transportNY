@@ -469,7 +469,7 @@ class GeneralGraphComp extends React.Component {
 
 	getColorRange([displayData]) {
 		const cr = get(this.props, ["state", "colorRange"], this.props.colorRange).slice();
-		return displayData.reverseColors ? cr.reverse() : cr;
+		return get(displayData, "reverseColors", false) ? cr.reverse() : cr;
 	}
 	setColorRange(colorRange) {
 		if (deepequal(colorRange, this.props.colorRange)) {

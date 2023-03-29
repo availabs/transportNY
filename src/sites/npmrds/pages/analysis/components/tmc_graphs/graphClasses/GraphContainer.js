@@ -12,7 +12,7 @@ import { ScalableLoading } from "modules/avl-components/src"
 
 // import { VertDots } from "components/common/icons"
 // import { Tooltip } from 'components/common/styled-components';
-import { Tooltip, MultiLevelDropdown } from "sites/npmrds/components"
+import { Tooltip, MultiLevelSelect } from "sites/npmrds/components"
 
 import { ControlBox, Control } from "sites/npmrds/pages/analysis/components/Sidebar/components/parts"
 
@@ -392,6 +392,9 @@ const DropdownMenu = styled.div`
 	background-color: ${ props => props.theme.dropdownListBgd };
 `
 
+const getLabel = o => o.label;
+const getValue = o => o.value;
+
 const Select = props => {
 	const {
 		title,
@@ -406,11 +409,11 @@ const Select = props => {
 		return domain.map(d => ({
 			label: nameAccessor(d),
 			value: keyAccessor(d),
-			Item: ({ children, ...props }) => (
+			Item: ({ children, active, hasChildren, ...props }) => (
 				<div { ...props }
 					className={ `
 						pr-2 pl-6 hover:bg-gray-300 whitespace-nowrap relative
-						${ value === keyAccessor(d) ? "bg-gray-200" : "" }
+						${ value === keyAccessor(d) ? "bg-gray-200" : "bg-white" }
 					` }
 				>
 					{ children }
@@ -425,19 +428,18 @@ const Select = props => {
 	}, [domain, value, keyAccessor, nameAccessor]);
 
 	return (
-		<MultiLevelDropdown
-			xDirection={ 0 }
-			searchable={ false }
-			items={ Items }
-			onClick={ onChange }
-			hideOnClick={ true }
+		<MultiLevelSelect isDropdown
+			options={ Items }
+			onChange={ onChange }
+			displayAccessor={ getLabel }
+			valueAccessor={ getValue }
 		>
 			<Control>
 				<div className="px-2">
 					{ title }
 				</div>
 			</Control>
-		</MultiLevelDropdown>
+		</MultiLevelSelect>
 	)
 }
 const MultiSelect = props => {
@@ -454,11 +456,11 @@ const MultiSelect = props => {
 		return domain.map(d => ({
 			label: nameAccessor(d),
 			value: keyAccessor(d),
-			Item: ({ children, ...props }) => (
+			Item: ({ children, active, hasChildren, ...props }) => (
 				<div { ...props }
 					className={ `
 						pr-2 pl-6 hover:bg-gray-300 whitespace-nowrap relative
-						${ value.includes(keyAccessor(d)) ? "bg-gray-200" : "" }
+						${ value.includes(keyAccessor(d)) ? "bg-gray-200" : "bg-white" }
 					` }
 				>
 					{ children }
@@ -472,28 +474,29 @@ const MultiSelect = props => {
 		}))
 	}, [domain, value, keyAccessor, nameAccessor]);
 
-	const doOnChange = React.useCallback(val => {
-		if (value.includes(val)) {
-			onChange(value.filter(v => v != val));
-		}
-		else {
-			onChange([...value, val]);
-		}
-	}, [onChange, value]);
+	// const doOnChange = React.useCallback(([val]) => {
+	// 	if (value.includes(val)) {
+	// 		onChange(value.filter(v => v != val));
+	// 	}
+	// 	else {
+	// 		onChange([...value, val]);
+	// 	}
+	// }, [onChange, value]);
 
 	return (
-		<MultiLevelDropdown
-			xDirection={ 0 }
-			searchable={ false }
-			items={ Items }
-			onClick={ doOnChange }
+		<MultiLevelSelect isDropdown isMulti
+			options={ Items }
+			onChange={ onChange }
+			value={ value }
+			displayAccessor={ getLabel }
+			valueAccessor={ getValue }
 		>
 			<Control>
 				<div className="px-2">
 					{ title }
 				</div>
 			</Control>
-		</MultiLevelDropdown>
+		</MultiLevelSelect>
 	)
 }
 

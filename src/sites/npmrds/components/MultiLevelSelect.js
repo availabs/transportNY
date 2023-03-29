@@ -48,6 +48,10 @@ const MultiLevelSelect = props => {
   const [outter, setOutter] = React.useState(null);
 
   const [show, setShow] = React.useState(false);
+  const toggleDropdown = React.useCallback(e => {
+    e.stopPropagation();
+    setShow(show => !show);
+  }, []);
   const showDropdown = React.useCallback(e => {
     e.stopPropagation();
     setShow(true);
@@ -133,7 +137,7 @@ const MultiLevelSelect = props => {
   return (
     <div ref={ setOutter }
       className={ `relative cursor-pointer` }
-      onClick={ showDropdown }
+      onClick={ toggleDropdown }
     >
 
       { isDropdown ? children :
@@ -181,7 +185,7 @@ const MultiLevelSelect = props => {
             overflow: hasChildren ? null : "auto"
           } }
         >
-          { fuse(search).map((opt, i) => (
+          { fuse(search).map(({ Item = DisplayItem, ...opt }, i) => (
               <Dropdown key={ `${ valueAccessor(opt) }-${ i }` }
                 { ...props }
                 options={ get(opt, "children", []) }
@@ -194,11 +198,11 @@ const MultiLevelSelect = props => {
                   select={ select }
                   option={ opt }
                 >
-                  <DisplayItem active={ Value.includes(valueAccessor(opt)) }
+                  <Item active={ Value.includes(valueAccessor(opt)) }
                     hasChildren={ Boolean(get(opt, ["children", "length"], 0)) }
                   >
                     { displayAccessor(opt) }
-                  </DisplayItem>
+                  </Item>
                 </Clickable>
               </Dropdown>
             ))
@@ -315,7 +319,7 @@ const Dropdown = props => {
             </div>
           }
           <div className="w-fit">
-            { fuse(search).map((opt, i) => (
+            { fuse(search).map(({ Item = DisplayItem, ...opt }, i) => (
                 <Dropdown key={ `${ valueAccessor(opt) }-${ i }` }
                   { ...props }
                   options={ get(opt, "children", []) }
@@ -323,11 +327,11 @@ const Dropdown = props => {
                   zIndex={ zIndex + 5 }
                 >
                   <Clickable select={ doSelect } option={ opt }>
-                    <DisplayItem active={ Value.includes(valueAccessor(opt)) }
+                    <Item active={ Value.includes(valueAccessor(opt)) }
                       hasChildren={ Boolean(get(opt, ["children", "length"], 0)) }
                     >
                       { displayAccessor(opt) }
-                    </DisplayItem>
+                    </Item>
                   </Clickable>
                 </Dropdown>
               ))

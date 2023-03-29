@@ -1,5 +1,6 @@
 import React from "react"
 
+import deepequal from "deepequal"
 import get from "lodash.get"
 
 import { useFalcor } from "modules/avl-components/src"
@@ -18,17 +19,28 @@ const Reducer = (state, action) => {
       return state;
   }
 }
-const InitReducer = props => ({
-  name: "",
-  description: "",
-  conflation_version: "0_4_2",
-  folder: null,
-  routeId: null
+const InitReducer = loadedRoute => ({
+  name: get(loadedRoute, "name", ""),
+  description: get(loadedRoute, "description", ""),
+  folder: get(loadedRoute, "folder", ""),
+  id: get(loadedRoute, "id", null)
 })
 
-const RouteSaveModal = ({ isOpen, close, ...props }) => {
+const RouteSaveModal = ({ isOpen, close, loadedRoute, ...props }) => {
 
-  const [state, dispatch] = React.useReducer(Reducer, props, InitReducer);
+  const [state, dispatch] = React.useReducer(Reducer, loadedRoute, InitReducer);
+
+  React.useEffect(() => {
+    if (loadedRoute && (state.id !== loadedRoute.id)) {
+      dispatch({
+        type: "update-state",
+        name: loadedRoute.name,
+        description: loadedRoute.description || "",
+        folder: loadedRoute.folder,
+        id: loadedRoute.id
+      })
+    }
+  }, [state.id, loadedRoute]);
 
   const setName = React.useCallback(e => {
     dispatch({
@@ -63,15 +75,26 @@ const RouteSaveModal = ({ isOpen, close, ...props }) => {
   }, [falcorCache]);
 
   const saveRoute = React.useCallback(e => {
+    const savePoints = Boolean(props.points.length);
     const data = {
       ...state,
-      points: props.points,
-      tmc_array: props.tmc_array,
-      conflation_array: props.conflation_array
+      routeId: state.id,
+      points: savePoints ? props.points : [],
+      tmc_array: savePoints ? [] : props.tmc_array
     }
     falcor.call(["routes2", "save"], [data])
-      .then(res => console.log("SAVE RES:", res));
-  }, [falcor, state, props.points, props.tmc_array, props.conflation_array]);
+      .then(() => close());
+  }, [falcor, state, props.points, props.tmc_array, close]);
+
+  const canSave = React.useMemo(() => {
+    const { points = [], tmc_array = [], ...route } = loadedRoute || {};
+
+    return state.name && state.folder &&
+      !(deepequal(state, route) &&
+        deepequal(props.points, points) &&
+        deepequal(props.tmc_array, tmc_array)) &&
+      (props.points.length || props.tmc_array.length);
+  }, [state, loadedRoute, props.points, props.tmc_array]);
 
   return (
     <Modal isOpen={ isOpen } close={ close }>
@@ -120,7 +143,7 @@ const RouteSaveModal = ({ isOpen, close, ...props }) => {
           <div className="col-span-6 border-t-2 border-current"/>
 
           <div className="col-span-6 flex justify-end">
-            <button disabled={ !state.name || !state.folder }
+            <button disabled={ !canSave }
               onClick={ saveRoute }
               className={ `
                 rounded py-1 w-40 text-center

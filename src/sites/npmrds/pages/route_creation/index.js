@@ -32,48 +32,13 @@ const RouteCreation = () => {
   const layers = React.useRef([layerFunc()]);
   const layerId = get(layers, ["current", 0, "id"]);
 
-  const { falcor, falcorCache } = useFalcor();
-
   const { routeId } = useParams();
-  const prevRouteId = React.useRef(null);
-
-  React.useEffect(() => {
-    if (!routeId) return;
-    falcor.get([
-      "routes2", "id", routeId,
-      ["id", "name", "description", "folder",
-        "points", "tmc_array",
-        "conflation_version", "conflation_array"
-      ]
-    ]);
-  }, [falcor, routeId]);
-
-  const [loadedRoute, setLoadedRoute] = React.useState(null);
-
-  React.useEffect(() => {
-    if (routeId === prevRouteId.current) return;
-
-    const data = get(falcorCache, ["routes2", "id", routeId], null);
-    if (data) {
-      const route = {
-        ...data,
-        conflation_array: get(data, ["conflation_array", "value"], []),
-        points: get(data, ["points", "value"], []),
-        tmc_array:get(data, ["tmc_array", "value"], [])
-      }
-      setLoadedRoute(route);
-      prevRouteId.current = routeId;
-    }
-    else {
-      setLoadedRoute(null);
-    }
-  }, [falcorCache, routeId]);
 
   const layerProps = React.useMemo(() => {
     return {
-      [layerId]: { loadedRoute }
+      [layerId]: { routeId }
     }
-  }, [layerId, loadedRoute]);
+  }, [layerId, routeId]);
 
   return (
     <div className="w-full h-full">
