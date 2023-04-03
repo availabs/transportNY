@@ -45,7 +45,6 @@ class RouteCreationLayer extends LayerContainer {
         this.addMarker(lngLat);
       }
       else if ((mode === "tmc-clicks") && ConflationLayerIds.includes(layer)) {
-        console.log("CLICKED:", layer, features)
         const tmcs = features.reduce((a, c) => {
           const tmc = get(c, ["properties", "tmc"], null);
           if (tmc && !a.includes(tmc)) {
@@ -66,16 +65,6 @@ class RouteCreationLayer extends LayerContainer {
   ]
 
   filters = {
-    geography: {
-      name: "Geography",
-      type: "select",
-      multi: true,
-      domain: [],
-      value: [],
-      accessor: g => g.name,
-      valueAccessor: g => g.value,
-      searchable: true
-    },
     year: {
       name: "Year",
       type: "single",
@@ -83,6 +72,14 @@ class RouteCreationLayer extends LayerContainer {
       value: YEARS[0]
     }
   }
+
+  mapActions = [
+    { icon: "fa-home",
+      action: function(MapActions, layer) {
+        layer.zoomToBounds();
+      }
+    }
+  ]
 
   sources = [
     ...ConflationSources
@@ -97,40 +94,11 @@ class RouteCreationLayer extends LayerContainer {
   }
 
   init(mapboxMap, falcor) {
-    return falcor.get(['geo', '36', 'geoLevels'])
-      .then(res => {
-        const cache = falcor.getCache();
-        const geos = get(cache, ["geo", "36", "geoLevels", "value"], []);
-
-        this.filters.geography.domain = geos
-          .filter(g => g.geolevel !== "STATE")
-          .sort((a, b) => {
-            if (a.geolevel === b.geolevel) {
-              if (a.geolevel === "REGION") {
-                return +a.geoid - +b.geoid;
-              }
-              return a.geoname.localeCompare(b.geoname);
-            }
-            return GEO_LEVEL_ORDER[a.geolevel] - GEO_LEVEL_ORDER[b.geolevel];
-          })
-          .map(g => {
-            return {
-              value: `${ g.geolevel.toLowerCase() }|${ g.geoid }`,
-              name: g.geolevel === "COUNTY" ? `${ g.geoname } County` : g.geoname
-            }
-          });
-
-        this.filters.geography.value = this.loadFromLocalStorage();
-      })
+    return Promise.resolve();
   }
 
   onAdd(mapboxMap, falcor) {
     this.state.markers.forEach(m => m.addTo(mapboxMap));
-
-    this.layers.forEach(({ id }) => {
-      mapboxMap.setLayoutProperty(id, "visibility", "none");
-      mapboxMap.setFilter(id, ["in", ["get", "id"], "none"])
-    });
 
     const { routeId } = this.props;
 
@@ -145,6 +113,7 @@ class RouteCreationLayer extends LayerContainer {
           points = [],
           tmc_array = []
         } = get(res, ["json", "routes2", "id", routeId], {});
+
         if (points && points.length) {
           const num = Math.max(points.length - 1, 1);
           const scale = scaleLinear().domain([0, num * 0.5, num]).range(COLORS);
@@ -160,9 +129,13 @@ class RouteCreationLayer extends LayerContainer {
           this.updateState({ tmcs: [], markers, creationMode: "markers" });
         }
         else if (tmc_array && tmc_array.length) {
-          this.updateState({ tmcs: tmc_array, creationMode: "tmc-clicks" });
+          const year = this.getYear();
+          return falcor.get(["tmc", tmc_array, "meta", year, "bounding_box"])
+            .then(() => {
+              this.updateState({ tmcs: tmc_array, creationMode: "tmc-clicks" });
+            })
         }
-      });
+      }).then(() => this.zoomToBounds());
     }
 
     return Promise.resolve();
@@ -173,25 +146,65 @@ class RouteCreationLayer extends LayerContainer {
   }
 
   fetchData(falcor) {
-    const year = this.getYear();
-
-    const requests = [];
-
-    this.filters.geography.value.forEach(geo => {
-      const [geolevel, geoid] = geo.split("|");
-      requests.push([
-        "conflation", geolevel, geoid, year, "tmc"
-      ])
-    })
-
     return Promise.resolve()
-      .then(() => falcor.get(...requests))
       .then(() => this.getWays())
       .then(({ tmcs }) => {
         if (tmcs.length) {
           this.updateState({ tmcs });
         }
       });
+  }
+
+  zoomToBounds() {
+    if (this.state.markers.length === 1) {
+      const [marker] = this.state.markers;
+      this.mapboxMap.flyTo({
+        center: marker.getLngLat(),
+        zoom: 10,
+        bearing: 0,
+        pitch: 0
+      });
+    }
+    else if (this.state.markers.length >= 2) {
+      const [m1, m2, ...rest] = this.state.markers;
+      const bounds = rest.reduce((a, c) => {
+        a.extend(c.getLngLat());
+        return a;
+      }, new mapboxgl.LngLatBounds(m1.getLngLat(), m2.getLngLat()));
+      this.mapboxMap.fitBounds(bounds, {
+        bearing: 0,
+        pitch: 0,
+        padding: 150
+      });
+    }
+    else if (this.state.tmcs.length) {
+      const cache = this.falcor.getCache();
+      const year = this.getYear();
+      const [tmc, ...rest] = this.state.tmcs;
+      const bbox = get(cache, ["tmc", tmc, "meta", year, "bounding_box", "value"]);
+      if (bbox && (bbox.length === 2)) {
+        const bounds = rest.reduce((a, c) => {
+          const bbox = get(cache, ["tmc", c, "meta", year, "bounding_box", "value"]);
+          if (bbox && (bbox.length === 2)) {
+            a.extend(bbox);
+          }
+          return a;
+        }, new mapboxgl.LngLatBounds(bbox));
+        this.mapboxMap.fitBounds(bounds, {
+          bearing: 0,
+          pitch: 0,
+          padding: 150
+        });
+      }
+    }
+    else {
+      this.mapboxMap.flyTo({
+        center: [-73.75619435918802, 42.65102710658],
+        zoom: 10,
+        bearing: 0,
+        pitch: 0
+      });
+    }
   }
 
   addMarker(lngLat) {
@@ -278,7 +291,7 @@ class RouteCreationLayer extends LayerContainer {
     this.updateState({ tmcs: [] });
   }
 
-  toggleTmcs(tmcs) {
+  async toggleTmcs(tmcs) {
     const TMCs = tmcs.reduce((a, c) => {
       if (a.includes(c)) {
         return a.filter(tmc => tmc !== c);
@@ -287,7 +300,10 @@ class RouteCreationLayer extends LayerContainer {
       return a;
     }, [...this.state.tmcs]);
 
-    this.updateState({ tmcs: TMCs });
+    const year = this.getYear();
+
+    return this.falcor.get(["tmc", TMCs, "meta", year, "bounding_box"])
+      .then(res => this.updateState({ tmcs: TMCs }));
   }
 
   getYear() {
@@ -313,8 +329,9 @@ class RouteCreationLayer extends LayerContainer {
 
     return this.falcor.get(["routes2", "get", "route", request])
       .then(res => {
-        const tmcs = get(res, ["json", "routes2", "get", "route", request], [])
-        return { tmcs, ways: [] };
+        const tmcs = get(res, ["json", "routes2", "get", "route", request], []);
+        return this.falcor.get(["tmc", tmcs, "meta", year, "bounding_box"])
+          .then(() => ({ tmcs, ways: [] }));
       })
   }
 
@@ -345,23 +362,9 @@ class RouteCreationLayer extends LayerContainer {
     return [];
   }
 
-  getTmcsForGeos() {
-    const cache = this.falcor.getCache();
-    const geos = this.filters.geography.value;
-    const year = this.getYear();
-
-    return geos.reduce((a, c) => {
-      const [geolevel, geoid] = c.split("|");
-      const tmcs = get(cache, ["conflation", geolevel, geoid, year, "tmc", "value"], []);
-      a.push(...tmcs);
-      return a;
-    }, [])
-  }
-
   render(mapboxMap) {
     const ways = get(this, ["state", "ways"], []);
     const tmcs = get(this, ["state", "tmcs"], []);
-    const geoTmcs = this.getTmcsForGeos();
 
     const year = this.getYear();
 
@@ -371,13 +374,10 @@ class RouteCreationLayer extends LayerContainer {
 
       if (visibility === "visible") {
         mapboxMap.setFilter(id, [
-          "all",
+          "any",
           filter,
-          ["any",
-            ["in", ["get", "id"], ["literal", ways]],
-            ["in", ["get", "tmc"], ["literal", tmcs]],
-            ["in", ["get", "tmc"], ["literal", geoTmcs]]
-          ]
+          ["in", ["get", "id"], ["literal", ways]],
+          ["in", ["get", "tmc"], ["literal", tmcs]]
         ])
         const LineColor = [
           "case",

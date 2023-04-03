@@ -82,7 +82,7 @@ const InfoBox = props => {
         <div>
           { creationMode === "markers" ?
               "Click map to place markers to define a route." :
-              "Select a geography and click TMCs to define a route."
+              "Click TMCs to define a route."
           }
         </div>
         <div className="border-t-2 border-current"/>
