@@ -387,14 +387,6 @@ const BooleanToggle = ({ title, value, onChange }) =>
 		{ title }
 	</button>
 
-const DropdownMenu = styled.div`
-	${ props => props.theme.dropdownScrollBar };
-	background-color: ${ props => props.theme.dropdownListBgd };
-`
-
-const getLabel = o => o.label;
-const getValue = o => o.value;
-
 const DisplayItem = ({ children, active, hasChildren }) => {
 	return (
 		<div

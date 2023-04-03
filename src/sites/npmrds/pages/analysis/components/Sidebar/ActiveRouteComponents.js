@@ -9,7 +9,8 @@ import { hexColorToRgb } from "../tmc_graphs/utils"
 
 import {
 	ControlBox,
-	Control
+	Control,
+	OpenCloseButton
 } from "./components/parts"
 
 import {
@@ -44,25 +45,7 @@ export const Header = styled.div`
 		transition: background-color 0.15s;
 	}
 `
-const OpenCloseButton = styled.div`
-	width: 30px;
-	span.fa {
-		padding: 5px;
-	}
-	:hover span.fa {
-		color: ${ props => props.theme.sidePanelBg };
-		background-color: ${ props => props.theme.textColorHl };
-	}
-`
 
-// const RouteSelectorContainer = styled.div`
-// 	border-bottom: 2px solid ${ props => props.theme.textColorHl };
-//
-// 	.item-selector__dropdown .list__item__anchor {
-// 		color: ${ props => props.theme.textColorHl };
-// 		font-size: 1rem;
-// 	}
-// `
 export const DropdownItem = ({ children, hasChildren }) => {
   return (
     <div style={ { minWidth: "15rem" } }
@@ -171,10 +154,7 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 			>
 
 				<Header>
-					<OpenCloseButton>
-						<span onClick={ toggle }
-							className={ `fa fa-${ state.open ? "minus" : "plus" }` }/>
-					</OpenCloseButton>
+					<OpenCloseButton open={ state.open } onClick={ toggle }/>
 					<h4 className="">Routes</h4>
 					{ !state.open ? null :
 						<div className="flex-0 flex items-center text-sm"
@@ -188,7 +168,8 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 				</Header>
 
 				<div style={ {
-					borderBottom: `2px solid currentColor`
+					borderBottom: `2px solid currentColor`,
+					display: state.open ? "block" : "none"
 				} }>
 					<ControlBox>
 						<Control>

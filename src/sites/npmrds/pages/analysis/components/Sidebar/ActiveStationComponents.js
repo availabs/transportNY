@@ -15,7 +15,8 @@ import { hexColorToRgb } from "../tmc_graphs/utils"
 
 import {
 	ControlBox,
-	Control
+	Control,
+	OpenCloseButton
 } from "./components/parts"
 
 import {
@@ -47,35 +48,6 @@ const ActiveStationItem = styled.div`
 	}
 `
 
-// const Header = styled.div`
-//   flex-grow: 1;
-// 	display: flex;
-// 	border-bottom: 2px solid ${ props => props.theme.textColorHl };
-// 	h4 {
-// 		margin-bottom: 0px;
-// 		color: ${ props => props.theme.textColorHl };
-// 		font-size: 1.5rem;
-// 		font-weight: bold;
-// 	}
-// 	span.fa {
-// 		color: ${ props => props.theme.textColorHl };
-// 		font-size: 18px;
-// 		border-radius: 4px;
-// 		padding: 5px 4px 3px 5px;
-// 		transition: background-color 0.15s;
-// 	}
-// `
-const OpenCloseButton = styled.div`
-	width: 30px;
-	span.fa {
-		padding: 5px;
-	}
-	:hover span.fa {
-		color: ${ props => props.theme.sidePanelBg };
-		background-color: ${ props => props.theme.textColorHl };
-	}
-`
-
 const Icon = styled.span`
 	color: ${ props => props.theme.textColor };
 	border-radius: 4px;
@@ -101,6 +73,7 @@ class ActiveStationComponents extends React.Component {
 		this.headerRef = React.createRef();
 
 		this.extendSidebar = this.extendSidebar.bind(this);
+		this.toggle = this.toggle.bind(this);
 	}
 
 	extendSidebar(openCompId) {
@@ -112,6 +85,9 @@ class ActiveStationComponents extends React.Component {
 		if (source.index === destination.index) return;
 
 		this.props.reorderStationComps(source.index, destination.index);
+	}
+	toggle() {
+		this.setState(state => ({ open: !state.open }));
 	}
   render() {
 
@@ -132,16 +108,18 @@ class ActiveStationComponents extends React.Component {
 				>
 
 					<Header>
-						<OpenCloseButton>
-							<span onClick={ e => {
-								e.stopPropagation();
-								this.setState(state => ({ open: !state.open }));
-							} } className={ `fa fa-${ this.state.open ? "minus" : "plus" }` }/>
-						</OpenCloseButton>
+						<OpenCloseButton
+							open={ this.state.open }
+							onClick={ this.toggle }
+						/>
 						<h4>Stations</h4>
 					</Header>
 
-					<div style={ { borderBottom: `2px solid currentColor` } }>
+					<div style={ {
+							borderBottom: `2px solid currentColor`,
+							display: this.state.open ? "block" : "none"
+						} }
+					>
 						<ControlBox>
 							<Control>
 								<MultiLevelSelect isDropdown
