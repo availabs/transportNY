@@ -21,7 +21,7 @@ const config = {
   icon: 'fa fa-home',
   path: "/folders-home",
   exact: true,
-  auth: true,
+  auth: false,
   mainNav: false,
   sideNav: {
     color: 'dark',

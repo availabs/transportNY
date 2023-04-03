@@ -6,7 +6,7 @@ import Documentation from "pages/Documentation"
 
 const Routes = [
   Auth,
-  ...DataManager,
+  ...DataManager(),
   ...Documentation,
   NoMatch
 ]
