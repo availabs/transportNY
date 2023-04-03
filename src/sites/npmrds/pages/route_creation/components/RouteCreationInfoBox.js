@@ -1,6 +1,8 @@
 import React from "react"
 
+import deepequal from "deepequal"
 import get from "lodash.get"
+import { useParams } from "react-router-dom"
 
 import {
   Button,
@@ -18,17 +20,46 @@ const InfoBox = props => {
   const year = props.layer.getYear();
   const markers = get(props, ["layer", "state", "markers"], []);
 
-  // const [tmcs, setTmcs] = React.useState([]);
-  //
-  // React.useEffect(() => {
-  //   if (!ways.length) return;
-  //   falcor.call(["conflation", "tmcs", "from", "ways"], [ways, [year]]);
-  // }, [falcor, ways, year]);
-  //
-  // React.useEffect(() => {
-  //   const tmcs = get(falcorCache, ["conflation", "tmcs", "from", "ways", year, "value"], []);
-  //   setTmcs(tmcs);
-  // }, [falcorCache, year]);
+  const points = markers.map(m => {
+    const lngLat = m.getLngLat();
+    return {
+      lng: lngLat.lng,
+      lat: lngLat.lat
+    }
+  });
+
+  const creationMode = props.layer.state.creationMode;
+
+  const { routeId } = useParams();
+
+  React.useEffect(() => {
+    if (!routeId) return;
+    falcor.get([
+      "routes2", "id", routeId,
+      ["id", "name", "description", "folder",
+        "points", "tmc_array"
+      ]
+    ]);
+  }, [falcor, routeId]);
+
+  const [loadedRoute, setLoadedRoute] = React.useState(null);
+
+  React.useEffect(() => {
+    const data = get(falcorCache, ["routes2", "id", routeId], null);
+    if (data) {
+      setLoadedRoute({
+        id: data.id,
+        name: data.name,
+        folder: data.folder,
+        description: data.description || "",
+        points: get(data, ["points", "value"], []),
+        tmc_array: get(data, ["tmc_array", "value"], [])
+      });
+    }
+    else {
+      setLoadedRoute(null);
+    }
+  }, [falcorCache, routeId]);
 
   const [isOpen, setIsOpen] = React.useState(false);
   const open = React.useCallback(e => {
@@ -38,29 +69,31 @@ const InfoBox = props => {
     setIsOpen(false);
   }, []);
 
-  const points = React.useMemo(() => {
-    return markers.map(m => {
-      const lngLat = m.getLngLat();
-      return {
-        lng: lngLat.lng,
-        lat: lngLat.lat
-      }
-    })
-  }, [markers]);
+  const removeLast = React.useCallback(e => {
+    props.layer.removeLast();
+  }, [props.layer.removeLast]);
+  const clearAll = React.useCallback(e => {
+    props.layer.clearAll();
+  }, [props.layer.clearAll]);
 
   return (
     <>
       <div className="grid grid-cols-1 gap-2 pb-1">
+        <div>
+          { creationMode === "markers" ?
+              "Click map to place markers to define a route." :
+              "Select a geography and click TMCs to define a route."
+          }
+        </div>
+        <div className="border-t-2 border-current"/>
         <div className="grid grid-cols-2 gap-2">
-          <Button
-            onClick={ e => props.layer.removeLastMarker() }
-            disabled={ !points.length }
+          <Button onClick={ removeLast }
+            disabled={ !(points.length || tmcs.length) }
           >
             Remove Last
           </Button>
-          <Button
-            onClick={ e => props.layer.clearAllMarkers() }
-            disabled={ !points.length }
+          <Button onClick={ clearAll }
+            disabled={ !(points.length || tmcs.length) }
           >
             Clear All
           </Button>
@@ -84,9 +117,8 @@ const InfoBox = props => {
           </div>
         }
         <div className="grid grid-cols-2 gap-2">
-          <Button
-            onClick={ open }
-            disabled={ !points.length }
+          <Button onClick={ open }
+            disabled={ !(points.length || tmcs.length) && !loadedRoute }
           >
             Save Route
           </Button>
@@ -97,8 +129,8 @@ const InfoBox = props => {
         isOpen={ isOpen }
         close={ close }
         points={ points }
-        tmc_array={ [] }
-        conflation_array={ ways }/>
+        tmc_array={ tmcs }
+        loadedRoute={ loadedRoute }/>
     </>
   )
 }
