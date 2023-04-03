@@ -145,7 +145,7 @@ class RouteCreationLayer extends LayerContainer {
           points = [],
           tmc_array = []
         } = get(res, ["json", "routes2", "id", routeId], {});
-        if (points.length) {
+        if (points && points.length) {
           const num = Math.max(points.length - 1, 1);
           const scale = scaleLinear().domain([0, num * 0.5, num]).range(COLORS);
           const markers = points.map((p, i) => {
@@ -159,7 +159,7 @@ class RouteCreationLayer extends LayerContainer {
           })
           this.updateState({ tmcs: [], markers, creationMode: "markers" });
         }
-        else if (tmc_array.length) {
+        else if (tmc_array && tmc_array.length) {
           this.updateState({ tmcs: tmc_array, creationMode: "tmc-clicks" });
         }
       });

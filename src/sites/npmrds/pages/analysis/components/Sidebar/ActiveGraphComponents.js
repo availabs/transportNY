@@ -5,27 +5,10 @@ import styled from "styled-components"
 
 import { Header } from "./ActiveRouteComponents"
 
-// const Header = styled.div`
-// 	border-bottom: 2px solid ${ props => props.theme.textColorHl };
-// 	cursor: pointer;
-// 	display: flex;
-// 	flex-grow: 1;
-//
-// 	h4 {
-// 		color: ${ props => props.theme.textColorHl };
-// 		margin-bottom: 0px;
-// 		font-size: 1.5rem;
-// 		font-weight: bold;
-// 	}
-//
-// 	span.fa {
-// 		color: ${ props => props.theme.textColorHl };
-// 		font-size: 18px;
-// 		border-radius: 4px;
-// 		padding: 5px 4px 3px 5px;
-// 		transition: background-color 0.15s;
-// 	}
-// `
+import {
+	OpenCloseButton
+} from "./components/parts"
+
 const HeaderInner = styled.div`
 	display: flex;
 	flex-grow: 1;
@@ -38,16 +21,6 @@ const HeaderInner = styled.div`
 const ActiveGraphItem = styled.div`
 	color: ${ props => props.theme.textColor };
 	padding: 3px 10px;
-`
-const OpenCloseButton = styled.div`
-	width: 30px;
-	span.fa {
-		padding: 5px;
-	}
-	:hover span.fa {
-		color: ${ props => props.theme.sidePanelBg };
-		background-color: ${ props => props.theme.textColorHl };
-	}
 `
 
 const Icon = styled.span`
@@ -68,6 +41,11 @@ const Icon = styled.span`
 
 const ActiveGraphComponents = props => {
 	const [open, setOpen] = React.useState(true);
+
+	const toggle = React.useCallback(e => {
+		e.stopPropagation();
+		setOpen(o => !o);
+	}, []);
 
 	const [headerRef, setHeaderRef] = React.useState();
 	const height = React.useMemo(() => {
@@ -90,7 +68,6 @@ const ActiveGraphComponents = props => {
 			>
 				<Header onClick={ e => props.extendColorSelector() }
 					style={ { marginBottom: "5px" } }>
-					<OpenCloseButton />
 					<HeaderInner>
 						<div style={ { flexGrow: 1 } }>
 							<h4>Colors</h4>
@@ -102,12 +79,7 @@ const ActiveGraphComponents = props => {
 				</Header>
 
 				<Header onClick={ e => props.extendGraphSelector() }>
-					<OpenCloseButton>
-						<span onClick={ e => {
-							e.stopPropagation();
-							setOpen(!open);
-						} } className={ `fa fa-${ open ? "minus" : "plus" }` }/>
-					</OpenCloseButton>
+					<OpenCloseButton open={ open } onClick={ toggle }/>
 					<HeaderInner>
 						<div style={ { flexGrow: 1 } }>
 							<h4>Graphs</h4>
