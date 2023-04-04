@@ -15,4 +15,4 @@
 	url = https://github.com/availabs/DataManagerClient
 [submodule "src/modules/avl-maplibre"]
 	path = src/modules/avl-maplibre
-	url = git@github.com:availabs/avl-maplibre.git
+	url = https://github.com/availabs/avl-maplibre.git
