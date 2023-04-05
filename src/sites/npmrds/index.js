@@ -8,12 +8,15 @@ import NewHome from "./pages/NewHome"
 
 import RouteCreation from "./pages/route_creation"
 
+// import Map from "./pages/Map"
+
 const Routes = [
   Home,
   NewHome,
   ...RouteCreation,
   ...Folders,
-  ...Analysis
+  ...Analysis,
+  // Map
 ]
 
 const site =  {
