@@ -106,6 +106,7 @@ class RouteLineGraph extends GeneralGraphComp {
 				domain: routes
 			})
 		}
+console.log("RESOLUTIONS:", resolutions)
 		if (resolutions.length > 1) {
 			headerData.unshift({
 				title: "Resolution",

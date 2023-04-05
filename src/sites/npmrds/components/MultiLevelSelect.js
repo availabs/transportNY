@@ -134,6 +134,14 @@ const MultiLevelSelect = props => {
     );
   }, [options, displayAccessor]);
 
+  const getItem = React.useCallback(opt => {
+    return get(opt, "Item", DisplayItem);
+  }, [DisplayItem])
+
+if (options.includes("5-minutes")) {
+  console.log("MULTI SELECT:", options, value, valueAccessor(value))
+}
+
   return (
     <div ref={ setOutter }
       className={ `relative cursor-pointer` }
@@ -185,27 +193,30 @@ const MultiLevelSelect = props => {
             overflow: hasChildren ? null : "auto"
           } }
         >
-          { fuse(search).map(({ Item = DisplayItem, ...opt }, i) => (
-              <Dropdown key={ `${ valueAccessor(opt) }-${ i }` }
-                { ...props }
-                options={ get(opt, "children", []) }
-                xDirection={ 1 }
-                zIndex={ zIndex + 5 }
-                select={ select }
-                Value={ Value }
-              >
-                <Clickable
+          { fuse(search).map((opt, i) => {
+              const Item = getItem(opt);
+              return (
+                <Dropdown key={ `${ valueAccessor(opt) }-${ i }` }
+                  { ...props }
+                  options={ get(opt, "children", []) }
+                  xDirection={ 1 }
+                  zIndex={ zIndex + 5 }
                   select={ select }
-                  option={ opt }
+                  Value={ Value }
                 >
-                  <Item active={ Value.includes(valueAccessor(opt)) }
-                    hasChildren={ Boolean(get(opt, ["children", "length"], 0)) }
+                  <Clickable
+                    select={ select }
+                    option={ opt }
                   >
-                    { displayAccessor(opt) }
-                  </Item>
-                </Clickable>
-              </Dropdown>
-            ))
+                    <Item active={ Value.includes(valueAccessor(opt)) }
+                      hasChildren={ Boolean(get(opt, ["children", "length"], 0)) }
+                    >
+                      { displayAccessor(opt) }
+                    </Item>
+                  </Clickable>
+                </Dropdown>
+              )
+            })
           }
         </div>
       </div>
