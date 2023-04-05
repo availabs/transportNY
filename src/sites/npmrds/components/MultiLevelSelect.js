@@ -136,11 +136,7 @@ const MultiLevelSelect = props => {
 
   const getItem = React.useCallback(opt => {
     return get(opt, "Item", DisplayItem);
-  }, [DisplayItem])
-
-if (options.includes("5-minutes")) {
-  console.log("MULTI SELECT:", options, value, valueAccessor(value))
-}
+  }, [DisplayItem]);
 
   return (
     <div ref={ setOutter }
@@ -289,6 +285,10 @@ const Dropdown = props => {
     );
   }, [options, displayAccessor]);
 
+  const getItem = React.useCallback(opt => {
+    return get(opt, "Item", DisplayItem);
+  }, [DisplayItem]);
+
   return (
     <div className="relative cursor-pointer"
       onMouseEnter={ options.length ? showDropdown : null }
@@ -330,22 +330,25 @@ const Dropdown = props => {
             </div>
           }
           <div className="w-fit">
-            { fuse(search).map(({ Item = DisplayItem, ...opt }, i) => (
-                <Dropdown key={ `${ valueAccessor(opt) }-${ i }` }
-                  { ...props }
-                  options={ get(opt, "children", []) }
-                  xDirection={ xDir }
-                  zIndex={ zIndex + 5 }
-                >
-                  <Clickable select={ doSelect } option={ opt }>
-                    <Item active={ Value.includes(valueAccessor(opt)) }
-                      hasChildren={ Boolean(get(opt, ["children", "length"], 0)) }
-                    >
-                      { displayAccessor(opt) }
-                    </Item>
-                  </Clickable>
-                </Dropdown>
-              ))
+            { fuse(search).map((opt, i) => {
+                const Item = getItem(opt);
+                return (
+                  <Dropdown key={ `${ valueAccessor(opt) }-${ i }` }
+                    { ...props }
+                    options={ get(opt, "children", []) }
+                    xDirection={ xDir }
+                    zIndex={ zIndex + 5 }
+                  >
+                    <Clickable select={ doSelect } option={ opt }>
+                      <Item active={ Value.includes(valueAccessor(opt)) }
+                        hasChildren={ Boolean(get(opt, ["children", "length"], 0)) }
+                      >
+                        { displayAccessor(opt) }
+                      </Item>
+                    </Clickable>
+                  </Dropdown>
+                )
+              })
             }
           </div>
         </div>
