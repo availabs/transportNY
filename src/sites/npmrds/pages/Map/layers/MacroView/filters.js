@@ -54,7 +54,7 @@ const filters = {
     multi: false,
     domain: ["none", 2016, 2017, 2018, 2019,2020],
     value: "none",
-    
+
   },
   measure: {
     name: 'Performance Measure',
@@ -89,7 +89,40 @@ const filters = {
       { name: "RIS", value: true },
       { name: "NPMRDS", value: false }
     ],
-    value: true,
+    value: false,
+    multi: false,
+    searchable: false,
+    active: false
+  },
+  fueltype: {
+    name: "Fuel Type",
+    type: "select",
+    accessor: d => d.name,
+    valueAccessor: d => d.value,
+    domain: [
+      { name: "Total (Gasoline & Diesel)", value: "total" },
+      { name: "Gasoline", value: "gas" },
+      { name: "Diesel", value: "diesel" }
+    ],
+    value: "total",
+    multi: false,
+    searchable: false,
+    active: false
+  },
+  pollutant: {
+    name: "Pollutant",
+    type: "select",
+    accessor: d => d.name,
+    valueAccessor: d => d.value,
+    domain: [
+      { name: "CO² (Carbon Dioxide)", value: "co2" },
+      { name: "CO (Carbon Monoxide)", value: "co" },
+      { name: "NOx (Nitrogen Oxides)", value: "nox" },
+      { name: "VOC (Volatile organic compound)", value: "voc" },
+      { name: "PM₂.₅ (Fine Particles <= 2.5 microns)", value: "pm2_5" },
+      { name: "PM₁₀ (Particulate Matter <= 10 microns)", value: "pm10" }
+    ],
+    value: "co2",
     multi: false,
     searchable: false,
     active: false
@@ -188,13 +221,16 @@ const updateSubMeasures = (measure, filters, falcor) => {
     vehicleHours,
     attributes,
     percentiles,
-    trafficType
+    trafficType,
+    fueltype,
+    pollutant
   } = filters;
-  // console.log('mids',falcor.getCache(["pm3", "measureIds"]),get(falcor.getCache(["pm3", "measureIds"]), ["pm3", "measureIds","value"], []))
-  const mIds = get(falcor.getCache(["pm3", "measureIds"]), ["pm3", "measureIds","value"], [])
-  const mInfo = get(falcor.getCache(["pm3", "measureInfo"]), ["pm3", "measureInfo"], {});
 
-  
+  const cache = falcor.getCache();
+
+  const mIds = get(cache, ["pm3", "measureIds","value"], []);
+  const mInfo = get(cache, ["pm3", "measureInfo"], {});
+
   peakSelector.active = false;
   peakSelector.domain = [];
   trafficType.active = false;
@@ -207,11 +243,19 @@ const updateSubMeasures = (measure, filters, falcor) => {
   percentiles.active = false;
 
   attributes.active = false;
-  
+
+  fueltype.active = false;
+  pollutant.active = false;
 
   switch (measure) {
     case "emissions":
       peakSelector.active = true;
+
+      fueltype.active = true;
+      fueltype.value = "total";
+      pollutant.active = true;
+      pollutant.value = "co2";
+
       peakSelector.domain = [
         { name: "No Peak", value: "none" },
         { name: "AM Peak", value: "am" },
@@ -328,11 +372,8 @@ const updateSubMeasures = (measure, filters, falcor) => {
     perMiles.value = true;
     vehicleHours.value = true;
   }
-  if ((measure !== "phed") && (measure !== "ted") && (measure !== "emissions")) {
-    risAADT.value = false;
-  } else {
-    risAADT.value = true;
-  }
+
+  risAADT.value = false;
 
   percentiles.value = null;
   attributes.value = null;
@@ -349,12 +390,18 @@ const getMeasure = (filters) => {
     attributes,
     percentiles,
     trafficType,
+    fueltype,
+    pollutant
   } = filters;
   const out = [
     measure.value,
     trafficType.value,
     freeflow.value && "freeflow",
-    risAADT.value && "ris",
+    risAADT.value ? "ris" : false,
+    fueltype.active && (fueltype.value !== "total") ? fueltype.value : false,
+    pollutant.active && pollutant.value,
+    fueltype.active && (fueltype.value === "gas") ? "pass" : false,
+    fueltype.active && (fueltype.value === "diesel") ? "truck" : false,
     perMiles.value && "per_mi",
     vehicleHours.value && "vhrs",
     (measure.value === "speed") && percentiles.value,
@@ -362,7 +409,8 @@ const getMeasure = (filters) => {
     attributes.value
   ].filter(Boolean).join("_")
 
-  // console.log('get measure', out);
+// console.log("GET MEASURE:", risAADT, out);
+
   return out
 }
 
@@ -458,7 +506,7 @@ const setActiveLayer = (layers, filters, mapboxMap) => {
       }
       return output
     }).filter(d => d)
-   
+
 }
 
 

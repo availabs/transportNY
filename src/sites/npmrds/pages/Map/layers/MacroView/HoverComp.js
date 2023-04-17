@@ -1,7 +1,7 @@
 import React from "react";
 import get from "lodash.get";
 import { Link } from "react-router-dom";
-import { useFalcor } from "@availabs/avl-components";
+import { useFalcor } from "modules/avl-components/src";
 
 const f_system_meta = {
   "1": "Interstate",
@@ -26,8 +26,9 @@ const HoverComp = ({ data, layer }) => {
     "tmc"
   );
 
-  //console.log('HOVER', data, layer, network)
-  if (hoverLayer === "bottlnecks") {
+// console.log('HOVER', data, layer, network)
+
+  if (hoverLayer === "geo-bottlenecks") {
     return <DefaultHoverComp data={data} layer={layer} />;
   }
   if (network === "ris" && key) {
@@ -94,7 +95,7 @@ const TmcComp = ({ data, layer, tmc }) => {
   //console.log('MeasureInfo', currentData[tmc][layer.getMeasure(layer.filters)])
 
   return (
-    <div className="p-1 w-44 overflow-hidden">
+    <div className="p-1 w-44 overflow-hidden bg-gray-100">
       <div className=" px-2">
         <div className="text-center text-lg">{TmcInfo.roadname}</div>
         <div className="flex  ">

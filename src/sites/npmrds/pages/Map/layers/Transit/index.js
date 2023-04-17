@@ -6,7 +6,7 @@ import {
   useFalcor,
   getColorRange,
   Legend,
-} from "@availabs/avl-components";
+} from "modules/avl-components/src";
 
 import {
   TransitSources,

@@ -1,5 +1,5 @@
 import React from "react";
-import { useFalcor } from "@availabs/avl-components";
+import { useFalcor } from "modules/avl-components/src";
 import get from "lodash.get";
 
 // Falcor Route:

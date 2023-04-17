@@ -56,7 +56,7 @@ const NpmrdsLayers = ['2016','2017','2018','2019','2020','2021']
       id: `tmc-${year}`,
       type: 'line',
       source: 'npmrds',
-      beneath: 'waterway-label',
+      beneath: 'traffic_signals_layer',
       'source-layer': `npmrds_${year}`,
       layout: {
         'visibility': 'visible',

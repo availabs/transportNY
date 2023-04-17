@@ -1,7 +1,7 @@
 import React from 'react'
 import get from 'lodash.get'
 import { format as d3format } from "d3-format"
-import { useFalcor } from "@availabs/avl-components";
+import { useFalcor } from "modules/avl-components/src";
 import { /*LineGraph,*/ BarGraph } from "modules/avl-graph/src";
 
 const MeasureVisBox = ({ layer }) => {

@@ -2,7 +2,7 @@ import React from 'react'
 import get from 'lodash.get'
 
 import { getColorRange, Legend } from "avl-components"
-import { Select, useFalcor } from '@availabs/avl-components'
+import { Select, useFalcor } from 'modules/avl-components/src'
 
 import { RISSources, RISLayers } from 'pages/map/map-styles/ris'
 

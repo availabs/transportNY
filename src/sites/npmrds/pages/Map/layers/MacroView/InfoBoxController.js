@@ -1,5 +1,5 @@
 import React from "react";
-import { Select } from "@availabs/avl-components";
+import { Select } from "modules/avl-components/src";
 // import get from "lodash.get";
 
 //import { format as d3format } from "d3-format";
@@ -19,7 +19,7 @@ const InfoBoxController = ({ layer }) => {
 		{ comp: MeasureInfoBox, name: "Measure Definition" },
 		{
 			comp: BottlenecksBox,
-			name: "Bottlnecks",
+			name: "Bottlenecks",
 			onRemove: () => {
 				let layerId = layer.mapboxMap.getLayer("bottlnecks").id;
 				let source = layer.mapboxMap.getLayer("bottlnecks").source;
@@ -30,7 +30,7 @@ const InfoBoxController = ({ layer }) => {
 			},
 		},
 		{ comp: MeasureVisBox, name: "Region Overview" },
-		{ 	
+		{
 			comp: IncidentsBox, name: "Transcom Incidents",
 		  	onRemove: () => {
 				let layerId = layer.mapboxMap.getLayer("incidents").id;
@@ -74,12 +74,12 @@ const InfoBoxController = ({ layer }) => {
 									<div className="text-lg">{Box.name}</div>
 									<div>
 										<span
-											onClick={() => {
+											onClick={ () => {
 												toggleBox(Box.name);
-												Box.onRemove
-													? Box.onRemove()
-													: "";
-											}}
+												if (typeof Box.onRemove === "function") {
+													Box.onRemove();
+												}
+											} }
 											className="text-lg cursor-pointer os-icon os-icon-x"
 										/>
 									</div>

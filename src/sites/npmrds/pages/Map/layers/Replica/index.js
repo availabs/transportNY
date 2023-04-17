@@ -2,7 +2,7 @@ import React from 'react'
 import get from 'lodash.get'
 
 import { getColorRange, Legend } from "../../utils"
-import { Select, useFalcor } from '@availabs/avl-components'
+import { Select, useFalcor } from 'modules/avl-components/src'
 import mapboxgl from "mapbox-gl"
 import * as d3scale from "d3-scale"
 import len from '@turf/length'

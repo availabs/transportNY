@@ -2,7 +2,7 @@ import React from "react";
 import get from "lodash.get";
 
 import { getColorRange, Legend, rgb2rgba } from "../../utils";
-import { Select, useFalcor } from "@availabs/avl-components";
+import { Select, useFalcor } from "modules/avl-components/src";
 import mapboxgl from "mapbox-gl";
 import * as d3scale from "d3-scale";
 import len from "@turf/length";
@@ -15,14 +15,14 @@ import {
   ConflationSources,
   ConflationLayers,
   //ConflationLayerCase
-} from "pages/auth/Map/map-styles/conflation";
+} from "../../map-styles/conflation";
 
-import { NpmrdsSources, NpmrdsLayers } from "pages/auth/Map/map-styles/npmrds";
+import { NpmrdsSources, NpmrdsLayers } from "../../map-styles/npmrds";
 
 import {
   TrafficSignalsSources,
   TrafficSignalsLayers,
-} from "pages/auth/Map/map-styles/traffic_signals";
+} from "../../map-styles/traffic_signals";
 
 import {
   filters,
@@ -52,8 +52,7 @@ class MacroLayer extends LayerContainer {
     ...ConflationSources,
     ...NpmrdsSources,
     ...TrafficSignalsSources,
-    {
-      id: "geo-boundaries-source",
+    { id: "geo-boundaries-source",
       source: {
         type: "geojson",
         data: {
@@ -62,20 +61,73 @@ class MacroLayer extends LayerContainer {
         },
       },
     },
+    { id: "incidents-source",
+      source: {
+        type: "geojson",
+        data: {
+          type: "FeatureCollection",
+          features: [],
+        },
+      },
+    },
+    { id: "bottlenecks-source",
+      source: {
+        type: "geojson",
+        data: {
+          type: "FeatureCollection",
+          features: [],
+        },
+      },
+    }
   ];
   layers = [
     // ...ConflationLayerCase,
+    ...TrafficSignalsLayers,
     ...ConflationLayers,
     ...NpmrdsLayers,
-    ...TrafficSignalsLayers,
-    {
-      id: "geo-boundaries",
+    { id: "geo-boundaries",
       type: "line",
       source: "geo-boundaries-source",
       paint: {
         "line-color": "#fff",
       },
     },
+    { id: "geo-incidents",
+      type: "circle",
+      source: "incidents-source",
+      paint: {
+        "circle-radius": {
+         stops: [[8, 1], [16, 8]]
+        },
+        'circle-opacity': [
+          "case",
+          ["boolean", ["feature-state", "hover"], false],
+          0.4,
+          1
+        ],
+        "circle-color": ["string", ["get", "color"], "white"],
+      },
+    },
+    { id: "geo-bottlenecks",
+      type: "circle",
+      source: "bottlenecks-source",
+  		paint: {
+  			"circle-radius": ["number", ["get", "radius"]],
+  			"circle-opacity": 0.8,
+  			"circle-color": ["string", ["get", "color"]],
+  		}
+    },
+    { id: "geo-bottlenecks-hover",
+      type: "circle",
+      source: "bottlenecks-source",
+      filter: ["in", "tmc", "none"],
+      paint: {
+        "circle-radius": ["number", ["get", "radius"]],
+        "circle-opacity": 0,
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "#fff"
+      }
+    }
   ];
 
   state = {
@@ -138,8 +190,8 @@ class MacroLayer extends LayerContainer {
     layers: [
       ...ConflationLayers.map((d) => d.id),
       ...NpmrdsLayers.map((d) => d.id),
-      "bottlnecks",
-      "incidents",
+      "geo-bottlenecks",
+      "geo-incidents",
     ],
     filterFunc: function(layer, features, point, latlng) {
       const key = this.getNetwork(this.filters),
@@ -331,6 +383,7 @@ class MacroLayer extends LayerContainer {
             ]
           )
           .then((res) => {
+console.log("RES:", res)
             const mInfo = get(res, ["json", "pm3", "measureInfo"], {});
             // console.log('measureInfo', res)
             this.filters.measure.domain = mIds
@@ -604,14 +657,29 @@ console.log("FETCHING DATA");
       return { ...out, ...gdata };
     }, {});
 
+    const compareYearData = this.getGeographies().reduce((out, geo) => {
+      let gdata = get(
+        falcorCache,
+        [
+          "conflation",
+          "byGeo",
+          geo,
+          cy,
+          n,
+          this.getMeasures().join("|"),
+          "value",
+        ],
+        {}
+      );
+      return { ...out, ...gdata };
+    }, {});
+
     const getValue = (id) => {
       const v = toNaN(get(currentYearData, [id, m], null));
       if (cy === "none") {
         return v;
       }
-      const c = toNaN(
-        get(falcorCache, ["conflation", n, id, "data", cy, m], null)
-      );
+      const c = toNaN(get(compareYearData, [id, m], null));
       return (v - c) / c;
     };
 
