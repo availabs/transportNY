@@ -101,7 +101,7 @@ const TmcComp = ({ data, layer, tmc }) => {
         <div className="flex  ">
           <div className="text-xs flex-1 font-bold">TMC</div>
           <div className="flex-0">
-            <a target="_blank" href={`/tmc/${tmc}`}>
+            <a target="_blank" className="underline text-blue-500" href={`/tmc/${tmc}`}>
               {tmc}
             </a>
           </div>
@@ -347,7 +347,7 @@ const RisComp = ({ data, layer, risId }) => {
 const DefaultHoverComp = ({ data, layer }) => {
   //const theme = useTheme();
   return (
-    <div className={`rounded relative px-1`}>
+    <div className={`rounded relative px-1 bg-gray-100`}>
       {data.map((row, i) => (
         <div key={i} className="flex">
           {row.map((d, ii) => (

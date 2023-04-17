@@ -10,12 +10,15 @@ import RouteCreation from "./pages/route_creation"
 
 import Map from "./pages/Map"
 
+import TmcPage from "./pages/TmcPage"
+
 const Routes = [
   Home,
   NewHome,
   ...RouteCreation,
   ...Folders,
   ...Analysis,
+  TmcPage,
   Map
 ]
 
