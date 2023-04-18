@@ -4,33 +4,43 @@ import get from "lodash.get"
 import styled from "styled-components"
 
 // import { Button } from "components/common/styled-components"
-import AvlModal from "components/AvlStuff/AvlModal"
+// import AvlModal from "components/AvlStuff/AvlModal"
+import { Modal } from "sites/npmrds/components"
 
 import {
   Button,
-  BooleanInput
+  BooleanInput,
+  ScalableLoading
 } from "modules/avl-components/src"
 
-import ItemSelector from 'components/common/item-selector/item-selector'
-import Checkbox from "components/AvlMap/components/layerControl/checkboxFilter"
+// import ItemSelector from 'components/common/item-selector/item-selector'
+// import Checkbox from "components/AvlMap/components/layerControl/checkboxFilter"
 
 import {
   MultiLevelSelect
 } from "sites/npmrds/components"
 
-import { download as shpDownload } from 'utils/shp-write';
+import { download as shpDownload } from '../../utils/shp-write';
 import { saveAs } from "file-saver"
 
-import { ScalableLoading } from "components/loading/loadingPage"
+// import { ScalableLoading } from "components/loading/loadingPage"
 
-import { useTheme, useFalcor} from '@availabs/avl-components'
+import { useTheme, useFalcor} from 'modules/avl-components/src'
 
 class DataDownloader extends React.Component {
-  timeout = null;
-  state = {
-    measures: [],
-    metaVars: {},
-    loading: false
+  constructor(props) {
+    super(props);
+
+    this.timeout = null;
+    this.state = {
+      measures: [],
+      metaVars: {},
+      loading: false,
+      show: false
+    }
+    this.downloadCsv = this.downloadCsv.bind(this);
+    this.downloadShp = this.downloadShp.bind(this);
+    this.clearAll = this.clearAll.bind(this);
   }
   componentDidMount() {
     if (window.localStorage) {
@@ -47,6 +57,7 @@ class DataDownloader extends React.Component {
       )
       this.setState({ measures, metaVars });
     }
+    this.props.falcor.get(["tmc", "metaInfo"], ["ris", "metaInfo"]);
   }
   // componentDidUpdate(oldProps, oldState) {
   //   if (this.state.editing) {
@@ -135,7 +146,7 @@ class DataDownloader extends React.Component {
     }
   }
   downloadShp() {
-    this.setState({ loading: true });
+    this.setState({ loading: true, show: false });
 
     this.props.falcor.get(...this.props.layer.fetchRequestsForGeography())
     .then(() =>{
@@ -192,7 +203,7 @@ class DataDownloader extends React.Component {
     );
   }
   downloadCsv() {
-    this.setState({ loading: true });
+    this.setState({ loading: true, show: false });
      this.props.falcor.get(...this.props.layer.fetchRequestsForGeography())
       .then(() =>{
 
@@ -247,6 +258,10 @@ class DataDownloader extends React.Component {
     this.setState({ metaVars: { ...this.state.metaVars, [this.props.network]: metaVars } });
   }
 
+  clearAll() {
+    this.setState({ measures: [], metaVars: {} });
+  }
+
   showModal() {
     const measures = [...this.state.measures];
     if (!this.state.measures.includes(this.props.measure)) {
@@ -269,26 +284,19 @@ class DataDownloader extends React.Component {
               <ScalableLoading scale={ 0.75 }/>
             </div>
           :
-            <Button className='bg-npmrds-800 hover:bg-cool-gray-700 font-sans text-sm text-npmrds-100 font-medium' onClick={ e => this.showModal() }
+            <Button className='bg-npmrds-800 hover:bg-cool-gray-700 font-sans text-sm text-npmrds-100 font-medium'
+              onClick={ e => this.showModal() }
               style={ { width: "100%", marginTop: "10px" } }>
               Open Data Downloader
             </Button>
         }
 
-        <AvlModal
-          show={ this.state.show }
-          theme={{sidePanelBG: '#242730'}}
-          onHide={ e => this.setState({ show: false }) }
-
-          actions={ [
-            { label: "Download as .csv",
-              action: this.downloadCsv.bind(this)
-            },
-            { label: "Download as .shp",
-              action: this.downloadShp.bind(this)
-            }
-          ] }>
-          <div className={`relative ${theme.sidebarBg}`} style={ { width: "60vw", height: "60vh" } }>
+        <Modal isOpen={ this.state.show }
+          close={ e => this.setState({ show: false }) }
+        >
+          <div className={`relative border-b-2 border-current`}
+            style={ { width: "60vw", height: "60vh" } }
+          >
             <div className='flex w-full h-full'>
               <div className='p-2'>
                  <div><h4 className='text-xl font-bold text-teal-500'>Data Downloader</h4></div>
@@ -306,28 +314,33 @@ class DataDownloader extends React.Component {
                   <span>{ this.props.compareYear }</span>
                 </div>
                 }
+                <div>
+                  <Button onClick={ this.clearAll }>
+                    Clear All
+                  </Button>
+                </div>
               </div>
               <div className='w-full h-full flex'>
-                <div className='flex flex-col flex-1 bg-npmrds-600 p-2'>
-                  <div className='text-xl font-bold'>Selected Variables</div>
-                  <div>
-                    <div>Performance Measures</div>
-                    <div>
-                      <div style={ { display: "inline-block", flexDirection: "column" } }>
-                        { this.state.measures.map(m =>
-                          <Measure measure={ m } graph={ this.props.falcorCache } key={ m }
-                            remove={ e => this.setState({ measures: this.state.measures.filter(msr => msr !== m) }) }/>) }
-                      </div>
-                    </div>
+                <div className='flex flex-col flex-1 bg-npmrds-600 p-2 overflow-auto scrollbar'>
+                  <div className='text-xl font-bold border-b-2 border-current'>Selected Variables</div>
+                  <div className="font-bold border-b border-current">
+                    Performance Measures
                   </div>
                   <div>
-                    <span>Metadata</span>
+                    <div style={ { display: "inline-block", flexDirection: "column" } }>
+                      { this.state.measures.map(m =>
+                        <Measure measure={ m } graph={ this.props.falcorCache } key={ m }
+                          remove={ e => this.setState({ measures: this.state.measures.filter(msr => msr !== m) }) }/>) }
+                    </div>
+                  </div>
+                  <div className="font-bold border-b border-current">
+                    Metadata
+                  </div>
+                  <div>
                     <div>
-                      <div>
-                        { metaVars.map(mv =>
-                          <MetaVar metaVar={ mv } graph={ metaGraph } key={ mv }
-                            remove={ e => this.removeMetaVar(mv) }/>) }
-                      </div>
+                      { metaVars.map(mv =>
+                        <MetaVar metaVar={ mv } graph={ metaGraph } key={ mv }
+                          remove={ e => this.removeMetaVar(mv) }/>) }
                     </div>
                   </div>
                 </div>
@@ -347,7 +360,15 @@ class DataDownloader extends React.Component {
               </div>
             </div>
           </div>
-        </AvlModal>
+          <div className="flex justify-end mt-4">
+            <Button onClick={ this.downloadCsv }>
+              Download as .csv
+            </Button>
+            <Button onClick={ this.downloadShp }>
+              Download as .shp
+            </Button>
+          </div>
+        </Modal>
 
       </div>
     )
@@ -386,10 +407,13 @@ const ControlDivStyle = styled.div`
 `
 const INITIAL_STATE = {
   measure: null,
+  useTruck: false,
   useFreeflow: false,
   useRisAADT: false,
   showPerMiles: false,
   showVehicleHours: false,
+  fueltype: "total",
+  pollutant: "co2",
   activeSubMeasures: [],
   peakDomain: [],
   peak: null,
@@ -400,7 +424,9 @@ const INITIAL_STATE = {
 class ControlDiv extends React.Component {
   state = { ...INITIAL_STATE }
   setMeasure(m) {
-    this.updateSubMeasures(m.value);
+    if (m !== null) {
+      this.updateSubMeasures(m.value);
+    }
     this.setState({ measure: m });
   }
   updateSubMeasures(measure) {
@@ -409,7 +435,7 @@ class ControlDiv extends React.Component {
 
     switch (measure) {
       case "emissions":
-        activeSubMeasures.push("peak", "risAADT");
+        activeSubMeasures.push("peak", "risAADT", "fueltype", "pollutant");
         peakDomain = [
           { name: "No Peak", value: "none" },
           { name: "AM Peak", value: "am" },
@@ -446,7 +472,7 @@ class ControlDiv extends React.Component {
         ]
         break;
       case "phed":
-        activeSubMeasures.push("peak", "freeflow", "risAADT", "perMiles", "vehicleHours");
+        activeSubMeasures.push("peak", "useTruck", "freeflow", "risAADT", "perMiles", "vehicleHours");
         peakDomain = [
           { name: "No Peak", value: "none" },
           { name: "AM Peak", value: "am" },
@@ -454,7 +480,7 @@ class ControlDiv extends React.Component {
         ]
         break;
       case "ted":
-        activeSubMeasures.push("freeflow", "risAADT", "perMiles", "vehicleHours");
+        activeSubMeasures.push("useTruck", "freeflow", "risAADT", "perMiles", "vehicleHours");
         break;
       case "pti":
       case "tti":
@@ -519,23 +545,38 @@ class ControlDiv extends React.Component {
     const {
       measure,
       peak,
+      useTruck,
       useFreeflow,
       useRisAADT,
       showPerMiles,
       showVehicleHours,
       attribute,
-      percentile
+      percentile,
+      fueltype,
+      pollutant
     } = this.state;
-    return [
-      get(measure, "value", null),
+
+    const msr = get(measure, "value", null);
+
+    const m = [
+      msr,
+      useTruck && "truck",
       useFreeflow && "freeflow",
       useRisAADT && "ris",
+      msr !== "emissions" ? null : fueltype !== "total" ? fueltype : null,
+      msr !== "emissions" ? null : pollutant,
+      msr === "emissions" && (fueltype === "gas") ? "pass" : false,
+      msr === "emissions" && (fueltype === "diesel") ? "truck" : false,
       showPerMiles && "per_mi",
       showVehicleHours && "vhrs",
       get(percentile, "value", null),
       get(peak, "value", null),
       get(attribute, "value", null)
     ].filter(v => Boolean(v) && (v !== "none")).join("_")
+
+// console.log("MEASURE:", m)
+
+    return m;
   }
   addMeasure() {
     this.updateSubMeasures(null);
@@ -555,7 +596,7 @@ class ControlDiv extends React.Component {
           <div >
             <div className='text-md font-medium'>Add Performance Measure</div>
             <Button
-            onClick={ e => this.addMeasure() } large
+            onClick={ e => this.addMeasure() }
             disabled={
               !get(this.props,'allMeasures', []).includes(this.getMeasure()) ||
               get(this.props,'selected', []).includes(this.getMeasure())
@@ -571,42 +612,90 @@ class ControlDiv extends React.Component {
                 isMulti={ false }
                 searchable={ false }
                 displayAccessor={ d => d.name }
+                valueAccessor={ v => v }
                 onChange={ v => this.setMeasure(v) }/>
             </div>
           </div>
 
+          { !this.state.activeSubMeasures.includes("useTruck") ? null :
+            <div className="flex">
+              <div className="flex-1">Use Truck</div>
+              <BooleanInput
+                value={ this.state.useTruck }
+                onChange={ v => this.setState({ useTruck: v }) }/>
+            </div>
+          }
+
           { !this.state.activeSubMeasures.includes("freeflow") ? null :
-            <div>
-              <Checkbox
-                label="Use Freeflow"
-                checked={ this.state.useFreeflow }
+            <div className="flex">
+              <div className="flex-1">Use Freeflow</div>
+              <BooleanInput
+                value={ this.state.useFreeflow }
                 onChange={ v => this.setState({ useFreeflow: v }) }/>
             </div>
           }
 
           { !this.state.activeSubMeasures.includes("risAADT") ? null :
-            <div>
-              <Checkbox
-                label="Use RIS AADT"
-                checked={ this.state.useRisAADT }
+            <div className="flex">
+              <div className="flex-1">Use RIS AADT</div>
+              <BooleanInput
+                value={ this.state.useRisAADT }
                 onChange={ v => this.setState({ useRisAADT: v }) }/>
             </div>
           }
 
-          { !this.state.activeSubMeasures.includes("perMiles") ? null :
+          { !this.state.activeSubMeasures.includes("fueltype") ? null :
             <div>
-              <Checkbox
-                label="Show Per Mile"
-                checked={ this.state.showPerMiles }
+              <div style={ { marginTop: "10px" } }>Fuel Type</div>
+              <MultiLevelSelect
+                value={ this.state.fueltype }
+                options={ [
+                  { name: "Total (Gasoline & Diesel)", value: "total" },
+                  { name: "Gasoline", value: "gas" },
+                  { name: "Diesel", value: "diesel" }
+                ] }
+                displayAccessor={ d => d.name }
+                valueAccessor={ d => d.value }
+                onChange={ v => this.setState({ fueltype: v }) }
+                isMulti={ false }
+                searchable={ false }/>
+            </div>
+          }
+          { !this.state.activeSubMeasures.includes("pollutant") ? null :
+            <div>
+              <div style={ { marginTop: "10px" } }>Pollutant</div>
+              <MultiLevelSelect
+                value={ this.state.pollutant }
+                options={ [
+                  { name: "CO² (Carbon Dioxide)", value: "co2" },
+                  { name: "CO (Carbon Monoxide)", value: "co" },
+                  { name: "NOx (Nitrogen Oxides)", value: "nox" },
+                  { name: "VOC (Volatile organic compound)", value: "voc" },
+                  { name: "PM₂.₅ (Fine Particles <= 2.5 microns)", value: "pm2_5" },
+                  { name: "PM₁₀ (Particulate Matter <= 10 microns)", value: "pm10" }
+                ] }
+                displayAccessor={ d => d.name }
+                valueAccessor={ d => d.value }
+                onChange={ v => this.setState({ pollutant: v }) }
+                isMulti={ false }
+                searchable={ false }/>
+            </div>
+          }
+
+          { !this.state.activeSubMeasures.includes("perMiles") ? null :
+            <div className="flex">
+              <div className="flex-1">Show Per Mile</div>
+              <BooleanInput
+                value={ this.state.showPerMiles }
                 onChange={ v => this.setState({ showPerMiles: v }) }/>
             </div>
           }
 
           { !this.state.activeSubMeasures.includes("vehicleHours") ? null :
-            <div>
-              <Checkbox
-                label="Show Vehicle Hours"
-                checked={ this.state.showVehicleHours }
+            <div className="flex">
+              <div className="flex-1">Show Vehicle Hours</div>
+              <BooleanInput
+                value={ this.state.showVehicleHours }
                 onChange={ v => this.setState({ showVehicleHours: v }) }/>
             </div>
           }
@@ -614,8 +703,8 @@ class ControlDiv extends React.Component {
           { !this.state.activeSubMeasures.includes("percentiles") ? null :
             <div>
               <div style={ { marginTop: "10px" } }>Percetile Selector</div>
-              <ItemSelector
-                selectedItems={ this.state.percentile }
+              <MultiLevelSelect
+                value={ this.state.percentile }
                 options={ [
                   { name: "5th Percentile", value: "5pctl" },
                   { name: "20th Percentile", value: "20pctl" },
@@ -625,10 +714,10 @@ class ControlDiv extends React.Component {
                   { name: "80th Percentile", value: "80pctl" },
                   { name: "95th Percentile", value: "95pctl" }
                 ] }
-                multiSelect={ false }
+                isMulti={ false }
                 searchable={ false }
-                displayOption={ d => d.name }
-                getOptionValue={ d => d }
+                displayAccessor={ d => d.name }
+                valueAccessor={ d => d }
                 onChange={ v => this.setState({ percentile: v }) }/>
             </div>
           }
@@ -636,13 +725,13 @@ class ControlDiv extends React.Component {
           { !this.state.activeSubMeasures.includes("peak") ? null :
             <div>
               <div style={ { marginTop: "10px" } }>Peak Selector</div>
-              <ItemSelector
-                selectedItems={ this.state.peak }
+              <MultiLevelSelect
+                value={ this.state.peak }
                 options={ this.state.peakDomain }
-                multiSelect={ false }
+                isMulti={ false }
                 searchable={ false }
-                displayOption={ d => d.name }
-                getOptionValue={ d => d }
+                displayAccessor={ d => d.name }
+                valueAccessor={ d => d }
                 onChange={ v => this.setState({ peak: v }) }/>
             </div>
           }
@@ -650,13 +739,13 @@ class ControlDiv extends React.Component {
           { !this.state.activeSubMeasures.includes("attributes") ? null :
             <div>
               <div style={ { marginTop: "10px" } }>Attribute Selector</div>
-              <ItemSelector
-                selectedItems={ this.state.attribute }
+              <MultiLevelSelect
+                value={ this.state.attribute }
                 options={ this.state.measure.value === "RIS" ? this.props.risAttributes : this.props.tmcAttributes }
-                multiSelect={ false }
+                isMulti={ false }
                 searchable={ false }
-                displayOption={ d => d.name }
-                getOptionValue={ d => d }
+                displayAccessor={ d => d.name }
+                valueAccessor={ d => d }
                 onChange={ v => this.setState({ attribute: v }) }/>
             </div>
           }
@@ -667,8 +756,8 @@ class ControlDiv extends React.Component {
         <div className='flex-1 bg-npmrds-600 p-2'>
           <div>
             <div className='text-md font-medium'>Add {this.props.network.toUpperCase()} Meta Variables</div>
-            <ItemSelector
-              selectedItems={ null }
+            <MultiLevelSelect
+              value={ null }
               placeholder="Select a variable..."
               options={
                 Object.keys(this.props.metaGraph)
@@ -682,10 +771,10 @@ class ControlDiv extends React.Component {
                     return a;
                   }, [])
               }
-              multiSelect={ false }
+              isMulti={ false }
               searchable={ false }
-              displayOption={ d => d.name !== d.key ? `${ d.name } (${ d.key })` : d.key }
-              getOptionValue={ d => d }
+              displayAccessor={ d => d.name !== d.key ? `${ d.name } (${ d.key })` : d.key }
+              valueAccessor={ d => d }
               onChange={ mv => this.props.addMetaVar(mv.key) }/>
           </div>
         </div>

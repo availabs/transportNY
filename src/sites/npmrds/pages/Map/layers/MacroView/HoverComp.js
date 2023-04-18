@@ -1,7 +1,7 @@
 import React from "react";
 import get from "lodash.get";
 import { Link } from "react-router-dom";
-import { useFalcor } from "@availabs/avl-components";
+import { useFalcor } from "modules/avl-components/src";
 
 const f_system_meta = {
   "1": "Interstate",
@@ -26,8 +26,9 @@ const HoverComp = ({ data, layer }) => {
     "tmc"
   );
 
-  //console.log('HOVER', data, layer, network)
-  if (hoverLayer === "bottlnecks") {
+// console.log('HOVER', data, layer, network)
+
+  if (hoverLayer === "geo-bottlenecks") {
     return <DefaultHoverComp data={data} layer={layer} />;
   }
   if (network === "ris" && key) {
@@ -94,13 +95,13 @@ const TmcComp = ({ data, layer, tmc }) => {
   //console.log('MeasureInfo', currentData[tmc][layer.getMeasure(layer.filters)])
 
   return (
-    <div className="p-1 w-44 overflow-hidden">
+    <div className="p-1 w-44 overflow-hidden bg-gray-100">
       <div className=" px-2">
         <div className="text-center text-lg">{TmcInfo.roadname}</div>
         <div className="flex  ">
           <div className="text-xs flex-1 font-bold">TMC</div>
           <div className="flex-0">
-            <a target="_blank" href={`/tmc/${tmc}`}>
+            <a target="_blank" className="underline text-blue-500" href={`/tmc/${tmc}`}>
               {tmc}
             </a>
           </div>
@@ -346,7 +347,7 @@ const RisComp = ({ data, layer, risId }) => {
 const DefaultHoverComp = ({ data, layer }) => {
   //const theme = useTheme();
   return (
-    <div className={`rounded relative px-1`}>
+    <div className={`rounded relative px-1 bg-gray-100`}>
       {data.map((row, i) => (
         <div key={i} className="flex">
           {row.map((d, ii) => (

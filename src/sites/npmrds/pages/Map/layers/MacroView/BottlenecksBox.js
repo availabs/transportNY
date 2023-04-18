@@ -3,7 +3,7 @@ import get from "lodash.get";
 import { format as d3format } from "d3-format";
 import { quantile, quantileRank } from "simple-statistics";
 import { /*LineGraph,*/ BarGraph } from "modules/avl-graph/src";
-import { useFalcor } from "@availabs/avl-components";
+import { useFalcor } from "modules/avl-components/src";
 import { download as shpDownload } from "../../utils/shp-write";
 import { saveAs } from "file-saver";
 import { scaleLinear } from "d3-scale";
@@ -26,7 +26,7 @@ const BottlenecksBox = ({ layer }) => {
 	const measure = layer.getMeasure(layer.filters);
 	const currentData = React.useMemo(
 		() => get(layer, "state.currentData", []).sort((a, b) => b.value - a.value),
-		[measure, falcorCache]
+		[layer.state.currentData]
 	);
 
 	const f = d3format(",.3~s");
@@ -48,7 +48,7 @@ const BottlenecksBox = ({ layer }) => {
 	const scale = React.useMemo(
 		() =>
 			layer.getColorScale(domain) ? layer.getColorScale(domain) : () => "blue",
-		[measure, falcorCache]
+		[domain]
 	);
 
 	const bottlenecks = React.useMemo(
@@ -60,14 +60,14 @@ const BottlenecksBox = ({ layer }) => {
 					d.color = scale(d.value);
 					d.rank = i + 1;
 					d.percentile = (quantileRank(domain, d.value) * 100).toFixed(0) - 1;
-					(d.vmt = f(
+					d.vmt = f(
 						+d.TMC_miles * d.TMC_aadt ? d.TMC_aadt : d.RIS_aadt_current_yr_est
-					)),
-						(d.roadname = get(
-							falcorCache,
-							["tmc", d.id, "meta", layer.filters.year.value, "roadname"],
-							d.id
-						));
+					);
+					d.roadname = get(
+						falcorCache,
+						["tmc", d.id, "meta", layer.filters.year.value, "roadname"],
+						d.id
+					);
 					d.roadname = get(
 						falcorCache,
 						["tmc", d.id, "meta", layer.filters.year.value, "firstname"],
@@ -85,7 +85,7 @@ const BottlenecksBox = ({ layer }) => {
 					);
 					return d;
 				}),
-		[currentData, falcorCache]
+		[currentData, falcorCache, layer.filters.year.value]
 	);
 
 	React.useEffect(() => {
@@ -108,7 +108,7 @@ const BottlenecksBox = ({ layer }) => {
 				]
 			)
 			.then((d) => console.log("test123", d));
-	}, [falcor, currentData]);
+	}, [falcor, currentData, layer.filters.year.value]);
 
 	const bottlenecksGeo = React.useMemo(() => {
 		return bottlenecks.reduce((out, curr) => {
@@ -129,7 +129,7 @@ const BottlenecksBox = ({ layer }) => {
 			);
 			return out;
 		}, {});
-	}, [bottlenecks, falcorCache]);
+	}, [bottlenecks, layer.filters.year.value, falcorCache]);
 
 	const quantiles = React.useMemo(
 		() =>
@@ -153,6 +153,14 @@ const BottlenecksBox = ({ layer }) => {
 		[domain]
 	);
 
+	const distData = React.useMemo(() => {
+		return Object.keys(quantileDist).map((k) => ({
+			color: scale(quantiles[Math.round(k * numQuantiles) - 1]),
+			index: k,
+			value: quantileDist[k]
+		}))
+	}, [quantiles, quantileDist, scale])
+
 	const bottlnecksGeojson = React.useMemo(() => {
 		return mapBottlenecks(
 			layer.mapboxMap,
@@ -161,11 +169,18 @@ const BottlenecksBox = ({ layer }) => {
 			bottlenecksGeo,
 			domain
 		);
-	}, [bottlenecksGeo]);
+	}, [layer.mapboxMap, layer.filters.year.value, bottlenecks, bottlenecksGeo, domain]);
 
-	const hoverFilter = (tmc) => {
-		layer.mapboxMap.setFilter("bottlnecks-hover", ["in", "tmc", tmc]);
-	};
+  React.useEffect(() => {
+    layer.mapboxMap.getSource("bottlenecks-source").setData(bottlnecksGeojson);
+  }, [layer.mapboxMap, bottlnecksGeojson])
+
+	const hoverFilter = React.useCallback((tmc) => {
+		layer.mapboxMap.setFilter("geo-bottlenecks-hover", ["in", "tmc", tmc]);
+	}, [layer.mapboxMap]);
+	const mouseOut = React.useCallback(() => {
+		layer.mapboxMap.setFilter("geo-bottlenecks-hover", ["in", "tmc", "none"]);
+	}, [layer.mapboxMap]);
 
 	const downloadShp = () => {
 		return shpDownload(
@@ -198,6 +213,8 @@ const BottlenecksBox = ({ layer }) => {
 	};
 	//console.log('quantileDist',quantileDist, quantiles.map((v,i) => v === quantiles[i-1] ? v += .001 : v),domain)
 
+// console.log("QUANTILES", quantiles)
+
 	return (
 		<div>
 			<h4 className="p-1">Bottlenecks</h4>
@@ -213,16 +230,10 @@ const BottlenecksBox = ({ layer }) => {
 			</div>
 			<div className="">
 				<BarGraph
-					data={Object.keys(quantileDist).map((k) => ({
-						index: k,
-						value: quantileDist[k],
-					}))}
+					data={ distData }
 					keys={["value"]}
 					margin={{ left: 20, bottom: 10 }}
-					colors={(d, ii, key) => {
-						//console.log(d,ii,key, )
-						return scale(quantiles[Math.round(d.index * numQuantiles) - 1]);
-					}}
+					colors={ (v, ii, data, key) => data.color }
 				/>
 				<BarGraph
 					data={quantiles
@@ -230,7 +241,7 @@ const BottlenecksBox = ({ layer }) => {
 						.map((v, i) => ({ index: i, value: v }))}
 					keys={["value"]}
 					margin={{ left: 20, bottom: 10 }}
-					colors={(d, ii, key) => scale(get(d, key, 0))}
+					colors={ scale }
 				/>
 			</div>
 			<div className="flex-1 flex border-b border-gray-700 bg-npmrds-500">
@@ -250,7 +261,9 @@ const BottlenecksBox = ({ layer }) => {
 					</div>
 				</div>
 			</div>
-			<div className="h-64 overflow-y-scroll scrollbar-sm">
+			<div className="h-64 overflow-y-scroll scrollbar-sm"
+				onMouseLeave={ mouseOut }
+			>
 				{bottlenecks.map((d, i) => (
 					<div
 						onMouseEnter={() => hoverFilter(d.id)}
@@ -320,7 +333,7 @@ const mapBottlenecks = (map, year, data, geo, domain) => {
 				properties: {},
 				geometry: {
 					type: "Point",
-					coordinates: geo[segment.id].coordinates[0],
+					coordinates: geo[segment.id].coordinates[0][0],
 				},
 			};
 
@@ -349,50 +362,50 @@ const mapBottlenecks = (map, year, data, geo, domain) => {
 		}
 	});
 
-	let source = {
-		type: "geojson",
-		data: bottlnecksGeo,
-	};
-	let newLayer = {
-		id: "bottlnecks",
-		type: "circle",
-		source: "bottlenecks-source",
-		paint: {
-			"circle-radius": ["number", ["get", "radius"]],
-			"circle-opacity": 0.8,
-			"circle-color": ["string", ["get", "color"]],
-		},
-	};
-
-	let higlightLayer = {
-		id: "bottlnecks-hover",
-		type: "circle",
-		source: "bottlenecks-source",
-		paint: {
-			"circle-radius": ["number", ["get", "radius"]],
-			"circle-opacity": 0,
-			"circle-stroke-width": 2,
-			"circle-stroke-color": "#fff",
-		},
-		filter: ["in", "tmc", ""],
-	};
-
-	//map.getSource('bottlenecks-source').setData(bottlnecksGeo)
-	//map.setPaintProperty('bottlnecks',  'circle-radius', ['number', ['get', 'radius']])
-	//console.log('sourceFeatures', map.querySourceFeatures('geo-boundaries-source'))
-	//console.log('rendered features', map.queryRenderedFeatures({ layers: ['bottlnecks'] }))
-	if (map.getLayer("bottlnecks")) {
-		// console.log('get bottlnecks layer', map.getLayer('bottlnecks').id   )
-		let layerId = map.getLayer("bottlnecks").id;
-		let source = map.getLayer("bottlnecks").source;
-		let hoverId = map.getLayer("bottlnecks-hover").id;
-		map.removeLayer(layerId);
-		map.removeLayer(hoverId);
-		map.removeSource(source);
-	}
-	map.addSource("bottlenecks-source", source);
-	map.addLayer(newLayer);
-	map.addLayer(higlightLayer);
+	// let source = {
+	// 	type: "geojson",
+	// 	data: bottlnecksGeo,
+	// };
+	// let newLayer = {
+	// 	id: "bottlnecks",
+	// 	type: "circle",
+	// 	source: "bottlenecks-source",
+	// 	paint: {
+	// 		"circle-radius": ["number", ["get", "radius"]],
+	// 		"circle-opacity": 0.8,
+	// 		"circle-color": ["string", ["get", "color"]],
+	// 	},
+	// };
+	//
+	// let higlightLayer = {
+	// 	id: "bottlnecks-hover",
+	// 	type: "circle",
+	// 	source: "bottlenecks-source",
+	// 	paint: {
+	// 		"circle-radius": ["number", ["get", "radius"]],
+	// 		"circle-opacity": 0,
+	// 		"circle-stroke-width": 2,
+	// 		"circle-stroke-color": "#fff",
+	// 	},
+	// 	filter: ["in", "tmc", ""],
+	// };
+	//
+	// //map.getSource('bottlenecks-source').setData(bottlnecksGeo)
+	// //map.setPaintProperty('bottlnecks',  'circle-radius', ['number', ['get', 'radius']])
+	// //console.log('sourceFeatures', map.querySourceFeatures('geo-boundaries-source'))
+	// //console.log('rendered features', map.queryRenderedFeatures({ layers: ['bottlnecks'] }))
+	// if (map.getLayer("bottlnecks")) {
+	// 	// console.log('get bottlnecks layer', map.getLayer('bottlnecks').id   )
+	// 	let layerId = map.getLayer("bottlnecks").id;
+	// 	let source = map.getLayer("bottlnecks").source;
+	// 	let hoverId = map.getLayer("bottlnecks-hover").id;
+	// 	map.removeLayer(layerId);
+	// 	map.removeLayer(hoverId);
+	// 	map.removeSource(source);
+	// }
+	// map.addSource("bottlenecks-source", source);
+	// map.addLayer(newLayer);
+	// map.addLayer(higlightLayer);
 
 	//  if( map.getLayer('bottlnecks-hover') ) {
 	//  	let hoverId =  map.getLayer('bottlnecks-hover').id
@@ -407,6 +420,8 @@ const mapBottlenecks = (map, year, data, geo, domain) => {
 	// map.getSource('bottlenecks-source').setData(bottlnecksGeo);
 
 	// console.log('draw bottlnecks',bottlnecksGeo.features.length, bottlnecksGeo)
+
+// console.log("bottlnecksGeo", bottlnecksGeo)
 
 	return bottlnecksGeo;
 };

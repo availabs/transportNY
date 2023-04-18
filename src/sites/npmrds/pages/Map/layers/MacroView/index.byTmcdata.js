@@ -2,7 +2,7 @@ import React from "react";
 import get from "lodash.get";
 
 import { getColorRange, Legend, rgb2rgba } from "../../utils";
-import { Select, useFalcor } from "@availabs/avl-components";
+import { Select, useFalcor } from "modules/avl-components/src";
 import mapboxgl from "mapbox-gl";
 import * as d3scale from "d3-scale";
 import len from "@turf/length";
@@ -42,7 +42,7 @@ import InfoBoxController from "./InfoBoxController";
 import HoverComp from "./HoverComp";
 import { LayerContainer } from "modules/avl-map/src";
 
-/* ---- To Do ----- 
+/* ---- To Do -----
 X - Data Overview
 X - stop lights
 X - All Years Working

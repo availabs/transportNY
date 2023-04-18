@@ -8,7 +8,9 @@ import NewHome from "./pages/NewHome"
 
 import RouteCreation from "./pages/route_creation"
 
-// import Map from "./pages/Map"
+import Map from "./pages/Map"
+
+import TmcPage from "./pages/TmcPage"
 
 const Routes = [
   Home,
@@ -16,7 +18,8 @@ const Routes = [
   ...RouteCreation,
   ...Folders,
   ...Analysis,
-  // Map
+  TmcPage,
+  Map
 ]
 
 const site =  {

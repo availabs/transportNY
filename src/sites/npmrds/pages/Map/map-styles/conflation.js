@@ -273,7 +273,7 @@ const ConflationYears = years.map(year => {
             "id": `con-${year}-${level}`,
             "type": "line",
             source: `conflation_map_${year}_${conflationVersion}`,
-            beneath: 'road-label',
+            beneath: 'traffic_signals_layer',
             ...networkLevels[level](year)
       }
   })

@@ -1,19 +1,21 @@
 import React from "react"
 
-import { BooleanInput, Select } from "@availabs/avl-components"
+import { BooleanInput, Select } from "modules/avl-components/src"
 
 import deepequal from "deep-equal"
 import get from "lodash.get"
 import {
   groups,
+  extent as d3extent
+} from "d3-array"
+import {
   scaleLinear,
   scaleOrdinal,
   scaleQuantize,
   scaleQuantile,
-  scaleThreshold,
-  extent as d3extent,
-  format as d3format
-} from "d3"
+  scaleThreshold
+} from "d3-scale"
+import { format as d3format } from "d3-format"
 
 import { ColorBar, ColorRanges } from "./color-ranges"
 
