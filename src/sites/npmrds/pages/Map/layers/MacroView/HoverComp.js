@@ -101,9 +101,9 @@ const TmcComp = ({ data, layer, tmc }) => {
         <div className="flex  ">
           <div className="text-xs flex-1 font-bold">TMC</div>
           <div className="flex-0">
-            <a target="_blank" className="underline text-blue-500" href={`/tmc/${tmc}`}>
+            <Link target="_blank" className="underline text-blue-500" to={`/tmc/${tmc}`}>
               {tmc}
-            </a>
+            </Link>
           </div>
         </div>
         <div className="flex  ">
@@ -363,7 +363,12 @@ const DefaultHoverComp = ({ data, layer }) => {
                     }
                   `}
             >
-              {d}
+              { (row[0] === "tmc") && (ii === 1) ?
+                <Link target="_blank" className="underline text-blue-500" to={`/tmc/${d}`}>
+                  {d}
+                </Link> :
+                <span>{ d }</span>
+              }
             </div>
           ))}
         </div>

@@ -571,19 +571,34 @@ console.log("RES:", res)
     // ---------------------------
     const meta = {
       tmc: [
+        "TMC_tmc",
         "TMC_aadt",
         "TMC_miles",
         "RIS_aadt_current_yr_est",
         "TMC_frc",
+        "TMC_f_system",
         "pct_bins_reporting_am",
         "pct_bins_reporting_off",
-        "pct_bins_reporting_pm",
+        "pct_bins_reporting_pm"
       ],
       ris: [
+        "TMC_tmc",
         "RIS_aadt_current_yr_est",
-        "RIS_section_length" /*'OSM_replica_aadt'*/,
+        "RIS_section_length",
+        "TMC_f_system",
+        "pct_bins_reporting_am",
+        "pct_bins_reporting_off",
+        "pct_bins_reporting_pm"
       ],
-      osm: ["RIS_aadt_current_yr_est" /*'OSM_replica_aadt'*/],
+      osm: [
+        "TMC_tmc",
+        "RIS_aadt_current_yr_est",
+        "TMC_f_system",
+        "TMC_miles",
+        "pct_bins_reporting_am",
+        "pct_bins_reporting_off",
+        "pct_bins_reporting_pm"
+      ],
     };
 
     return [
@@ -618,6 +633,7 @@ console.log("FETCHING DATA");
         this.getMeasures().join("|"),
       ],
     ];
+console.log("REQUEST:", request)
     this.getGeographies().forEach((geo) => {
       let g = geo.split("|");
       request.push(["geo", g[0].toLowerCase(), g[1], "geometry"]);

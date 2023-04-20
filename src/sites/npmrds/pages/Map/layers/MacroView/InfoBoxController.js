@@ -48,8 +48,11 @@ const InfoBoxController = ({ layer }) => {
 	};
 
 	return (
-		<div className="h-full">
-			<div className="absolute py-2" style={{ width: 380 }}>
+		<div>
+
+			<div className="absolute p-2 bg-gray-100"
+				style={ { width: "372px" } }
+			>
 				<Select
 					multi={false}
 					onChange={toggleBox}
@@ -59,8 +62,10 @@ const InfoBoxController = ({ layer }) => {
 					).map((d) => d.name)}
 				/>
 			</div>
-			<div style={{ height: 50 }} />
-			<div className=" overflow-y-auto scrollbar">
+
+			<div style={ { height: "56px" } }/>
+
+			<div className="overflow-y-auto scrollbar">
 				{InfoBoxes.filter((d) => activeBoxes.includes(d.name)).map(
 					(Box) => {
 						let Comp = Box.comp;
