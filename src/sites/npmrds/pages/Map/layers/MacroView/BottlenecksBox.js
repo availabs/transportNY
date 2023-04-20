@@ -3,10 +3,11 @@ import get from "lodash.get";
 import { format as d3format } from "d3-format";
 import { quantile, quantileRank } from "simple-statistics";
 import { /*LineGraph,*/ BarGraph } from "modules/avl-graph/src";
-import { useFalcor } from "modules/avl-components/src";
+import { useFalcor, Input } from "modules/avl-components/src";
 import { download as shpDownload } from "../../utils/shp-write";
 import { saveAs } from "file-saver";
 import { scaleLinear } from "d3-scale";
+import { MultiLevelSelect } from "sites/npmrds/components"
 
 // import { useFalcor } from 'modules/avl-components/src'
 /*const f_system_meta = {
@@ -20,6 +21,16 @@ import { scaleLinear } from "d3-scale";
   "7": "Local"
 }*/
 
+const F_SYSTEMS = [
+	{ value: 1, name: "Interstate" },
+	{ value: 2, name: "Freeway" },
+	{ value: 3, name: "Principal" },
+	{ value: 4, name: "Minor Arterial" },
+	{ value: 5, name: "Major Collector" },
+	{ value: 6, name: "Minor Collector" },
+	{ value: 7, name: "Local" }
+]
+
 const BottlenecksBox = ({ layer }) => {
 	const { falcor, falcorCache } = useFalcor();
 
@@ -29,20 +40,51 @@ const BottlenecksBox = ({ layer }) => {
 		[layer.state.currentData]
 	);
 
+console.log("CURRENT DATA:", currentData);
+
+	const getMiles = React.useCallback(d => {
+		const miles = get(d, "TMC_miles", "unknown")
+		return miles === "unknown" ? "unknown" : miles.toFixed(2);
+	}, [])
+
 	const f = d3format(",.3~s");
 	const numQuantiles = 100;
 	const numBottleNecks = 30;
 	const quantileGroup = (number) =>
 		(Math.ceil(number * numQuantiles) / numQuantiles).toFixed(4);
 
+	const [qaLevel, _setQaLevel] = React.useState(0.5)
+	const setQaLevel = React.useCallback(v => {
+		_setQaLevel(Math.max(0.1, Math.min(0.9, v)))
+	}, []);
+
+	const qaFilter = React.useCallback((d) => {
+		return Math.max(
+			d.pct_bins_reporting_am,
+			d.pct_bins_reporting_pm,
+			d.pct_bins_reporting_off
+		) > qaLevel;
+	}, [qaLevel]);
+
+	const [fSystems, setFSystems] = React.useState([]);
+	const toggleFSystem = React.useCallback(v => {
+
+	}, []);
+
+	const fSystemFilter = React.useCallback(d => {
+		if (!fSystems.length) return true;
+		return fSystems.includes(d.TMC_f_system);
+	}, [fSystems])
+
 	const domain = React.useMemo(
 		() =>
 			currentData
-				.filter((d) => layer.qaFilter(d))
+				.filter(Boolean)
+				.filter((d) => qaFilter(d))
+				.filter((d) => fSystemFilter(d))
 				.map((d) => d.value)
-				.filter((d) => d)
 				.sort((a, b) => a - b),
-		[currentData]
+		[currentData, qaFilter, fSystemFilter]
 	);
 
 	const scale = React.useMemo(
@@ -54,14 +96,16 @@ const BottlenecksBox = ({ layer }) => {
 	const bottlenecks = React.useMemo(
 		() =>
 			currentData
-				.filter((d) => layer.qaFilter(d))
-				.filter((d, i) => i < numBottleNecks)
+				.filter(Boolean)
+				.filter((d) => qaFilter(d))
+				.filter((d) => fSystemFilter(d))
+				.slice(0, numBottleNecks)
 				.map((d, i) => {
 					d.color = scale(d.value);
 					d.rank = i + 1;
 					d.percentile = (quantileRank(domain, d.value) * 100).toFixed(0) - 1;
 					d.vmt = f(
-						+d.TMC_miles * d.TMC_aadt ? d.TMC_aadt : d.RIS_aadt_current_yr_est
+						+d.TMC_miles * (d.TMC_aadt ? d.TMC_aadt : d.RIS_aadt_current_yr_est)
 					);
 					d.roadname = get(
 						falcorCache,
@@ -85,7 +129,7 @@ const BottlenecksBox = ({ layer }) => {
 					);
 					return d;
 				}),
-		[currentData, falcorCache, layer.filters.year.value]
+		[currentData, falcorCache, layer.filters.year.value, qaFilter, fSystemFilter]
 	);
 
 	React.useEffect(() => {
@@ -107,8 +151,8 @@ const BottlenecksBox = ({ layer }) => {
 					["roadname", "firstname", "direction", "region_code"],
 				]
 			)
-			.then((d) => console.log("test123", d));
-	}, [falcor, currentData, layer.filters.year.value]);
+			// .then((d) => console.log("test123", d));
+	}, [falcor, bottlenecks, layer.filters.year.value]);
 
 	const bottlenecksGeo = React.useMemo(() => {
 		return bottlenecks.reduce((out, curr) => {
@@ -217,7 +261,26 @@ const BottlenecksBox = ({ layer }) => {
 
 	return (
 		<div>
-			<h4 className="p-1">Bottlenecks</h4>
+			<div className="flex items-center pr-1">
+				<div className="flex-1">Data Quality Threshold</div>
+				<Input type="number"
+					className="w-28 px-2 py-1"
+					value={ qaLevel }
+					onChange={ setQaLevel }
+					step={ 0.1 } min={ 0.1 } max={ 0.9 }/>
+			</div>
+			<div>
+				<div>F System Filter</div>
+				<div className="px-1">
+					<MultiLevelSelect
+						isMulti
+						options={ F_SYSTEMS }
+						value={ fSystems }
+						valueAccessor={ d => d.value }
+						displayAccessor={ d => d.name }
+						onChange={ setFSystems }/>
+				</div>
+			</div>
 			<div className="flex-1 flex border-b border-gray-700 pt-2 h-12 p-1">
 				<div className="flex-1 text-base text-npmrds-100">
 					<div className="text-xs text-npmrds-100 pr-2"># tmcs</div>
@@ -228,11 +291,11 @@ const BottlenecksBox = ({ layer }) => {
 					{domain.length}
 				</div>
 			</div>
-			<div className="">
+			<div className="mt-2">
 				<BarGraph
 					data={ distData }
 					keys={["value"]}
-					margin={{ left: 20, bottom: 10 }}
+					margin={{ left: 0, right: 0, top: 0, bottom: 10 }}
 					colors={ (v, ii, data, key) => data.color }
 				/>
 				<BarGraph
@@ -240,7 +303,7 @@ const BottlenecksBox = ({ layer }) => {
 						.map((v, i) => (v === quantiles[i - 1] ? (v += 0.001) : v))
 						.map((v, i) => ({ index: i, value: v }))}
 					keys={["value"]}
-					margin={{ left: 20, bottom: 10 }}
+					margin={{ left: 0, right: 0, top: 0, bottom: 10 }}
 					colors={ scale }
 				/>
 			</div>
@@ -297,7 +360,7 @@ const BottlenecksBox = ({ layer }) => {
 							</div>
 							<div className="flex-1">
 								<div className="text-xs text-npmrds-100">
-									{d.TMC_miles.toFixed(2)} mi
+									{getMiles(d)} mi
 								</div>
 							</div>
 						</div>

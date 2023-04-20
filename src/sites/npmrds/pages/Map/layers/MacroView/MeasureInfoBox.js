@@ -44,11 +44,6 @@ const MeasureInfoBox = ({ layer, excludeFullNameInInfoBox = true }) => {
         {!excludeFullNameInInfoBox && <dt>Measure</dt>}
         {!excludeFullNameInInfoBox && <dd style={DD}>{fullname}</dd>}
 
-        {definition && (
-          <dt>
-            <h6 style={H6}>Definition</h6>
-          </dt>
-        )}
         {definition && <dd style={DD}>{definition}</dd>}
 
         {equation && (
