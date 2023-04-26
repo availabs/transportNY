@@ -2,6 +2,7 @@ import React from "react"
 
 import deepequal from "deepequal"
 import get from "lodash.get"
+import { format as d3format } from "d3-format"
 import { useParams } from "react-router-dom"
 
 import {
@@ -10,6 +11,8 @@ import {
 } from "modules/avl-components/src"
 
 import RouteSaveModal from "./RouteSaveModal"
+
+const format = d3format(",.2f")
 
 const InfoBox = props => {
 
@@ -41,6 +44,11 @@ const InfoBox = props => {
       ]
     ]);
   }, [falcor, routeId]);
+
+  React.useEffect(() => {
+    if (!tmcs.length) return;
+    falcor.get(["tmc", tmcs, "meta", year, ["roadname", "miles", "direction"]])
+  }, [tmcs, year])
 
   const [loadedRoute, setLoadedRoute] = React.useState(null);
 
@@ -76,6 +84,16 @@ const InfoBox = props => {
     props.layer.clearAll();
   }, [props.layer.clearAll]);
 
+  const totalMiles = React.useMemo(() => {
+    return format(tmcs.reduce((a, c) => {
+      return a + get(falcorCache, ["tmc", c, "meta", year, "miles"], 0)
+    }, 0));
+  }, [tmcs, falcorCache]);
+
+  const doHighlight = React.useCallback(tmc => {
+    props.layer.setHighlightedTmcs(tmc);
+  }, [props.layer.setHighlightedTmcs])
+
   return (
     <>
       <div className="grid grid-cols-1 gap-2 pb-1">
@@ -100,16 +118,22 @@ const InfoBox = props => {
         </div>
         { !tmcs.length ? null :
           <div>
-            <div className="border-b-2 border-current mb-1 font-bold text-lg">
-              TMC List
+            <div className="border-b-2 border-current mb-1 flex items-center">
+              <div className="font-bold text-lg flex-1">
+                TMC List
+              </div>
+              <div className="text-sm">
+                { totalMiles } total miles
+              </div>
             </div>
             <div className="overflow-auto scrollbar-sm"
               style={ { maxHeight: "300px" } }
             >
               { tmcs.map(tmc => (
-                  <div key={ tmc }>
-                    { tmc }
-                  </div>
+                  <TmcItem key={ tmc }
+                    tmc={ tmc } year={ year }
+                    highlight={ doHighlight }
+                  />
                 ))
               }
             </div>
@@ -136,3 +160,28 @@ const InfoBox = props => {
 }
 
 export default InfoBox;
+
+const TmcItem = ({ tmc, year, highlight }) => {
+  const { falcor, falcorCache } = useFalcor();
+  const doHighlight = React.useCallback(e => {
+    highlight(tmc);
+  }, [tmc, highlight]);
+  return (
+    <div className="border-b hover:bg-gray-200 px-1"
+      onMouseOver={ doHighlight }
+      onMouseOut={ doHighlight }
+    >
+      <div className="flex items-center">
+        <div className="font-bold flex-1">
+          { tmc }
+        </div>
+        <div className="text-sm">
+          { format(get(falcorCache, ["tmc", tmc, "meta", year, "miles"], 0)) } miles
+        </div>
+      </div>
+      <div className="text-sm">
+        { get(falcorCache, ["tmc", tmc, "meta", year, "roadname"]) } { get(falcorCache, ["tmc", tmc, "meta", year, "direction"]) }
+      </div>
+    </div>
+  )
+}

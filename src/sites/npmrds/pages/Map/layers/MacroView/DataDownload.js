@@ -41,6 +41,7 @@ class DataDownloader extends React.Component {
     this.downloadCsv = this.downloadCsv.bind(this);
     this.downloadShp = this.downloadShp.bind(this);
     this.clearAll = this.clearAll.bind(this);
+    this.addMeasure = this.addMeasure.bind(this);
   }
   componentDidMount() {
     if (window.localStorage) {
@@ -236,12 +237,12 @@ class DataDownloader extends React.Component {
   }
 
   addMeasure(m) {
-    if (!this.state.measures.includes(m)) {
-      const measures = [...this.state.measures, m];
-      this.setState({ measures });
-      return true;
-    }
-    return false;
+    this.setState(({ measures }) => {
+      if (!measures.includes(m)) {
+        return { measures: [...measures, m] };
+      }
+      return null;
+    });
   }
 
   addMetaVar(mv) {
@@ -345,11 +346,11 @@ class DataDownloader extends React.Component {
                   </div>
                 </div>
                 <ControlDiv
-                  addMeasure={ m => this.addMeasure(m) }
+                  addMeasure={ this.addMeasure }
                   allMeasures={ this.props.allMeasures }
                   measures={ this.props.measures }
                   selected={ this.state.measures }
-                  addMetaVar={ mv => this.addMetaVar(mv) }
+                  addMetaVar={ this.addMetaVar }
                   metaVars={ metaVars }
                   metaGraph={ metaGraph }
                   network={this.props.network}
@@ -402,9 +403,18 @@ const ControlDivStyle = styled.div`
   color: ${ props => props.theme.textColorHl };
   width: ${ ControlDivWidth }px;
   height: 100%;
-
-
 `
+
+const PERCENTILES = [
+  { name: "5th Percentile", value: "5pctl" },
+  { name: "20th Percentile", value: "20pctl" },
+  { name: "25th Percentile", value: "25pctl" },
+  { name: "50th Percentile", value: "50pctl" },
+  { name: "75th Percentile", value: "75pctl" },
+  { name: "80th Percentile", value: "80pctl" },
+  { name: "95th Percentile", value: "95pctl" }
+]
+
 const INITIAL_STATE = {
   measure: null,
   useTruck: false,
@@ -416,7 +426,7 @@ const INITIAL_STATE = {
   pollutant: "co2",
   activeSubMeasures: [],
   peakDomain: [],
-  peak: null,
+  peak: [],
   attribute: null,
   percentile: null
 }
@@ -426,6 +436,9 @@ class ControlDiv extends React.Component {
   setMeasure(m) {
     if (m !== null) {
       this.updateSubMeasures(m.value);
+    }
+    else {
+      this.updateSubMeasures(null);
     }
     this.setState({ measure: m });
   }
@@ -522,14 +535,22 @@ class ControlDiv extends React.Component {
     if (!activeSubMeasures.includes("speed")) {
       this.setState({ percentile: null })
     }
-    if (!peakDomain.reduce((a, c) => a || (c.value === get(this.state.peak, "value", null)), false)) {
-      if (measure === "speed") {
-        this.setState({ peak: { name: "No Peak", value: "total" } });
-      }
-      else {
-        this.setState({ peak: { name: "No Peak", value: "none" } });
-      }
+    // if (!peakDomain.reduce((a, c) => a || (c.value === get(this.state.peak, "value", null)), false)) {
+    //   if (measure === "speed") {
+    //     this.setState({ peak: { name: "No Peak", value: "total" } });
+    //   }
+    //   else {
+    //     this.setState({ peak: { name: "No Peak", value: "none" } });
+    //   }
+    // }
+
+    if (peakDomain.length) {
+      this.setState({ peak: [peakDomain[0]] })
     }
+    else {
+      this.setState({ peak: [] })
+    }
+
     if ((measure !== "phed") && (measure !== "ted")) {
       this.setState({
         useFreeflow: false,
@@ -541,7 +562,7 @@ class ControlDiv extends React.Component {
       this.setState({ useRisAADT: false });
     }
   }
-  getMeasure() {
+  getMeasures() {
     const {
       measure,
       peak,
@@ -557,6 +578,26 @@ class ControlDiv extends React.Component {
     } = this.state;
 
     const msr = get(measure, "value", null);
+
+    if (peak.length) {
+      return peak.map(p => {
+        return [
+          msr,
+          useTruck && "truck",
+          useFreeflow && "freeflow",
+          useRisAADT && "ris",
+          msr !== "emissions" ? null : fueltype !== "total" ? fueltype : null,
+          msr !== "emissions" ? null : pollutant,
+          msr === "emissions" && (fueltype === "gas") ? "pass" : false,
+          msr === "emissions" && (fueltype === "diesel") ? "truck" : false,
+          showPerMiles && "per_mi",
+          showVehicleHours && "vhrs",
+          get(percentile, "value", null),
+          get(p, "value", null),
+          get(attribute, "value", null)
+        ].filter(v => Boolean(v) && (v !== "none")).join("_")
+      }).filter(Boolean);
+    }
 
     const m = [
       msr,
@@ -576,12 +617,31 @@ class ControlDiv extends React.Component {
 
 // console.log("MEASURE:", m)
 
-    return m;
+    return [m].filter(Boolean);
   }
   addMeasure() {
     this.updateSubMeasures(null);
     this.setState({ ...INITIAL_STATE });
-    this.props.addMeasure(this.getMeasure());
+
+    const { selected = [], allMeasures = [] } = this.props;
+
+    this.getMeasures().forEach(m => {
+      if (allMeasures.includes(m) && !selected.includes(m)) {
+        this.props.addMeasure(m);
+      }
+    })
+  }
+  checkDisabled() {
+    const measures = this.getMeasures();
+
+    const canAdd = this.getMeasures()
+      .reduce((a, c) => {
+        return a ||
+          (get(this.props, 'allMeasures', []).includes(c) &&
+          !get(this.props, 'selected', []).includes(c))
+      }, false);
+
+    return !canAdd;
   }
   render() {
     const { theme } = this.props
@@ -589,6 +649,7 @@ class ControlDiv extends React.Component {
     // console.log('all measures includes this measure', this.getMeasure(), get(this.props,'allMeasures', []), !get(this.props,'allMeasures', []).includes(this.getMeasure()))
     // console.log('this measure is selected', this.getMeasure(), get(this.props,'selected', []),  get(this.props,'selected', []).includes(this.getMeasure()))
     // console.log('---------------------------------')
+
     return (
       <div className='flex w-80 flex-col  ml-2'>
 
@@ -597,10 +658,7 @@ class ControlDiv extends React.Component {
             <div className='text-md font-medium'>Add Performance Measure</div>
             <Button
             onClick={ e => this.addMeasure() }
-            disabled={
-              !get(this.props,'allMeasures', []).includes(this.getMeasure()) ||
-              get(this.props,'selected', []).includes(this.getMeasure())
-            }
+            disabled={ this.checkDisabled() }
             className='w-full'>
             Add Measure
           </Button>
@@ -705,15 +763,7 @@ class ControlDiv extends React.Component {
               <div style={ { marginTop: "10px" } }>Percetile Selector</div>
               <MultiLevelSelect
                 value={ this.state.percentile }
-                options={ [
-                  { name: "5th Percentile", value: "5pctl" },
-                  { name: "20th Percentile", value: "20pctl" },
-                  { name: "25th Percentile", value: "25pctl" },
-                  { name: "50th Percentile", value: "50pctl" },
-                  { name: "75th Percentile", value: "75pctl" },
-                  { name: "80th Percentile", value: "80pctl" },
-                  { name: "95th Percentile", value: "95pctl" }
-                ] }
+                options={ PERCENTILES }
                 isMulti={ false }
                 searchable={ false }
                 displayAccessor={ d => d.name }
@@ -728,7 +778,7 @@ class ControlDiv extends React.Component {
               <MultiLevelSelect
                 value={ this.state.peak }
                 options={ this.state.peakDomain }
-                isMulti={ false }
+                isMulti={ true }
                 searchable={ false }
                 displayAccessor={ d => d.name }
                 valueAccessor={ d => d }
