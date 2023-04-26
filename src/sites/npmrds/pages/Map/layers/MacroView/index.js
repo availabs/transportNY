@@ -383,7 +383,7 @@ class MacroLayer extends LayerContainer {
             ]
           )
           .then((res) => {
-console.log("RES:", res)
+// console.log("RES:", res)
             const mInfo = get(res, ["json", "pm3", "measureInfo"], {});
             // console.log('measureInfo', res)
             this.filters.measure.domain = mIds
@@ -604,7 +604,7 @@ console.log("RES:", res)
     return [
       this.getMeasure(this.filters), // current measure
       ...meta[this.getNetwork(this.filters)], // meta by network
-      this.filters.network.value === "con" ? "CON_miles" : null,
+      // this.filters.network.value === "con" ? "CON_miles" : null,
     ].filter((d) => d);
   }
 
@@ -620,7 +620,7 @@ console.log("RES:", res)
   }
 
   fetchData(falcor) {
-console.log("FETCHING DATA");
+// console.log("FETCHING DATA");
     let request = [
       [
         "conflation",
@@ -633,7 +633,7 @@ console.log("FETCHING DATA");
         this.getMeasures().join("|"),
       ],
     ];
-console.log("REQUEST:", request)
+// console.log("REQUEST:", request)
     this.getGeographies().forEach((geo) => {
       let g = geo.split("|");
       request.push(["geo", g[0].toLowerCase(), g[1], "geometry"]);
@@ -723,7 +723,7 @@ console.log("REQUEST:", request)
     const falcorCache = this.falcor.getCache();
     const n = this.getNetwork(this.filters);
 
-console.log("RENDERING", this.state, falcorCache, n)
+// console.log("RENDERING", this.state, falcorCache, n)
 
     const domain = data /*.filter((d) => this.qaFilter(d))*/
       .map((d) => d.value);
@@ -763,6 +763,8 @@ console.log("RENDERING", this.state, falcorCache, n)
       this.filters,
       this.mapboxMap
     );
+
+// console.log("activeLayers", activeLayers)
 
     activeLayers.forEach((l) => {
       //console.log('set paint', l, colors)

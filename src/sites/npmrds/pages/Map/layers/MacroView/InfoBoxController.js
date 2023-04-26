@@ -5,7 +5,7 @@ import { Select } from "modules/avl-components/src";
 //import { format as d3format } from "d3-format";
 
 import MeasureInfoBox from "./MeasureInfoBox";
-import DataDownloader from "./DataDownload";
+// import DataDownloader from "./DataDownload";
 import MeasureVisBox from "./MeasureVisBox";
 import BottlenecksBox from "./BottlenecksBox";
 import IncidentsBox from "./IncidentsBox";
@@ -21,22 +21,26 @@ const InfoBoxController = ({ layer }) => {
 			comp: BottlenecksBox,
 			name: "Bottlenecks",
 			onRemove: () => {
-				let layerId = layer.mapboxMap.getLayer("bottlnecks").id;
-				let source = layer.mapboxMap.getLayer("bottlnecks").source;
-				let hoverId = layer.mapboxMap.getLayer("bottlnecks-hover").id;
-				layer.mapboxMap.removeLayer(layerId);
-				layer.mapboxMap.removeLayer(hoverId);
-				layer.mapboxMap.removeSource(source);
+				const source = layer.mapboxMap.getSource("bottlenecks-source");
+				if (source) {
+					source.setData({
+						type: "FeatureCollection",
+						features: []
+					})
+				}
 			},
 		},
 		{ comp: MeasureVisBox, name: "Region Overview" },
 		{
 			comp: IncidentsBox, name: "Transcom Incidents",
 		  	onRemove: () => {
-				let layerId = layer.mapboxMap.getLayer("incidents").id;
-				let source = layer.mapboxMap.getLayer("incidents").source;
-				layer.mapboxMap.removeLayer(layerId);
-				layer.mapboxMap.removeSource(source);
+					const source = layer.mapboxMap.getSource("incidents-source");
+					if (source) {
+						source.setData({
+							type: "FeatureCollection",
+							features: []
+						})
+					}
 			}
 		},
 	];
@@ -85,7 +89,7 @@ const InfoBoxController = ({ layer }) => {
 													Box.onRemove();
 												}
 											} }
-											className="text-lg cursor-pointer os-icon os-icon-x"
+											className="text-lg cursor-pointer fa fa-remove"
 										/>
 									</div>
 								</div>

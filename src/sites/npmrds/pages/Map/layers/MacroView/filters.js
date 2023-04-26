@@ -1,5 +1,8 @@
 import get from 'lodash.get'
 import { getColorRange } from "../../utils"
+
+const YEARS = [2022, 2021, 2020, 2019, 2018, 2017, 2016];
+
 const filters = {
   geography: {
     name: 'Geography',
@@ -45,14 +48,14 @@ const filters = {
     name: 'Year',
     type: "select",
     multi: false,
-    domain: [2016, 2017, 2018, 2019,2020,2021],
-    value: 2020
+    domain: [...YEARS],
+    value: YEARS[0]
   },
   compareYear: {
     name: 'Compare Year',
     type: 'select',
     multi: false,
-    domain: ["none", 2016, 2017, 2018, 2019,2020],
+    domain: ["none", ...YEARS],
     value: "none",
 
   },
@@ -181,12 +184,12 @@ const filters = {
     accessor: d => d.name,
     valueAccessor: d => d.value,
     domain: [
-      { name: "All Traffic", value: "" },
+      { name: "All Traffic", value: "all" },
       { name: "All Trucks", value: "truck" },
       { name: "Single Unit Trucks", value: "singl" },
       { name: "Combination Trucks", value: "combi" },
     ],
-    value: '',
+    value: 'all',
     active: false
   },
   peakSelector: {
@@ -234,7 +237,7 @@ const updateSubMeasures = (measure, filters, falcor) => {
   peakSelector.active = false;
   peakSelector.domain = [];
   trafficType.active = false;
-  trafficType.value = ''
+  trafficType.value = 'all'
 
   freeflow.active = false;
   risAADT.active = false;
@@ -276,7 +279,7 @@ const updateSubMeasures = (measure, filters, falcor) => {
       break;
     case "TMC":
       attributes.active = true;
-      attributes.domain =  mIds.filter(m => /^TMC_/.test(m))
+      attributes.domain =  mIds.filter(m => /^TMC_/.test(m)).filter(m => m !== "TMC_tmc")
         .map(id => ({
           name: get(mInfo, [id, "fullname"], id),
           value: id.replace("TMC_", "")
@@ -393,9 +396,10 @@ const getMeasure = (filters) => {
     fueltype,
     pollutant
   } = filters;
+
   const out = [
     measure.value,
-    trafficType.value,
+    (trafficType.value !== "all") && trafficType.value,
     freeflow.value && "freeflow",
     risAADT.value ? "ris" : false,
     fueltype.active && (fueltype.value !== "total") ? fueltype.value : false,
@@ -409,7 +413,13 @@ const getMeasure = (filters) => {
     attributes.value
   ].filter(Boolean).join("_")
 
-// console.log("GET MEASURE:", risAADT, out);
+// console.log("GET MEASURE:", out);
+
+  const NOT_MEASURES = ["RIS", "TMC", "speed_total"]
+
+  if (NOT_MEASURES.includes(out)) {
+    return ""
+  }
 
   return out
 }
@@ -458,7 +468,7 @@ const updateLegend = (filters, legend) => {
         legend.format = ",.0~f";
         break;
       case 'pct_bins_reporting':
-        legend.range = getColorRange(get(legend, 'range.length', 6), "Greys", true)
+        legend.range = getColorRange(get(legend, 'range.length', 6), "RdYlGn", true)
         // legend.domain = [.1,.25,.5, .75, .9]
         legend.format = ",.2~f";
         break;

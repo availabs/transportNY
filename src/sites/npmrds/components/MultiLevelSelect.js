@@ -10,9 +10,9 @@ const NoOp = () => {};
 const Identity = v => v;
 
 const getDisplayValues = (options, value, dAccess, vAccess, result = []) => {
-  return options.reduce((a, c) => {
+  return options.reduce((a, c, i) => {
     if (value.includes(vAccess(c))) {
-      a.push({ display: dAccess(c), value: vAccess(c) });
+      a.push({ display: dAccess(c), value: vAccess(c), key: i });
     }
     return getDisplayValues(get(c, "children", []), value, dAccess, vAccess, a);
   }, result);
@@ -388,7 +388,7 @@ const ValueContainer = ({ displayValues, placeholder, disabled, remove }) => {
   return (
     <div tabIndex={ 0 }
       className={ `
-        bg-white rounded px-2 py-1 flex
+        bg-white rounded px-2 py-1 flex flex-wrap
         focus:outline-2 focus:outline focus:outline-current
         hover:outline-2 hover:outline hover:outline-gray-300
       ` }
@@ -398,9 +398,7 @@ const ValueContainer = ({ displayValues, placeholder, disabled, remove }) => {
           { placeholder }
         </PlaceHolder> :
         displayValues.map((v, i) => (
-          <div key={ v.value }
-            className={ i > 0 ? "ml-1" : null }
-          >
+          <div key={ v.key }>
             <ValueItem { ...v }
               remove={ remove }/>
           </div>

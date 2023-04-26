@@ -35,7 +35,22 @@ class RouteCreationLayer extends LayerContainer {
     markers: [],
     ways: [],
     tmcs: [],
-    creationMode: "markers"
+    creationMode: "markers",
+    highlighted: []
+  }
+
+  setHighlightedTmcs(tmc) {
+    const tmcs = this.state.highlighted;
+    if (tmcs.includes(tmc)) {
+      this.updateState({
+        highlighted: tmcs.filter(t => t !== tmc)
+      });
+    }
+    else {
+      this.updateState({
+        highlighted: [...tmcs, tmc]
+      })
+    }
   }
 
   onClick = {
@@ -381,9 +396,12 @@ class RouteCreationLayer extends LayerContainer {
         ])
         const LineColor = [
           "case",
-          ["all",
-            ["boolean", ["feature-state", "hover"], false],
-            ["in", ["get", "tmc"], ["literal", this.state.tmcs]]
+          ["any",
+            ["all",
+              ["boolean", ["feature-state", "hover"], false],
+              ["in", ["get", "tmc"], ["literal", this.state.tmcs]]
+            ],
+            ["in", ["get", "tmc"], ["literal", this.state.highlighted]]
           ],
           "#990099",
           ["boolean", ["feature-state", "hover"], false],
