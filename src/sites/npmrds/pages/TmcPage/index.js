@@ -168,7 +168,8 @@ const TmcPage = props => {
                   options={ YEARS }
                   value={ year }
                   onChange={ setYear }
-                  removable={ false }/>
+                  removable={ false }
+                  DisplayItem={ DisplayItem }/>
               </div>
 
               <div>
@@ -180,7 +181,8 @@ const TmcPage = props => {
                   value={ metric }
                   displayAccessor={ DisplayAccessor }
                   onChange={ setMetric }
-                  removable={ false }/>
+                  removable={ false }
+                  DisplayItem={ DisplayItem }/>
               </div>
 
               <div>
@@ -193,7 +195,8 @@ const TmcPage = props => {
                   displayAccessor={ DisplayAccessor }
                   valueAccessor={ ValueAccessor }
                   onChange={ setSource }
-                  removable={ false }/>
+                  removable={ false }
+                  DisplayItem={ DisplayItem }/>
               </div>
 
               <div>
@@ -205,7 +208,8 @@ const TmcPage = props => {
                   value={ resolution }
                   displayAccessor={ DisplayAccessor }
                   onChange={ setResolution }
-                  removable={ false }/>
+                  removable={ false }
+                  DisplayItem={ DisplayItem }/>
               </div>
 
             </div>
@@ -231,3 +235,19 @@ const config = {
 }
 
 export default config;
+
+const DisplayItem = ({ children, active, hasChildren }) => {
+  return (
+    <div style={ { minWidth: "10rem" } }
+      className={ `
+        py-1 px-2 flex items-center text-left
+        ${ active ? "bg-gray-400" : "hover:bg-gray-300 bg-gray-200" }
+      ` }
+    >
+      <div className="flex-1">{ children }</div>
+      { !hasChildren ? null :
+        <span className="fa fa-caret-right ml-2"/>
+      }
+    </div>
+  )
+}

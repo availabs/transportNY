@@ -65,8 +65,15 @@ const MetricByPeaks = ({ tmc, year, source, resolution, metric }) => {
     const rawData = get(falcorCache, ["tmc", tmc, "year", year, "npmrds", source, "value"], []);
 
     const grouper = getResolutionGrouper(resolution);
-    const rollups1 = d3rollups(rawData, g => transform(d3mean(g, d => d.tt)), d => `${ d.ts.slice(0, 10) }-${ grouper(d) }`);
-    const rollups2 = d3rollups(rollups1, d => d.length, d => d[1], d => getPeak(d[0], resolution));
+    const group1 = d => `${ d.ts.slice(0, 10) }-${ grouper(d) }`;
+    const reducer1 = g => ({
+      value: transform(d3mean(g, d => d.tt)),
+      count: g.length
+    })
+    const rollups1 = d3rollups(rawData, reducer1, group1);
+
+    const reducer2 = d => d.reduce((a, c) => a + c[1].count, 0);
+    const rollups2 = d3rollups(rollups1, reducer2, d => d[1].value, d => getPeak(d[0], resolution));
 
     const data = rollups2.map(([speed, peaks]) => {
       return {
@@ -91,6 +98,13 @@ const MetricByPeaks = ({ tmc, year, source, resolution, metric }) => {
     return getResolutionFormat(resolution);
   }, [resolution]);
 
+  const indexFormat = React.useMemo(() => {
+    if (metric.key === "tt") {
+      return v => `${ v } seconds`
+    }
+    return v => `${ v } MPH`
+  }, [metric]);
+
   return (
     <div>
       <div className="font-bold text-2xl border-b-2 border-current mb-4">
@@ -106,13 +120,14 @@ const MetricByPeaks = ({ tmc, year, source, resolution, metric }) => {
             margin={ { left: 75, top: 5, right: 5, bottom: 50 } }
             colors={ ColorRange }
             hoverComp={ {
-              valueFormat: ",d"
+              valueFormat: ",d",
+              indexFormat: indexFormat
             } }
             xScale={ {
               domain: xDomain
             } }
             axisBottom={ {
-              label: "Speed",
+              label: metric.name,
               tickDensity: 3
             } }
             axisLeft={ {
