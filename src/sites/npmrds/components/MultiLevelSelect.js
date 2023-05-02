@@ -37,6 +37,7 @@ const MultiLevelSelect = props => {
     DisplayItem = DefaultDisplayItem,
     isDropdown = false,
     searchable = false,
+    removable = true,
     InputContainer = DefaultInputContainer,
     children
   } = props;
@@ -147,6 +148,7 @@ const MultiLevelSelect = props => {
       { isDropdown ? children :
         <ValueContainer placeholder={ placeholder }
           disabled={ disabled }
+          removable={ removable }
           remove={ remove }
           displayValues={ displayValues }/>
       }
@@ -365,15 +367,21 @@ const DefaultInputContainer = ({ className = "", children }) => {
   )
 }
 
-const ValueItem = ({ display, value, remove }) => {
+const ValueItem = ({ display, value, remove, removable }) => {
   const doRemove = React.useCallback(e => {
     remove(value);
   }, [remove, value]);
   return (
-    <div className="px-1 bg-gray-200 flex items-center rounded">
+    <div
+      className={ `
+        ${ removable ? "px-1 bg-gray-200 flex items-center rounded" : null }
+      ` }
+    >
       { display }
-      <span className="fa fa-remove text-xs ml-2 px-1 rounded hover:bg-gray-400"
-        onClick={ doRemove }/>
+      { !removable ? null :
+        <span className="fa fa-remove text-xs ml-2 px-1 rounded hover:bg-gray-400"
+          onClick={ doRemove }/>
+      }
     </div>
   )
 }
@@ -384,7 +392,15 @@ const PlaceHolder = ({ children }) => {
     </div>
   )
 }
-const ValueContainer = ({ displayValues, placeholder, disabled, remove }) => {
+const ValueContainer = props => {
+  const {
+    displayValues,
+    placeholder,
+    disabled,
+    remove,
+    removable
+  } = props;
+
   return (
     <div tabIndex={ 0 }
       className={ `
@@ -400,6 +416,7 @@ const ValueContainer = ({ displayValues, placeholder, disabled, remove }) => {
         displayValues.map((v, i) => (
           <div key={ v.key }>
             <ValueItem { ...v }
+              removable={ removable }
               remove={ remove }/>
           </div>
         ))
