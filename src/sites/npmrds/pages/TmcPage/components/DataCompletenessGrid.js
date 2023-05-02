@@ -104,10 +104,6 @@ const DataCompletenessGrid = ({ tmc, year, source, resolution }) => {
 
 export default DataCompletenessGrid;
 
-const Scale = scaleLinear()
-  .domain([1/7, 2/7, 3/7, 4/7, 5/7, 6/7, 1])
-  .range(ColorRange);
-
 const percentFormat = d3format(".1%")
 
 const Legend = () => {
@@ -139,54 +135,6 @@ const Legend = () => {
     </div>
   )
 }
-
-// const Legend = () => {
-//   const [ref, setRef] = React.useState();
-//   const [height, setHeight] = React.useState(0);
-//   React.useEffect(() => {
-//     if (!ref) return;
-//     const rect = ref.getBoundingClientRect();
-//     setHeight(rect.height);
-//   }, [ref]);
-//
-//   const labelScale = React.useMemo(() => {
-//     return scaleLinear()
-//       .domain([0, 1])
-//       .range([0, height]);
-//   }, [height]);
-//
-// console.log("?????????", ColorScale.thresholds())
-//
-//   return (
-//     <div ref={ setRef } className="h-full  flex">
-//       <div className="flex flex-col h-full w-1/2"
-//         style={ { backgroundColor: "#999999" } }
-//       >
-//         { [0, ...ColorScale.thresholds()].map((n, i) => (
-//             <div key={ ColorScale(n) }
-//               className="opacity-75 hover:opacity-100 h-8 rounded"
-//               style={ {
-//                 backgroundColor: ColorScale(n)
-//               } }/>
-//           ))
-//         }
-//       </div>
-//       <div className="h-full w-1/2 relative">
-//         { d3range(0, 1, 0.1).map(n => (
-//             <div key={ n }
-//               className="absolute w-full flex justify-start items-start ml-1"
-//               style={ {
-//                 top: `${ labelScale(n) }px`
-//               } }
-//             >
-//               { percentFormat(n) }
-//             </div>
-//           ))
-//         }
-//       </div>
-//     </div>
-//   )
-// }
 
 const HoverComp = ({ data, indexFormat, keyFormat, valueFormat }) => {
   return (
