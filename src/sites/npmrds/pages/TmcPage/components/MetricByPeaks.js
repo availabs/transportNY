@@ -121,7 +121,7 @@ const MetricByPeaks = ({ tmc, year, source, resolution, metric }) => {
             colors={ ColorRange }
             hoverComp={ {
               valueFormat: ",d",
-              indexFormat: indexFormat
+              indexFormat
             } }
             xScale={ {
               domain: xDomain

@@ -84,10 +84,6 @@ const TmcInfo = ({ tmc, year }) => {
       </FlexRow>
 
       <div className="grid grid-cols-2 mt-1">
-        <AttDisplay title="Route Signing" value={ getAtt("route_sign") }/>
-        <AttDisplay title="Route Qualifier" value={ getAtt("route_qual") }/>
-
-        <div className="col-span-2 border-t-2 pb-1 mt-1"/>
 
         <AttDisplay title="State" value={ getAtt("state_name") }/>
         <AttDisplay title="County" value={ getAtt("county_name") }/>
@@ -107,6 +103,11 @@ const TmcInfo = ({ tmc, year }) => {
 
         <AttDisplay title="Single-Unit Truck AADT" value={ decimal(getAtt("aadt_singl")) }/>
         <AttDisplay title="Combination Truck AADT" value={ decimal(getAtt("aadt_combi")) }/>
+
+        <div className="col-span-2 border-t-2 pb-1 mt-1"/>
+
+        <AttDisplay title="Route Signing" value={ getAtt("route_sign") }/>
+        <AttDisplay title="Route Qualifier" value={ getAtt("route_qual") }/>
 
         <div className="col-span-2 border-t-2 pb-1 mt-1"/>
 

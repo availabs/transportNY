@@ -29,6 +29,8 @@ import {
 const ColorRange = getColorRange(7, "BrBG");
 const ColorScale = scaleQuantize().domain([0, 1]).range(ColorRange);
 
+const BgColor = "#999999";
+
 const DataCompletenessGrid = ({ tmc, year, source, resolution }) => {
 
   const { falcorCache } = useFalcor();
@@ -76,7 +78,7 @@ const DataCompletenessGrid = ({ tmc, year, source, resolution }) => {
             showAnimations={ false }
             colors={ ColorScale }
             margin={ { left: 75, top: 5, right: 5, bottom: 50 } }
-            bgColor="#999999"
+            bgColor={ BgColor }
             hoverComp={ {
               HoverComp: HoverComp,
               indexFormat: resFormat,
@@ -106,6 +108,19 @@ export default DataCompletenessGrid;
 
 const percentFormat = d3format(".1%")
 
+const LegendColor = ({ color }) => {
+  return (
+    <div className="w-full h-6 rounded relative">
+      <div className="w-full h-6 rounded absolute z-10"
+        style={ { backgroundColor: BgColor } }
+      />
+      <div className="w-full h-6 rounded absolute z-20 opacity-75 hover:opacity-100"
+        style={ { backgroundColor: color } }
+      />
+    </div>
+  )
+}
+
 const Legend = () => {
   const thresholds = React.useMemo(() => {
     return ColorScale.thresholds();
@@ -115,17 +130,13 @@ const Legend = () => {
       <div className="whitespace-nowrap">
         { percentFormat(0)}
       </div>
-      <div className="w-full h-6 rounded opacity-75 hover:opacity-100"
-        style={ { backgroundColor: ColorScale(0) } }
-      />
+      <LegendColor color={ ColorScale(0) }/>
       { thresholds.map((v, i) => (
           <React.Fragment key={ i }>
             <div className="whitespace-nowrap">
               { percentFormat(v)}
             </div>
-            <div className="w-full h-6 rounded opacity-75 hover:opacity-100"
-              style={ { backgroundColor: ColorScale(v) } }
-            />
+            <LegendColor color={ ColorScale(v) }/>
           </React.Fragment>
         ))
       }
