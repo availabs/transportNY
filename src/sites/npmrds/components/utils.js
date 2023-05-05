@@ -69,3 +69,7 @@ export const getDist2 = (attributes, tmc, _dow=7) => {
     [dow, roadType].join("_") :
     [dow, congestionLevel, peakType, roadType].join("_");
 }
+
+export const capitalize = string =>
+  string.toLowerCase().split("")
+    .map((c, i) => i === 0 ? c.toUpperCase() : c).join("");
