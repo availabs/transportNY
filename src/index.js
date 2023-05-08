@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import App from './App';
 
 import { API_HOST } from 'config'
@@ -11,38 +11,23 @@ import store from 'store';
 import PPDAF_THEME from "./theme"
 import {
   FalcorProvider,
-  ThemeContext,
-  // falcorGraph,
-  addComponents,
-  addWrappers
+  ThemeContext
 } from "modules/avl-components/src"
 
 import reportWebVitals from './reportWebVitals';
 
 import { falcorGraph } from "store/falcorGraph"
 
-//
-// import DmsComponents from "components/dms"
-// import DmsWrappers from "components/dms/wrappers"
-
 import {
-  Components as AmsComponents,
-  Wrappers as AmsWrappers,
   enableAuth
 } from "@availabs/ams"
 
 import 'index.css';
 
-// addComponents(DmsComponents);
-// addWrappers(DmsWrappers);
-
-addComponents(AmsComponents);
-addWrappers(AmsWrappers);
-
 const AuthEnabledApp = enableAuth(App, { AUTH_HOST, PROJECT_NAME, CLIENT_HOST });
 
 
-ReactDOM.render(
+ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
    	<Provider store={ store }>
   		<FalcorProvider falcor={ falcorGraph }>
@@ -51,8 +36,7 @@ ReactDOM.render(
         </ThemeContext.Provider>
       </FalcorProvider>
   	</Provider>
-  </React.StrictMode>,
-  document.getElementById('root')
+  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

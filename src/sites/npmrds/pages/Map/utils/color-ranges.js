@@ -25,7 +25,7 @@ for (const type in colorbrewer.schemeGroups) {
 }
 
 export { ColorRanges };
-console.log("ColorRanges", ColorRanges);
+//console.log("ColorRanges", ColorRanges);
 
 export const getColorRange = (size, name) =>
 	get(ColorRanges, [size], [])

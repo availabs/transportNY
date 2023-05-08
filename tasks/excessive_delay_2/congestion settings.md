@@ -1,0 +1,3 @@
+- Use dynamic threshold where we use avgspeed if # of stoplights is >= 2
+- For Limited Access use denoiser 1 (5 minutes)
+- For Non Limited access denoise 3 (15 minutes)

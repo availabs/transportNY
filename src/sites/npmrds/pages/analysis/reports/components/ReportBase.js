@@ -2,7 +2,11 @@ import React from 'react';
 // import { reduxFalcor } from 'utils/redux-falcor';
 import { avlFalcor } from "modules/avl-components/src"
 import { connect } from 'react-redux';
-import { withRouter } from "react-router-dom"
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 
 import styled from "styled-components"
 import get from "lodash.get"
@@ -43,6 +47,25 @@ const {
   ...REDUX_ACTIONS
 } = stuff;
 
+
+
+
+function withRouter(Component) {
+  function ComponentWithRouterProp(props) {
+    let location = useLocation();
+    let navigate = useNavigate();
+    let params = useParams();
+    return (
+      <Component
+        {...props}
+        {...{ location, navigate, params }}
+      />
+    );
+  }
+
+  return ComponentWithRouterProp;
+}
+
 class ReportBase extends React.Component {
 
   state = {
@@ -62,12 +85,12 @@ class ReportBase extends React.Component {
     this.props.resetState();
     this.props.getDataDateExtent()
       .then(() => {
-        const reportId = get(this.props, 'match.params.reportId', ""),
-          templateId = get(this.props, 'match.params.templateId', ""),
-          defaultType = get(this.props, 'match.params.defaultType', ""),
-          routeId = get(this.props, 'match.params.routeId', ""),
-          stationId = get(this.props, 'match.params.stationId', ""),
-          path = get(this.props, 'match.path', "");
+        const reportId = get(this.props, 'params.reportId', ""),
+          templateId = get(this.props, 'params.templateId', ""),
+          defaultType = get(this.props, 'params.defaultType', ""),
+          routeId = get(this.props, 'params.routeId', ""),
+          stationId = get(this.props, 'params.stationId', ""),
+          path = get(this.props, 'location.pathname', "");
 
         const query = new URLSearchParams(this.props.location.search);
 
