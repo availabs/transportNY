@@ -34,10 +34,10 @@ import {
   setActiveLayer,
 } from "./filters";
 
-import MeasureInfoBox from "./MeasureInfoBox";
+// import MeasureInfoBox from "./MeasureInfoBox";
 import DataDownloader from "./DataDownload";
-import MeasureVisBox from "./MeasureVisBox";
-import BottlenecksBox from "./BottlenecksBox";
+// import MeasureVisBox from "./MeasureVisBox";
+// import BottlenecksBox from "./BottlenecksBox";
 import InfoBoxController from "./InfoBoxController";
 import HoverComp from "./HoverComp";
 import { LayerContainer } from "modules/avl-map/src";

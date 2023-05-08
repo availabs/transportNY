@@ -37,6 +37,7 @@ const MultiLevelSelect = props => {
     DisplayItem = DefaultDisplayItem,
     isDropdown = false,
     searchable = false,
+    removable = true,
     InputContainer = DefaultInputContainer,
     children
   } = props;
@@ -147,6 +148,7 @@ const MultiLevelSelect = props => {
       { isDropdown ? children :
         <ValueContainer placeholder={ placeholder }
           disabled={ disabled }
+          removable={ removable }
           remove={ remove }
           displayValues={ displayValues }/>
       }
@@ -191,8 +193,9 @@ const MultiLevelSelect = props => {
         >
           { fuse(search).map((opt, i) => {
               const Item = getItem(opt);
+              const value = valueAccessor(opt);
               return (
-                <Dropdown key={ `${ valueAccessor(opt) }-${ i }` }
+                <Dropdown key={ `${ value }-${ i }` }
                   { ...props }
                   options={ get(opt, "children", []) }
                   xDirection={ 1 }
@@ -200,11 +203,11 @@ const MultiLevelSelect = props => {
                   select={ select }
                   Value={ Value }
                 >
-                  <Clickable
+                  <Clickable disabled={ !hasValue(value) }
                     select={ select }
                     option={ opt }
                   >
-                    <Item active={ Value.includes(valueAccessor(opt)) }
+                    <Item active={ Value.includes(value) }
                       hasChildren={ Boolean(get(opt, ["children", "length"], 0)) }
                     >
                       { displayAccessor(opt) }
@@ -365,15 +368,21 @@ const DefaultInputContainer = ({ className = "", children }) => {
   )
 }
 
-const ValueItem = ({ display, value, remove }) => {
+const ValueItem = ({ display, value, remove, removable }) => {
   const doRemove = React.useCallback(e => {
     remove(value);
   }, [remove, value]);
   return (
-    <div className="px-1 bg-gray-200 flex items-center rounded">
+    <div
+      className={ `
+        ${ removable ? "px-1 bg-gray-200 flex items-center rounded" : null }
+      ` }
+    >
       { display }
-      <span className="fa fa-remove text-xs ml-2 px-1 rounded hover:bg-gray-400"
-        onClick={ doRemove }/>
+      { !removable ? null :
+        <span className="fa fa-remove text-xs ml-2 px-1 rounded hover:bg-gray-400"
+          onClick={ doRemove }/>
+      }
     </div>
   )
 }
@@ -384,7 +393,15 @@ const PlaceHolder = ({ children }) => {
     </div>
   )
 }
-const ValueContainer = ({ displayValues, placeholder, disabled, remove }) => {
+const ValueContainer = props => {
+  const {
+    displayValues,
+    placeholder,
+    disabled,
+    remove,
+    removable
+  } = props;
+
   return (
     <div tabIndex={ 0 }
       className={ `
@@ -400,6 +417,7 @@ const ValueContainer = ({ displayValues, placeholder, disabled, remove }) => {
         displayValues.map((v, i) => (
           <div key={ v.key }>
             <ValueItem { ...v }
+              removable={ removable }
               remove={ remove }/>
           </div>
         ))
@@ -409,9 +427,9 @@ const ValueContainer = ({ displayValues, placeholder, disabled, remove }) => {
 }
 const DefaultDisplayItem = ({ children, active, hasChildren }) => {
   return (
-    <div style={ { minWidth: "10rem" } }
+    <div style={ { minWidth: "12rem" } }
       className={ `
-        py-1 px-2 flex items-center text-left
+        py-1 px-2 flex items-center text-left min-w-fit whitespace-nowrap
         ${ active ? "bg-gray-400" : "hover:bg-gray-300 bg-white" }
       ` }
     >
@@ -422,13 +440,13 @@ const DefaultDisplayItem = ({ children, active, hasChildren }) => {
     </div>
   )
 }
-const Clickable = ({ select, option, children }) => {
+const Clickable = ({ select, option, disabled, children }) => {
   const onClick = React.useCallback(e => {
     e.stopPropagation();
     select(option);
   }, [select, option]);
   return (
-    <div onClick={ onClick }>
+    <div onClick={ disabled ? null : onClick }>
       { children }
     </div>
   )

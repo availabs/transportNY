@@ -7,7 +7,7 @@ import { /*LineGraph,*/ BarGraph } from "modules/avl-graph/src";
 const MeasureVisBox = ({ layer }) => {
 	const { falcor, falcorCache } = useFalcor();
 	const currentData = get(layer, 'state.currentData', []);
-	
+
 	const f_system_meta = {
 	  "0": "Total",
 	  "1": "Interstate",
@@ -19,7 +19,7 @@ const MeasureVisBox = ({ layer }) => {
 	  "7": "Local"
 	}
 
-	const years = [2016,2017,2018,2019,2020]
+	const YEARS = [2016,2017,2018,2019,2020, 2021, 2022]
 
 	const f = d3format(",.3~s");
 
@@ -33,17 +33,17 @@ const MeasureVisBox = ({ layer }) => {
 	  	o[0].vmt += (c[aadt_measure[0]] * c.TMC_miles)
 	  	o[0].count += 1
 	  	o[0].miles += c.TMC_miles
-	  	
-	  	o[0].measure += sum_measures.includes(layer.filters.measure.value) ?  
-	  		c.value : 
+
+	  	o[0].measure += sum_measures.includes(layer.filters.measure.value) ?
+	  		c.value :
 	  		c.value * (+c[aadt_measure[0]] * +c.TMC_miles)
 
 	   	//console.log(c.TMC_frc)
 	  	o[+c.TMC_frc].vmt += c[aadt_measure[0]] * c.TMC_miles
 	  	o[+c.TMC_frc].count += 1
 	  	o[+c.TMC_frc].miles += c.TMC_miles
-	  	o[+c.TMC_frc].measure += sum_measures.includes(layer.filters.measure.value) ?  
-	  		c.value : 
+	  	o[+c.TMC_frc].measure += sum_measures.includes(layer.filters.measure.value) ?
+	  		c.value :
 	  		c.value * (+c[aadt_measure[0]] * +c.TMC_miles)
 
 	  }
@@ -52,24 +52,20 @@ const MeasureVisBox = ({ layer }) => {
 	},[0,1,2,3,4,5,6,7].map(d => { return {frc:d, vmt:0, count:0, miles:0, measure: 0}}))
 }
 
-	let run_data = 0;
 	React.useEffect(() => {
-			console.log('loading too much data')
-		    falcor.get([
-		    "conflation",
-		    "byGeo",
-		    layer.getGeographies(),
-		   	years,
-		    layer.getNetwork(layer.filters),
-		    layer.getMeasures().join("|"),
-		  ]).then(data => {
-		  	run_data++;
-		  })
-	    
-	 }, []);
+		console.log('loading too much data')
+		falcor.get([
+	    "conflation",
+	    "byGeo",
+	    layer.getGeographies(),
+	   	YEARS,
+	    layer.getNetwork(layer.filters),
+	    layer.getMeasures().join("|"),
+	  ])
+	 }, [layer]);
 
 	let annualSummaries = React.useMemo(() => {
-		return years.reduce((out, year) => {
+		return YEARS.reduce((out, year) => {
 			//console.time(`process ${year}`)
 			let currentYearData = layer.getGeographies().reduce((out,geo)=> {
 	      let gdata = get(falcorCache,[
@@ -97,7 +93,7 @@ const MeasureVisBox = ({ layer }) => {
       //console.timeEnd(`process ${year}`)
       return out
 		},{})
-	},[falcorCache,run_data])
+	},[falcorCache, layer])
 
 	//console.log('annualSummaries',annualSummaries )
 
@@ -107,8 +103,8 @@ const MeasureVisBox = ({ layer }) => {
   return (
     <div className="p-1">
       <div className=" px-2">
-	      <div className='flex flex-col flex-wrap'>	
-		     	{annualSummaries[layer.filters.year.value].filter((d,i) => d.count > 0).map((value,ix) => 
+	      <div className='flex flex-col flex-wrap'>
+		     	{get(annualSummaries, layer.filters.year.value, []).filter((d,i) => d.count > 0).map((value,ix) =>
 			     <React.Fragment key={ix}>
 			     <div  className='flex-1 flex border-b border-gray-700 pt-2 h-12'>
 			        <div className='text-base text-npmrds-100 flex-1'>
@@ -128,8 +124,8 @@ const MeasureVisBox = ({ layer }) => {
 			     <div className="h-16">
 						<BarGraph
 							data={Object.keys(annualSummaries).map((year) => {
-								let v = sum_measures.includes(layer.filters.measure.value) ? 
-									+(annualSummaries[year][ix].measure).toFixed(2) : 
+								let v = sum_measures.includes(layer.filters.measure.value) ?
+									+(annualSummaries[year][ix].measure).toFixed(2) :
 									+(annualSummaries[year][ix].measure / annualSummaries[year][ix].vmt).toFixed(2)
 								return {
 									index: year,
@@ -138,7 +134,7 @@ const MeasureVisBox = ({ layer }) => {
 							})}
 							keys={["value"]}
 							margin={{ left: 0, bottom: 10 }}
-							
+
 						/>
 						</div>
 			     </React.Fragment>

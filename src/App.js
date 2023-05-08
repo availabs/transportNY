@@ -41,13 +41,11 @@ const App = (props) => {
       return get(Sites, SUBDOMAIN, Sites['transportNY'])
   },[SUBDOMAIN])
 
-  const Routes = [...transportNY.Routes, ...DefaultRoutes]
-  console.log('Routes', Routes)
   const WrappedRoutes =  useMemo(() => {
     const Routes = [...site.Routes, ...DefaultRoutes]
     return LayoutWrapper(Routes, Layout)
   }, [site])
-  console.log('Wrapped', WrappedRoutes)
+  //console.log('Wrapped', WrappedRoutes)
 
 
   return (

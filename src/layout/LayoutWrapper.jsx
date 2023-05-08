@@ -22,7 +22,7 @@ const LayoutWrapper = withAuth(({
   // console.log('LayoutWrapper props', props)
   // console.log('LayoutWrapper comp',  typeof Comp, Comp )
   // console.log('LayoutWrapper Element',  typeof Element, Element )
-  console.log('LayoutWrapper child', props, typeof Child, Child )
+  //console.log('LayoutWrapper child', props, typeof Child, Child )
   // console.log('LayoutWrapper layout', typeof Layout, Layout)
   // -------------------------------------
   // we may want to restore this ??
@@ -40,9 +40,10 @@ const LayoutWrapper = withAuth(({
 
 export default function  DefaultLayoutWrapper ( routes, layout ) {
   //console.log('routes', routes)
+  const menus = routes.filter(r => r.mainNav)
   return routes.map(route => {
     let out = cloneDeep(route)
-    out.element = <LayoutWrapper {...out} Layout={layout} />
+    out.element = <LayoutWrapper {...out} Layout={layout} menus={menus} />
     return out
   })
 }

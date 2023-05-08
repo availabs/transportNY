@@ -28,8 +28,7 @@ const Map = () => {
 
 
 const AdminMapPage = {
-  icon: 'fa-map',
-  class: "fa",
+  icon: 'fa fa-map',
   path: '/map',
   exact: true,
   mainNav: true,
