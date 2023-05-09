@@ -94,9 +94,7 @@ const config = {
   // title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
   // icon: 'fa-duotone fa-home',
   path: "/",
-  exact: true,
-  auth: false,
-  mainNav: false,
+  
   sideNav: {
     color: 'dark',
     size: 'none'

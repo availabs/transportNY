@@ -1,6 +1,6 @@
 import React from "react"
 
-import { useHistory, useParams, Link } from "react-router-dom"
+import { useNavigate, useParams, Link } from "react-router-dom"
 
 import get from "lodash.get"
 import { groups as d3groups, range as d3range } from "d3-array"
@@ -74,29 +74,29 @@ const MonthGrid = () => {
   const [direction, setDirection] = React.useState("E");
   const tmclinearKey = `${ tmclinear }_${ direction }`;
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const setUrlFromTmclinearKey = React.useCallback(tmclinearKey => {
     const [/*level*/, geoid] = selectedGeo.split("|");
-    history.push(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
-  }, [history, date, selectedGeo]);
+    navigate(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
+  }, [navigate, date, selectedGeo]);
 
   const setUrlFromMonth = React.useCallback(month => {
     const [/*level*/, geoid] = selectedGeo.split("|");
     const date = `${ year }-${ `0${ month }`.slice(-2) }`;
-    history.push(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
-  }, [history, year, tmclinearKey, selectedGeo]);
+    navigate(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
+  }, [navigate, year, tmclinearKey, selectedGeo]);
   
   const setUrlFromYear = React.useCallback(year => {
     const [/*level*/, geoid] = selectedGeo.split("|");
     const date = `${ year }-${ `0${ month }`.slice(-2) }`;
-    history.push(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
-  }, [history, month, tmclinearKey, selectedGeo]);
+    navigate(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
+  }, [navigate, month, tmclinearKey, selectedGeo]);
 
   const setUrlFromDate = React.useCallback(date => {
     const [/*level*/, geoid] = selectedGeo.split("|");
-    history.push(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
-  }, [history, tmclinearKey, selectedGeo])
+    navigate(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
+  }, [navigate, tmclinearKey, selectedGeo])
 
   const [TMCs, setTMCs] = React.useState([]);
 

@@ -1,17 +1,16 @@
 import React, { useEffect, useMemo} from 'react';
-import { BrowserRouter, Switch } from 'react-router-dom';
-import { useDispatch } from "react-redux";
-
-import ScrollToTop from 'utils/ScrollToTop'
-import DefaultRoutes from 'Routes';
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from 'layout/ppdaf-layout'
-import get from 'lodash.get'
-import {/*getDomain,*/getSubdomain} from 'utils'
+import LayoutWrapper from 'layout/LayoutWrapper'
+import get from 'lodash/get'
+
+import { getSubdomain }  from 'utils'
 
 import {
-  DefaultLayout,
   Messages
-} from "modules/avl-components/src"
+} from "@availabs/ams"
+
+import DefaultRoutes from 'Routes';
 
 import transportNY from 'sites/transportny'
 import tsmo from 'sites/tsmo'
@@ -29,6 +28,11 @@ const Sites = {
   'demos': demos
 }
 
+
+console.log('just run', transportNY)
+//const Routes = [...transportNY.Routes, ...DefaultRoutes]
+// const WrappedRoutes = LayoutWrapper(Routes,Layout)
+
 const App = (props) => {
   const SUBDOMAIN = getSubdomain(window.location.host)
   // const PROJECT_HOST = getDomain(window.location.host)
@@ -37,29 +41,23 @@ const App = (props) => {
       return get(Sites, SUBDOMAIN, Sites['transportNY'])
   },[SUBDOMAIN])
 
-  const Routes =  useMemo(() => {
-    return [...site.Routes, ...DefaultRoutes ]
+  const WrappedRoutes =  useMemo(() => {
+    const Routes = [...site.Routes, ...DefaultRoutes]
+    return LayoutWrapper(Routes, Layout)
   }, [site])
+  //console.log('Wrapped', WrappedRoutes)
+
 
   return (
-    <BrowserRouter basename={process.env.REACT_APP_PUBLIC_URL}>
-      <ScrollToTop />
-      {/*<div>{SUBDOMAIN} {site.title} {PROJECT_HOST}</div>*/}
-      <Switch>
-        { Routes.map((route, i) =>
-            <DefaultLayout
-              site={site.title}
-              layout={Layout}
-              key={ i }
-              { ...route }
-              { ...props }
-              menus={ Routes.filter(r => r.mainNav) }/>
-          )
-        }
-      </Switch>
+    <>
+      <RouterProvider 
+        router={createBrowserRouter(WrappedRoutes)} 
+      />
       <Messages />
-    </BrowserRouter>
-  );
+    </>
+  )
+
+  
 }
 
 export default App;

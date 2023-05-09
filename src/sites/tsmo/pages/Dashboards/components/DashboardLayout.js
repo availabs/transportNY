@@ -1,7 +1,7 @@
 import React, { /*createContext*/ }  from "react"
 import { useSelector, useDispatch } from 'react-redux';
 import { setRegion, setMonth, setFsystem } from './dashboardSlice'
-import { useHistory,useLocation } from 'react-router-dom'
+import { useNavigate,useLocation } from 'react-router-dom'
 import get from 'lodash.get'
 
 import {
@@ -23,7 +23,7 @@ const Layout = ({
     loading,
     children
   }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const location = useLocation()
   // const theme = useTheme()
   const dispatch = useDispatch();
@@ -47,7 +47,7 @@ const Layout = ({
             options={ ['Incidents', 'Work Zones','Congestion'] }
             value={ get(pages ,`[${location.pathname}]`, 'Incidents') }
             onChange={ (e) => {
-              history.push(`/${e.replace(/ /g, '').toLowerCase()}`)}
+              navigate(`/${e.replace(/ /g, '').toLowerCase()}`)}
             }
             multi={ false }
             className = 'font-bold text-3xl'
