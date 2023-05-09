@@ -128,7 +128,9 @@ const GeoAtts = ({ versions, geoid }) => {
   }, [falcorCache, versions, geoid]);
 
   return (
-    <div className={ `grid grid-cols-${ versions.length }` }>
+    <div className="grid"
+      style={ { gridTemplateColumns: `repeat(${ geoAtts.length }, minmax(0, 1fr))` } }
+    >
       { geoAtts.map(atts => <GeoAtt key={ atts.year } { ...atts }/>) }
     </div>
   )
@@ -225,7 +227,9 @@ const MeasureList = ({ versions, geoid, measure, name, colors }) => {
       <div className="font-bold">
         { name }
       </div>
-      <div className={ `grid grid-cols-${ versions.length }` }>
+      <div className="grid"
+        style={ { gridTemplateColumns: `repeat(${ data.length }, minmax(0, 1fr))` } }
+      >
         { data.map(d => <Measure key={ d.year } { ...d }/>) }
       </div>
     </div>
