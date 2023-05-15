@@ -1,14 +1,14 @@
-import get from "lodash.get"
+import get from "lodash/get"
 
 // import DateObject from "components/tmc_graphs/utils/DateObject"
-import DateObject from "sites/npmrds/pages/analysis/components/tmc_graphs/utils/DateObject"
+import DateObject from "~/sites/npmrds/pages/analysis/components/tmc_graphs/utils/DateObject"
 
 import {
   getRoutePeaks
 } from "./general.utils"
 
 // import { getColorRange } from "constants/color-ranges"
-import { getColorRange } from "modules/avl-components/src"
+import { getColorRange } from "~/modules/avl-components/src"
 const COLORS = getColorRange(9, "Set1");
 
 let STATION_COLORS = [...COLORS].reverse();

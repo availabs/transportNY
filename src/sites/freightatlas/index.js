@@ -1,4 +1,4 @@
-import FreightMap from "sites/freightatlas/pages/FreightMap"
+import FreightMap from "~/sites/freightatlas/pages/FreightMap"
 
 
 const Routes = [

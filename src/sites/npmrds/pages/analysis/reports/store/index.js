@@ -1,9 +1,9 @@
-import { falcorGraph } from "store/falcorGraph"
+import { falcorGraph } from "~/store/falcorGraph"
 // import { update } from "utils/redux-falcor/components/duck"
 // import { updateFalcor as update } from "store/falcorGraph"
 
-import deepequal from "deep-equal"
-import get from "lodash.get"
+import isEqual from "lodash/isEqual"
+import get from "lodash/get"
 import moment from "moment"
 
 import { range } from "d3-array";
@@ -11,7 +11,7 @@ import { range } from "d3-array";
 // import { UPDATE as updateFalcor } from "utils/redux-falcor"
 
 // import DateObject from "components/tmc_graphs/utils/DateObject"
-import DateObject from "sites/npmrds/pages/analysis/components/tmc_graphs/utils/DateObject"
+import DateObject from "~/sites/npmrds/pages/analysis/components/tmc_graphs/utils/DateObject"
 
 import {
   _addStationComp,
@@ -19,12 +19,12 @@ import {
   _updateStationSettings,
   _updateStation,
   loadStationCompsFromReport,
-  loadStationCompsFromTemplate,
-  _reorderStationComps
+  loadStationCompsFromTemplate
+  //_reorderStationComps
 } from "./utils/station.utils"
 
 // import { getColorRange } from "constants/color-ranges"
-import { getColorRange } from "modules/avl-components/src"
+import { getColorRange } from "~/modules/avl-components/src"
 const COLORS = getColorRange(9, "Set1");//COLOR_RANGES[12][1].colors.slice();
 // const COLORS = ['#FF6900', '#FCB900', '#7BDCB5', '#00D084', '#8ED1FC', '#0693E3', '#ABB8C3', '#EB144C', '#F78DA7', '#9900EF']
 
@@ -1117,7 +1117,7 @@ export const resetState = () =>
 
 export const selectColorRange = colorRange =>
   (dispatch, getState) =>
-    !deepequal(getState().report.colorRange, colorRange) &&
+    !isEqual(getState().report.colorRange, colorRange) &&
       Promise.resolve(
         dispatch({
           type: UPDATE_STATE,

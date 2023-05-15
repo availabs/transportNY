@@ -1,6 +1,6 @@
-var zip = require('./zip');
-var saveAs = require("file-saver").saveAs;
+import zip from './zip'
+import { saveAs } from "file-saver"
 
-module.exports = function(gj, options, aliasString, tmcMetaString) {
+export default function download(gj, options, aliasString, tmcMetaString) {
     zip(gj, options, aliasString, tmcMetaString).then(function(blob) { saveAs(blob, options.file + '.zip'); });
 };

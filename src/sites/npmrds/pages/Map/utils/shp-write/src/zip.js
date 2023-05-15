@@ -1,10 +1,10 @@
-var write = require('./write'),
-    geojson = require('./geojson'),
-    prj = require('./prj'),
-    JSZip = require('jszip'),
-    get = require('lodash.get');
+import write from './write'
+import geojson from './geojson'
+import prj from './prj'
+import JSZip from 'jszip'
+import get from 'lodash.get'
 
-module.exports = function(gj, options, aliasString, tmcMetaString) {
+export default function zip (gj, options, aliasString, tmcMetaString) {
     var zip = new JSZip(),
         layers = zip.folder(options && options.folder ? options.folder : 'layers');
 

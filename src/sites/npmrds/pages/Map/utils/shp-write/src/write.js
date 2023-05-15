@@ -1,11 +1,11 @@
-var types = require('./types'),
-    dbf = require('dbf'),
-    prj = require('./prj'),
-    ext = require('./extent'),
-    getFields = require('./fields'),
-    assert = require('assert'),
-    pointWriter = require('./points'),
-    polyWriter = require('./poly');
+import types from './types'
+import dbf from 'dbf'
+import prj from './prj'
+//import ext from './extent'
+import getFields from './fields'
+import assert from 'assert'
+import pointWriter from './points'
+import polyWriter from './poly'
 
 var writers = {
     1: pointWriter,
@@ -15,10 +15,10 @@ var writers = {
 
 var recordHeaderLength = 8;
 
-module.exports = write;
+
 
 // Low-level writing interface
-function write(rows, geometry_type, geometries, callback) {
+export function write(rows, geometry_type, geometries, callback) {
 
     var TYPE = types.geometries[geometry_type],
         writer = writers[TYPE],
@@ -65,4 +65,8 @@ function writeExtent(extent, view) {
     view.setFloat64(44, extent.ymin, true);
     view.setFloat64(52, extent.xmax, true);
     view.setFloat64(60, extent.ymax, true);
+}
+
+export default {
+    write
 }
