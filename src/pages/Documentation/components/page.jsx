@@ -22,7 +22,7 @@ export function PageView ({item, dataItems, attributes}) {
       <div className='border flex-1 bg-white flex'>
         <div className={theme.page.container}>
           <div className='p-6 text-4xl font-semibold'>
-            {item['title']} {item['id']} 
+            {item['title']} 
           </div>
           
           <div className='text-base font-light leading-7'>
@@ -66,8 +66,9 @@ export function PageEdit ({item, dataItems, updateAttribute ,attributes, setItem
           {/*{status ? <div>{JSON.stringify(status)}</div> : ''}*/}
           <div className='p-6 text-4xl font-semibold'>
             <TitleEdit 
-              value={item['title']} 
-              onChange={(v) => updateAttribute('title', v)}        
+              value={item['title']}
+              onChange={(v) => updateAttribute('title', v)}  
+              className='w-full'      
               {...attributes['title']}
             />
           </div>

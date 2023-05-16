@@ -1,15 +1,15 @@
 import React from "react"
 
-import get from "lodash.get"
+import get from "lodash/get"
 import { extent as d3extent } from "d3-array"
 
 import {
   useFalcor
-} from "modules/avl-components/src"
+} from "~/modules/avl-components/src"
 
 import {
   LineGraph
-} from "modules/avl-graph/src"
+} from "~/modules/avl-graph/src"
 
 const idFormat = () => "Value";
 

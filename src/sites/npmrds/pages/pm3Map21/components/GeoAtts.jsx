@@ -1,11 +1,11 @@
 import React from "react"
 
 import { format as d3format } from "d3-format"
-import get from "lodash.get"
+import get from "lodash/get"
 
 import {
   useFalcor
-} from "modules/avl-components/src"
+} from "~/modules/avl-components/src"
 
 const decimal = d3format(",d");
 const float = d3format(",.1f");

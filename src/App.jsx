@@ -44,9 +44,7 @@ const App = (props) => {
     const Routes = [...site.Routes, ...DefaultRoutes]
     return LayoutWrapper(Routes, Layout)
   }, [site])
-  console.log('Wrapped', WrappedRoutes)
-
-
+  // console.log('Wrapped', WrappedRoutes)
   return (
     <>
       <RouterProvider 
