@@ -41,20 +41,20 @@ const IncidentsTable = ({ events, setHoveredEvent }) => {
   const [TMCs, setTMCs] = React.useState([]);
 
   React.useEffect(() => {
-    if (!eventsIds.length) return;
+    if (eventsIds.length) {
+      const tmcSet = eventsIds.reduce((a, c) => {
+        const d = get(falcorCache, ["transcom2", "eventsbyId", c, "congestion_data", "value", "tmcDelayData"], {});
+        for (const tmc in d) {
+          if (d[tmc]) {
+            a.add(tmc);
+          }
+        };
+        return a;
+      }, new Set());
 
-    const tmcSet = eventsIds.reduce((a, c) => {
-      const d = get(falcorCache, ["transcom2", "eventsbyId", c, "congestion_data", "value", "tmcDelayData"], {});
-      for (const tmc in d) {
-        if (d[tmc]) {
-          a.add(tmc);
-        }
-      };
-      return a;
-    }, new Set());
-
-    if (tmcSet.size) {
-      setTMCs([...tmcSet]);
+      if (tmcSet.size) {
+        setTMCs([...tmcSet]);
+      }
     }
   }, [falcorCache, eventsIds]);
   
