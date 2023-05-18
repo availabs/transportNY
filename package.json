@@ -71,6 +71,8 @@
     "react-on-screen": "^2.1.1",
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.9.0",
+    "react-select": "^5.7.3",
+    "react-selected": "^1.0.1",
     "react-switch": "^7.0.0",
     "react-table": "^7.6.2",
     "react-tooltip": "^4.5.0",
@@ -81,7 +83,8 @@
     "tlds": "^1.238.0",
     "uuid": "^9.0.0",
     "web-vitals": "^0.2.4",
-    "xhr2": "^0.2.1"
+    "xhr2": "^0.2.1",
+    "yjs": "^13.6.1"
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
