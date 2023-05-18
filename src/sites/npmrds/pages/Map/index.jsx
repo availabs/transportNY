@@ -40,7 +40,7 @@ const AdminMapPage = {
     layout: 'menu-layout-mini',
     style: 'color-style-default'
   },
-  name: 'Map',
+  name: 'Macro',
   authLevel: 0,
   component: Map
 }

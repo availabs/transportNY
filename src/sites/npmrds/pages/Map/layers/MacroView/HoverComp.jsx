@@ -45,30 +45,34 @@ const TmcComp = ({ data, layer, tmc }) => {
   const { falcor, falcorCache } = useFalcor();
 
   React.useEffect(() => {
-    if (tmc === null) return;
-    // console.log('hover fetch')
-    return falcor.get(
-      [
-        "tmc",
-        tmc,
-        "meta",
-        layer.filters.year.value,
-        ["miles", "roadname", "aadt", "f_system", "nhs", "frc"],
-      ],
-      [
-        "conflation",
-        "tmc",
-        tmc,
-        "data",
-        layer.filters.year.value,
+    async function fetchData () {
+      if (tmc === null) return;
+      
+      // console.log('hover fetch')
+      return falcor.get(
         [
-          "pct_bins_reporting",
-          "pct_bins_reporting_am",
-          "pct_bins_reporting_pm",
-          "pct_bins_reporting_off",
+          "tmc",
+          tmc,
+          "meta",
+          layer.filters.year.value,
+          ["miles", "roadname", "aadt", "f_system", "nhs", "frc"],
         ],
-      ]
-    );
+        [
+          "conflation",
+          "tmc",
+          tmc,
+          "data",
+          layer.filters.year.value,
+          [
+            "pct_bins_reporting",
+            "pct_bins_reporting_am",
+            "pct_bins_reporting_pm",
+            "pct_bins_reporting_off",
+          ],
+        ]
+      );
+    }
+    fetchData()
   }, [falcor, tmc]);
 
   const TmcInfo = React.useMemo(() => {
