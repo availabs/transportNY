@@ -16,3 +16,6 @@
 [submodule "src/modules/avl-maplibre"]
 	path = src/modules/avl-maplibre
 	url = https://github.com/availabs/avl-maplibre.git
+[submodule "src/modules/dms"]
+	path = src/modules/dms
+	url = git@github.com:availabs/dms.git

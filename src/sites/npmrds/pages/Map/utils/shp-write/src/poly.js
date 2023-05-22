@@ -1,7 +1,7 @@
-var ext = require('./extent'),
-    types = require('./types');
+import { enlarge, blank } from './extent'
+import {jstypes as types} from './types'
 
-module.exports.write = function writePoints(geometries, extent, shpView, shxView, TYPE) {
+export function write(geometries, extent, shpView, shxView, TYPE) {
 
     var shpI = 0,
         shxI = 0,
@@ -16,8 +16,8 @@ module.exports.write = function writePoints(geometries, extent, shpView, shxView
             contentLength = (flattened.length * 16) + 48 + (noParts - 1) * 4;
 
         var featureExtent = flattened.reduce(function(extent, c) {
-            return ext.enlarge(extent, c);
-        }, ext.blank());
+            return enlarge(extent, c);
+        }, blank());
 
         // INDEX
         shxView.setInt32(shxI, shxOffset / 2); // offset
@@ -64,23 +64,23 @@ module.exports.write = function writePoints(geometries, extent, shpView, shxView
     }
 };
 
-module.exports.shpLength = function(geometries) {
+export function shpLength(geometries) {
     return (geometries.length * 56) +
         // points
         (justCoords(geometries).length * 16);
 };
 
-module.exports.shxLength = function(geometries) {
+export function shxLength(geometries) {
     return geometries.length * 8;
 };
 
-module.exports.extent = function(coordinates) {
+export function extent(coordinates) {
     return justCoords(coordinates).reduce(function(extent, c) {
-        return ext.enlarge(extent, c);
-    }, ext.blank());
+        return enlarge(extent, c);
+    }, blank());
 };
 
-function parts(geometries, TYPE) {
+export function parts(geometries, TYPE) {
     var no = 1;
     if (TYPE === types.geometries.POLYGON || TYPE === types.geometries.POLYLINE)  {
         no = geometries.reduce(function (no, coords) {
@@ -96,7 +96,7 @@ function parts(geometries, TYPE) {
     return no;
 }
 
-module.exports.parts = parts;
+
 
 function totalPoints(geometries) {
     var sum = 0;
@@ -115,3 +115,10 @@ function justCoords(coords, l) {
     }
 }
 
+
+export default {
+    write,
+    shpLength,
+    shxLength,
+    extent
+}

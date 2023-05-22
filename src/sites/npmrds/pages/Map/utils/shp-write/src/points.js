@@ -1,6 +1,6 @@
-var ext = require('./extent');
+import ext from './extent'
 
-module.exports.write = function writePoints(coordinates, extent, shpView, shxView) {
+export function write(coordinates, extent, shpView, shxView) {
 
     var contentLength = 28, // 8 header, 20 content
         fileLength = 100,
@@ -30,20 +30,28 @@ module.exports.write = function writePoints(coordinates, extent, shpView, shxVie
     });
 };
 
-module.exports.extent = function(coordinates) {
+export function extent(coordinates) {
     return coordinates.reduce(function(extent, coords) {
         return ext.enlarge(extent, coords);
     }, ext.blank());
 };
 
-module.exports.parts = function parts(geometries, TYPE) {
+export function parts(geometries, TYPE) {
     return geometries.length;
 };
 
-module.exports.shxLength = function(coordinates) {
+export function shxLength(coordinates) {
     return coordinates.length * 8;
 };
 
-module.exports.shpLength = function(coordinates) {
+export function shpLength(coordinates) {
     return coordinates.length * 28;
 };
+
+
+export default {
+    write,
+    parts,
+    shxLength,
+    shpLength
+}

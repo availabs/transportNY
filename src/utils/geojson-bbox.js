@@ -1,4 +1,4 @@
-module.exports = function(gj) {
+export default function bbox (gj) {
   var coords, bbox;
   if (!gj.hasOwnProperty('type')) return;
   coords = getCoordinatesDump(gj);

@@ -1,7 +1,7 @@
-module.exports.point = justType('Point', 'POINT');
-module.exports.multiline = justType('MultiLineString', 'POLYLINE');
-module.exports.line = justType('LineString', 'POLYLINE');
-module.exports.polygon = justType('Polygon', 'POLYGON');
+export const point = justType('Point', 'POINT');
+export const multiline = justType('MultiLineString', 'POLYLINE');
+export const line = justType('LineString', 'POLYLINE');
+export const polygon = justType('Polygon', 'POLYGON');
 
 function justType(type, TYPE) {
     return function(gj) {
@@ -30,4 +30,11 @@ function justProps(t) {
 
 function isType(t) {
     return function(f) { return f.geometry.type === t; };
+}
+
+export default {
+    point,
+    multiline,
+    line,
+    polygon
 }

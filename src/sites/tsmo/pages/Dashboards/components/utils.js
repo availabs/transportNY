@@ -1,6 +1,6 @@
 import React from "react"
-import get from "lodash.get";
-import { useFalcor } from "modules/avl-components/src"
+import get from "lodash/get";
+import { useFalcor } from "~/modules/avl-components/src"
 
 export const useGeographies = () => {
   const { falcor, falcorCache } = useFalcor();

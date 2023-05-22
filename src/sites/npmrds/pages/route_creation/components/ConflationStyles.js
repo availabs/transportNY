@@ -1,4 +1,4 @@
-import flatten from 'lodash.flatten'
+import flatten from 'lodash/flatten'
 
 export const VERSION = '0_6_0'
 
