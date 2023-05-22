@@ -44,15 +44,17 @@ const HoverComp = ({ data, layer }) => {
 const TmcComp = ({ data, layer, tmc }) => {
   const { falcor, falcorCache } = useFalcor();
 
+  const year = layer.filters.year.value;
+
   React.useEffect(() => {
     if (tmc === null) return;
     // console.log('hover fetch')
-    return falcor.get(
+    falcor.get(
       [
         "tmc",
         tmc,
         "meta",
-        layer.filters.year.value,
+        year,
         ["miles", "roadname", "aadt", "f_system", "nhs", "frc"],
       ],
       [
@@ -60,7 +62,7 @@ const TmcComp = ({ data, layer, tmc }) => {
         "tmc",
         tmc,
         "data",
-        layer.filters.year.value,
+        year,
         [
           "pct_bins_reporting",
           "pct_bins_reporting_am",
@@ -69,11 +71,11 @@ const TmcComp = ({ data, layer, tmc }) => {
         ],
       ]
     );
-  }, [falcor, tmc]);
+  }, [falcor, tmc, year]);
 
   const TmcInfo = React.useMemo(() => {
-    return get(falcorCache, ["tmc", tmc, "meta", layer.filters.year.value], {});
-  }, [tmc, falcorCache]);
+    return get(falcorCache, ["tmc", tmc, "meta", year], {});
+  }, [tmc, falcorCache, year]);
 
   const n = React.useMemo(() => {
     return data.filter((d) => d[0] === "n")[0][1];
@@ -82,10 +84,10 @@ const TmcComp = ({ data, layer, tmc }) => {
   const MeasureInfo = React.useMemo(() => {
     return get(
       falcorCache,
-      ["conflation", "tmc", tmc, "data", layer.filters.year.value],
+      ["conflation", "tmc", tmc, "data", year],
       {}
     );
-  }, [tmc, falcorCache]);
+  }, [tmc, falcorCache, year]);
 
   const currentData = get(layer, 'state.currentData', []).reduce((out, seg) => {
     out[seg.id] = seg
