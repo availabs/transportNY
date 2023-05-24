@@ -44,40 +44,38 @@ const HoverComp = ({ data, layer }) => {
 const TmcComp = ({ data, layer, tmc }) => {
   const { falcor, falcorCache } = useFalcor();
 
+  const year = layer.filters.year.value;
+
   React.useEffect(() => {
-    async function fetchData () {
-      if (tmc === null) return;
-      
-      // console.log('hover fetch')
-      return falcor.get(
+    if (tmc === null) return;
+    // console.log('hover fetch')
+    falcor.get(
+      [
+        "tmc",
+        tmc,
+        "meta",
+        year,
+        ["miles", "roadname", "aadt", "f_system", "nhs", "frc"],
+      ],
+      [
+        "conflation",
+        "tmc",
+        tmc,
+        "data",
+        year,
         [
-          "tmc",
-          tmc,
-          "meta",
-          layer.filters.year.value,
-          ["miles", "roadname", "aadt", "f_system", "nhs", "frc"],
+          "pct_bins_reporting",
+          "pct_bins_reporting_am",
+          "pct_bins_reporting_pm",
+          "pct_bins_reporting_off",
         ],
-        [
-          "conflation",
-          "tmc",
-          tmc,
-          "data",
-          layer.filters.year.value,
-          [
-            "pct_bins_reporting",
-            "pct_bins_reporting_am",
-            "pct_bins_reporting_pm",
-            "pct_bins_reporting_off",
-          ],
-        ]
-      );
-    }
-    fetchData()
-  }, [falcor, tmc]);
+      ]
+    );
+  }, [falcor, tmc, year]);
 
   const TmcInfo = React.useMemo(() => {
-    return get(falcorCache, ["tmc", tmc, "meta", layer.filters.year.value], {});
-  }, [tmc, falcorCache]);
+    return get(falcorCache, ["tmc", tmc, "meta", year], {});
+  }, [tmc, falcorCache, year]);
 
   const n = React.useMemo(() => {
     return data.filter((d) => d[0] === "n")[0][1];
@@ -86,10 +84,10 @@ const TmcComp = ({ data, layer, tmc }) => {
   const MeasureInfo = React.useMemo(() => {
     return get(
       falcorCache,
-      ["conflation", "tmc", tmc, "data", layer.filters.year.value],
+      ["conflation", "tmc", tmc, "data", year],
       {}
     );
-  }, [tmc, falcorCache]);
+  }, [tmc, falcorCache, year]);
 
   const currentData = get(layer, 'state.currentData', []).reduce((out, seg) => {
     out[seg.id] = seg

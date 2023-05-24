@@ -7,6 +7,7 @@ import {
   groups as d3groups,
   range as d3range,
   mean as d3mean,
+  deviation as d3deviation,
   extent as d3extent
 } from "d3-array"
 
@@ -61,8 +62,18 @@ const MetricByPeaks = ({ tmc, year, source, resolution, metric }) => {
     return Math.floor(miles * (3600.0 / tt));
   }, [metric, miles]);
 
+  const [devFilter, setDevFilter] = React.useState(0);
+
   const data = React.useMemo(() => {
-    const rawData = get(falcorCache, ["tmc", tmc, "year", year, "npmrds", source, "value"], []);
+    let rawData = get(falcorCache, ["tmc", tmc, "year", year, "npmrds", source, "value"], []);
+
+    if (devFilter > 0) {
+      const mean = d3mean(rawData, d => d.tt);
+      const dev = d3deviation(rawData, d => d.tt);
+      const upper = mean + dev * devFilter;
+      const lower = mean - dev * devFilter;
+      rawData = rawData.filter(d => (d.tt >= lower) && (d.tt <= upper));
+    }
 
     const grouper = getResolutionGrouper(resolution);
     const group1 = d => `${ d.ts.slice(0, 10) }-${ grouper(d) }`;
@@ -87,7 +98,7 @@ const MetricByPeaks = ({ tmc, year, source, resolution, metric }) => {
     }).sort((a, b) => a.index - b.index);
 
     return data;
-  }, [falcorCache, tmc, year, source, resolution, transform]);
+  }, [falcorCache, tmc, year, source, resolution, transform, devFilter]);
 
   const xDomain = React.useMemo(() => {
     const extent = d3extent(data, d => d.index);
@@ -138,6 +149,10 @@ const MetricByPeaks = ({ tmc, year, source, resolution, metric }) => {
           <Legend />
         </div>
       </div>
+      <div>
+        <Radios value={ devFilter }
+          onChange={ setDevFilter }/>
+      </div>
     </div>
   )
 }
@@ -158,6 +173,47 @@ const Legend = () => {
           </div>
         ))
       }
+    </div>
+  )
+}
+
+const Radios = ({ value, onChange }) => {
+  const doOnChange = React.useCallback(e => {
+    onChange(+e.target.id);
+  }, [onChange]);
+  return (
+    <div className="flex items-end">
+      <div className="mr-8">
+        <div className="mr-1">No filter</div>
+        <input type="radio" name="deviation" id="0"
+          checked={ value === 0 }
+          onChange={ doOnChange }/>
+      </div>
+      <div className="flex flex-col">
+        <div className="border-b border-current">
+          Filter all data within...
+        </div>
+        <div className="flex">
+          <div className="mr-8">
+            <div className="mr-1">3 Std. Deviations</div>
+            <input type="radio" name="deviation" id="3"
+              checked={ value === 3 }
+              onChange={ doOnChange }/>
+          </div>
+          <div className="mr-8">
+            <div className="mr-1">2 Std. Deviations</div>
+            <input type="radio" name="deviation" id="2"
+              checked={ value === 2 }
+              onChange={ doOnChange }/>
+          </div>
+          <div className="mr-8">
+            <div className="mr-1">1 Std. Deviation</div>
+            <input type="radio" name="deviation" id="1"
+              checked={ value === 1 }
+              onChange={ doOnChange }/>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
