@@ -45,10 +45,9 @@ const App = (props) => {
 
   const WrappedRoutes =  useMemo(() => {
     const Routes = [...site.Routes, ...DefaultRoutes]
-    console.log('site',SUBDOMAIN, site)
     return LayoutWrapper(Routes, Layout)
   }, [site])
-  console.log('Wrapped', WrappedRoutes)
+  
   return (
     <>
       <RouterProvider 

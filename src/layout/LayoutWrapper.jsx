@@ -17,10 +17,10 @@ const LayoutWrapper = withAuth(({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { auth, authLevel } = props;
+  const { auth, authLevel, user } = props;
 
   React.useEffect(() => {
-    checkAuth({ auth, authLevel }, navigate, location);
+    checkAuth({ user, auth, authLevel }, navigate, location);
   }, [auth, authLevel, navigate, location]);
 
   // console.log('LayoutWrapper props', props)
