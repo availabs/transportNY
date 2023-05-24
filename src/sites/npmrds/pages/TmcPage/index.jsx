@@ -225,7 +225,7 @@ const config = {
   name: 'TMC',
   path: "/tmc/:tmc",
   exact: true,
-  auth: true,
+  // auth: true,
   mainNav: false,
   sideNav: {
     color: 'dark',

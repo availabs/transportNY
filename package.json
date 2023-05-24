@@ -71,6 +71,7 @@
     "react-on-screen": "^2.1.1",
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.9.0",
+    "react-select": "^5.7.3",
     "react-switch": "^7.0.0",
     "react-table": "^7.6.2",
     "react-tooltip": "^4.5.0",
