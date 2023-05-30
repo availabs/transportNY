@@ -1,6 +1,22 @@
 
 import { format as d3format } from "d3-format"
 
+export const YEARS = [2022, 2021, 2020, 2019, 2018, 2017, 2016];
+export const METRICS = [
+  { name: "Speed", key: "speed" },
+  { name: "Travel Time", key: "tt" }
+];
+export const RESOLUTIONS = [
+  { name: "Hour", key: "hour", bins: 12, density: 1 },
+  { name: "15 Minutes", key: "15-min", bins: 3, density: 4 },
+  { name: "5 Minutes", key: "5-min", bins: 1, density: 12 }
+];
+export const SOURCES = [
+  { name: "All Vehicles", key: "ALL" },
+  { name: "Passenger Vehicles", key: "PASS" },
+  { name: "Freight Trucks", key: "TRUCK" }
+];
+
 export const tmcAttributes = [
   'aadt',
   'aadt_combi',
