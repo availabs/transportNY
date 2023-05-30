@@ -1,5 +1,6 @@
 import React from 'react';
 import {getDomain} from "~/utils"
+import { lazy, Suspense } from 'react';
 
 
 function classNames(...classes) {
@@ -38,6 +39,7 @@ const Home = () => {
   ]
 
   return (
+    <Suspense>
     <div className='max-w-6xl mx-auto'>
       <div className="mt-8 md:mt-32 mx-2 md:mx-0 rounded-lg overflow-hidden shadow divide-y divide-gray-200 sm:divide-y-0 sm:grid sm:grid-cols-2 sm:gap-px">
         {transportNYItems.map((action, actionIdx) => (
@@ -85,6 +87,7 @@ const Home = () => {
         ))}
       </div>
     </div>
+    </Suspense>
   )
 }
 

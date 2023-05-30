@@ -14,7 +14,6 @@ import config from "~/config.json"
 
 import {CustomSidebar} from './MapControls'
 
-import { selectPgEnv } from "~/pages/DataManager/store"
 
 export const LayerContext = React.createContext({
   layerList: [],
@@ -29,7 +28,7 @@ const Map = ({ events }) => {
     const {falcor,falcorCache} = useFalcor()
     const [layerList, setLayerList] = React.useState([54,17,8])
     const [layerData, setLayerData] = React.useState([infoLayer])
-    const pgEnv = useSelector(selectPgEnv);
+    const pgEnv = 'npmrds'
 
     const layerContextValue = React.useMemo(() => {
         return { 

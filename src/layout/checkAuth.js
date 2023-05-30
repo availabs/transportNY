@@ -2,16 +2,16 @@ import get from 'lodash/get'
 const checkAuth = (props, navigate, location) => {
   //const isAuthenticating = props?.user?.isAuthenticating
 
-  //------------------------------------------
+  //-----------------------------------------------------
   // TODO : if user is logged in
   // and refreshes authed page
   // isAuthenticating = false and Authed = false
   // so user is sent to login
   // while token check happens in background
-  // then user is send back to authed page
+  // then user is sent back to authed page
   // by /auth/login redirect using state:from
-  // can we switch to isAuthenticating is true
-  //------------------------------------------
+  // can we switch to isAuthenticating is true on load?
+  //-----------------------------------------------------
 
   const authLevel = props.auth ? 0 : (props?.authLevel || -1);
   const sendToLogin = authLevel > -1 && !get(props, ["user", "authed"], false)
@@ -23,6 +23,7 @@ const checkAuth = (props, navigate, location) => {
   // && user isn't logged in
   // send to login
   //----------------------------------------
+  console.log('checkAuth', authLevel, props?.user?.authed, props?.user?.isAuthenticating)
   if( sendToLogin ) {
     //console.log('navigate to login', nav)
     navigate("/auth/login", {state:{ from: location.pathname }})

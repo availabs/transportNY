@@ -203,7 +203,7 @@ class ReportBase extends React.Component {
     })
   }
   setHighlightedTmcs(tmcs) {
-    if (!isEqual(tmcs, this.state.highlightedTmcs)) {
+    if (!isEqual(tmcs, lodash/isEqual.highlightedTmcs)) {
       this.setState({ highlightedTmcs: tmcs });
     }
   }
@@ -456,7 +456,7 @@ class ReportBase extends React.Component {
 
     return this.props.station_comps
       .reduce((a, c) =>
-        a || !isEqual(c.settings, c.workingSettings)
+        a || !isEqual(c.settldash/isEqualrkingSettings)
       , false);
   }
   _needsUpdate(SETTINGS, settings) {
@@ -467,8 +467,8 @@ class ReportBase extends React.Component {
       SETTINGS.resolution !== settings.resolution ||
       SETTINGS.dataColumn !== settings.dataColumn ||
       SETTINGS.compTitle !== settings.compTitle ||
-      !isEqual(SETTINGS.weekdays, settings.weekdays) ||
-      !isEqual(SETTINGS.overrides, settings.overrides);
+      !isEqual(SETTINlodash/isEquals, settings.weekdays) ||
+      !isEqual(SETTINlodash/isEquales, settings.overrides);
   }
 
   showTableModal(data) {
@@ -885,7 +885,7 @@ const ReportSaveModal = props => {
   }, []);
 
   React.useEffect(() => {
-    if (!props.show && !isEqual(state, props.report)) {
+    if (!props.show && !isEqual(state,ldash/isEqualort)) {
       dispatch({
         type: "reset",
         state: { ...props.report }
@@ -990,7 +990,7 @@ const TemplateModal = props => {
 // console.log("TEMPLATE STATE", state);
 
   React.useEffect(() => {
-    if (!props.show && !isEqual(state, props.template)) {
+    if (!props.show && !isEqual(state,ldash/isEqualplate)) {
       dispatch({
         type: "reset",
         state: { ...props.template }

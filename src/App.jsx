@@ -15,21 +15,24 @@ import DefaultRoutes from '~/Routes';
 import transportNY from '~/sites/transportny'
 import tsmo from '~/sites/tsmo'
 import freightatlas from '~/sites/freightatlas'
+import freightdata from '~/sites/freightdata'
+
 import npmrds from '~/sites/npmrds'
 import transit from '~/sites/transit'
 import demos from '~/sites/demos'
 
 const Sites = {
-  'transportNY': transportNY,
-  'tsmo': tsmo,
-  'freightatlas' : freightatlas,
-  'npmrds': npmrds,
-  'transit': transit,
-  'demos': demos
+  transportNY,
+  tsmo,
+  freightatlas,
+  freightdata,
+  npmrds,
+  transit,
+  demos
 }
 
 
-console.log('just run', transportNY)
+//console.log('just run', transportNY)
 //const Routes = [...transportNY.Routes, ...DefaultRoutes]
 // const WrappedRoutes = LayoutWrapper(Routes,Layout)
 
@@ -44,7 +47,7 @@ const App = (props) => {
     const Routes = [...site.Routes, ...DefaultRoutes]
     return LayoutWrapper(Routes, Layout)
   }, [site])
-  // console.log('Wrapped', WrappedRoutes)
+  
   return (
     <>
       <RouterProvider 

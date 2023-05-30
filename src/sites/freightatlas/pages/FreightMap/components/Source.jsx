@@ -1,12 +1,10 @@
 import React, { useEffect, useMemo } from "react";
 import { useFalcor } from "~/modules/avl-components/src"
-import { useSelector } from "react-redux";
 
 import get from "lodash/get"
 // import { useParams } from "react-router-dom"
 
 import {SourceAttributes, ViewAttributes, getAttributes} from "~/pages/DataManager/components/attributes"
-import { selectPgEnv } from "~/pages/DataManager/store"
 
 
 const Overview = ({source, views}) => {
@@ -104,7 +102,7 @@ const Metadata = ({source}) => {
 
 const Source = ({sourceId}) => {
   const {falcor,falcorCache} = useFalcor()
-  const pgEnv = useSelector(selectPgEnv);
+  const pgEnv = 'npmrds'
   
   useEffect( () => {
     const fetchData = async () => { 
