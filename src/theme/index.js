@@ -250,34 +250,37 @@ const ppdaf = () => {
       }
     },
 
-    table: (opts = {}) => {
-            const {color = 'white', size = 'compact'} = opts
-            let colors = {
-                white: 'bg-white hover:bg-gray-100',
-                gray: 'bg-gray-100 hover:bg-gray-200',
-                transparent: 'gray-100'
-            }
+    table: (opts = {color:'white', size: 'compact'}) => {
+          const {color = 'white', size = 'compact'} = opts
+          let colors = {
+              white: 'bg-white hover:bg-blue-50',
+              gray: 'bg-gray-100 hover:bg-gray-200',
+              transparent: 'gray-100'
+          }
 
-            let sizes = {
-                compact: 'px-2 ',
-                full: 'px-10 py-5'
-            }
-            return {
-                tableHeader:
-                    `${sizes[size]} py-1 border-b-2 bg-gray-100 border-gray-200 text-left font-medium text-gray-600  first:rounded-tl-md last:rounded-tr-md`,
-                tableInfoBar: "bg-white",
-                tableRow: `${colors[color]} transition ease-in-out duration-150 border-b border-gray-100`,
-                tableRowStriped: `bg-gray-100 even:bg-gray-200 hover:bg-gray-300 transition ease-in-out duration-150`,
-                tableCell: `${sizes[size]} whitespace-no-wrap`,
-                inputSmall: 'w-24',
-                sortIconDown: 'px-2 text-sm fa fa-chevron-down',
-                sortIconUp: 'px-2 text-sm fa fa-chevron-up',
-                vars: {
-                    color: colors,
-                    size: sizes
-                }
-            }
-        },
+          let sizes = {
+              small: 'px-4 py-1 text-xs',
+              compact: 'px-4 py-1 text-sm',
+              full: 'px-10 py-5'
+          }
+          return {
+              tableHeader:
+                  `${sizes[size]} pb-1 h-8 border border-b-4 border-gray-200 bg-white text-left font-medium text-gray-700 uppercase first:rounded-tl-md last:rounded-tr-md`,
+              tableInfoBar: "bg-white",
+              tableRow: `${colors[color]} transition ease-in-out duration-150 hover:bg-blue-100`,
+              tableRowStriped: `bg-white odd:bg-tigGray-25 hover:bg-tigGray-100 bg-opacity-25 transition ease-in-out duration-150`,
+              tableCell: `${sizes[size]} break-words border border-gray-200 pl-1 align-top font-light text-sm`,
+              inputSmall: 'w-24',
+              sortIconDown: 'fas fa-sort-amount-down text-tigGray-300 opacity-75',
+              sortIconUp: 'fas fa-sort-amount-up text-tigGray-300 opacity-75',
+              sortIconIdeal: 'fa fa-sort-alt text-tigGray-300 opacity-25',
+              vars: {
+                  color: colors,
+                  size: sizes
+              }
+          }
+         
+      },
 
     tabpanel: (opts = {}) => {
             const { tabLocation = 'top' } = opts
