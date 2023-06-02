@@ -20,8 +20,8 @@ const LayoutWrapper = withAuth(({
   const { auth, authLevel, user } = props;
 
   React.useEffect(() => {
-    checkAuth({ user, auth, authLevel }, navigate, location);
-  }, [auth, authLevel, navigate, location]);
+    checkAuth({ auth, authLevel, user }, navigate, location);
+  }, [auth, authLevel, user, navigate, location]);
 
   // console.log('LayoutWrapper props', props)
   // console.log('LayoutWrapper comp',  typeof Comp, Comp )

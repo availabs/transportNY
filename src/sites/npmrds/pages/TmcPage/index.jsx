@@ -15,26 +15,16 @@ import {
 import TmcInfo from "./components/TmcInfo"
 import DataCompletenessGrid from "./components/DataCompletenessGrid"
 import MetricByPeaks from "./components/MetricByPeaks"
+import Pm3Measures from "./components/Pm3Measures"
 
 import {
-  tmcAttributes
+  tmcAttributes,
+  YEARS,
+  METRICS,
+  RESOLUTIONS,
+  SOURCES
 } from "./components/utils"
 
-const YEARS = [2022, 2021, 2020, 2019, 2018, 2017, 2016]
-const METRICS = [
-  { name: "Speed", key: "speed" },
-  { name: "Travel Time", key: "tt" }
-]
-const RESOLUTIONS = [
-  { name: "Hour", key: "hour", bins: 12, density: 1 },
-  { name: "15 Minutes", key: "15-min", bins: 3, density: 4 },
-  { name: "5 Minutes", key: "5-min", bins: 1, density: 12 }
-]
-const SOURCES = [
-  { name: "All Vehicles", key: "ALL" },
-  { name: "Passenger Vehicles", key: "PASS" },
-  { name: "Freight Trucks", key: "TRUCK" }
-]
 const DisplayAccessor = d => d.name;
 const ValueAccessor = d => d.key;
 
@@ -43,7 +33,8 @@ const InitialState = {
   year: YEARS[0],
   metric: METRICS[0],
   resolution: RESOLUTIONS[0],
-  source: "ALL"
+  source: "ALL",
+  versions: []
 }
 const Reducer = (state, action) => {
   const { type, ...payload } = action;
@@ -126,7 +117,8 @@ const TmcPage = props => {
     loadingStart();
     falcor.get(
       ["tmc", tmc, "year", year, "npmrds", source],
-      ["tmc", tmc, "meta", year, tmcAttributes]
+      ["tmc", tmc, "meta", year, tmcAttributes],
+      ["pm3", "measuresByTmc", tmc, YEARS, ["lottr", "tttr", "phed"]]
     ).then(() => loadingEnd())
   }, [falcor, tmc, year, source, loadingStart, loadingEnd]);
 
@@ -151,6 +143,10 @@ const TmcPage = props => {
 
         <Section>
           <MetricByPeaks tmc={ tmc } { ...state }/>
+        </Section>
+
+        <Section>
+          <Pm3Measures tmc={ tmc } year={ year }/>
         </Section>
 
       </div>
