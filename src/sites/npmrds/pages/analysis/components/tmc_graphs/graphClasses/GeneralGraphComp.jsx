@@ -162,7 +162,6 @@ class GeneralGraphComp extends React.Component {
 
 	componentDidMount() {
 		this.IS_ACTIVE = true;
-		this.fetchFalcorDeps();
 	}
 	componentWillUnmount() {
 		this.IS_ACTIVE = false;

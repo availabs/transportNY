@@ -43,6 +43,8 @@ class RouteBarGraph extends GeneralGraphComp {
 			year = this.getMaxYear(route),
 			rolled = d3array.rollup(routeData, v => reducer(v, this.props.tmcGraph, year), d => d.resolution);
 
+console.log("routeData", routeData)
+
 		rolled.forEach((value, resolution) => {
 			graphData.push({
 				value,

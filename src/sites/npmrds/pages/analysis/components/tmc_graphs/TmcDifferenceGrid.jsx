@@ -206,10 +206,11 @@ class TmcDifferenceGrid extends GeneralGraphComp {
 
 		const resolutions = [];
 
-		data1.forEach(({ resolution }) => resolutions.push(resolution));
-		data2.forEach(({ resolution }) => resolutions.push(resolution));
+		data1.forEach(({ resolution }) => resolutions.push(+resolution));
+		data2.forEach(({ resolution }) => resolutions.push(+resolution));
 
 		const extent = d3array.extent(resolutions);
+
 		return d3array.range(extent[0], extent[1] + 1);
 	}
 	getColorScale(graphData, keys, colorRange) {
