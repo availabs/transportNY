@@ -23,7 +23,7 @@ export const tmcAttributes = [
   'aadt_singl',
   'altrtename',
   'avg_speedlimit',
-  // 'bounding_box',
+  'bounding_box',
   'county_code',
   'county_name',
   'direction',

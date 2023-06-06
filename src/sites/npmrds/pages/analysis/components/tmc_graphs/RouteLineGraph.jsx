@@ -36,8 +36,8 @@ const DATA_TYPES = [
 const GraphColors = d => d.color;
 
 class RouteLineGraph extends GeneralGraphComp {
-	componentDidUpdate(oldProps) {
-		super.componentDidUpdate(...arguments);
+	componentDidUpdate(...args) {
+		super.componentDidUpdate(...args);
 
 		const stateRes = get(this.props, `state.resolution`, null);
 		if ((stateRes !== null) && (stateRes !== this.getResolution())) {
@@ -120,6 +120,7 @@ class RouteLineGraph extends GeneralGraphComp {
 		return headerData;
 	}
 	generateGraphData(routeComps, displayData, resolution) {
+
 		return displayData.reduce((graphData, dd, i) => {
 			if (dd.key === 'none') return graphData;
 
