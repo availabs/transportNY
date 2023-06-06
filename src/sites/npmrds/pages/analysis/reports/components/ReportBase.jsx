@@ -160,10 +160,10 @@ class ReportBase extends React.Component {
   }
 
   componentDidUpdate(oldProps, oldState) {
-    const { owner, redirect, history } = this.props;
+    const { owner, redirect, navigate } = this.props;
 
     if (redirect) {
-      history.replace(redirect);
+      navigate(redirect);
       this.updateReport({ redirect: false });
     }
 
