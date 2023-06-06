@@ -162,6 +162,7 @@ class GeneralGraphComp extends React.Component {
 
 	componentDidMount() {
 		this.IS_ACTIVE = true;
+		this.fetchFalcorDeps();
 	}
 	componentWillUnmount() {
 		this.IS_ACTIVE = false;
@@ -177,6 +178,7 @@ class GeneralGraphComp extends React.Component {
 	componentDidUpdate(oldProps) {
 		const oldRouteSettings = oldProps.routes.map(r => r.settings),
 			routeSettings = this.props.routes.map(r => r.settings);
+
 		if (!isEqual(oldProps.state, this.props.state) ||
 				!isEqual(oldRouteSettings, routeSettings)) {
 		// if (!isEqual(oldProps.state, this.props.state)) {
@@ -185,7 +187,6 @@ class GeneralGraphComp extends React.Component {
 	}
 
 	fetchFalcorDeps() {
-
 		const routes = this.getActiveRouteComponents().filter(r => get(r, 'tmcArray.length', 0));
 		if (!routes.length) return Promise.resolve();
 

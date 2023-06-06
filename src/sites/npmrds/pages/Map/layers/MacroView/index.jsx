@@ -41,6 +41,7 @@ import DataDownloader from "./DataDownload";
 import InfoBoxController from "./InfoBoxController";
 import HoverComp from "./HoverComp";
 import { LayerContainer } from "~/modules/avl-map/src";
+import TmcSearch from "./TmcSearch"
 
 /* ---- To Do -----
 
@@ -144,13 +145,12 @@ class MacroLayer extends LayerContainer {
   };
 
   infoBoxes = [
-    {
-      Component: ({ layer }) => <InfoBoxController layer={layer} />,
+    { Component: TmcSearch },
+    { Component: ({ layer }) => <InfoBoxController layer={layer} />,
       show: true,
       width: 420,
     },
-    {
-      Component: ({ layer }) => (
+    { Component: ({ layer }) => (
         <DataDownloader
           layer={layer}
           network={layer.filters.network.value}

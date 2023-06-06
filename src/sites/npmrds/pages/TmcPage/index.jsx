@@ -16,6 +16,7 @@ import TmcInfo from "./components/TmcInfo"
 import DataCompletenessGrid from "./components/DataCompletenessGrid"
 import MetricByPeaks from "./components/MetricByPeaks"
 import Pm3Measures from "./components/Pm3Measures"
+import TmcMap from "./components/TmcMap"
 
 import {
   tmcAttributes,
@@ -118,6 +119,7 @@ const TmcPage = props => {
     falcor.get(
       ["tmc", tmc, "year", year, "npmrds", source],
       ["tmc", tmc, "meta", year, tmcAttributes],
+      ["tmc", tmc, "year", year, "geometries"],
       ["pm3", "measuresByTmc", tmc, YEARS, ["lottr", "tttr", "phed"]]
     ).then(() => loadingEnd())
   }, [falcor, tmc, year, source, loadingStart, loadingEnd]);
@@ -152,7 +154,12 @@ const TmcPage = props => {
       </div>
 
       <div className="col-span-3">
-        <div className="sticky" style={ { top: "1rem" } }>
+        <div className="sticky grid grid-cols-1 gap-4" style={ { top: "1rem" } }>
+
+          <div className="shadow-lg rounded-lg overflow-hidden">
+            <TmcMap tmc={ tmc } year={ year }/>
+          </div>
+
           <Section>
             <div className="grid grid-cols-1 gap-4">
 

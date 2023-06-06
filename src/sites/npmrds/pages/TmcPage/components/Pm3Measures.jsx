@@ -81,7 +81,7 @@ const Pm3MesureLine = ({ tmc, measure: { key, name } }) => {
   }, [falcorCache, tmc, key]);
 
   return (
-    <div classname="h-40">
+    <div className="h-40">
       <LineGraph data={ data }
         colors={ ["black"] }
         margin={ { left: 50, top: 5, right: 5, bottom: 25 } }
