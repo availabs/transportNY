@@ -186,13 +186,14 @@ class GeneralGraphComp extends React.Component {
 	}
 
 	fetchFalcorDeps() {
+
 		const routes = this.getActiveRouteComponents().filter(r => get(r, 'tmcArray.length', 0));
 		if (!routes.length) return Promise.resolve();
 
 		const displayData = this.getDisplayData();
 		if (!displayData.length) return Promise.resolve();
 
-		this.setState({ loading: ++this.state.loading });
+		this.setState(prev => ({ loading: ++prev.loading }));
 
 		// const routeData = {};
 
@@ -302,7 +303,7 @@ class GeneralGraphComp extends React.Component {
 			})
 		}, Promise.resolve())
 		.then(() => {
-			this.setState({ loading: --this.state.loading });
+			this.setState(prev => ({ loading: --prev.loading }));
 		})
 		// .then(() => {
 		// 	this.props.updateRouteData(routeData);

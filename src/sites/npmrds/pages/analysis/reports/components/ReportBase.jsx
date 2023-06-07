@@ -160,10 +160,10 @@ class ReportBase extends React.Component {
   }
 
   componentDidUpdate(oldProps, oldState) {
-    const { owner, redirect, history } = this.props;
+    const { owner, redirect, navigate } = this.props;
 
     if (redirect) {
-      history.replace(redirect);
+      navigate(redirect);
       this.updateReport({ redirect: false });
     }
 
@@ -203,7 +203,7 @@ class ReportBase extends React.Component {
     })
   }
   setHighlightedTmcs(tmcs) {
-    if (!isEqual(tmcs, lodash/isEqual.highlightedTmcs)) {
+    if (!isEqual(tmcs, this.state.highlightedTmcs)) {
       this.setState({ highlightedTmcs: tmcs });
     }
   }
