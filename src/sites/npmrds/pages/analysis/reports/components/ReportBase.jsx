@@ -203,7 +203,7 @@ class ReportBase extends React.Component {
     })
   }
   setHighlightedTmcs(tmcs) {
-    if (!isEqual(tmcs, lodash/isEqual.highlightedTmcs)) {
+    if (!isEqual(tmcs, this.state.highlightedTmcs)) {
       this.setState({ highlightedTmcs: tmcs });
     }
   }

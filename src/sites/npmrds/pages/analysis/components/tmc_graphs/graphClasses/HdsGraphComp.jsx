@@ -91,7 +91,7 @@ class HdsGraphComp extends GeneralGraphComp {
 		const [displayData] = this.getHdsData();
 		if (!displayData) return Promise.resolve();
 
-		this.setState({ loading: ++this.state.loading });
+		this.setState(prev => ({ loading: ++prev.loading }));
 
     const stationData = {};
 
@@ -106,7 +106,7 @@ class HdsGraphComp extends GeneralGraphComp {
         stationData[station.compId][displayData.key] = data;
       })
     }, Promise.resolve())
-      .then(() => this.setState({ loading: --this.state.loading }))
+      .then(() => this.setState(prev => ({ loading: --prev.loading })))
       .then(() => this.props.updateStationData(stationData));
   }
 
@@ -241,7 +241,7 @@ class HdsGraphComp extends GeneralGraphComp {
 				savingImage={ this.state.savingImage }
 				setSavingImage={ this.setSavingImage }
 				type={ this.props.type }
-				
+
 				remove={ () => this.props.removeGraphComp(this.props.index, this.props.id) }
 				add={ () => this.props.addGraphComp(this.props.type, { x, y, w, h }) }
 				loading={ Boolean(this.state.loading) }
