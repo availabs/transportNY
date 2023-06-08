@@ -14,7 +14,7 @@ const Routes = [
   ...Folders,
   ...Analysis,
   TmcPage,
-  Map,
+  ...Map,
   PM3
 ]
 

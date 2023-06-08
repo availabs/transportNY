@@ -2,6 +2,8 @@ import React from "react"
 
 import get from "lodash.get"
 
+import { TypeAhead, MultiLevelSelect } from "~/sites/npmrds/components"
+
 import {
   useFalcor
 } from "~/modules/avl-components/src"
@@ -43,6 +45,8 @@ const TmcSearch = ({ layer }) => {
     }, []);
   }, [layer, n, year, geoids]);
 
+  const [tmcs, setTmcs] = React.useState([]);
+
   React.useEffect(() => {
     falcor.get(...getRequests());
   }, [falcor, getRequests]);
@@ -53,23 +57,32 @@ const TmcSearch = ({ layer }) => {
         .forEach(tmc => a.add(tmc));
       return a;
     }, new Set());
-
-    const tmcs = [...tmcSet];
-
-console.log("TMCs:", tmcs)
-
+    setTmcs([...tmcSet]);
   }, [falcorCache, getRequests]);
 
   const [tmc, setTmc] = React.useState("");
-  const doSearch = React.useCallback(e => {
-    setTmc(e.target.value);
-  }, []);
+
+  React.useEffect(() => {
+    if (!tmc) return;
+    falcor.get(["tmc", tmc, "meta", year, "bounding_box"]);
+  }, [falcor, tmc, year]);
+
+  React.useEffect(() => {
+    if (!tmc) return;
+    const bbox = get(falcorCache, ["tmc", tmc, "meta", year, "bounding_box", "value"], []);
+    if (bbox.length) {
+      layer.mapboxMap.fitBounds(bbox);
+    }
+  }, [falcorCache, layer, tmc, year]);
 
   return (
     <div>
-      <input type="text" className="w-full px-2 py-1"
-        onChange={ doSearch }
-        value={ tmc }/>
+      <MultiLevelSelect
+        onChange={ setTmc }
+        value={ tmc }
+        options={ tmcs }
+        maxOptions={ 8 }
+        searchable/>
     </div>
   )
 }

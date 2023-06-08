@@ -49,6 +49,7 @@ import TmcSearch from "./TmcSearch"
 
 class MacroLayer extends LayerContainer {
   name = "Macro View";
+  setActive = true;
   sources = [
     ...ConflationSources,
     ...NpmrdsSources,
@@ -145,7 +146,9 @@ class MacroLayer extends LayerContainer {
   };
 
   infoBoxes = [
-    { Component: TmcSearch },
+    { Component: TmcSearch,
+      Header: "TMC Search"
+    },
     { Component: ({ layer }) => <InfoBoxController layer={layer} />,
       show: true,
       width: 420,
@@ -362,7 +365,7 @@ class MacroLayer extends LayerContainer {
 
   init(map, falcor) {
     this.updateSubMeasures(this.filters.measure.value, this.filters, falcor);
-    console.log('----init----')
+    // console.log('----init----')
     // map.on('zoomend', () => {
     //  this.updateState({zoom: map.getZoom()})
     // })
@@ -450,8 +453,18 @@ class MacroLayer extends LayerContainer {
       })
       .then(() => {
         this.filters.geography.value = this.loadFromLocalStorage();
-        //console.log('where am i', this.filters.geography.value)
-        //this.fetchData(this.falcor)
+
+        const {
+          geoid,
+          year,
+          measure
+        } = get(this, ["props", "params"], {});
+
+        if (geoid) {
+          this.filters.geography.value = [geoid];
+          this.filters.year.value = +year;
+          this.filters.measure.value = measure;
+        }
         this.zoomToGeography();
 
       });
@@ -638,7 +651,7 @@ class MacroLayer extends LayerContainer {
       let g = geo.split("|");
       request.push(["geo", g[0].toLowerCase(), g[1], "geometry"]);
     });
-    console.log("fetchData request", request);
+    // console.log("fetchData request", request);
 
     return falcor.get(...request).then((d) => {
       this.processData();
@@ -647,7 +660,7 @@ class MacroLayer extends LayerContainer {
 
   processData() {
     const falcorCache = this.falcor.getCache();
-    console.log("processData falcorCache", falcorCache);
+    // console.log("processData falcorCache", falcorCache);
 
     const { year, compareYear } = this.filters;
     const n = this.getNetwork(this.filters);
@@ -716,9 +729,10 @@ class MacroLayer extends LayerContainer {
     this.updateState({ currentData: data });
   }
 
+  onAdd() {
+  }
+
   render(map) {
-
-
     const data = this.state.currentData;
     const falcorCache = this.falcor.getCache();
     const n = this.getNetwork(this.filters);

@@ -9,6 +9,10 @@ const EmptyArray = [];
 const NoOp = () => {};
 const Identity = v => v;
 
+const stopPropagation = e => {
+  e.stopPropagation();
+};
+
 const getDisplayValues = (options, value, dAccess, vAccess, result = []) => {
   return options.reduce((a, c, i) => {
     if (value.includes(vAccess(c))) {
@@ -39,6 +43,7 @@ const MultiLevelSelect = props => {
     searchable = false,
     removable = true,
     InputContainer = DefaultInputContainer,
+    maxOptions = null,
     children
   } = props;
 
@@ -139,6 +144,8 @@ const MultiLevelSelect = props => {
     return get(opt, "Item", DisplayItem);
   }, [DisplayItem]);
 
+  const fused = fuse(search)
+
   return (
     <div ref={ setOutter }
       className={ `relative cursor-pointer` }
@@ -169,6 +176,7 @@ const MultiLevelSelect = props => {
               bottom: xDir ? "100%" : null,
               position: xDir ? "absolute" : "block"
             } }
+            onClick={ stopPropagation }
           >
             <InputContainer>
               <input value={ search } onChange={ setSearch }
@@ -191,7 +199,7 @@ const MultiLevelSelect = props => {
             overflow: hasChildren ? null : "auto"
           } }
         >
-          { fuse(search).map((opt, i) => {
+          { fuse(search).slice(0, maxOptions || Infinity).map((opt, i) => {
               const Item = getItem(opt);
               const value = valueAccessor(opt);
               return (
@@ -238,6 +246,7 @@ const Dropdown = props => {
     DisplayItem = DefaultDisplayItem,
     searchable = false,
     InputContainer = DefaultInputContainer,
+    maxOptions = null,
     children
   } = props;
 
@@ -321,6 +330,7 @@ const Dropdown = props => {
                 bottom: xDir ? "100%" : null,
                 position: xDir ? "absolute" : "block"
               } }
+              onClick={ stopPropagation }
             >
               <InputContainer className="rounded-t pt-2">
                 <input value={ search } onChange={ setSearch }
@@ -333,7 +343,7 @@ const Dropdown = props => {
             </div>
           }
           <div className="w-fit">
-            { fuse(search).map((opt, i) => {
+            { fuse(search).slice(0, maxOptions).map((opt, i) => {
                 const Item = getItem(opt);
                 return (
                   <Dropdown key={ `${ valueAccessor(opt) }-${ i }` }
@@ -430,7 +440,7 @@ const DefaultDisplayItem = ({ children, active, hasChildren }) => {
     <div style={ { minWidth: "12rem" } }
       className={ `
         py-1 px-2 flex items-center text-left min-w-fit whitespace-nowrap
-        ${ active ? "bg-gray-400" : "hover:bg-gray-300 bg-white" }
+        ${ active ? "bg-gray-400" : "hover:bg-gray-300 bg-gray-100" }
       ` }
     >
       <div className="flex-1">{ children }</div>

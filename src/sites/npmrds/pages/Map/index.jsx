@@ -1,6 +1,7 @@
 import React from "react"
 import get from "lodash/get"
 import { AvlMap } from "~/modules/avl-map/src"
+import { useParams } from "react-router-dom"
 import config from "~/config.json"
 // import { RisLayerFactory } from "./layers/RISLayer"
 import { MacroLayerFactory } from "./layers/MacroView/index"
@@ -8,6 +9,13 @@ import { baseMaps } from './map-styles/basemaps'
 
 const Map = () => {
   const layers = React.useRef([MacroLayerFactory()]);
+  const layerId = layers.current[0].id;
+
+  const params = useParams();
+  const layerProps = React.useMemo(() => {
+    return { [layerId]: { params: { ...params } } };
+  }, [params, layerId]);
+
   return (
     <div className='h-full'>
       <AvlMap
@@ -17,32 +25,46 @@ const Map = () => {
           styles: baseMaps
         } }
         layers={ layers.current }
-        sidebar={ {
-          title: "NPMRDS",
-          tabs: ["layers", "styles"],
-          open: true
-        } }/>
+        layerProps={ layerProps }
+        sidebar={ { open: true } }/>
     </div>
   )
 }
 
 
-const AdminMapPage = {
-  icon: 'fa fa-map',
-  path: '/map',
-  exact: true,
-  mainNav: true,
-  menuSettings: {
-    display: 'none',
-    image: 'none',
-    scheme: 'color-scheme-dark',
-    position: 'menu-position-side',
-    layout: 'menu-layout-mini',
-    style: 'color-style-default'
+const MapConfig = [
+  { icon: 'fa fa-map',
+    path: '/map',
+    exact: true,
+    mainNav: true,
+    menuSettings: {
+      display: 'none',
+      image: 'none',
+      scheme: 'color-scheme-dark',
+      position: 'menu-position-side',
+      layout: 'menu-layout-mini',
+      style: 'color-style-default'
+    },
+    name: 'Macro',
+    authLevel: 0,
+    component: Map
   },
-  name: 'Macro',
-  authLevel: 0,
-  component: Map
-}
+  { icon: 'fa fa-map',
+    path: '/map/:geoid/:year/:measure',
+    exact: true,
+    mainNav: false,
+    menuSettings: {
+      display: 'none',
+      image: 'none',
+      scheme: 'color-scheme-dark',
+      position: 'menu-position-side',
+      layout: 'menu-layout-mini',
+      style: 'color-style-default'
+    },
+    name: 'Macro',
+    authLevel: 0,
+    component: Map
+  }
+]
 
-export default AdminMapPage;
+export default MapConfig;
