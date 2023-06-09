@@ -38,7 +38,7 @@ const TmcSearch = ({ layer }) => {
               c.geolevel.toLowerCase(),
               c.value,
               year,
-              this.getNetwork(this.filters),
+              layer.getNetwork(layer.filters),
             ]
       );
       return a;
