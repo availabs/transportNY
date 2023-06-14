@@ -16,7 +16,7 @@ import StuffDropdown from "./StuffDropdown"
 import FolderIcon from "./FolderIcon"
 import FolderModal from "./FolderModal"
 import StuffInfoModal from "./StuffInfoModal"
-import { Modal, MultiLevelDropdown } from "~/sites/npmrds/components"
+import { Modal, MultiLevelDropdown, FuseWrapper } from "~/sites/npmrds/components"
 
 const Folder = ({ id, openedFolders, setOpenedFolders, forFolder, ...props }) => {
   const { falcor, falcorCache } = useFalcor();
@@ -649,6 +649,31 @@ const RouteSelector = ({ onClick, selectedRoutes, children }) => {
     setStuff(stuff);
   }, [falcorCache, Folder]);
 
+  const [search, setSearch] = React.useState("");
+  const onChange = React.useCallback(e => {
+    setSearch(e.target.value);
+  }, []);
+
+  const getRouteName = React.useCallback(r => {
+    return r.name;
+  }, []);
+
+  const routes = React.useMemo(() => {
+    return stuff.filter(({ type }) => type === "route")
+        .filter(({ id }) => selectedRoutes.reduce((a, c) => {
+          return a && (+c.id !== +id);
+        }, true))
+  }, [stuff, selectedRoutes]);
+
+  const fuse = React.useMemo(() => {
+    return FuseWrapper(
+      routes,
+      { keys: [{ name: "label", getFn: getRouteName }],
+        threshold: 0.25
+      }
+    );
+  }, [routes, getRouteName]);
+
   React.useEffect(() => {
     if (folders.length && !openedFolders.length) {
       setOpenedFolders([folders.filter(f => f.type === "user")[0].id]);
@@ -681,23 +706,25 @@ const RouteSelector = ({ onClick, selectedRoutes, children }) => {
       <div className="overflow-auto"
         style={ { maxHeight: "20rem" } }
       >
-        <div className="pt-2 font-bold border-b border-current">
+        <div className="pt-2 font-bold border-b border-current mb-2">
           { children }
         </div>
-        { stuff.filter(({ type }) => type === "route")
-            .filter(({ id }) => selectedRoutes.reduce((a, c) => {
-              return a && (+c.id !== +id);
-            }, true))
-            .map(s => {
-              return (
-                <div key={ `${ s.type }-${ s.id }` }
-                  onClick={ e => onClick(s) }
-                  className="cursor-pointer hover:bg-gray-200"
-                >
-                  <Stuff { ...s }/>
-                </div>
-              )
-            })
+        <div>
+          <input type="text" className="w-full px-2 py-1 rounded"
+            value={ search }
+            onChange={ onChange }
+            placeholder="search for a route..."/>
+        </div>
+        { fuse(search).map(s => {
+            return (
+              <div key={ `${ s.type }-${ s.id }` }
+                onClick={ e => onClick(s) }
+                className="cursor-pointer hover:bg-gray-200"
+              >
+                <Stuff { ...s }/>
+              </div>
+            )
+          })
         }
       </div>
     </div>

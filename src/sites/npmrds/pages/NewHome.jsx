@@ -10,7 +10,7 @@ import {
   useFalcor
 } from "~/modules/avl-components/src"
 
-import { Modal } from "~/sites/npmrds/components"
+import { Modal, FuseWrapper } from "~/sites/npmrds/components"
 
 import FolderIcon from "./components/FolderIcon"
 import {
@@ -510,6 +510,24 @@ const TemplateLoader = ({ id, title }) => {
     return routes;
   }, [Folder, stuff, selectedRoutes]);
 
+  const [search, setSearch] = React.useState("");
+  const onChange = React.useCallback(e => {
+    setSearch(e.target.value);
+  }, []);
+
+  const getRouteName = React.useCallback(r => {
+    return r.name;
+  }, []);
+
+  const fuse = React.useMemo(() => {
+    return FuseWrapper(
+      routes,
+      { keys: [{ name: "label", getFn: getRouteName }],
+        threshold: 0.25
+      }
+    );
+  }, [routes, getRouteName]);
+
   return (
     <div className="grid grid-cols-1 gap-2">
       <div className="font-bold border-b-2 border-current">
@@ -582,8 +600,14 @@ const TemplateLoader = ({ id, title }) => {
               <div className="border-b border-current w-3/4 text-lg font-bold">
                 Select { remaining } Route{ remaining > 1 ? "s" : "" }
               </div>
+              <div>
+                <input type="text" className="w-3/4 px-2 py-1 rounded"
+                  value={ search }
+                  onChange={ onChange }
+                  placeholder="search for a route..."/>
+              </div>
               <div className="w-3/4 max-h-96 overflow-auto">
-                { routes.map(r => {
+                { fuse(search).map(r => {
                     return (
                       <div key={ r.id }
                         onClick={ e => addRoute(r) }
