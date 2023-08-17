@@ -2,6 +2,17 @@ import flatten from "lodash/flatten"
 
 const conflationVersion = '0_6_0'
 const years =['2016', '2017', '2018', '2019', '2020', '2021','2022']
+const displayYears = {
+  '2016': '2016',
+   '2017': '2017',
+   '2018': '2018',
+   '2019': '2019',
+   '2020': '2020',
+   '2021': '2021',
+   '2022': '2022',
+   '2023': '2022'
+}
+
 const ConflationSources = years.map(year => {
 	return { id: `conflation_map_${year}_${conflationVersion}`,
 	  source: {
@@ -267,24 +278,24 @@ let  networkLevels = {
 }
 
 
-const ConflationYears = years.map(year => {
+const ConflationYears = Object.keys(displayYears).map(year => {
   return Object.keys(networkLevels).map(level => {
     return {
             "id": `con-${year}-${level}`,
             "type": "line",
-            source: `conflation_map_${year}_${conflationVersion}`,
+            source: `conflation_map_${displayYears[year]}_${conflationVersion}`,
             beneath: 'road-label',
             ...networkLevels[level](year,lineColors[0])
       }
   })
 })
 
-const ConflationCaseYears = years.map(year => {
+const ConflationCaseYears = Object.keys(displayYears).map(year => {
   return Object.keys(networkLevels).map(level => {
     return {
             "id": `concase-${year}-${level}`,
             "type": "line",
-            source: `conflation_map_${year}_${conflationVersion}`,
+            source: `conflation_map_${displayYears[year]}_${conflationVersion}`,
             beneath: `con-${year}-${level}`,
             ...networkLevels[level](year,lineColors[2],1)
       }

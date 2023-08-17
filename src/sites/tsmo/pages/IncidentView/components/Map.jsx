@@ -12,7 +12,10 @@ const  { ConflationLayer, PointLayer }  = layers
 const MAPBOX_TOKEN = config.MAPBOX_TOKEN;
 
 const Map = ({ event_id, activeBranch }) => {
+
+  console.log('event_id', event_id, activeBranch);
   const { falcor, falcorCache } = useFalcor();
+  console.log('what is the falcor cache?', falcorCache);
 
   React.useEffect(() => {
     falcor.get([
@@ -35,6 +38,12 @@ const Map = ({ event_id, activeBranch }) => {
     );
   }, [event_id, falcorCache]);
 
+  const eventData = {
+      'open_time' : congestionData?.startTime,
+      'close_time' : congestionData?.endTime
+    };
+
+  // const eventData = [];
   const tmcs = React.useMemo(() => Object.keys(get(congestionData, 'rawTmcDelayData', {}))
     ,[congestionData])
 
@@ -71,18 +80,20 @@ const Map = ({ event_id, activeBranch }) => {
   }, [event_id, falcorCache]);
 
   const showRaw = true
+
  
 
   const layers = React.useRef([new ConflationLayer(), new PointLayer()]);
   const layerProps = React.useMemo(() => {
     return {
       [layers.current[0].id]: { tmcs, year, point, congestionData, showRaw, activeBranch },
-      [layers.current[1].id]: { point },
+      [layers.current[1].id]: { point, eventData },
     };
   }, [tmcs, year, point, congestionData, activeBranch, showRaw]);
+  console.log('what is the layerProps: ', layerProps);
 
   return congestionData ? 
-    <div className='bg-white p-2' style={{ minHeight: "50rem" }} >
+    <div className='bg-white p-2' style={{ minHeight: "50rem", color : 'rgb(180, 180, 180)' }} >
       <AvlMap
         accessToken={MAPBOX_TOKEN}
         navigationControl={false}

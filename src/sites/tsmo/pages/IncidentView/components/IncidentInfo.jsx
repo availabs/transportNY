@@ -119,7 +119,7 @@ export const IncidentTitle = ({event_id}) => {
 	const { falcor, falcorCache } = useFalcor();
 
 	React.useEffect(() => {
-		return falcor.get(["transcom2","eventsbyId",event_id, rawDataKeys])
+		falcor.get(["transcom2","eventsbyId",event_id, rawDataKeys])
   	}, [event_id, falcor]);
   	
   	const incident = React.useMemo(() => {
@@ -166,7 +166,7 @@ const IncidentInfo = ({event_id}) => {
 	const { falcor, falcorCache } = useFalcor();
 
 	React.useEffect(() => {
-		return falcor.get(["transcom2","eventsbyId",event_id, rawDataKeys])
+		falcor.get(["transcom2","eventsbyId",event_id, rawDataKeys])
   	}, [event_id, falcor]);
   	
   	const incident = React.useMemo(() => {
