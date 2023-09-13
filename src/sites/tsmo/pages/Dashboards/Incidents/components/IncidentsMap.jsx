@@ -28,6 +28,7 @@ const Map = ({ events, colorsForTypes, hoveredEvent }) => {
       [layers.current[0].id]: { region, month, fsystem, events, colorsForTypes, hoveredEvent }
     };
   }, [region, month, events, fsystem, colorsForTypes, hoveredEvent]);
+  console.log('what is the layerprops in incidentsMat component: ', layerProps);
 
     return (
 

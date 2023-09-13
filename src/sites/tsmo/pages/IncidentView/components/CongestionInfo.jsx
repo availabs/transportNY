@@ -117,7 +117,7 @@ const CongestionInfo = ({
           activeBranch = c.corridor
         } 
       })
-      // console.log('activeBranch', activeBranch, eventTmc, congestionData)
+      console.log('activeBranch', activeBranch, eventTmc, congestionData)
       if(activeBranch) {
         setActiveBranch(activeBranch)
       }

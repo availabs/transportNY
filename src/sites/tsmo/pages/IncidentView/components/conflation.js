@@ -12,6 +12,7 @@ const displayYears = {
   '2022': '2022',
   '2023': '2022'
 }
+
 const ConflationSources = years.map(year => {
 	return { id: `conflation_map_${year}_${conflationVersion}`,
 	  source: {
