@@ -25,9 +25,11 @@ const Logo = ({sideNav}) => {
 	)
 }
 
+const noop = () => '';
 
-
+	
 const Layout = ({ children, menus, sideNav, title, site }) => {
+	const TitleComp = title || noop;
 	const theme = useTheme()
 	const themeOptions = {size: get(sideNav, 'size','micro') ,color: get(sideNav, 'color','dark')}
 	const [flyoutOpen, setFlyoutOpen] = React.useState(false)

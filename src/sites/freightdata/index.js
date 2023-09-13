@@ -1,7 +1,18 @@
 import DataManager from "~/pages/DataManager"
 
+import { useFalcor } from "~/modules/avl-components/src"
+import { useAuth } from "@availabs/ams"
+
+const DAMA_ARGS = {
+  baseUrl: '',
+  defaultPgEnv: 'freight_data',
+  useFalcor,
+  useAuth
+}
+
+
 const Routes = [
-  ...DataManager('', 'freight_data', true)
+  ...DataManager(DAMA_ARGS)
 ]
 
 const site = {

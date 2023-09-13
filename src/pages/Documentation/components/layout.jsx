@@ -18,18 +18,3 @@ export default function SiteLayout ({children, ...props},) {
     </div>
   )
 }
-
-// function FakeHeader () {
-//   return (
-//     <>
-//     <div className='w-full h-12 border-b bg-slate-100 fixed z-20' >
-//       <div className='2xl:max-w-[1536px] 2xl:mx-auto w-full flex items-baseline'>
-//         <NavLink to='/' className='p-3'>Home</NavLink>
-//         <div className='flex-1'></div>
-//         <NavLink to='/edit' className='p-3'>Edit</NavLink>
-//       </div>
-//     </div>
-//     <div className='pb-12'/>
-//     </>
-//   )
-// }

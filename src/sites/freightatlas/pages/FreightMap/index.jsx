@@ -1,12 +1,24 @@
 import React from "react"
 // import get from "lodash.get";
 import Map from './components/FreightMap'
+import { DamaContext } from "~/pages/DataManager/store"
+import { useFalcor } from "~/modules/avl-components/src"
+import { useAuth } from "@availabs/ams"
+
+const baseUrl = '/datasources';
+const defaultPgEnv = 'npmrds';
 
 const FreightMap = props => {
+  const { falcor, falcorCache } = useFalcor();
+  const user = useAuth();
+    
   return (
-    <div className='h-full'>
-      <Map />
-    </div>
+    <DamaContext.Provider value={{pgEnv: defaultPgEnv, baseUrl, falcor, falcorCache, user}}>
+      <div className='h-full'>
+
+        <Map />
+      </div>
+    </DamaContext.Provider>
   )
 }
 
