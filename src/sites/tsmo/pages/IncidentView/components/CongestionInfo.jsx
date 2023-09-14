@@ -53,7 +53,7 @@ export const congestionController = (Component) => (props) => {
   
 
   React.useEffect(() => {
-    if (tmcs.length === 0 ) return
+    if (tmcs.length === 0 )
     falcor.get(
         [
         "tmc",tmcs, "meta", year, ["length", "roadname", "tmclinear","road_order","county_code", "firstname", "direction", "avg_speedlimit"]
@@ -117,7 +117,7 @@ const CongestionInfo = ({
           activeBranch = c.corridor
         } 
       })
-      // console.log('activeBranch', activeBranch, eventTmc, congestionData)
+      console.log('activeBranch', activeBranch, eventTmc, congestionData)
       if(activeBranch) {
         setActiveBranch(activeBranch)
       }

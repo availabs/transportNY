@@ -21,4 +21,8 @@
 	url = https://github.com/availabs/dms.git
 [submodule "src/modules/avl-map-2"]
 	path = src/modules/avl-map-2
+<<<<<<< HEAD
 	url = https://github.com/availabs/avl-map-2.git
+=======
+	url = git@github.com:availabs/avl-map-2.git
+>>>>>>> a50e5aa66e94187c557f563da708d719cf3bc19b

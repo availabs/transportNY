@@ -14,7 +14,7 @@ const IncidentViewNew = (props) => {
 
   const [activeBranch, setActiveBranch] = React.useState(null)
   const [showRaw, setShowRaw] = React.useState(true);
-  
+  console.log('event_id', event_id)
   
   return (
     <div className='w-full'>
