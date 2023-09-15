@@ -44,7 +44,7 @@ const useSourceLegend = (source, data) => {
       name,
       title,
       type = "quantile",
-      color = "BrBG",
+      color = "Blues",
       reverse = false
     } = settings;
 
