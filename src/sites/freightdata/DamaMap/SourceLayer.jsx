@@ -3,9 +3,11 @@ import React from "react"
 import { AvlLayer, getColorRange } from "~/modules/avl-map-2/src"
 
 import get from "lodash/get"
-import { scaleQuantile } from "d3-scale"
+import { scaleQuantile, scale } from "d3-scale"
 
 import { DAMA_HOST } from "~/config"
+
+import SourceLegend from "./SourceLegend"
 
 const $HOST = `${ DAMA_HOST }/tiles`
 
@@ -46,7 +48,7 @@ const SourceRenderComponent = props => {
 
     const scale = scaleQuantile()
       .domain(values)
-      .range(getColorRange(7, "BrBG"))
+      .range(getColorRange(7, "Blues"))
 
     const colors = layerData.reduce((a, c) => {
       a[c.id] = scale(c.value);
@@ -54,11 +56,15 @@ const SourceRenderComponent = props => {
     }, {});
 
     const paint = ["get", ["to-string", ["get", "ogc_fid"]], ["literal", colors]];
+    // const width = ["get", ["to-string", ["get", "ogc_fid"]], ["literal", widths]];
 
     layer.layers.forEach(layer => {
       if ((layer.viewId === activeViewId) && maplibreMap.getLayer(layer.id)) {
         if (layerData.length) {
           maplibreMap.setPaintProperty(layer.id, layer.paintProperty, paint);
+          // if (layer.paintProperty.includes("line")) {
+          //   maplibreMap.setPaintProperty(layer.id, "line-width", width);
+          // }
         }
         else {
           maplibreMap.setPaintProperty(layer.id, layer.paintProperty, "#000");
@@ -109,6 +115,11 @@ class SourceLayer extends AvlLayer {
     this.layers = layers;
   }
   RenderComponent = SourceRenderComponent;
+  infoBoxes = [
+    { Component: SourceLegend,
+      Header: ({ layer }) => <div>{ layer.name }</div>
+    }
+  ]
 }
 
 export const SourceLayerConstructor = source => {
