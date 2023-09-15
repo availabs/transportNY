@@ -157,10 +157,12 @@ const LayerPanel = props => {
           </div>
         <div className={ `
             border-y border-r border-current p-1 flex-1 hover:bg-gray-300
-            ${ isOpen ? "rounded-tr" : "rounded-r" }
+            ${ isOpen ? "rounded-tr" : "rounded-r" } flex
           ` }
         >
-          { layer.name }
+          <div className="flex-1">
+            { layer.name }
+          </div>
         </div>
       </div>
       <div className={ isOpen ? "block" : "h-0 overflow-hidden invisible" }>
@@ -208,9 +210,9 @@ const ActiveIcon = ({ isActive, onClick }) => {
     <div onClick={ onClick }>
       <span className={ `
         fa ${ isActive ?
-          `fa-toggle-on ${ theme.textHighlight }` :
-          "fa-toggle-off text-gray-500"
-        }
+              `fa-toggle-on ${ theme.textHighlight }` :
+              "fa-toggle-off text-gray-500"
+            }
       ` }/>
     </div>
   )
