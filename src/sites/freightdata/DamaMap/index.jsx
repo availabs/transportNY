@@ -4,10 +4,11 @@ import get from "lodash/get"
 
 import { useFalcor } from "~/modules/avl-components/src";
 
-import { AvlMap as AvlMap2 } from "~/modules/avl-map-2/src"
+import { AvlMap as AvlMap2, ThemeProvider } from "~/modules/avl-map-2/src"
 import { Protocol, PMTiles } from '~/pages/DataManager/utils/pmtiles/index.ts'
 
 import useSourceCategories from "./useSourceCategories"
+import NewTheme from "./NewTheme"
 
 import { SourceLayerConstructor } from "./SourceLayer"
 import SourcePanel from "./SourcePanel"
@@ -68,19 +69,25 @@ const DamaMap = props => {
 
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <AvlMap2
-        layers={ layers }
-        layerProps={ layerProps }
-        mapOptions={ {
-          protocols: [PMTilesProtocol]
-        } }
-        leftSidebar={ {
-          Panels: [
-            { icon: "fas fa-layer-group",
-              Panel: SourcePanel
-            }
-          ]
-        } }/>
+      <ThemeProvider theme={ NewTheme }>
+        <AvlMap2
+          layers={ layers }
+          layerProps={ layerProps }
+          mapOptions={ {
+            protocols: [PMTilesProtocol],
+            styles: [{
+              name: "new-style",
+              style: "https://api.maptiler.com/maps/dataviz-light/style.json?key=mU28JQ6HchrQdneiq6k9"
+            }]
+          } }
+          leftSidebar={ {
+            Panels: [
+              { icon: "fas fa-layer-group",
+                Panel: SourcePanel
+              }
+            ]
+          } }/>
+      </ThemeProvider>
     </div>
   )
 }

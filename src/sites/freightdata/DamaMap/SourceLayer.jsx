@@ -56,17 +56,14 @@ const SourceRenderComponent = props => {
       return a;
     }, {});
 
-    const widthScale = scaleLinear()
-      .domain(d3extent(values))
-      .range([2, 10])
-      .clamp(true);
+    const widthScale = scaleQuantile()
+      .domain(values)
+      .range([1, 2, 3, 4, 5, 6, 7]);
 
     const widths = layerData.reduce((a, c) => {
-      a[c.id] = +widthScale(+c.value);
+      a[c.id] = widthScale(c.value);
       return a;
     }, {});
-
-console.log("WIDTHS:", widths);
 
     const paint = ["get", ["to-string", ["get", "ogc_fid"]], ["literal", colors]];
     const width = ["get", ["to-string", ["get", "ogc_fid"]], ["literal", widths]];
@@ -76,13 +73,13 @@ console.log("WIDTHS:", widths);
         if (layerData.length) {
           maplibreMap.setPaintProperty(layer.id, layer.paintProperty, paint);
           if (layer.paintProperty.includes("line")) {
-            // maplibreMap.setPaintProperty(layer.id, "line-width", widths);
+            maplibreMap.setPaintProperty(layer.id, "line-width", width);
           }
         }
         else {
           maplibreMap.setPaintProperty(layer.id, layer.paintProperty, "#000");
           if (layer.paintProperty.includes("line")) {
-            maplibreMap.setPaintProperty(layer.id, "line-width", 2);
+            maplibreMap.setPaintProperty(layer.id, "line-width", 1);
           }
         }
         maplibreMap.setLayoutProperty(layer.id, "visibility", "visible");
