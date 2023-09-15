@@ -3,7 +3,8 @@ import React from "react"
 import { AvlLayer, getColorRange } from "~/modules/avl-map-2/src"
 
 import get from "lodash/get"
-import { scaleQuantile, scale } from "d3-scale"
+import { scaleQuantile, scaleLinear } from "d3-scale"
+import { extent as d3extent } from "d3-array"
 
 import { DAMA_HOST } from "~/config"
 
@@ -46,28 +47,43 @@ const SourceRenderComponent = props => {
 
     const values = layerData.map(d => +d.value);
 
-    const scale = scaleQuantile()
+    const colorScale = scaleQuantile()
       .domain(values)
-      .range(getColorRange(7, "Blues"))
+      .range(getColorRange(7, "Blues"));
 
     const colors = layerData.reduce((a, c) => {
-      a[c.id] = scale(c.value);
+      a[c.id] = colorScale(+c.value);
       return a;
     }, {});
 
+    const widthScale = scaleLinear()
+      .domain(d3extent(values))
+      .range([2, 10])
+      .clamp(true);
+
+    const widths = layerData.reduce((a, c) => {
+      a[c.id] = +widthScale(+c.value);
+      return a;
+    }, {});
+
+console.log("WIDTHS:", widths);
+
     const paint = ["get", ["to-string", ["get", "ogc_fid"]], ["literal", colors]];
-    // const width = ["get", ["to-string", ["get", "ogc_fid"]], ["literal", widths]];
+    const width = ["get", ["to-string", ["get", "ogc_fid"]], ["literal", widths]];
 
     layer.layers.forEach(layer => {
       if ((layer.viewId === activeViewId) && maplibreMap.getLayer(layer.id)) {
         if (layerData.length) {
           maplibreMap.setPaintProperty(layer.id, layer.paintProperty, paint);
-          // if (layer.paintProperty.includes("line")) {
-          //   maplibreMap.setPaintProperty(layer.id, "line-width", width);
-          // }
+          if (layer.paintProperty.includes("line")) {
+            // maplibreMap.setPaintProperty(layer.id, "line-width", widths);
+          }
         }
         else {
           maplibreMap.setPaintProperty(layer.id, layer.paintProperty, "#000");
+          if (layer.paintProperty.includes("line")) {
+            maplibreMap.setPaintProperty(layer.id, "line-width", 2);
+          }
         }
         maplibreMap.setLayoutProperty(layer.id, "visibility", "visible");
       }
