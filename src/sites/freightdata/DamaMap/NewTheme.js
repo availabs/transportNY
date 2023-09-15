@@ -70,14 +70,14 @@ const NewThemeBase = {
   bgAccent3Hover: "hover:bg-gray-400",
   bgAccent4Hover: "hover:bg-gray-400",
 
-  textHighlight: "text-blue-600",
-  textHighlightHover: "hover:text-blue-600",
+  textHighlight: "text-sky-600",
+  textHighlightHover: "hover:text-sky-600",
 
-  borderHighlight: "border-blue-600",
-  borderHighlightHover: "hover:border-blue-600",
+  borderHighlight: "border-sky-600",
+  borderHighlightHover: "hover:border-sky-600",
 
-  bgHighlight: "bg-blue-600",
-  bgHighlightHover: "hover:bg-blue-600",
+  bgHighlight: "bg-sky-600",
+  bgHighlightHover: "hover:bg-sky-600",
 
   transition: "transition ease-in-out duration-150",
 
