@@ -4,7 +4,10 @@ import get from "lodash/get"
 
 import { useFalcor } from "~/modules/avl-components/src";
 
-import { MultiLevelSelect } from "~/modules/avl-map-2/src"
+import {
+  MultiLevelSelect,
+  useTheme
+} from "~/modules/avl-map-2/src"
 
 import useSourceVariables from "./useSourceVariables"
 
@@ -140,13 +143,25 @@ const LayerPanel = props => {
     <div>
       <div onClick={ toggle }
         className={ `
-          border border-current rounded-t font-bold flex p-1
-          bg-gray-200 hover:bg-gray-300 cursor-pointer
-          ${ isOpen ? "rounded-t" : "rounded" }
+          rounded-t font-bold cursor-pointer flex
+          bg-gray-200
         ` }
       >
-        <ActiveIcon isActive={ isActive }
-          onClick={ toggleSource }/>{ layer.name }
+        <div onClick={ toggleSource }
+          className={ `
+            border border-current p-1 group hover:bg-gray-300
+            ${ isOpen ? "rounded-tl" : "rounded-l" }
+          ` }
+        >
+          <ActiveIcon isActive={ isActive }/>
+          </div>
+        <div className={ `
+            border-y border-r border-current p-1 flex-1 hover:bg-gray-300
+            ${ isOpen ? "rounded-tr" : "rounded-r" }
+          ` }
+        >
+          { layer.name }
+        </div>
       </div>
       <div className={ isOpen ? "block" : "h-0 overflow-hidden invisible" }>
         <div className="border-x border-b border-current rounded-b grid grid-cols-1 gap-1 p-1">
@@ -188,10 +203,14 @@ const LayerPanel = props => {
 }
 
 const ActiveIcon = ({ isActive, onClick }) => {
+  const theme = useTheme();
   return (
-    <div className="mr-1" onClick={ onClick }>
+    <div onClick={ onClick }>
       <span className={ `
-        fa ${ isActive ? "fa-toggle-on text-green-500" : "fa-toggle-off text-red-500" }
+        fa ${ isActive ?
+          `fa-toggle-on ${ theme.textHighlight }` :
+          "fa-toggle-off text-gray-500"
+        }
       ` }/>
     </div>
   )
