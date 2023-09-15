@@ -80,8 +80,7 @@ const DamaMap = props => {
               Panel: SourcePanel
             }
           ]
-        } }
-        rightSidebar={ false }/>
+        } }/>
     </div>
   )
 }

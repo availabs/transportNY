@@ -1,5 +1,11 @@
 import React from "react"
 
+import get from "lodash/get"
+
+import { getColorRange } from "~/modules/avl-map-2/src"
+
+import ckmeans from "~/pages/DataManager/utils/ckmeans";
+
 const calcDomain = (type, data, length) => {
   const values = data.map(d => +d.value);
   switch (type) {
@@ -13,24 +19,23 @@ const calcDomain = (type, data, length) => {
 }
 const calcRange = (type, length, color, reverse) => {
   switch (type) {
-    case "quantize":
-      return getColorRange(7, color, reverse);
     case "threshold":
       return getColorRange(length ? length + 1 : 7, color, reverse);
     default:
-      return data;
+      return getColorRange(7, color, reverse);
   }
 }
 
-const useSourceLegend = source => {
+const useSourceLegend = (source, data) => {
   const [legend, setLegend] = React.useState(null);
 
   React.useEffect(() => {
-    const legend = get(source, ["metadata", "legend"], {});
-    setLegend(legend);
-  }, [source]);
+    if (!data.length) {
+      setLegend(null);
+      return;
+    }
 
-  const createLegend = React.useCallback((settings = {}) => {
+    const settings = get(source, ["metadata", "legend"], {});
 
     const {
       domain = [],
@@ -38,8 +43,7 @@ const useSourceLegend = source => {
       format = ".2s",
       name,
       title,
-      type = "threshold",
-      data = [],
+      type = "quantile",
       color = "BrBG",
       reverse = false
     } = settings;
@@ -51,7 +55,6 @@ const useSourceLegend = source => {
       name,
       title,
       type,
-      data,
       color,
       reverse
     };
@@ -64,7 +67,8 @@ const useSourceLegend = source => {
     }
 
     setLegend(legend);
-  }, []);
+  }, [source, data]);
 
-  return [legend, createLegend];
+  return legend;
 }
+export default useSourceLegend;

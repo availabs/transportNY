@@ -7,6 +7,8 @@ import { scaleQuantile } from "d3-scale"
 
 import { DAMA_HOST } from "~/config"
 
+import SourceLegend from "./SourceLegend"
+
 const $HOST = `${ DAMA_HOST }/tiles`
 
 const getValidSources = sources => {
@@ -109,6 +111,11 @@ class SourceLayer extends AvlLayer {
     this.layers = layers;
   }
   RenderComponent = SourceRenderComponent;
+  infoBoxes = [
+    { Component: SourceLegend,
+      Header: ({ layer }) => <div>{ layer.name }</div>
+    }
+  ]
 }
 
 export const SourceLayerConstructor = source => {
