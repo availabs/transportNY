@@ -144,19 +144,19 @@ const LayerPanel = props => {
       <div onClick={ toggle }
         className={ `
           rounded-t font-bold cursor-pointer flex
-          bg-gray-200
+          bg-neutral-200
         ` }
       >
         <div onClick={ toggleSource }
           className={ `
-            border border-current p-1 group hover:bg-gray-300
+            border border-current p-1 group hover:bg-neutral-300
             ${ isOpen ? "rounded-tl" : "rounded-l" }
           ` }
         >
           <ActiveIcon isActive={ isActive }/>
           </div>
         <div className={ `
-            border-y border-r border-current p-1 flex-1 hover:bg-gray-300
+            border-y border-r border-current p-1 flex-1 hover:bg-neutral-300
             ${ isOpen ? "rounded-tr" : "rounded-r" } flex
           ` }
         >
@@ -211,7 +211,7 @@ const ActiveIcon = ({ isActive, onClick }) => {
       <span className={ `
         fa ${ isActive ?
               `fa-toggle-on ${ theme.textHighlight }` :
-              "fa-toggle-off text-gray-500"
+              "fa-toggle-off text-neutral-500"
             }
       ` }/>
     </div>
