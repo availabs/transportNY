@@ -25,11 +25,12 @@ const Logo = ({sideNav}) => {
 	)
 }
 
-const noop = () => '';
+const noop = () => <></>;
 
 	
 const Layout = ({ children, menus, sideNav, title, site }) => {
 	const TitleComp = title || noop;
+	// console.log('TitleComp', TitleComp, title)
 	const theme = useTheme()
 	const themeOptions = {size: get(sideNav, 'size','micro') ,color: get(sideNav, 'color','dark')}
 	const [flyoutOpen, setFlyoutOpen] = React.useState(false)
@@ -91,14 +92,14 @@ const Layout = ({ children, menus, sideNav, title, site }) => {
 											<img src='/nys_logo_blue.svg' className='w-full h-12' alt='New York State Logo' />
 										</div>
 									</Link>
-									<div 
+									{/*<div 
 										className={`text-lg font-bold text-gray-800 hover:text-gray-600 cursor-pointer px-4 `}
 										onClick={() => setFlyoutOpen(!flyoutOpen)}
 									>
 										{site} <span className='fal fa-angle-down pl-2 relative top-[2px]'/>
-									</div>
+									</div>*/ }
 									<div className={`text-2xl font-thin text-blue-500  flex-1` }>
-										<div className='h-[34px] overflow-hidden'> {title} </div>
+										<div className='h-[34px] overflow-hidden'> {TitleComp} </div>
 									</div>
 								</div>
 								<div>

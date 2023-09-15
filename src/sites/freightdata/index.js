@@ -1,5 +1,7 @@
 import DataManager from "~/pages/DataManager"
 
+import MapPageConfig from "./MapPage"
+
 import { useFalcor } from "~/modules/avl-components/src"
 import { useAuth } from "@availabs/ams"
 
@@ -10,9 +12,9 @@ const DAMA_ARGS = {
   useAuth
 }
 
-
 const Routes = [
-  ...DataManager(DAMA_ARGS)
+  ...DataManager(DAMA_ARGS),
+  MapPageConfig
 ]
 
 const site = {
