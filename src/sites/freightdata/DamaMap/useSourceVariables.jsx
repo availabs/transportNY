@@ -54,7 +54,7 @@ const useSourceVariables = (source, activeViewId, pgEnv, startLoading, stopLoadi
     startLoading();
     falcor.chunk([
       "dama", pgEnv, "viewsbyId", activeViewId, "databyIndex",
-      [...Array(dataLength).keys()], variables
+      {from:0, to: dataLength-1}, variables
     ]).then(() => stopLoading())
   }, [falcor, pgEnv, activeViewId, dataLength, variables, startLoading, stopLoading]);
 
