@@ -19,17 +19,17 @@ const useSourceVariables = (source, activeViewId, pgEnv, startLoading, stopLoadi
   const dataVariables = React.useMemo(() => {
     return columns
       .filter(md => md.display === "data-variable")
-      .map(md => md.name);
+      .map(md => ({ name: md.name, type: "data-variable" }));
   }, [columns]);
 
   const metaVariables = React.useMemo(() => {
     return columns
       .filter(md => md.display === "meta-variable")
-      .map(md => md.name);
+      .map(md => ({ name: md.name, type: "meta-variable" }));
   }, [columns]);
 
   const variables = React.useMemo(() => {
-    return [...dataVariables, ...metaVariables];
+    return [...dataVariables, ...metaVariables].map(d => d.name);
   }, [dataVariables, metaVariables]);
 
   React.useEffect(() => {
@@ -58,6 +58,6 @@ const useSourceVariables = (source, activeViewId, pgEnv, startLoading, stopLoadi
     ]).then(() => stopLoading())
   }, [falcor, pgEnv, activeViewId, dataLength, variables, startLoading, stopLoading]);
 
-  return [dataVariables, metaVariables];
+  return [...dataVariables, ...metaVariables];
 }
 export default useSourceVariables;

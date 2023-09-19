@@ -108,23 +108,25 @@ const LayerPanel = props => {
     }
   }, [activateLayer, deactivateLayer, layer.id, isActive, setLayerData]);
 
-  const [dataVariables, metaVariables] = useSourceVariables(layer, activeViewId, pgEnv, startLoading, stopLoading);
+  const sourceVariables = useSourceVariables(layer, activeViewId, pgEnv, startLoading, stopLoading);
 
   // const [activeDataVariable, setActiveDataVariable] = React.useState(null);
-  const [activeMetaVariables, setActiveMetaVariables] = React.useState(null);
+  // const [activeMetaVariables, setActiveMetaVariables] = React.useState(null);
 
   React.useEffect(() => {
-    if (!activeDataVariable) setLayerData([]);
-    if (!isActive) setLayerData([]);
-    if (!resourcesLoaded) setLayerData([]);
+    if (!activeDataVariable || !isActive || !resourcesLoaded) {
+      setLayerData([]);
+      return;
+    }
 
     const dataById = get(falcorCache, ["dama", pgEnv, "viewsbyId", activeViewId, "databyId"], {});
     const data = Object.keys(dataById)
       .map(id => {
-        const value = get(dataById, [id, activeDataVariable], null);
+        const value = get(dataById, [id, activeDataVariable.name], null);
         return {
           id,
-          var: activeDataVariable,
+          var: activeDataVariable.name,
+          type: activeDataVariable.type,
           value: value === 'null' ? null : value
         }
       }).filter(d => d.value !== null);
@@ -183,15 +185,16 @@ const LayerPanel = props => {
           </div>
 
           <div>
-            <div className="font-bold">Data Variables</div>
+            <div className="font-bold">Variables</div>
             <MultiLevelSelect
-              options={ dataVariables }
+              options={ sourceVariables }
               value={ activeDataVariable }
               onChange={ doSetActiveDataVariable }
+              displayAccessor={ v => v.name }
               removable={ false }
               placeholder="Select a data variable..."/>
           </div>
-
+{/*
           <div>
             <div className="font-bold">Meta Variables</div>
             <MultiLevelSelect isMulti
@@ -200,7 +203,7 @@ const LayerPanel = props => {
               onChange={ setActiveMetaVariables }
               placeholder="Select meta variables..."/>
           </div>
-
+*/}
         </div>
       </div>
 

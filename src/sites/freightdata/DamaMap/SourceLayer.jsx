@@ -8,7 +8,8 @@ import get from "lodash/get"
 import {
   scaleQuantile,
   scaleQuantize,
-  scaleThreshold
+  scaleThreshold,
+  scaleOrdinal
 } from "d3-scale"
 import {
   extent as d3extent,
@@ -18,7 +19,6 @@ import {
 import { DAMA_HOST } from "~/config"
 
 import SourceLegend from "./SourceLegend"
-import useSourceLegend from "./useSourceLegend"
 
 const $HOST = `${ DAMA_HOST }/tiles`
 
@@ -39,11 +39,13 @@ const getValidSources = sources => {
 const getScale = (type, domain, range) => {
   switch (type) {
     case "quantize":
-      return scaleQuantize(domain, range)
+      return scaleQuantize(domain, range);
     case "quantile":
-      return scaleQuantile(domain, range)
+      return scaleQuantile(domain, range);
     case "threshold":
-      return scaleThreshold(domain, range)
+      return scaleThreshold(domain, range);
+    case "ordinal":
+      return scaleOrdinal(domain, range);
   }
 }
 
@@ -59,12 +61,16 @@ const SourceRenderComponent = props => {
   const {
     layerData,
     activeViewId,
+    activeDataVariable,
     legend
   } = layerProps;
 
   React.useEffect(() => {
     if (!maplibreMap) return;
     if (!resourcesLoaded) return;
+
+    const dataType = get(activeDataVariable, "type", "data-variable");
+    const isDataVar = dataType === "data-variable";
 
     if (legend) {
       const colorScale = getScale(legend.type, legend.domain, legend.range);
@@ -94,8 +100,8 @@ const SourceRenderComponent = props => {
         if ((layer.view_id === activeViewId) && maplibreMap.getLayer(layer.id)) {
           maplibreMap.setPaintProperty(layer.id, layer.paintProperty, colorExpression);
           if (layer.paintProperty.includes("line")) {
-            maplibreMap.setPaintProperty(layer.id, "line-width", widthExpression);
-            maplibreMap.setPaintProperty(layer.id, "line-offset", offsetExpression);
+            maplibreMap.setPaintProperty(layer.id, "line-width", isDataVar ? widthExpression : 4);
+            maplibreMap.setPaintProperty(layer.id, "line-offset", isDataVar ? offsetExpression : 2);
           }
         }
       });
@@ -105,7 +111,7 @@ const SourceRenderComponent = props => {
         if ((layer.view_id === activeViewId) && maplibreMap.getLayer(layer.id)) {
           maplibreMap.setPaintProperty(layer.id, layer.paintProperty, "#000");
           if (layer.paintProperty.includes("line")) {
-            maplibreMap.setPaintProperty(layer.id, "line-width", 1);
+            maplibreMap.setPaintProperty(layer.id, "line-width", 2);
             maplibreMap.setPaintProperty(layer.id, "line-offset", 1);
           }
         }
@@ -120,7 +126,7 @@ const SourceRenderComponent = props => {
         maplibreMap.setLayoutProperty(layer.id, "visibility", "none");
       }
     });
-  }, [maplibreMap, resourcesLoaded, activeViewId, layer, layerData, legend]);
+  }, [maplibreMap, resourcesLoaded, activeViewId, layer, layerData, legend, activeDataVariable]);
 
   return (
     null
@@ -138,7 +144,7 @@ const SourceLayerHoverComp = ({ data, layer, layerProps }) => {
   }, [layer, layerProps]);
 
   const activeDataVariable = React.useMemo(() => {
-    return get(layerProps, [layer.id, "activeDataVariable"]);
+    return get(layerProps, [layer.id, "activeDataVariable", "name"]);
   }, [layer, layerProps]);
 
   const {
@@ -151,7 +157,7 @@ const SourceLayerHoverComp = ({ data, layer, layerProps }) => {
   const featureData = React.useMemo(() => {
     return featureIds.map(id => {
       return get(falcorCache, ["dama", pgEnv, "viewsbyId", activeViewId, "databyId", id, activeDataVariable], null);
-    }).filter(Boolean);
+    }).filter(Boolean).filter(d => d !== 'null');
   }, [falcorCache, featureIds, pgEnv, activeViewId, activeDataVariable]);
 
   const theme = useTheme();
@@ -162,15 +168,20 @@ const SourceLayerHoverComp = ({ data, layer, layerProps }) => {
         <div className={ `p-1 font-bold border-b border-current ${ theme.bgAccent1 }` }>
           { layerName }
         </div>
-        <div className="p-1 grid grid-cols-1 gap-1">
-          { featureData.map((d, i) => (
-              <div key={ i } className="flex">
-                <div className="font-bold mr-1">{ activeDataVariable }:</div>
-                <div>{ d }</div>
-              </div>
-            ))
-          }
-        </div>
+        { !activeDataVariable ?
+          <div className="p-1 font-bold">no variable selected</div> :
+          !featureData.length ?
+          <div className="p-1 font-bold">no data available</div> :
+          <div className="p-1 grid grid-cols-1 gap-1">
+            { featureData.map((d, i) => (
+                <div key={ i } className="flex">
+                  <div className="font-bold mr-1">{ activeDataVariable }:</div>
+                  <div>{ d }</div>
+                </div>
+              ))
+            }
+          </div>
+        }
       </div>
     </div>
   )

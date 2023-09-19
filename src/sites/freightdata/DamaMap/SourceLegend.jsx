@@ -4,8 +4,6 @@ import get from "lodash/get"
 
 import { Legend } from "~/modules/avl-map-2/src"
 
-import useSourceLegend from "./useSourceLegend"
-
 const SourceLegend = props => {
 
   const {
@@ -19,7 +17,7 @@ const SourceLegend = props => {
   }, [layer, layerProps]);
 
   const activeDataVariable = React.useMemo(() => {
-    return get(layerProps, [layer.id, "activeDataVariable"], null)
+    return get(layerProps, [layer.id, "activeDataVariable", "name"], null)
   }, [layer, layerProps]);
 
   const legend = React.useMemo(() => {
@@ -33,7 +31,7 @@ const SourceLegend = props => {
   return (
     <div className="p-1">
       <div className="font-bold">
-        { activeDataVariable || "no data variable selected" }
+        { activeDataVariable  || "no data variable selected" }
       </div>
       <div className="relative w-full">
         { !layerData.length && layerLoading ? "loading data..." :
