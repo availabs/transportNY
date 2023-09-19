@@ -1,14 +1,24 @@
 import React from "react"
 
-import { AvlLayer, getColorRange } from "~/modules/avl-map-2/src"
+import { AvlLayer, getColorRange, useTheme } from "~/modules/avl-map-2/src"
+
+import { useFalcor } from "~/modules/avl-components/src";
 
 import get from "lodash/get"
-import { scaleQuantile, scaleLinear } from "d3-scale"
-import { extent as d3extent } from "d3-array"
+import {
+  scaleQuantile,
+  scaleQuantize,
+  scaleThreshold
+} from "d3-scale"
+import {
+  extent as d3extent,
+  range as d3range
+} from "d3-array"
 
 import { DAMA_HOST } from "~/config"
 
 import SourceLegend from "./SourceLegend"
+import useSourceLegend from "./useSourceLegend"
 
 const $HOST = `${ DAMA_HOST }/tiles`
 
@@ -26,6 +36,17 @@ const getValidSources = sources => {
   return sources.filter(src => REGEX.test(get(src, ["source", "url"], "")))
 }
 
+const getScale = (type, domain, range) => {
+  switch (type) {
+    case "quantize":
+      return scaleQuantize(domain, range)
+    case "quantile":
+      return scaleQuantile(domain, range)
+    case "threshold":
+      return scaleThreshold(domain, range)
+  }
+}
+
 const SourceRenderComponent = props => {
 
   const {
@@ -37,62 +58,121 @@ const SourceRenderComponent = props => {
 
   const {
     layerData,
-    activeViewId
+    activeViewId,
+    legend
   } = layerProps;
 
   React.useEffect(() => {
     if (!maplibreMap) return;
     if (!resourcesLoaded) return;
-    if (!activeViewId) return;
 
-    const values = layerData.map(d => +d.value);
+    if (legend) {
+      const colorScale = getScale(legend.type, legend.domain, legend.range);
 
-    const colorScale = scaleQuantile()
-      .domain(values)
-      .range(getColorRange(7, "Blues"));
+      const dataValues = layerData.map(d => +d.value);
 
-    const colors = layerData.reduce((a, c) => {
-      a[c.id] = colorScale(+c.value);
-      return a;
-    }, {});
+      const widthScale = getScale("quantile", dataValues, d3range(2, 7));
+      const offsetScale = getScale("quantile", dataValues, d3range(1, 4));
 
-    const widthScale = scaleQuantile()
-      .domain(values)
-      .range([1, 2, 3, 4, 5, 6, 7]);
+      const [colors, widths, offsets] = layerData.reduce((a, c) => {
+        a[0][c.id] = colorScale(+c.value);
+        a[1][c.id] = widthScale(+c.value);
+        a[2][c.id] = offsetScale(+c.value);
+        return a;
+      }, [{}, {}, {}]);
 
-    const widths = layerData.reduce((a, c) => {
-      a[c.id] = widthScale(c.value);
-      return a;
-    }, {});
+      const colorExpression = [
+        "case",
+        ["boolean", ["feature-state", "hover"], false],
+        "#ff7518",
+        ["get", ["to-string", ["get", "ogc_fid"]], ["literal", colors]]
+      ];
+      const widthExpression = ["get", ["to-string", ["get", "ogc_fid"]], ["literal", widths]];
+      const offsetExpression = ["get", ["to-string", ["get", "ogc_fid"]], ["literal", offsets]];
 
-    const paint = ["get", ["to-string", ["get", "ogc_fid"]], ["literal", colors]];
-    const width = ["get", ["to-string", ["get", "ogc_fid"]], ["literal", widths]];
-
-    layer.layers.forEach(layer => {
-      if ((layer.viewId === activeViewId) && maplibreMap.getLayer(layer.id)) {
-        if (layerData.length) {
-          maplibreMap.setPaintProperty(layer.id, layer.paintProperty, paint);
+      layer.layers.forEach(layer => {
+        if ((layer.view_id === activeViewId) && maplibreMap.getLayer(layer.id)) {
+          maplibreMap.setPaintProperty(layer.id, layer.paintProperty, colorExpression);
           if (layer.paintProperty.includes("line")) {
-            maplibreMap.setPaintProperty(layer.id, "line-width", width);
+            maplibreMap.setPaintProperty(layer.id, "line-width", widthExpression);
+            maplibreMap.setPaintProperty(layer.id, "line-offset", offsetExpression);
           }
         }
-        else {
+      });
+    }
+    else {
+      layer.layers.forEach(layer => {
+        if ((layer.view_id === activeViewId) && maplibreMap.getLayer(layer.id)) {
           maplibreMap.setPaintProperty(layer.id, layer.paintProperty, "#000");
           if (layer.paintProperty.includes("line")) {
             maplibreMap.setPaintProperty(layer.id, "line-width", 1);
+            maplibreMap.setPaintProperty(layer.id, "line-offset", 1);
           }
         }
+      });
+    }
+
+    layer.layers.forEach(layer => {
+      if ((layer.view_id === activeViewId) && maplibreMap.getLayer(layer.id)) {
         maplibreMap.setLayoutProperty(layer.id, "visibility", "visible");
       }
       else if (maplibreMap.getLayer(layer.id)) {
         maplibreMap.setLayoutProperty(layer.id, "visibility", "none");
       }
-    })
-
-  }, [maplibreMap, resourcesLoaded, layer, layerData, activeViewId]);
+    });
+  }, [maplibreMap, resourcesLoaded, activeViewId, layer, layerData, legend]);
 
   return (
     null
+  )
+}
+
+const SourceLayerHoverComp = ({ data, layer, layerProps }) => {
+
+  const pgEnv = React.useMemo(() => {
+    return get(layerProps, [layer.id, "pgEnv"], []);
+  }, [layer, layerProps]);
+
+  const activeViewId = React.useMemo(() => {
+    return get(layerProps, [layer.id, "activeViewId"]);
+  }, [layer, layerProps]);
+
+  const activeDataVariable = React.useMemo(() => {
+    return get(layerProps, [layer.id, "activeDataVariable"]);
+  }, [layer, layerProps]);
+
+  const {
+    layerName,
+    featureIds
+  } = data;
+
+  const { falcorCache } = useFalcor();
+
+  const featureData = React.useMemo(() => {
+    return featureIds.map(id => {
+      return get(falcorCache, ["dama", pgEnv, "viewsbyId", activeViewId, "databyId", id, activeDataVariable], null);
+    }).filter(Boolean);
+  }, [falcorCache, featureIds, pgEnv, activeViewId, activeDataVariable]);
+
+  const theme = useTheme();
+
+  return (
+    <div className={ `p-1 ${ theme.bg }` }>
+      <div className={ `border ${ theme.border } rounded` }>
+        <div className={ `p-1 font-bold border-b border-current ${ theme.bgAccent1 }` }>
+          { layerName }
+        </div>
+        <div className="p-1 grid grid-cols-1 gap-1">
+          { featureData.map((d, i) => (
+              <div key={ i } className="flex">
+                <div className="font-bold mr-1">{ activeDataVariable }:</div>
+                <div>{ d }</div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -115,17 +195,25 @@ class SourceLayer extends AvlLayer {
       if (sources.length && layers.length) {
         a[0].push(...sources);
         a[1].push(...layers.map(l =>
-          ({ ...l,
-            viewId: c.view_id,
-            version: get(c, ["version", "value"], get(c, "version")) || "unknown version",
+          ({ ...c,
+            ...l,
             paintProperty: `${ l.type }-color`
           })
         ));
       }
       return a;
     }, [[], []]);
+
     this.sources = sources;
     this.layers = layers;
+
+    this.onHover = {
+      layers: layers.map(l => l.id),
+      Component: SourceLayerHoverComp,
+      callback: (layerId, features) => {
+        return { layerId, layerName: this.name, featureIds: features.map(f => f.id) };
+      }
+    }
   }
   RenderComponent = SourceRenderComponent;
   infoBoxes = [

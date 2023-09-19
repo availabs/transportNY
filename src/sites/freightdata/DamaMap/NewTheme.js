@@ -4,6 +4,9 @@ const NewThemeBase = {
   bgInput: "bg-white",
   bgInputHover: "hover:bg-white",
 
+  bgLegend: "bg-neutral-400",
+  bgLegendHover: "hover:bg-neutral-400",
+
   bgContrast: "bg-neutral-800",
   bgContrastHover: "hover:bg-neutral-800",
 
@@ -60,15 +63,15 @@ const NewThemeBase = {
   paddingBase: "py-1 px-2",
   paddingLarge: "py-2 px-4",
 
-  bgAccent1: "bg-neutral-200",
-  bgAccent2: "bg-neutral-300",
-  bgAccent3: "bg-neutral-400",
-  bgAccent4: "bg-neutral-400",
+  bgAccent1: "bg-neutral-300",
+  bgAccent2: "bg-neutral-400",
+  bgAccent3: "bg-neutral-500",
+  bgAccent4: "bg-neutral-600",
 
-  bgAccent1Hover: "hover:bg-neutral-200",
-  bgAccent2Hover: "hover:bg-neutral-300",
-  bgAccent3Hover: "hover:bg-neutral-400",
-  bgAccent4Hover: "hover:bg-neutral-400",
+  bgAccent1Hover: "hover:bg-neutral-300",
+  bgAccent2Hover: "hover:bg-neutral-400",
+  bgAccent3Hover: "hover:bg-neutral-500",
+  bgAccent4Hover: "hover:bg-neutral-600",
 
   textHighlight: "text-sky-600",
   textHighlightHover: "hover:text-sky-600",

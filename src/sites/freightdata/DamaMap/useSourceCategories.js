@@ -82,11 +82,12 @@ const useSourceCategories = ({ pgEnv = "freight_data", categories = [] }) => {
           ...srcData,
           categories: srcData?.categories?.value || [],
           metadata: srcData?.metadata?.value || {},
-          views: d3range(views).map(view => {
+          views: d3range(views).map((view, i) => {
             const ref = get(falcorCache, ["dama", pgEnv, "sources", "byId", srcId, "views", "byIndex", view, "value"], []);
             const viewData = get(falcorCache, [...ref, "attributes"], {});
             return {
               ...viewData,
+              version: get(viewData, ["version", "value"], get(viewData, "version")) || `version ${ i + 1 }`,
               metadata: viewData?.metadata?.value || {}
             };
           })

@@ -13,6 +13,8 @@ import NewTheme from "./NewTheme"
 import { SourceLayerConstructor } from "./SourceLayer"
 import SourcePanel from "./SourcePanel"
 
+import calculateLegend from "./calculateLegend"
+
 const PMTilesProtocol = {
   type: "pmtiles",
   protocolInit: maplibre => {
@@ -28,7 +30,7 @@ const PMTilesProtocol = {
 
 const DamaMap = props => {
 
-  const { pgEnv  } = props;
+  const { pgEnv } = props;
 
   const sources = useSourceCategories(props);
   const [layers, setLayers] = React.useState([]);
@@ -49,23 +51,49 @@ const DamaMap = props => {
     _setLayerData(prev => ({ ...prev, [layerId]: data }));
   }, []);
 
-  const [activeViewId, _setActiveViewId] = React.useState({});
-  const setActiveViewId = React.useCallback((layerId, viewId) => {
-    _setActiveViewId(prev => ({ ...prev, [layerId]: viewId }))
+  const [activeViewIds, setActiveViewIds] = React.useState({});
+  const setActiveViewId = React.useCallback((layerId, view_id) => {
+    setActiveViewIds(prev => ({ ...prev, [layerId]: view_id }))
   }, []);
+
+  const [activeDataVariables, setActiveDataVariables] = React.useState({});
+  const setActiveDataVariable = React.useCallback((layerId, v) => {
+    setActiveDataVariables(prev => ({ ...prev, [layerId]: v }));
+  }, []);
+
+  const [legends, setLegends] = React.useState({});
+
+  React.useEffect(() => {
+    const legends = layers.reduce((a, c) => {
+      a[c.id] =  calculateLegend(c.damaSource, get(layerData, c.id, []));
+      return a;
+    }, {});
+    setLegends(legends);
+  }, [layers, layerData]);
 
   const layerProps = React.useMemo(() => {
     return layers.reduce((a, c) => {
       a[c.id] = {
         pgEnv,
+
         layerData: get(layerData, c.id, []),
         setLayerData,
-        activeViewId: get(activeViewId, c.id, null),
-        setActiveViewId
+
+        activeViewId: get(activeViewIds, c.id, null),
+        setActiveViewId,
+
+        activeDataVariable: get(activeDataVariables, c.id, null),
+        setActiveDataVariable,
+
+        legend: get(legends, c.id, null)
       };
       return a;
     }, {});
-  }, [pgEnv, layers, layerData, setLayerData, activeViewId, setActiveViewId]);
+  }, [pgEnv, layers, layerData, setLayerData,
+      activeViewIds, setActiveViewId, legends,
+      activeDataVariables, setActiveDataVariable
+    ]
+  );
 
   return (
     <div className="w-full h-full flex items-center justify-center">

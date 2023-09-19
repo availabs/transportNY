@@ -79,16 +79,22 @@ const LayerPanel = props => {
     setLayerData,
     layerData,
     activeViewId,
-    setActiveViewId
+    setActiveViewId,
+    activeDataVariable,
+    setActiveDataVariable
   } = layerProps;
 
-  const doSetActiveView = React.useCallback(viewId => {
-    setActiveViewId(layer.id, viewId);
+  const doSetActiveView = React.useCallback(view_id => {
+    setActiveViewId(layer.id, view_id);
   }, [layer.id, setActiveViewId]);
+
+  const doSetActiveDataVariable = React.useCallback(v => {
+    setActiveDataVariable(layer.id, v);
+  }, [layer.id, setActiveDataVariable]);
 
   React.useEffect(() => {
     if (!activeViewId) {
-      doSetActiveView(layer?.layers[0]?.viewId);
+      doSetActiveView(layer?.layers[0]?.view_id);
     }
   }, [layer.layers, activeViewId, doSetActiveView]);
 
@@ -104,7 +110,7 @@ const LayerPanel = props => {
 
   const [dataVariables, metaVariables] = useSourceVariables(layer, activeViewId, pgEnv, startLoading, stopLoading);
 
-  const [activeDataVariable, setActiveDataVariable] = React.useState(null);
+  // const [activeDataVariable, setActiveDataVariable] = React.useState(null);
   const [activeMetaVariables, setActiveMetaVariables] = React.useState(null);
 
   React.useEffect(() => {
@@ -126,11 +132,7 @@ const LayerPanel = props => {
   }, [falcorCache, pgEnv, setLayerData, layer.id, activeViewId, activeDataVariable, isActive, resourcesLoaded]);
 
   const views = React.useMemo(() => {
-    return get(layer, ["damaSource", "views"], [])
-      .map((view, i) => ({
-        viewId: view.view_id,
-        version: get(view, ["version", "value"], get(view, "version")) || `unknown version ${ i }`
-      }))
+    return layer.damaSource?.views || [];
   }, [layer.damaSource]);
 
   const [isOpen, setIsOpen] = React.useState(false);
@@ -139,24 +141,26 @@ const LayerPanel = props => {
     setIsOpen(prev => !prev);
   }, []);
 
+  const theme = useTheme();
+
   return (
     <div>
       <div onClick={ toggle }
         className={ `
           rounded-t font-bold cursor-pointer flex
-          bg-neutral-200
+          ${ theme.bgAccent1 }
         ` }
       >
         <div onClick={ toggleSource }
           className={ `
-            border border-current p-1 group hover:bg-neutral-300
+            border border-current p-1 group ${ theme.bgAccent2Hover }
             ${ isOpen ? "rounded-tl" : "rounded-l" }
           ` }
         >
           <ActiveIcon isActive={ isActive }/>
           </div>
         <div className={ `
-            border-y border-r border-current p-1 flex-1 hover:bg-neutral-300
+            border-y border-r border-current p-1 flex-1 ${ theme.bgAccent2Hover }
             ${ isOpen ? "rounded-tr" : "rounded-r" } flex
           ` }
         >
@@ -174,7 +178,7 @@ const LayerPanel = props => {
               value={ activeViewId }
               onChange={ doSetActiveView }
               displayAccessor={ lbv =>  lbv.version }
-              valueAccessor={ lbv => lbv.viewId }
+              valueAccessor={ lbv => lbv.view_id }
               removable={ false }/>
           </div>
 
@@ -183,7 +187,7 @@ const LayerPanel = props => {
             <MultiLevelSelect
               options={ dataVariables }
               value={ activeDataVariable }
-              onChange={ setActiveDataVariable }
+              onChange={ doSetActiveDataVariable }
               removable={ false }
               placeholder="Select a data variable..."/>
           </div>
@@ -211,7 +215,7 @@ const ActiveIcon = ({ isActive, onClick }) => {
       <span className={ `
         fa ${ isActive ?
               `fa-toggle-on ${ theme.textHighlight }` :
-              "fa-toggle-off text-neutral-500"
+              `fa-toggle-off ${ theme.text }`
             }
       ` }/>
     </div>
