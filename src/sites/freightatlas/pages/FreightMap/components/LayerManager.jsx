@@ -7,7 +7,7 @@ import get from "lodash/get";
 
 import Source from "./Source";
 
-import {SourceAttributes, getAttributes } from '~/pages/DataManager/components/attributes'
+import {SourceAttributes, getAttributes } from '~/pages/DataManager/Source/attributes'
 
 import { LayerContext } from "./FreightMap";
 
