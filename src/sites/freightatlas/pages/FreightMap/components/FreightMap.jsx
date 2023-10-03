@@ -7,9 +7,9 @@ import get from 'lodash/get'
 
 // import {MacroLayerFactory} from './IncidentsLayer'
 //import {FreightAtlasFactory} from '../layers/freight_atlas'
-import FreightAtlasLayer from '~/pages/DataManager/DataTypes/freight_atlas_shapefile/FreightAtlasLayer'
+import FreightAtlasLayer from '~/pages/TransportNYDataTypes/freight_atlas_shapefile/FreightAtlasLayer'
 import { FreightAtlasInfoLayer } from '../layers/freight_atlas_info'
-import {SourceAttributes, ViewAttributes, getAttributes} from '~/pages/DataManager/components/attributes'
+import {SourceAttributes, ViewAttributes, getAttributes} from '~/pages/DataManager/Source/attributes'
 import config from "~/config.json"
 
 import {CustomSidebar} from './MapControls'

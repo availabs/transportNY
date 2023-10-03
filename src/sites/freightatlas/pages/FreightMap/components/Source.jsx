@@ -4,7 +4,7 @@ import { useFalcor } from "~/modules/avl-components/src"
 import get from "lodash/get"
 // import { useParams } from "react-router-dom"
 
-import {SourceAttributes, ViewAttributes, getAttributes} from "~/pages/DataManager/components/attributes"
+import {SourceAttributes, ViewAttributes, getAttributes} from "~/pages/DataManager/Source/attributes"
 
 
 const Overview = ({source, views}) => {

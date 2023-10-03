@@ -7,9 +7,12 @@ import Documentation from "~/pages/Documentation"
 import { useFalcor } from "~/modules/avl-components/src"
 import { useAuth } from "@availabs/ams"
 
+import transportNYDataTypes from '~/pages/TransportNYDataTypes'
+
 const DAMA_ARGS = {
   baseUrl: '/datasources',
   defaultPgEnv: 'npmrds',
+  dataTypes: transportNYDataTypes,
   useFalcor,
   useAuth
 }

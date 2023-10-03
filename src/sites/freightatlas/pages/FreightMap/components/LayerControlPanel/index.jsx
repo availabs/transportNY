@@ -2,7 +2,7 @@ import React from 'react'
 import { TabPanel, Dropdown } from "~/modules/avl-components/src"
 import get from 'lodash/get'
 
-import { SymbologyControls } from '~/pages/DataManager/components/SymbologyControls'
+//import { SymbologyControls } from '~/pages/DataManager/components/SymbologyControls'
 import { SourceInfoPanel } from './SourceInfoPanel'
 
 
@@ -10,10 +10,10 @@ import { SourceInfoPanel } from './SourceInfoPanel'
 
 const LayerControlPanel = (props) => {
   const LayerTabs = [
-        {
-            name: 'styles',
-            Component: SymbologyControls
-        },
+        // {
+        //     name: 'styles',
+        //     Component: SymbologyControls
+        // },
         // {
         //     name: 'filter',
         //     Component: () => <div className='border-t border-gray-300 h-full bg-gray-100'> filter </div>
