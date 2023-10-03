@@ -31,13 +31,13 @@ const Map = ({ events }) => {
     const pgEnv = 'npmrds'
 
     const layerContextValue = React.useMemo(() => {
-        return { 
-            layerList, 
+        return {
+            layerList,
             toggleLayer: (id, mapActions, activeLayers) => {
-                let newlayers = layerList.includes(id) ? 
+                let newlayers = layerList.includes(id) ?
                     [...layerList].filter(d => d !== id) :
                     [...layerList , id]
-                setLayerList(newlayers)                  
+                setLayerList(newlayers)
             }
         }
     }, [layerList])
@@ -56,7 +56,7 @@ const Map = ({ events }) => {
                 style: 'mapbox://styles/am3081/ckm85o7hq6d8817nr0y6ute5v' },
             { name: "Satellite Streets",
                 style: 'mapbox://styles/am3081/cjya70364016g1cpmbetipc8u' }
-           
+
         ]
     }
 
@@ -77,7 +77,7 @@ const Map = ({ events }) => {
                 ]
             )
         }
-            
+
 
         const getMapData = (sourceId) => {
             let views = Object.values(get(falcorCache,["dama", pgEnv, "sources","byId", sourceId, "views","byIndex",],{}))
@@ -92,7 +92,7 @@ const Map = ({ events }) => {
                   "attributes"
                 ], {}))
 
-            return views[0] ? 
+            return views[0] ?
                 {
                     layer_id: sourceId,
                     name: get(sourceAttributes,'display_name', ''),
@@ -104,18 +104,18 @@ const Map = ({ events }) => {
                     activeView: 0
 
                 } : null
-              
+
         }
- 
+
         const updateLayers = async () => {
             await Promise.all(layerList.map(sourceId => fetchSourceData(sourceId)))
-            
+
             if(mounted.current) {
                 setLayerData(l => {
                     // use functional setState
                     // to get info about previous layerData (l)
                     let currentLayerIds = l.map(d => d.layer_id).filter(d => d)
-                    
+
                     let output = layerList
                         .map(sourceId => getMapData(sourceId))
                         .filter(d => d)
@@ -152,5 +152,3 @@ const Map = ({ events }) => {
 }
 
 export default Map
-
-
