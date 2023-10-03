@@ -66,12 +66,13 @@ const DamaMap = props => {
   React.useEffect(() => {
     const legends = layers.reduce((a, c) => {
       const ld = get(layerData, c.id, []);
-      const advt = get(activeDataVariables, [c.id, "type"], "data-variable");
-      a[c.id] =  calculateLegend(c.damaSource, ld, advt);
+      const avid = get(activeViewIds, c.id, null);
+      const adv = get(activeDataVariables, c.id, null);
+      a[c.id] =  calculateLegend(c.damaSource, avid, adv, ld);
       return a;
     }, {});
     setLegends(legends);
-  }, [layers, layerData, activeDataVariables]);
+  }, [layers, layerData, activeDataVariables, activeViewIds]);
 
   const layerProps = React.useMemo(() => {
     return layers.reduce((a, c) => {

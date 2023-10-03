@@ -52,9 +52,9 @@ const useSourceVariables = (source, activeViewId, pgEnv, startLoading, stopLoadi
   React.useEffect(() => {
     if (!(dataLength && variables.length)) return;
     startLoading();
-    falcor.chunk([
+    falcor.get([
       "dama", pgEnv, "viewsbyId", activeViewId, "databyIndex",
-      [...Array(dataLength).keys()], variables
+      { from: 0, to: dataLength - 1 }, variables
     ]).then(() => stopLoading())
   }, [falcor, pgEnv, activeViewId, dataLength, variables, startLoading, stopLoading]);
 

@@ -90,7 +90,10 @@ const LayerPanel = props => {
 
   const doSetActiveDataVariable = React.useCallback(v => {
     setActiveDataVariable(layer.id, v);
-  }, [layer.id, setActiveDataVariable]);
+    if (!isActive) {
+      activateLayer(layer.id);
+    }
+  }, [layer.id, setActiveDataVariable, isActive, activateLayer]);
 
   React.useEffect(() => {
     if (!activeViewId) {
@@ -106,7 +109,7 @@ const LayerPanel = props => {
     else {
       activateLayer(layer.id);
     }
-  }, [activateLayer, deactivateLayer, layer.id, isActive, setLayerData]);
+  }, [activateLayer, deactivateLayer, layer.id, isActive]);
 
   const sourceVariables = useSourceVariables(layer, activeViewId, pgEnv, startLoading, stopLoading);
 

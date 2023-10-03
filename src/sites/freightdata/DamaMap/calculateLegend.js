@@ -4,36 +4,63 @@ import { getColorRange } from "~/modules/avl-map-2/src"
 
 import ckmeans from "~/pages/DataManager/utils/ckmeans";
 
-const calcDomain = (type, data, rangeLength) => {
-  const values = data.map(d => d.value).sort((a, b) => a - b);
+const strictNaN = v => (v === null) || isNaN(v);
+const ordinalSort = (a, b) => {
+  return String(a).localeCompare(String(b));
+}
+
+const calcDomain = (type, data, length) => {
+  const values = data.map(d => strictNaN(d.value) ? d.value : +d.value);
   switch (type) {
     case "quantize":
       return d3extent(values);
     case "threshold":
-      return ckmeans(values.filter(Boolean), rangeLength ? rangeLength - 1 : 6);
+      return ckmeans(values.filter(Boolean), length ? length - 1 : 6);
     case "ordinal":
-      return [...new Set(values)];
+      return [...new Set(values)].sort(ordinalSort);
     default:
       return values;
   }
 }
-const calcRange = (type, domainLength, color, reverse = false) => {
+const calcRange = (type, length, color, reverse) => {
   switch (type) {
     case "threshold":
-      return getColorRange(domainLength ? domainLength + 1 : 7, color, reverse);
+      return getColorRange(length ? length + 1 : 7, color, reverse);
     case "ordinal":
-      return getColorRange(Math.min(domainLength || 7, 12), color, reverse);
+      return getColorRange(Math.min(12, length), color, reverse);
     default:
       return getColorRange(7, color, reverse);
   }
 }
 
-const calculateLegend = (source, data, variableType) => {
+const getActiveView = (viewId, views = []) => {
+  return views.reduce((a, c) => {
+    if (c.view_id === viewId) {
+      return c;
+    }
+    return a;
+  }, null);
+}
+
+const calculateLegend = (source, viewId, adv = {}, data = []) => {
   if (!data.length) {
     return null;
   }
 
-  const settings = get(source, ["metadata", "legend"], {});
+  const {
+    type: advt,
+    name: advn
+  } = adv;
+
+  const view = getActiveView(viewId, source?.views || []);
+  const layers = get(view, ["metadata", "tiles", "layers"], []);
+  const symbology = get(source, ["metadata", "symbology"], {});
+
+  const [path] = layers.map(({ id, type }) => {
+    return [id, `${ type }-color`, advn, "settings"];
+  });
+
+  const settings = get(symbology, path, {});
 
   const {
     domain = [],
@@ -41,8 +68,8 @@ const calculateLegend = (source, data, variableType) => {
     format = ".2s",
     name,
     title,
-    type = variableType === "data-variable" ? "quantile" : "ordinal",
-    color = variableType === "data-variable" ? "Blues" : "Set3",
+    type = advt === "data-variable" ? "quantile" : "ordinal",
+    color = advt === "data-variable" ? "Blues" : "Set3",
     reverse = false
   } = settings;
 
@@ -63,6 +90,8 @@ const calculateLegend = (source, data, variableType) => {
   if (!legend.range.length) {
     legend.range = calcRange(type, legend.domain.length, color, reverse);
   }
+
+console.log("CREATE LEGEND:", data, legend);
 
   return legend;
 }

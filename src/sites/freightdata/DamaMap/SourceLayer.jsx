@@ -1,10 +1,7 @@
 import React from "react"
 
-import { AvlLayer, getColorRange, useTheme } from "~/modules/avl-map-2/src"
-
-import { useFalcor } from "~/modules/avl-components/src";
-
 import get from "lodash/get"
+
 import {
   scaleQuantile,
   scaleQuantize,
@@ -15,6 +12,12 @@ import {
   extent as d3extent,
   range as d3range
 } from "d3-array"
+
+import { format as d3format } from "d3-format"
+
+import { AvlLayer, getColorRange, useTheme } from "~/modules/avl-map-2/src"
+
+import { useFalcor } from "~/modules/avl-components/src";
 
 import { DAMA_HOST } from "~/config"
 
@@ -33,7 +36,6 @@ const getValidSources = sources => {
       }
     }
   });
-  return sources.filter(src => REGEX.test(get(src, ["source", "url"], "")))
 }
 
 const getScale = (type, domain, range) => {
@@ -81,9 +83,9 @@ const SourceRenderComponent = props => {
       const offsetScale = getScale("quantile", dataValues, d3range(1, 4));
 
       const [colors, widths, offsets] = layerData.reduce((a, c) => {
-        a[0][c.id] = colorScale(+c.value);
-        a[1][c.id] = widthScale(+c.value);
-        a[2][c.id] = offsetScale(+c.value);
+        a[0][c.id] = colorScale(c.value);
+        a[1][c.id] = widthScale(c.value);
+        a[2][c.id] = offsetScale(c.value);
         return a;
       }, [{}, {}, {}]);
 
@@ -147,6 +149,11 @@ const SourceLayerHoverComp = ({ data, layer, layerProps }) => {
     return get(layerProps, [layer.id, "activeDataVariable", "name"]);
   }, [layer, layerProps]);
 
+  const format = React.useMemo(() => {
+    const format = get(layerProps, [layer.id, "legend", "format"], ",.1f");
+    return d3format(format);
+  }, [layer, layerProps]);
+
   const {
     layerName,
     featureIds
@@ -176,7 +183,7 @@ const SourceLayerHoverComp = ({ data, layer, layerProps }) => {
             { featureData.map((d, i) => (
                 <div key={ i } className="flex">
                   <div className="font-bold mr-1">{ activeDataVariable }:</div>
-                  <div>{ d }</div>
+                  <div>{ format(d) }</div>
                 </div>
               ))
             }
@@ -222,7 +229,7 @@ class SourceLayer extends AvlLayer {
       layers: layers.map(l => l.id),
       Component: SourceLayerHoverComp,
       callback: (layerId, features) => {
-        return { layerId, layerName: this.name, featureIds: features.map(f => f.id) };
+        return { layerId, layerName: this.name, featureIds: features?.map(f => f.id) || [] };
       }
     }
   }
