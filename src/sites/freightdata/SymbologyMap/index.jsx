@@ -40,6 +40,8 @@ const SymbologyMap = props => {
         <AvlMap2
           layers={ layers }
           mapOptions={ {
+            center: [-76, 43.3],
+            zoom: 6,
             protocols: [PMTilesProtocol],
             styles: [{
               name: "new-style",

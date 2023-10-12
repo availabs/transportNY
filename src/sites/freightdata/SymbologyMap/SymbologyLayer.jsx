@@ -8,7 +8,7 @@ import { DAMA_HOST } from "~/config"
 
 const $HOST = `${ DAMA_HOST }/tiles`
 
-import SymbologyLegend from "./SymbologyLegend"
+import SymbologyLegend from "~/pages/DataManager/DataTypes/gis_dataset/pages/Symbology/components/SymbologyLegend"
 
 export const SymbologyLayerRenderComponent = props => {
 
@@ -19,8 +19,6 @@ export const SymbologyLayerRenderComponent = props => {
   } = props;
 
   const activeSymbology = get(props, ["layerState", "activeSymbology"], null);
-
-console.log("SymbologyLayerRenderComponent::props",props)
 
   const [legend, setLegend] = React.useState(null);
 

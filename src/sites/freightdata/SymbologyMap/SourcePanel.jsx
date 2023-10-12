@@ -37,9 +37,6 @@ const SourcePanel = props => {
 export default SourcePanel;
 
 const SourceLayer = ({ layer, ...rest }) => {
-
-console.log("SourceLayer", layer)
-
 	return (
 		<div>
 			<div className="font-bold border-b border-current">
@@ -59,8 +56,6 @@ const ViewLayer = ({ layerId, view, layerState, MapActions }) => {
 	const symbologies = React.useMemo(() => {
 		return get(view, ["metadata", "symbologies"], []);
 	}, [view]);
-
-console.log("VIEW LAYER", layerId, layerState);
 
 	const activeSymbology = React.useMemo(() => {
 		const active = get(layerState, "activeSymbology", null);
