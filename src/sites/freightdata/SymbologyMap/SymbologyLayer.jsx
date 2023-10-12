@@ -46,20 +46,19 @@ export const SymbologyLayerRenderComponent = props => {
           } = paintProperty;
 
           if (value) {
-// console.log("SymbologyLayerRenderComponent::value", value);
             if (maplibreMap.getLayer(layer.layerId)) {
               maplibreMap.setPaintProperty(layer.layerId, ppId, value);
             }
           }
           else if (paintExpression) {
-            // delete defaultPaint[ppId];
-// console.log("SymbologyLayerRenderComponent::paintExpression", paintExpression);
+            if (maplibreMap.getLayer(layer.layerId)) {
+              maplibreMap.setPaintProperty(layer.layerId, ppId, paintExpression);
+            }
           }
           else if (variable) {
-// console.log("SymbologyLayerRenderComponent::variable", variable);
             if (maplibreMap.getLayer(layer.layerId)) {
 
-              const { paintExpression, scale } = variable;
+              const { paintExpression, scale, filterExpression } = variable;
 
               if (ppId.includes("color")) {
                 legend = {
@@ -70,6 +69,10 @@ export const SymbologyLayerRenderComponent = props => {
 
               maplibreMap.setPaintProperty(layer.layerId, ppId, paintExpression);
               setLayerVisibility(layer.id, "visible");
+
+              if (filterExpression) {
+                maplibreMap.setFilter(activeLayer.layerId, filterExpression);
+              }
             }
           }
           else {
