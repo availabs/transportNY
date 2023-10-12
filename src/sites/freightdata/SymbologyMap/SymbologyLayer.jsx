@@ -48,11 +48,13 @@ export const SymbologyLayerRenderComponent = props => {
           if (value) {
             if (maplibreMap.getLayer(layer.layerId)) {
               maplibreMap.setPaintProperty(layer.layerId, ppId, value);
+              setLayerVisibility(layer.layerId, "visible");
             }
           }
           else if (paintExpression) {
             if (maplibreMap.getLayer(layer.layerId)) {
               maplibreMap.setPaintProperty(layer.layerId, ppId, paintExpression);
+              setLayerVisibility(layer.layerId, "visible");
             }
           }
           else if (variable) {
@@ -68,15 +70,14 @@ export const SymbologyLayerRenderComponent = props => {
               }
 
               maplibreMap.setPaintProperty(layer.layerId, ppId, paintExpression);
-              setLayerVisibility(layer.id, "visible");
-
-              if (filterExpression) {
-                maplibreMap.setFilter(activeLayer.layerId, filterExpression);
-              }
+              maplibreMap.setFilter(layer.layerId, filterExpression);
+              setLayerVisibility(layer.layerId, "visible");
             }
           }
           else {
-            setLayerVisibility(layer.id, "none");
+            if (maplibreMap.getLayer(layer.layerId)) {
+              setLayerVisibility(layer.layerId, "none");
+            }
           }
         })
     })
