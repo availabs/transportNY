@@ -60,7 +60,7 @@ export const SymbologyLayerRenderComponent = props => {
           else if (variable) {
             if (maplibreMap.getLayer(layer.layerId)) {
 
-              const { paintExpression, scale, filterExpression } = variable;
+              const { paintExpression, scale } = variable;
 
               if (ppId.includes("color")) {
                 legend = {
@@ -70,7 +70,6 @@ export const SymbologyLayerRenderComponent = props => {
               }
 
               maplibreMap.setPaintProperty(layer.layerId, ppId, paintExpression);
-              maplibreMap.setFilter(layer.layerId, filterExpression);
               setLayerVisibility(layer.layerId, "visible");
             }
           }
@@ -79,6 +78,10 @@ export const SymbologyLayerRenderComponent = props => {
               setLayerVisibility(layer.layerId, "none");
             }
           }
+        })
+      Object.values(layer.filters || {})
+        .forEach(({ filterExpression }) => {
+          maplibreMap.setFilter(layer.layerId, filterExpression);
         })
     })
 
