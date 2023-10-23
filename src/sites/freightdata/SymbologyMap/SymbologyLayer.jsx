@@ -34,6 +34,7 @@ export const SymbologyLayerRenderComponent = props => {
     if (!view) return;
 
     view.layers.forEach(layer => {
+      maplibreMap.setFilter(layer.layerId, null);
       Object.keys(layer.paintProperties)
         .forEach(ppId => {
 
@@ -90,7 +91,7 @@ export const SymbologyLayerRenderComponent = props => {
   }, [maplibreMap, resourcesLoaded, setLayerVisibility, activeSymbology])
 
   return !legend ? null : (
-    <div className="p-1 pointer-events-auto bg-gray-100 rounded mb-1"
+    <div className="p-1 pointer-events-auto bg-gray-100 rounded mb-1 absolute top-0 right-0"
       style={ {
         width: "100%",
         maxWidth: "25rem"
@@ -139,7 +140,12 @@ class SymbologyLayer extends AvlLayer {
         if (sources.length && layers.length) {
           aa[0].push(...sources);
           aa[1].push(...layers.map(l =>
-            ({ ...cc, ...l })
+            ({ ...cc, ...l,
+              layout: {
+                ...get(l, "layout", {}),
+                visibility: "none"
+              }
+            })
           ));
         }
         return aa;
