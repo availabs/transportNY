@@ -786,7 +786,7 @@ class MacroLayer extends LayerContainer {
         "case",
         ["has", ["to-string", ["get", n]], ["literal", colors]],
         ["get", ["to-string", ["get", n]], ["literal", colors]],
-        "hsla(185, 0%, 27%,0.8)",
+        "hsla(185, 0%, 27%,0.8)"
       ]);
     });
   }

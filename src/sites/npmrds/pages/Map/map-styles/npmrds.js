@@ -50,14 +50,24 @@ const npmrdsPaint = {
   }
 }
 
-const NpmrdsLayers = ['2016','2017','2018','2019','2020','2021']
+const yearMap = {
+  '2016': '2016',
+  '2017': '2017',
+  '2018': '2018',
+  '2019': '2019',
+  '2020': '2020',
+  '2021': '2021',
+  '2022': '2021'
+}
+
+const NpmrdsLayers = ['2016','2017','2018','2019','2020','2021','2022']
   .map(year => {
     return {
       id: `tmc-${year}`,
       type: 'line',
       source: 'npmrds',
       beneath: 'traffic_signals_layer',
-      'source-layer': `npmrds_${year}`,
+      'source-layer': `npmrds_${yearMap[year]}`,
       layout: {
         'visibility': 'visible',
         'line-join': 'round',

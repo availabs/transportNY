@@ -1,8 +1,10 @@
 import FreightMap from "~/sites/freightatlas/pages/FreightMap"
+import FreightAtlas from "~/sites/freightatlas/pages/Atlas"
 
 
 const Routes = [
-  ...FreightMap
+  ...FreightMap,
+  ...FreightAtlas
 ]
 
 const SiteConfig = {

@@ -2,8 +2,6 @@ import React from "react"
 
 import SymbologyMap from "./SymbologyMap"
 
-console.log("SymbologyMap",SymbologyMap)
-
 const SymbologyMapPage = props => {
   return (
     <div className="w-full h-full relative">

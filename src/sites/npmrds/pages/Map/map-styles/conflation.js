@@ -266,13 +266,23 @@ let  networkLevels = {
   }
 }
 
+const yearMap = {
+  '2016': '2016',
+  '2017': '2017',
+  '2018': '2018',
+  '2019': '2019',
+  '2020': '2020',
+  '2021': '2021',
+  '2022': '2021'
+}
 
 const ConflationYears = years.map(year => {
+
   return Object.keys(networkLevels).map(level => {
     return {
             "id": `con-${year}-${level}`,
             "type": "line",
-            source: `conflation_map_${year}_${conflationVersion}`,
+            source: `conflation_map_${yearMap[year]}_${conflationVersion}`,
             beneath: 'traffic_signals_layer',
             ...networkLevels[level](year)
       }
