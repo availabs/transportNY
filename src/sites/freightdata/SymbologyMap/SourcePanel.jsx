@@ -57,12 +57,7 @@ const ViewLayer = ({ layerId, view, layerState, MapActions }) => {
 		return get(view, ["symbologies"], []);
 	}, [view]);
 
-	const activeSymbology = React.useMemo(() => {
-		const active = get(layerState, "activeSymbology", null);
-		return symbologies.reduce((a, c) => {
-			return c === active ? c : a;
-		}, null);
-	}, [symbologies, layerState]);
+  const activeSymbology = get(layerState, "activeSymbology", null);
 
 	const setActiveSymbology = React.useCallback(value => {
 		MapActions.updateLayerState(layerId, {

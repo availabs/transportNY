@@ -15,7 +15,8 @@ export const SymbologyLayerRenderComponent = props => {
   const {
     maplibreMap,
     resourcesLoaded,
-    setLayerVisibility
+    setLayerVisibility,
+    layer: avlLayer
   } = props;
 
   const activeSymbology = get(props, ["layerState", "activeSymbology"], null);
@@ -31,64 +32,70 @@ export const SymbologyLayerRenderComponent = props => {
 
     const [view] = get(activeSymbology, "views", []);
 
-    if (!view) return;
+    const layerVisibilities = avlLayer.layers.reduce((a, c) => {
+      a[c.id] = "none"
+      return a;
+    }, {});
 
-    view.layers.forEach(layer => {
-      maplibreMap.setFilter(layer.uniqueId, null);
-      Object.keys(layer.paintProperties)
-        .forEach(ppId => {
+    if (view) {
+      view.layers.forEach(layer => {
+        maplibreMap.setFilter(layer.uniqueId, null);
+        Object.keys(layer.paintProperties)
+          .forEach(ppId => {
 
-          const paintProperty = get(layer, ["paintProperties", ppId], {});
+            const paintProperty = get(layer, ["paintProperties", ppId], {});
 
-          const {
-            value,
-            paintExpression,
-            variable
-          } = paintProperty;
+            const {
+              value,
+              paintExpression,
+              variable
+            } = paintProperty;
 
-          if (value) {
-            if (maplibreMap.getLayer(layer.uniqueId)) {
-              maplibreMap.setPaintProperty(layer.uniqueId, ppId, value);
-              setLayerVisibility(layer.uniqueId, "visible");
-            }
-          }
-          else if (paintExpression) {
-            if (maplibreMap.getLayer(layer.uniqueId)) {
-              maplibreMap.setPaintProperty(layer.uniqueId, ppId, paintExpression);
-              setLayerVisibility(layer.uniqueId, "visible");
-            }
-          }
-          else if (variable) {
-            if (maplibreMap.getLayer(layer.uniqueId)) {
-
-              const { paintExpression, scale } = variable;
-
-              if (ppId.includes("color")) {
-                legends.push({
-                  name: variable.displayName,
-                  ...scale
-                });
+            if (value) {
+              if (maplibreMap.getLayer(layer.uniqueId)) {
+                maplibreMap.setPaintProperty(layer.uniqueId, ppId, value);
+                layerVisibilities[layer.uniqueId] = "visible";
               }
+            }
+            else if (paintExpression) {
+              if (maplibreMap.getLayer(layer.uniqueId)) {
+                maplibreMap.setPaintProperty(layer.uniqueId, ppId, paintExpression);
+                layerVisibilities[layer.uniqueId] = "visible";
+              }
+            }
+            else if (variable) {
+              if (maplibreMap.getLayer(layer.uniqueId)) {
 
-              maplibreMap.setPaintProperty(layer.uniqueId, ppId, paintExpression);
-              setLayerVisibility(layer.uniqueId, "visible");
+                const { paintExpression, scale } = variable;
+
+                if (ppId.includes("color")) {
+                  legends.push({
+                    name: variable.displayName,
+                    ...scale
+                  });
+                }
+
+                maplibreMap.setPaintProperty(layer.uniqueId, ppId, paintExpression);
+                layerVisibilities[layer.uniqueId] = "visible";
+              }
             }
-          }
-          else {
-            if (maplibreMap.getLayer(layer.uniqueId)) {
-              setLayerVisibility(layer.uniqueId, "none");
+            else {
+              if (maplibreMap.getLayer(layer.uniqueId)) {
+                layerVisibilities[layer.uniqueId] = "none";
+              }
             }
-          }
-        })
-      Object.values(layer.filters || {})
-        .forEach(({ filterExpression }) => {
-          maplibreMap.setFilter(layer.uniqueId, filterExpression);
-        })
-    })
+          })
+        Object.values(layer.filters)
+          .forEach(({ filterExpression }) => {
+            maplibreMap.setFilter(layer.uniqueId, filterExpression);
+          })
+      })
+    }
 
     setLegends(legends);
+    setLayerVisibility(layerVisibilities);
 
-  }, [maplibreMap, resourcesLoaded, setLayerVisibility, activeSymbology]);
+  }, [maplibreMap, resourcesLoaded, setLayerVisibility, activeSymbology, avlLayer]);
 
   return !legends.length ? null : (
     <div className="p-1 pointer-events-auto bg-gray-100 rounded mb-1 absolute top-0 right-0 grid grid-cols-1 gap-1"
@@ -163,7 +170,8 @@ class SymbologyLayer extends AvlLayer {
                 aa[1].push({
                   ...layer,
                   id: uniqueId,
-                  name: symView.version || symView.viewId
+                  name: symView.version || symView.viewId,
+                  layout: { visibility: "none" }
                 });
                 if (!sourceIds.includes(layer.source)) {
                   sourceIds.push(layer.source);
