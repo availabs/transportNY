@@ -20,21 +20,21 @@ export const SymbologyLayerRenderComponent = props => {
 
   const activeSymbology = get(props, ["layerState", "activeSymbology"], null);
 
-  const [legend, setLegend] = React.useState(null);
+  const [legends, setLegends] = React.useState([]);
 
   React.useEffect(() => {
     if (!maplibreMap) return;
     if (!resourcesLoaded) return;
     if (!activeSymbology) return;
 
-    let legend = null;
+    const legends = [];
 
     const [view] = get(activeSymbology, "views", []);
 
     if (!view) return;
 
     view.layers.forEach(layer => {
-      maplibreMap.setFilter(layer.layerId, null);
+      maplibreMap.setFilter(layer.uniqueId, null);
       Object.keys(layer.paintProperties)
         .forEach(ppId => {
 
@@ -47,64 +47,67 @@ export const SymbologyLayerRenderComponent = props => {
           } = paintProperty;
 
           if (value) {
-            if (maplibreMap.getLayer(layer.layerId)) {
-              maplibreMap.setPaintProperty(layer.layerId, ppId, value);
-              setLayerVisibility(layer.layerId, "visible");
+            if (maplibreMap.getLayer(layer.uniqueId)) {
+              maplibreMap.setPaintProperty(layer.uniqueId, ppId, value);
+              setLayerVisibility(layer.uniqueId, "visible");
             }
           }
           else if (paintExpression) {
-            if (maplibreMap.getLayer(layer.layerId)) {
-              maplibreMap.setPaintProperty(layer.layerId, ppId, paintExpression);
-              setLayerVisibility(layer.layerId, "visible");
+            if (maplibreMap.getLayer(layer.uniqueId)) {
+              maplibreMap.setPaintProperty(layer.uniqueId, ppId, paintExpression);
+              setLayerVisibility(layer.uniqueId, "visible");
             }
           }
           else if (variable) {
-            if (maplibreMap.getLayer(layer.layerId)) {
+            if (maplibreMap.getLayer(layer.uniqueId)) {
 
               const { paintExpression, scale } = variable;
 
               if (ppId.includes("color")) {
-                legend = {
+                legends.push({
                   name: variable.displayName,
                   ...scale
-                };
+                });
               }
 
-              maplibreMap.setPaintProperty(layer.layerId, ppId, paintExpression);
-              setLayerVisibility(layer.layerId, "visible");
+              maplibreMap.setPaintProperty(layer.uniqueId, ppId, paintExpression);
+              setLayerVisibility(layer.uniqueId, "visible");
             }
           }
           else {
-            if (maplibreMap.getLayer(layer.layerId)) {
-              setLayerVisibility(layer.layerId, "none");
+            if (maplibreMap.getLayer(layer.uniqueId)) {
+              setLayerVisibility(layer.uniqueId, "none");
             }
           }
         })
       Object.values(layer.filters || {})
         .forEach(({ filterExpression }) => {
-          maplibreMap.setFilter(layer.layerId, filterExpression);
+          maplibreMap.setFilter(layer.uniqueId, filterExpression);
         })
     })
 
-    setLegend(legend);
+    setLegends(legends);
 
-  }, [maplibreMap, resourcesLoaded, setLayerVisibility, activeSymbology])
+  }, [maplibreMap, resourcesLoaded, setLayerVisibility, activeSymbology]);
 
-  return !legend ? null : (
-    <div className="p-1 pointer-events-auto bg-gray-100 rounded mb-1 absolute top-0 right-0"
+  return !legends.length ? null : (
+    <div className="p-1 pointer-events-auto bg-gray-100 rounded mb-1 absolute top-0 right-0 grid grid-cols-1 gap-1"
       style={ {
         width: "100%",
         maxWidth: "25rem"
       } }
     >
-      <div className="bg-gray-300 border border-current rounded p-1">
-        <div className="font-bold">
-          { legend.name }
-        </div>
-        <div>
-          <SymbologyLegend { ...legend }/>
-        </div>
-      </div>
+      { legends.map((legend, i) => (
+          <div key={ i } className="bg-gray-300 border border-current rounded p-1">
+            <div className="font-bold">
+              { legend.name }
+            </div>
+            <div>
+              <SymbologyLegend { ...legend }/>
+            </div>
+          </div>
+        ))
+      }
     </div>
   );
 }
@@ -132,21 +135,48 @@ class SymbologyLayer extends AvlLayer {
 
     this.startState = { activeSymbology: null };
 
+    this.viewsWithSymbologies = damaSource.views
+      .filter(view => Boolean(view.metadata?.symbologies?.length))
+      .map(view => {
+        return {
+          name: view.version || view.viewId,
+          symbologies: view.metadata.symbologies
+        }
+      })
+
     const [sources, layers] = damaSource.views
       .filter(view => Boolean(view.metadata?.symbologies?.length))
-      .reduce((aa, cc) => {
+      .reduce((aa, cc, ii) => {
+
         const sources = getValidSources(cc.metadata?.tiles?.sources || []);
         const layers = cc.metadata?.tiles?.layers || [];
+
         if (sources.length && layers.length) {
-          aa[0].push(...sources);
-          aa[1].push(...layers.map(l =>
-            ({ ...cc, ...l,
-              layout: {
-                ...get(l, "layout", {}),
-                visibility: "none"
-              }
+          cc.metadata.symbologies.forEach((sym, i) => {
+            sym.views.forEach(symView => {
+              const sourceIds = [];
+              symView.layers.forEach(symLayer => {
+                const { layerId, uniqueId = `sym-layer-${ ii }-${ i }` } = symLayer;
+                const layer = layers.reduce((a, c) => {
+                  return c.id === layerId ? c : a;
+                });
+                aa[1].push({
+                  ...layer,
+                  id: uniqueId,
+                  name: symView.version || symView.viewId
+                });
+                if (!sourceIds.includes(layer.source)) {
+                  sourceIds.push(layer.source);
+                }
+              })
+              sourceIds.forEach(id => {
+                const source = sources.reduce((a, c) => {
+                  return c.id === id ? c : a;
+                });
+                aa[0].push(source);
+              })
             })
-          ));
+          })
         }
         return aa;
       }, [[], []]);
