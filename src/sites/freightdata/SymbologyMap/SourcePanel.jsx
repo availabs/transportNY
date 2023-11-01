@@ -42,8 +42,8 @@ const SourceLayer = ({ layer, ...rest }) => {
 			<div className="font-bold border-b border-current">
 				{ layer.name }
 			</div>
-			{ layer.layers.map(view => (
-					<ViewLayer key={ view.id } { ...rest }
+			{ layer.viewsWithSymbologies.map(view => (
+					<ViewLayer key={ view.name } { ...rest }
 						layerId={ layer.id }
 						view={ view }/>
 				))
@@ -54,15 +54,10 @@ const SourceLayer = ({ layer, ...rest }) => {
 
 const ViewLayer = ({ layerId, view, layerState, MapActions }) => {
 	const symbologies = React.useMemo(() => {
-		return get(view, ["metadata", "symbologies"], []);
+		return get(view, ["symbologies"], []);
 	}, [view]);
 
-	const activeSymbology = React.useMemo(() => {
-		const active = get(layerState, "activeSymbology", null);
-		return symbologies.reduce((a, c) => {
-			return c === active ? c : a;
-		}, null);
-	}, [symbologies, layerState]);
+  const activeSymbology = get(layerState, "activeSymbology", null);
 
 	const setActiveSymbology = React.useCallback(value => {
 		MapActions.updateLayerState(layerId, {
@@ -78,7 +73,7 @@ const ViewLayer = ({ layerId, view, layerState, MapActions }) => {
 
 	return (
 		<div>
-			<div>{ view.version || view.id }</div>
+			<div>{ view.name }</div>
 			<MultiLevelSelect
 				placeholder="Select a symbology..."
 				options={ symbologies }
