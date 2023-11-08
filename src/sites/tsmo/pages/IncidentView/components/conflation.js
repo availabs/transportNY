@@ -307,7 +307,7 @@ const ConflationLayers = flatten(ConflationYears)
 const ConflationCaseLayers = flatten(ConflationCaseYears)
 
 
-console.log('confaltionLayers', ConflationSources, ConflationLayers, ConflationCaseLayers)
+// console.log('confaltionLayers', ConflationSources, ConflationLayers, ConflationCaseLayers)
 
 export {
 	ConflationSources,
