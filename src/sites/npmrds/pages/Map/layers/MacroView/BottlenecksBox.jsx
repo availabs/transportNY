@@ -4,7 +4,10 @@ import { format as d3format } from "d3-format";
 import { quantile, quantileRank } from "simple-statistics";
 import { /*LineGraph,*/ BarGraph } from "~/modules/avl-graph/src";
 import { useFalcor, Input } from "~/modules/avl-components/src";
-import { download as shpDownload } from "../../utils/shp-write";
+
+// import { download as shpDownload } from "../../utils/shp-write";
+import shpwrite from  '@mapbox/shp-write'
+
 import { saveAs } from "file-saver";
 import { scaleLinear } from "d3-scale";
 import { MultiLevelSelect } from "~/sites/npmrds/components"
@@ -40,7 +43,7 @@ const BottlenecksBox = ({ layer }) => {
 		[layer.state.currentData]
 	);
 
-console.log("CURRENT DATA:", currentData);
+// console.log("CURRENT DATA:", currentData);
 
 	const getMiles = React.useCallback(d => {
 		const miles = get(d, "TMC_miles", "unknown")
@@ -227,24 +230,35 @@ console.log("CURRENT DATA:", currentData);
 	}, [layer.mapboxMap]);
 
 	const downloadShp = () => {
-		return shpDownload(
-			bottlnecksGeojson,
-			{
-				file: `${layer.filters.geography.value.join("_")}_${measure}_${
-					layer.filters.year.value
-				}`,
-				folder: `${layer.filters.geography.value.join("_")}_${measure}_${
-					layer.filters.year.value
-				}`,
-				types: {
-					point: `${layer.filters.geography.value.join("_")}_${measure}_${
-						layer.filters.year.value
-					}`,
-				},
-			}
-			// aliasString,
-			// tmcMetaString
-		);
+
+		const filename = `${layer.filters.geography.value.join("_")}_${measure}_${
+			layer.filters.year.value
+		}`
+
+		const options = {
+			folder: filename,
+			file: filename,
+			outputType: "blob",
+			compression: "DEFLATE",
+		}
+		return shpwrite.download(bottlnecksGeojson, options);
+
+		// return shpDownload(
+		// 	bottlnecksGeojson,
+		// 	{
+		// 		file: ,
+		// 		folder: `${layer.filters.geography.value.join("_")}_${measure}_${
+		// 			layer.filters.year.value
+		// 		}`,
+		// 		types: {
+		// 			point: `${layer.filters.geography.value.join("_")}_${measure}_${
+		// 				layer.filters.year.value
+		// 			}`,
+		// 		},
+		// 	}
+		// 	// aliasString,
+		// 	// tmcMetaString
+		// );
 	};
 
 	const downloadJson = () => {

@@ -20,7 +20,9 @@ import {
   MultiLevelSelect
 } from "~/sites/npmrds/components"
 
-import { download as shpDownload } from '../../utils/shp-write';
+import shpwrite from  '@mapbox/shp-write'
+
+// import { download as shpDownload } from '../../utils/shp-write';
 import { saveAs } from "file-saver"
 
 // import { ScalableLoading } from "components/loading/loadingPage"
@@ -89,7 +91,7 @@ class DataDownloader extends React.Component {
         get(this.state, ["metaVars", n], [])
       ]
     ).then(() => {
-      console.log('then downloadMeasures')
+      // console.log('then downloadMeasures')
       this.saveDefaultMeasures()
     })
   }
@@ -156,20 +158,18 @@ class DataDownloader extends React.Component {
       this.downloadMeasures(selection)
         .then(() => this.downloadGeometry(selection))
         .then(() => {
-          let featureCollection = this.createFeatureCollection(selection);
-          console.log('featureCollection', featureCollection)
-          return shpDownload(featureCollection,
-            { file: this.makeFileName(),
-              folder: this.makeFileName(),
-              types: { polyline: this.makeFileName() }
-            },
-            // aliasString,
-            // tmcMetaString
-          )
-        }
+          const featureCollection = this.createFeatureCollection(selection);
 
-        )
-        .then(() => this.setState({ loading: false }));
+          const filename = this.makeFileName();
+
+          const options = {
+            folder: filename,
+            file: filename,
+            outputType: "blob",
+            compression: "DEFLATE",
+          }
+          return shpwrite.download(featureCollection, options);
+        }).then(() => this.setState({ loading: false }));
     })
   }
   createCsv() {
@@ -210,7 +210,7 @@ class DataDownloader extends React.Component {
 
       const n = this.props.network,
         selection = this.props.layer.getSelectionForGeography();
-        console.log('download csv, selection.length', selection.length)
+        // console.log('download csv, selection.length', selection.length)
 
 
       this.downloadMeasures(selection)
@@ -220,7 +220,7 @@ class DataDownloader extends React.Component {
           if (this.props.compareYear !== "none") {
             header.push("compare year");
           }
-          console.log('download csv rows', rows)
+          // console.log('download csv rows', rows)
           rows.unshift(header.join(","))
           const blob = new Blob([rows.join("\n")], { type: "text/csv" });
           saveAs(blob, this.makeFileName() + '.csv');
