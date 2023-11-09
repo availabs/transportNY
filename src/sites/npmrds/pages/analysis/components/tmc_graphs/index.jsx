@@ -28,8 +28,8 @@ const NA = ({ type, state, routes }) =>
 const NE = ((props) => (<div>{props.type} Doesn't Exist</div>))
 
 export default {
-	HDSBarGraph,
-	HDSLineGraph,
+	// HDSBarGraph,
+	// HDSLineGraph,
 
 	RouteLineGraph,
 	RouteBarGraph,
@@ -44,9 +44,9 @@ export default {
 	RouteDifferenceGraph,
 	BarGraphSummary,
 	TMCDifferenceGrid,
-	StackedTranscomGraph,
-	TranscomEventsChart,
-	TranscomIncidentsChart: TranscomEventsChart,
+	// StackedTranscomGraph,
+	// TranscomEventsChart,
+	// TranscomIncidentsChart: TranscomEventsChart,
 	TrafficVolumeGraph,
 	ExperientialTravelTime,
 	NE,

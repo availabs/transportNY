@@ -1,7 +1,7 @@
 import get from 'lodash.get'
 import { getColorRange } from "../../utils"
 
-const YEARS = [2022, 2021, 2020, 2019, 2018, 2017, 2016];
+const YEARS = [/*2022, */2021, 2020, 2019, 2018, 2017, 2016];
 
 const filters = {
   geography: {
@@ -433,47 +433,47 @@ const updateLegend = (filters, legend) => {
   if (filters.compareYear.value === "none") {
     switch (filters.measure.value) {
       case 'lottr':
-        legend.range = getColorRange(get(legend, 'range.length', 6), "RdYlBu", true).reverse()
+        legend.range = getColorRange(get(legend, 'range.length', 7), "RdYlBu", true).reverse()
         legend.format = ",.2~f";
         break;
        case 'tttr':
-        legend.range = getColorRange(get(legend, 'range.length', 6), "RdYlGn", true).reverse()
+        legend.range = getColorRange(get(legend, 'range.length', 7), "RdYlGn", true).reverse()
         legend.format = ",.2~f";
         break;
       case 'freeflow':
-        legend.range = getColorRange(get(legend, 'range.length', 6), "RdPu", true)
+        legend.range = getColorRange(get(legend, 'range.length', 7), "RdPu", true)
         legend.format = ",.0~f";
         break;
       case 'pti':
-        legend.range = getColorRange(get(legend, 'range.length', 6), "PRGn", true)
+        legend.range = getColorRange(get(legend, 'range.length', 7), "PRGn", true)
         legend.format = ",.2~f";
         break;
       case 'pti':
-        legend.range = getColorRange(get(legend, 'range.length', 6), "PiYG", true)
+        legend.range = getColorRange(get(legend, 'range.length', 7), "PiYG", true)
         legend.format = ",.2~f";
         break;
       case 'phed':
-        legend.range = getColorRange(get(legend, 'range.length', 6), "YlOrRd", true)
+        legend.range = getColorRange(get(legend, 'range.length', 7), "YlOrRd", true)
         legend.format = ",.2~s";
         break;
       case 'ted':
-        legend.range = getColorRange(get(legend, 'range.length', 6), "YlOrBr", true)
+        legend.range = getColorRange(get(legend, 'range.length', 7), "YlOrBr", true)
         legend.format = ",.2~s";
       case 'emissions':
-        legend.range = getColorRange(get(legend, 'range.length', 6), "Oranges", true)
+        legend.range = getColorRange(get(legend, 'range.length', 7), "Oranges", true)
         legend.format = ",.2~s";
         break;
       case 'speed':
-        legend.range = getColorRange(get(legend, 'range.length', 6), "Spectral", true)
+        legend.range = getColorRange(get(legend, 'range.length', 7), "Spectral", true)
         legend.format = ",.0~f";
         break;
       case 'pct_bins_reporting':
-        legend.range = getColorRange(get(legend, 'range.length', 6), "RdYlGn", true)
+        legend.range = getColorRange(get(legend, 'range.length', 7), "RdYlGn", true)
         // legend.domain = [.1,.25,.5, .75, .9]
         legend.format = ",.2~f";
         break;
       default:
-        legend.range = getColorRange(get(legend, 'range.length', 6), "Reds");
+        legend.range = getColorRange(get(legend, 'range.length', 7), "Reds");
         legend.format = ",.2~s";
         break;
     }
@@ -481,7 +481,7 @@ const updateLegend = (filters, legend) => {
   else {
     //legend.type = "threshold";
     legend.domain = [-.30, -.20, -.10, 0, .10, .20, .30];
-    legend.range = getColorRange(get(legend, 'range.length', 8), "RdYlGn").reverse();
+    legend.range = getColorRange(get(legend, 'range.length', 7), "RdYlGn").reverse();
     legend.format = ",.0%";
   }
 }

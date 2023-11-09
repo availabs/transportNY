@@ -202,7 +202,7 @@ const config = {
     style: 'color-style-default'
   },
   name: 'PM3',
-  authLevel: 0,
+  auth: true,
   component: PM3
 }
 

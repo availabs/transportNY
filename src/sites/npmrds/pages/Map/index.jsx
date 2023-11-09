@@ -46,7 +46,7 @@ const MapConfig = [
       style: 'color-style-default'
     },
     name: 'Macro',
-    authLevel: 0,
+    auth: true,
     component: Map
   },
   { icon: 'fa fa-map',
@@ -62,7 +62,7 @@ const MapConfig = [
       style: 'color-style-default'
     },
     name: 'Macro',
-    authLevel: 0,
+    auth: true,
     component: Map
   }
 ]

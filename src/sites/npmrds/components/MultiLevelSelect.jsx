@@ -343,7 +343,7 @@ const Dropdown = props => {
             </div>
           }
           <div className="w-fit">
-            { fuse(search).slice(0, maxOptions).map((opt, i) => {
+            { fuse(search).slice(0, maxOptions || Infinity).map((opt, i) => {
                 const Item = getItem(opt);
                 return (
                   <Dropdown key={ `${ valueAccessor(opt) }-${ i }` }

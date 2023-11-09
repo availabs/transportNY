@@ -51,6 +51,8 @@ const IncidentsTable = ({ events, setHoveredEvent }) => {
   const Events = React.useMemo(() => {
     return events.map(ev => {
       const newEvent = {
+        general_cat: ev.nysdot_general_category,
+        sub_cat: ev.nysdot_sub_category,
         event_id: ev.event_id,
         start_date_time: ev.start_date_time,
         facility: ev.facility,
@@ -59,8 +61,10 @@ const IncidentsTable = ({ events, setHoveredEvent }) => {
         delay_cost: calcDelayCost(get(ev, 'congestion_data.value', null), falcorCache)
       }
       return newEvent
-    }).sort((a, b) => b.delay_cost - a.delay_cost).slice(0, 20);
+    })//.sort((a, b) => b.delay_cost - a.delay_cost).slice(0, 20);
   }, [falcorCache, events]);
+
+console.log("EVENTS:", events, Events)
 
   return (
     <Table
@@ -83,12 +87,12 @@ const Columns = [
     Header: "Event",
     Cell: (d) => (
       <Link className='min-w-20' to={ `/incidents/${d.value}`}>
-        <div className='text-sm'>
-           {d.value}
+        <div className='text-xs whitespace-nowrap'>
+           {get(d, 'row.original.general_cat','')} ({get(d, 'row.original.sub_cat','')})
         </div>
 
         <div>
-        <span className='text-xs text-gray-500'>{get(d, 'row.original.start_date_time','').split(' ')[0]}</span>
+          <span className='text-xs text-gray-500'>{get(d, 'row.original.start_date_time','').split(' ')[0]}</span>
         </div>
       </Link>
     ),

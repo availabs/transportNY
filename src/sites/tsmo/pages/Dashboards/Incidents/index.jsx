@@ -358,11 +358,10 @@ const Incidents = props => {
       return a;
     }, {})
 
-    console.log('colorsForTypes', colorsForTypes)
+    // console.log('colorsForTypes', colorsForTypes)
     return {
-      events: events
-        .sort((a,b) => get(b,'congestion_data.value.vehicleDelay',0) - get(a,'congestion_data.value.vehicleDelay',0))
-        .filter((d,i) => i < 20),
+      events: events.slice(0, 20),
+        // .sort((a,b) => get(b,'congestion_data.value.vehicleDelay',0) - get(a,'congestion_data.value.vehicleDelay',0))
       numEvents: events.length,
       currentMonthbyCat,
       prevMonthByCat,
@@ -484,7 +483,7 @@ const Incidents = props => {
   )
 }
 
-const IncidentsPageConfig = 
+const IncidentsPageConfig =
 
   { name:'Incidents',
     title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',

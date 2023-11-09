@@ -50,6 +50,7 @@ import TmcSearch from "./TmcSearch"
 class MacroLayer extends LayerContainer {
   name = "Macro View";
   setActive = true;
+  showLegendControls = false;
   sources = [
     ...ConflationSources,
     ...NpmrdsSources,
@@ -177,7 +178,7 @@ class MacroLayer extends LayerContainer {
   legend = {
     type: "quantile",
     domain: [0, 150],
-    range: getColorRange(9, "RdYlBu").reverse(),
+    range: getColorRange(7, "RdYlBu").reverse(),
     format: ",.1f",
     show: true,
     Title: ({ layer }) => {
@@ -251,7 +252,7 @@ class MacroLayer extends LayerContainer {
     layers: [...ConflationLayers.map((d) => d.id)],
     callback: (features, lngLat) => {
       let feature = features[0];
-      console.log("click", feature, features);
+      // console.log("click", feature, features);
     },
   };
 
@@ -269,6 +270,9 @@ class MacroLayer extends LayerContainer {
     ) > this.state.qaLevel;
 
   onFilterChange(filterName, newValue, prevValue) {
+
+// console.log("MacroLayer::onFilterChange")
+
     switch (filterName) {
       case "network":
         this.filters.conflation.active = newValue === "con";
@@ -286,7 +290,7 @@ class MacroLayer extends LayerContainer {
         this.updateLegend(this.filters, this.legend);
         break;
       default:
-        console.log("no case for filter", filterName);
+        // console.log("no case for filter", filterName);
         break;
     }
   }
@@ -471,6 +475,9 @@ class MacroLayer extends LayerContainer {
   }
 
   getColorScale(domain) {
+
+// console.log("MacroLayer::getColorScale")
+
     if (this.legend.range.length > domain.length) {
       this.legend.domain = [];
       return false;
@@ -528,7 +535,7 @@ class MacroLayer extends LayerContainer {
       ),
       falcorCache = this.falcor.getCache();
 
-      console.log('getSelectionForGeography', n, year,geoids,filtered, falcorCache)
+      // console.log('getSelectionForGeography', n, year,geoids,filtered, falcorCache)
 
     return [
       ...filtered.reduce((a, c) => {
@@ -653,9 +660,10 @@ class MacroLayer extends LayerContainer {
     });
     // console.log("fetchData request", request);
 
-    return falcor.get(...request).then((d) => {
-      this.processData();
-    });
+    return falcor.get(...request)
+      .then((d) => {
+        this.processData();
+      });
   }
 
   processData() {
@@ -779,6 +787,8 @@ class MacroLayer extends LayerContainer {
     );
 
 // console.log("activeLayers", activeLayers)
+
+// console.log("RENDERING COLORS:", colors);
 
     activeLayers.forEach((l) => {
       //console.log('set paint', l, colors)
