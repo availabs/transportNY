@@ -25,7 +25,7 @@ const FreightMap = props => {
 const FreightMapConfig = [{
   name:'Freight Map',
   icon: 'fa-duotone fa-map-location-dot',
-  path: "/",
+  path: "/old",
   exact: true,
   auth: false,
   mainNav: false,
@@ -41,7 +41,7 @@ const FreightMapConfig = [{
   path: "/map",
   exact: true,
   auth: false,
-  mainNav: true,
+  mainNav: false,
   sideNav: {
     color: 'dark',
     size: 'micro'

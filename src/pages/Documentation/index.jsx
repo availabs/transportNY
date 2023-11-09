@@ -19,22 +19,22 @@ import checkAuth  from "~/layout/checkAuth"
 
 const siteConfig = {
   format: docsFormat,
-  check: ({user}, activeConfig, navigate) =>  {
+  // check: ({user}, activeConfig, navigate) =>  {
 
-    const getReqAuth = (configs) => {
-      return configs.reduce((out,config) => {
-        let authLevel = config.authLevel || -1
-        if(config.children) {
-          authLevel = Math.max(authLevel, getReqAuth(config.children))
-        }
-        return Math.max(out, authLevel)
-      },-1)
-    } 
+  //   const getReqAuth = (configs) => {
+  //     return configs.reduce((out,config) => {
+  //       let authLevel = config.authLevel || -1
+  //       if(config.children) {
+  //         authLevel = Math.max(authLevel, getReqAuth(config.children))
+  //       }
+  //       return Math.max(out, authLevel)
+  //     },-1)
+  //   } 
 
-    let requiredAuth = getReqAuth(activeConfig)
-    checkAuth({user, authLevel:requiredAuth}, navigate)
+  //   let requiredAuth = getReqAuth(activeConfig)
+  //   checkAuth({user, authLevel:requiredAuth}, navigate)
     
-  },
+  // },
   children: [
     { 
       type: Layout,
@@ -65,7 +65,7 @@ const siteConfig = {
 }
 
 export default [{ 
-  ...dmsPageFactory(siteConfig,"/docs/", withAuth),
+  ...dmsPageFactory(siteConfig, "/docs/", withAuth),
   name: "Home",
   mainNav: false,
   sideNav: {
