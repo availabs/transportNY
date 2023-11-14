@@ -20,9 +20,9 @@ import {
   MultiLevelSelect
 } from "~/sites/npmrds/components"
 
-import shpwrite from  '@mapbox/shp-write'
+//import shpwrite from  '@mapbox/shp-write'
 
-// import { download as shpDownload } from '../../utils/shp-write';
+import { download as shpDownload } from '../../utils/shp-write';
 import { saveAs } from "file-saver"
 
 // import { ScalableLoading } from "components/loading/loadingPage"
@@ -141,11 +141,16 @@ class DataDownloader extends React.Component {
     const falcorCache = this.props.falcor.getCache()
     return {
       type: "FeatureCollection",
-      features: selection.map(id => ({
+      features: selection.map(id => {
+        const geom = get(falcorCache, [...this.props.layer.getGeomRequest(id), "value"], "FAILED")
+        console.log('download geomtype', geom?.type)
+    
+        return {
         type: "Feature",
-        geometry: get(falcorCache, [...this.props.layer.getGeomRequest(id), "value"], "FAILED"),
-        properties: this.getMetaVarProperties(n, y, id, this.getMeasureProperties(n, y, cy, id))
-      }))
+          geometry: geom,
+          properties: this.getMetaVarProperties(n, y, id, this.getMeasureProperties(n, y, cy, id))
+        }
+      })
     }
   }
   downloadShp() {
@@ -160,15 +165,17 @@ class DataDownloader extends React.Component {
         .then(() => {
           const featureCollection = this.createFeatureCollection(selection);
 
+          console.log(featureCollection)
           const filename = this.makeFileName();
 
           const options = {
             folder: filename,
             file: filename,
-            outputType: "blob",
-            compression: "DEFLATE",
+            types: {
+              polyline: filename,
+            }
           }
-          return shpwrite.download(featureCollection, options);
+          return shpDownload(featureCollection, options);
         }).then(() => this.setState({ loading: false }));
     })
   }

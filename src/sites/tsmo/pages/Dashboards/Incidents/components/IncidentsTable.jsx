@@ -76,6 +76,7 @@ console.log("EVENTS:", events, Events)
       sortBy="delay_cost"
       sortOrder="DESC"
       initialPageSize={20}
+      pageSize={20}
     />
   )
 }

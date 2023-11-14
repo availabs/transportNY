@@ -1,4 +1,4 @@
-import write from './write'
+import {write} from './write'
 import geojson from './geojson'
 import prj from './prj'
 import JSZip from 'jszip'
