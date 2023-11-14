@@ -20,7 +20,7 @@ import {
   MultiLevelSelect
 } from "~/sites/npmrds/components"
 
-import shpwrite from  '@mapbox/shp-write'
+//import shpwrite from  '@mapbox/shp-write'
 
 import { download as shpDownload } from '../../utils/shp-write';
 import { saveAs } from "file-saver"
@@ -142,11 +142,16 @@ class DataDownloader extends React.Component {
     const falcorCache = this.props.falcor.getCache()
     return {
       type: "FeatureCollection",
-      features: selection.map(id => ({
+      features: selection.map(id => {
+        const geom = get(falcorCache, [...this.props.layer.getGeomRequest(id), "value"], "FAILED")
+        console.log('download geomtype', geom?.type)
+
+        return {
         type: "Feature",
-        geometry: get(falcorCache, [...this.props.layer.getGeomRequest(id), "value"], "FAILED"),
-        properties: this.getMetaVarProperties(n, y, id, this.getMeasureProperties(n, y, cy, id))
-      }))
+          geometry: geom,
+          properties: this.getMetaVarProperties(n, y, id, this.getMeasureProperties(n, y, cy, id))
+        }
+      })
     }
   }
   downloadShp() {

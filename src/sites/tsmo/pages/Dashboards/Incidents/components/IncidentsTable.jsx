@@ -64,7 +64,7 @@ const IncidentsTable = ({ events, setHoveredEvent }) => {
     })//.sort((a, b) => b.delay_cost - a.delay_cost).slice(0, 20);
   }, [falcorCache, events]);
 
-console.log("EVENTS:", events, Events)
+// console.log("EVENTS:", events, Events)
 
   return (
     <Table
@@ -76,6 +76,7 @@ console.log("EVENTS:", events, Events)
       sortBy="delay_cost"
       sortOrder="DESC"
       initialPageSize={20}
+      pageSize={20}
     />
   )
 }
