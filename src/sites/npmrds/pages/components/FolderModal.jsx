@@ -10,9 +10,6 @@ import {
   ColorInput,
   Button,
   Modal
-  // getColorRange,
-  // ScalableLoading,
-  // Select
 } from "~/modules/avl-components/src"
 
 import FolderIcon from "./FolderIcon"

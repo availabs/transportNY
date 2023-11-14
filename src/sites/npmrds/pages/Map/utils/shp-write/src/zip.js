@@ -1,4 +1,4 @@
-import write from './write'
+import {write} from './write'
 import geojson from './geojson'
 import prj from './prj'
 import JSZip from 'jszip'
@@ -11,7 +11,7 @@ export default function zip (gj, options, aliasString, tmcMetaString) {
     [geojson.point(gj), geojson.line(gj), geojson.multiline(gj), geojson.polygon(gj)]
         .forEach(function(l,i) {
         if (l.geometries.length && l.geometries[0].length) {
-            console.log('l.geo',l.geometries, i, l)
+            // console.log('l.geo',l.geometries, i, l)
             write(
                 // field definitions
                 l.properties,
@@ -38,7 +38,7 @@ export default function zip (gj, options, aliasString, tmcMetaString) {
     }
 
     return zip.generateAsync({
-        type: process.browser === undefined ? 'nodebuffer' : 'blob',
-        compression: 'STORE'
+        type: 'blob',
+        compression: 'DEFLATE'
     });
 };

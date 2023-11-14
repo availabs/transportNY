@@ -2,15 +2,11 @@ import React from "react"
 
 import get from "lodash/get"
 import { range as d3range } from "d3-array"
-import { useParams, Link } from "react-router-dom"
+import { useParams } from "react-router-dom"
 
 import {
   useFalcor,
-  useTheme,
   withAuth,
-  getColorRange,
-  ScalableLoading,
-  Select
 } from "~/modules/avl-components/src"
 
 import FolderIcon from "./components/FolderIcon"

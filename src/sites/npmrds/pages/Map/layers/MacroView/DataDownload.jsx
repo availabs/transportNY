@@ -22,7 +22,7 @@ import {
 
 import shpwrite from  '@mapbox/shp-write'
 
-// import { download as shpDownload } from '../../utils/shp-write';
+import { download as shpDownload } from '../../utils/shp-write';
 import { saveAs } from "file-saver"
 
 // import { ScalableLoading } from "components/loading/loadingPage"
@@ -161,8 +161,6 @@ class DataDownloader extends React.Component {
           .then(() => {
             const featureCollection = this.createFeatureCollection(selection);
 
-console.log("FEATURE COLLECTION:", featureCollection);
-
             const filename = this.makeFileName();
 
             // const blob = new Blob([JSON.stringify(featureCollection)], { type: "application/json" });
@@ -170,17 +168,18 @@ console.log("FEATURE COLLECTION:", featureCollection);
 
             const options = {
               folder: filename,
-              file: "geoms",
+              file: filename,
               outputType: "blob",
               compression: "DEFLATE",
               types: {
                 polyline: "mylines"
               }
             }
-            shpwrite.zip(featureCollection, options)
-              .then(res => {
-                saveAs(res, filename + '.zip');
-              });
+            // shpwrite.zip(featureCollection, options)
+            //   .then(res => {
+            //     saveAs(res, filename + '.zip');
+            //   });
+            return shpDownload(featureCollection, options);
 
             //
             // return shpwrite.download(featureCollection, options);

@@ -1,5 +1,6 @@
-import types from './types'
-import dbf from 'dbf'
+import {jstypes as types} from './types'
+// import dbf from 'dbf'
+import structure from "./structure/structure"
 import prj from './prj'
 //import ext from './extent'
 import getFields from './fields'
@@ -20,7 +21,7 @@ var recordHeaderLength = 8;
 // Low-level writing interface
 export function write(rows, geometry_type, geometries, callback) {
 
-    var TYPE = types.geometries[geometry_type],
+    var TYPE = types[geometry_type],
         writer = writers[TYPE],
         parts = writer.parts(geometries, TYPE),
         shpLength = 100 + (parts - geometries.length) * 4 + writer.shpLength(geometries),
@@ -44,7 +45,7 @@ export function write(rows, geometry_type, geometries, callback) {
     shpView.setInt32(24, shpLength / 2);
     shxView.setInt32(24, (50 + geometries.length * 4));
 
-    var dbfBuf = dbf.structure(rows);
+    var dbfBuf = structure(rows);
 
     callback(null, {
         shp: shpView,

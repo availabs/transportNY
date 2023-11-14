@@ -65,11 +65,11 @@ export const GRAPH_TYPES = [
 	{ type: "Route Compare Component", category: "Tables", saveImage: true },
 	{ type: "Route Difference Graph", category: "Bar Graphs", saveImage: true, isColorfull: true },
 	{ type: "TMC Difference Grid", category: "Grid Graphs", saveImage: true, isColorfull: true },
-	{ type: "Stacked Transcom Graph", category: "Bar Graphs", saveImage: true },
-	{ type: "Transcom Events Chart", category: "Tables", saveImage: true },
+	// { type: "Stacked Transcom Graph", category: "Bar Graphs", saveImage: true },
+	// { type: "Transcom Events Chart", category: "Tables", saveImage: true },
 	{ type: "Traffic Volume Graph", category: "Bar Graphs", saveImage: true },
 	{ type: "Experiential Travel Time", category: "Bar Graphs", saveImage: true },
 
-	{ type: "HDS Bar Graph", category: "HDS Graph", saveImage: true },
-	{ type: "HDS Line Graph", category: "HDS Graph", saveImage: true }
+	// { type: "HDS Bar Graph", category: "HDS Graph", saveImage: true },
+	// { type: "HDS Line Graph", category: "HDS Graph", saveImage: true }
 ]

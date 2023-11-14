@@ -82,7 +82,7 @@ export function extent(coordinates) {
 
 export function parts(geometries, TYPE) {
     var no = 1;
-    if (TYPE === types.geometries.POLYGON || TYPE === types.geometries.POLYLINE)  {
+    if (TYPE === types.POLYGON || TYPE === types.POLYLINE)  {
         no = geometries.reduce(function (no, coords) {
             no += coords.length;
             if (Array.isArray(coords[0][0][0])) { // multi
@@ -120,5 +120,6 @@ export default {
     write,
     shpLength,
     shxLength,
-    extent
+    extent,
+    parts
 }

@@ -1,7 +1,6 @@
 import React from "react"
 
 import {
-  Button,
   Modal
 } from "~/modules/avl-components/src"
 
