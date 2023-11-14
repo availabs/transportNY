@@ -44,6 +44,7 @@ class DataDownloader extends React.Component {
     this.downloadShp = this.downloadShp.bind(this);
     this.clearAll = this.clearAll.bind(this);
     this.addMeasure = this.addMeasure.bind(this);
+    this.addMetaVar = this.addMetaVar.bind(this);
   }
   componentDidMount() {
     if (window.localStorage) {
@@ -152,25 +153,39 @@ class DataDownloader extends React.Component {
     this.setState({ loading: true, show: false });
 
     this.props.falcor.get(...this.props.layer.fetchRequestsForGeography())
-    .then(() =>{
-      const selection = this.props.layer.getSelectionForGeography();
+      .then(() =>{
+        const selection = this.props.layer.getSelectionForGeography();
 
-      this.downloadMeasures(selection)
-        .then(() => this.downloadGeometry(selection))
-        .then(() => {
-          const featureCollection = this.createFeatureCollection(selection);
+        return this.downloadMeasures(selection)
+          .then(() => this.downloadGeometry(selection))
+          .then(() => {
+            const featureCollection = this.createFeatureCollection(selection);
 
-          const filename = this.makeFileName();
+console.log("FEATURE COLLECTION:", featureCollection);
 
-          const options = {
-            folder: filename,
-            file: filename,
-            outputType: "blob",
-            compression: "DEFLATE",
-          }
-          return shpwrite.download(featureCollection, options);
-        }).then(() => this.setState({ loading: false }));
-    })
+            const filename = this.makeFileName();
+
+            // const blob = new Blob([JSON.stringify(featureCollection)], { type: "application/json" });
+            // saveAs(blob, filename + '.json');
+
+            const options = {
+              folder: filename,
+              file: "geoms",
+              outputType: "blob",
+              compression: "DEFLATE",
+              types: {
+                polyline: "mylines"
+              }
+            }
+            shpwrite.zip(featureCollection, options)
+              .then(res => {
+                saveAs(res, filename + '.zip');
+              });
+
+            //
+            // return shpwrite.download(featureCollection, options);
+          }).then(() => this.setState({ loading: false }));
+      })
   }
   createCsv() {
     const selection = this.props.layer.getSelectionForGeography(),
