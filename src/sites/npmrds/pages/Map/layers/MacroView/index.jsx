@@ -452,7 +452,7 @@ class MacroLayer extends LayerContainer {
               value: geo.geoid,
               bounds: geo.bounding_box,
             }));
-            //console.log(this.filters.geography)
+// console.log("GEOGRAPHY:", this.filters.geography)
           });
       })
       .then(() => {
@@ -735,9 +735,6 @@ class MacroLayer extends LayerContainer {
     }, []);
 
     this.updateState({ currentData: data });
-  }
-
-  onAdd() {
   }
 
   render(map) {

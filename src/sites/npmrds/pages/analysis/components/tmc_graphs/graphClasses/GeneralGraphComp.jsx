@@ -193,8 +193,7 @@ class GeneralGraphComp extends React.Component {
 		const displayData = this.getDisplayData();
 		if (!displayData.length) return Promise.resolve();
 
-		this.setState(prev => ({ loading: ++prev.loading }));
-
+		this.setState(prev => ({ loading: prev.loading + 1 }));
 		// const routeData = {};
 
 		return routes.reduce((promise, route) => {
@@ -303,7 +302,7 @@ class GeneralGraphComp extends React.Component {
 			})
 		}, Promise.resolve())
 		.then(() => {
-			this.setState(prev => ({ loading: --prev.loading }));
+			this.setState(prev => ({ loading: prev.loading - 1 }));
 		})
 		// .then(() => {
 		// 	this.props.updateRouteData(routeData);

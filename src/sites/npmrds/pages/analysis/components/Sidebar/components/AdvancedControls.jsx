@@ -338,7 +338,7 @@ const AdvancedControls = props => {
             <Label>AADT</Label>
             <InputBox style={ { maxWidth: "70%", width: "70%", flex: "0 0 70%" } }>
               <Input type="number"
-                onChange={ e => updateOverrides("aadt", e.target.value) }
+                onChange={ v => updateOverrides("aadt", v) }
                 value={ overrides.aadt || "" }/>
             </InputBox>
           </Row>

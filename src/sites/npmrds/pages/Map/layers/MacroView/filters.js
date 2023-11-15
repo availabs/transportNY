@@ -420,6 +420,7 @@ const getMeasure = (filters) => {
   if (NOT_MEASURES.includes(out)) {
     return ""
   }
+console.log("MEASURE:", out);
 
   return out
 }

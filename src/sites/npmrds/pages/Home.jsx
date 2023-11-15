@@ -6,6 +6,7 @@ import { range as d3range } from "d3-array"
 
 import {
   Button,
+  Select,
   withAuth,
   useFalcor
 } from "~/modules/avl-components/src"
@@ -21,6 +22,8 @@ import {
 } from "./components/Stuff"
 
 import FocusAnalysis from "./FocusAnalysis.config"
+
+import REGIONS from "./Regions"
 
 const Title = ({ children }) => {
   return (
@@ -44,7 +47,7 @@ const Section = ({ title, children }) => {
 }
 
 const TemplateSelector = ({ id, title, onClick, children }) => {
-  
+
   const { falcor, falcorCache } = useFalcor();
   const [template, setTemplate] = React.useState(null);
 
@@ -81,10 +84,10 @@ const TemplateSelector = ({ id, title, onClick, children }) => {
           className="relative flex items-center space-x-2 rounded-lg border border-gray-300 bg-white px-4 py-5 shadow-sm hover:bg-blue-50 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
         >
           <div className="flex-shrink-0">
-            { template?.thumbnail ? 
+            { template?.thumbnail ?
               <img className="h-12 w-12" src={template?.thumbnail || ""}  alt="" /> :
               <img className="h-12 w-12 bg-blue-100"  alt="" />
-              
+
             }
           </div>
           <div className="min-w-0 flex-1">
@@ -97,10 +100,10 @@ const TemplateSelector = ({ id, title, onClick, children }) => {
     </div>
   )
 
-  
+
 }
 const ReportLink = ({ id, name, description, thumbnail  }) => {
-  
+
   return(
     <Link
           key={id}
@@ -108,24 +111,49 @@ const ReportLink = ({ id, name, description, thumbnail  }) => {
           className="relative flex items-center space-x-2 rounded-lg border border-gray-300 bg-white px-4 py-5 shadow-sm hover:bg-blue-50 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
         >
           <div className="flex-shrink-0">
-            { thumbnail ? 
+            { thumbnail ?
               <img className="h-12 w-12" src={thumbnail || ""}  alt="" /> :
               <img className="h-12 w-12 bg-blue-100"  alt="" />
-              
+
             }
           </div>
           <div className="min-w-0 flex-1">
-            <a href="#" className="focus:outline-none">
-              <span className="absolute inset-0" aria-hidden="true" />
-              <p className="text-lg font-medium text-gray-900">{name}</p>
-              <p className="truncate text-xs text-gray-500">{description || ''}</p>
-            </a>
+            <span className="absolute inset-0" aria-hidden="true" />
+            <p className="text-lg font-medium text-gray-900">{name}</p>
+            <p className="truncate text-xs text-gray-500">{description || ''}</p>
           </div>
     </Link>
   )
 }
 
 const NoData = { templateId: null }
+
+const regionAccessor = r => r.name;
+const regionValueAccessor = r => r.region;
+
+const LinkCard = ({ title, description, href }) => {
+  return (
+    <Link to={ href }>
+      <div className={ `
+          relative flex items-center space-x-2 rounded-lg
+          border border-gray-300 bg-white px-4 py-5
+          shadow-sm focus-within:ring-2
+          focus-within:ring-indigo-500 focus-within:ring-offset-2
+          hover:bg-blue-50 hover:border-gray-400
+        ` }
+      >
+        <div className="flex-shrink-0">
+          <div className="h-12 w-12 bg-gray-300"  alt="" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <span className="absolute inset-0" aria-hidden="true" />
+          <p className="text-lg font-medium text-gray-900">{ title }</p>
+          <p className="truncate text-xs text-gray-500">{ description }</p>
+        </div>
+      </div>
+    </Link>
+  )
+}
 
 const Home = () => {
   const [templateData, setTemplateData] = React.useState(NoData);
@@ -156,6 +184,8 @@ const Home = () => {
     setRecent(recent);
   }, [falcorCache]);
 
+  const [region, setRegion] = React.useState("1");
+
   return (
     <div className="max-w-6xl mx-auto my-8">
       <div className="grid grid-cols-2 gap-4 p-10">
@@ -169,17 +199,11 @@ const Home = () => {
                 <Section key={ title } title={ title }>
                   { Templates.map((t,i) => {
                       return (
-                        <TemplateSelector 
+                        <TemplateSelector
                           key={ t.title }
                           onClick={ setTemplateData }
                           title={ [title, t.title] }
-                          id={ t.id }
-                        >
-                          { t.title }
-                          <div className="text-sm italic ml-2">
-                            { t.description }
-                          </div>
-                        </TemplateSelector>
+                          id={ t.id }/>
                       )
                     })
                   }
@@ -188,7 +212,7 @@ const Home = () => {
             })
           }
           <Section title="Your Recent Reports">
-           
+
             { recent.map(r => {
                 return r.stuff_type === "report" ?
                   <ReportLink key={ r.id }  { ...r }/> :
@@ -197,8 +221,6 @@ const Home = () => {
                     title={ ["Custom Reports", r.name] }
                     id={ r.id }
                   />
-                    
-                  
               })
             }
           </Section>
@@ -208,17 +230,57 @@ const Home = () => {
           <Title>
             Regional Analysis
           </Title>
+          <Section title="Region">
+            <div className="col-span-2">
+              <Select options={ REGIONS }
+                value={ region }
+                onChange={ setRegion }
+                accessor={ regionAccessor }
+                valueAccessor={ regionValueAccessor }/>
+            </div>
+          </Section>
           <Section title="Reliability">
-            <div>Car</div>
-            <div>Truck</div>
+            <LinkCard
+              title="Car (LoTTR)"
+              description="Level of Travel Time Realiability"
+              href={ `/map/${ region }/2021/lottr` }/>
+            <LinkCard
+              title="Truck (TTTR)"
+              description="Truck Travel Time Reliability"
+              href={ `/map/${ region }/2021/tttr` }/>
           </Section>
           <Section title="Congestion">
-            <div>Total</div>
-            <div>Peak Hour</div>
-            <div>Recurrent / Non-Recurrent</div>
+            <LinkCard
+              title="Total (TED)"
+              description="Total Excessive Delay"
+              href={ `/map/${ region }/2021/ted` }/>
+            <LinkCard
+              title="Per Mile (TED)"
+              description="Excessive Delay Per Mile"
+              href={ `/map/${ region }/2021/ted_per_mi` }/>
+            <div className="col-span-2">
+              <LinkCard
+                title="Peak Hours (PHED)"
+                description="Peak Hours Excessive Delay"
+                href={ `/map/${ region }/2021/phed` }/>
+            </div>
           </Section>
-          <Section title="PM3"/>
-          <Section title="TSMO"/>
+          <Section title="PM3">
+            <div className="col-span-2">
+              <LinkCard
+                title="PM3 Measures"
+                description="PM3 mesures over time"
+                href="https://npmrds.transportny.org/map21"/>
+            </div>
+          </Section>
+          <Section title="TSMO">
+            <div className="col-span-2">
+              <LinkCard
+                title="TSMO"
+                description="Transportation Systems Management and Operations Data"
+                href="https://tsmo.transportny.org/"/>
+            </div>
+          </Section>
         </div>
 
         <TemplateModal close={ close }

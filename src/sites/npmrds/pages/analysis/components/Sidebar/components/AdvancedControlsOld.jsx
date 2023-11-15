@@ -5,7 +5,7 @@ import get from "lodash.get"
 import moment from "moment"
 import styled from "styled-components"
 
-import { Input } from "components/common/styled-components"
+import { Input as StyledInput } from "components/common/styled-components"
 import ItemSelector from 'components/common/item-selector/item-selector';
 
 import { resolutions } from "components/tmc_graphs/utils/resolutionFormats"
@@ -174,7 +174,7 @@ class AdvancedControls extends React.Component {
 				<Row>
 					<Label>Start Date</Label>
 					<InputBox>
-						<Input type="date"
+						<StyledInput type="date"
 							onChange={ e => {
 								const date = +moment(e.target.value, 'YYYY-MM-DD').format('YYYYMMDD');
 								if (!isNaN(date)) {
@@ -191,7 +191,7 @@ class AdvancedControls extends React.Component {
 				<Row>
 					<Label>End Date</Label>
 					<InputBox>
-						<Input type="date"
+						<StyledInput type="date"
 							onChange={ e => {
 								const date = +moment(e.target.value, 'YYYY-MM-DD').format('YYYYMMDD');
 								if (!isNaN(date)) {
@@ -209,7 +209,7 @@ class AdvancedControls extends React.Component {
 				<Row>
 					<Label>Start Time</Label>
 					<InputBox>
-						<Input type="time"
+						<StyledInput type="time"
 							onChange={ e => this.props.updateSettings("startTime", e.target.value) }
 							value={ startTime }/>
 					</InputBox>
@@ -220,7 +220,7 @@ class AdvancedControls extends React.Component {
 				<Row>
 					<Label>End Time</Label>
 					<InputBox>
-						<Input type="time"
+						<StyledInput type="time"
 							onChange={ e => this.props.updateSettings("endTime", e.target.value) }
 							value={ endTime }/>
 					</InputBox>
@@ -331,7 +331,7 @@ class AdvancedControls extends React.Component {
 						<Row>
 							<Label>AADT</Label>
 							<InputBox style={ { maxWidth: "70%", width: "70%", flex: "0 0 70%" } }>
-								<Input type="number"
+								<StyledInput type="number"
 									onChange={ e => this.updateOverrides("aadt", e.target.value) }
 									value={ overrides.aadt || "" }/>
 							</InputBox>
@@ -340,7 +340,7 @@ class AdvancedControls extends React.Component {
 						<Row>
 							<Label>Precent Speed</Label>
 							<InputBox style={ { maxWidth: "70%", width: "70%", flex: "0 0 70%" } }>
-								<Input type="number" step={ 0.25 }
+								<StyledInput type="number" step={ 0.25 }
 									onChange={ e => this.updateOverrides("speed", e.target.value) }
 									value={ overrides.speed || "" }/>
 							</InputBox>
@@ -349,7 +349,7 @@ class AdvancedControls extends React.Component {
 						<Row>
 							<Label>Threshold Speed</Label>
 							<InputBox style={ { maxWidth: "70%", width: "70%", flex: "0 0 70%" } }>
-								<Input type="number" step={ 1 }
+								<StyledInput type="number" step={ 1 }
 									onChange={ e => this.updateOverrides("thresholdSpeed", e.target.value) }
 									value={ overrides.thresholdSpeed || "" }/>
 							</InputBox>
@@ -358,7 +358,7 @@ class AdvancedControls extends React.Component {
 						<Row>
 							<Label>Base Speed</Label>
 							<InputBox style={ { maxWidth: "70%", width: "70%", flex: "0 0 70%" } }>
-								<Input type="number" step={ 1 }
+								<StyledInput type="number" step={ 1 }
 									onChange={ e => this.updateOverrides("baseSpeed", e.target.value) }
 									value={ overrides.baseSpeed || "" }/>
 							</InputBox>
