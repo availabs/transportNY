@@ -172,6 +172,7 @@ const Home = () => {
       ["name", "thumbnail", "description", "updated_at", "stuff_type", "id"]
     ])
   }, [falcor]);
+
   React.useEffect(() => {
     const recent = [];
     for (let i = 0; i < 5; ++i) {
@@ -186,6 +187,11 @@ const Home = () => {
 
   const [region, setRegion] = React.useState("1");
 
+  const tsmoHref = React.useMemo(() => {
+    const href = window.location.href;
+    return href.replace("npmrds", "tsmo");
+  }, []);
+
   return (
     <div className="max-w-6xl mx-auto my-8">
       <div className="grid grid-cols-2 gap-4 p-10">
@@ -197,7 +203,31 @@ const Home = () => {
           { FocusAnalysis.map(({ title, Templates }) => {
               return (
                 <Section key={ title } title={ title }>
-                  { Templates.map((t,i) => {
+                  { Templates.length % 2 === 1 ?
+                    <>
+                      { Templates.slice(0, -1).map((t,i) => {
+                          return (
+                            <TemplateSelector
+                              key={ t.title }
+                              onClick={ setTemplateData }
+                              title={ [title, t.title] }
+                              id={ t.id }/>
+                          )
+                        })
+                      }
+                      { Templates.slice(-1).map((t,i) => {
+                          return (
+                            <div key={ t.title } className="col-span-2">
+                              <TemplateSelector
+                                onClick={ setTemplateData }
+                                title={ [title, t.title] }
+                                id={ t.id }/>
+                            </div>
+                          )
+                        })
+                      }
+                    </> :
+                    Templates.map((t,i) => {
                       return (
                         <TemplateSelector
                           key={ t.title }
@@ -213,7 +243,35 @@ const Home = () => {
           }
           <Section title="Your Recent Reports">
 
-            { recent.map(r => {
+            { recent.length % 2 === 1 ?
+              <>
+                { recent.slice(0, -1).map(r => {
+                    return r.stuff_type === "report" ?
+                      <ReportLink key={ r.id }  { ...r }/> :
+                      <TemplateSelector key={ r.id }
+                        onClick={ setTemplateData }
+                        title={ ["Custom Reports", r.name] }
+                        id={ r.id }
+                      />
+                  })
+                }
+                { recent.slice(-1).map(r => {
+                    return (
+                      <div key={ r.id } className="col-span-2">
+                        { r.stuff_type === "report" ?
+                            <ReportLink key={ r.id }  { ...r }/> :
+                            <TemplateSelector key={ r.id }
+                              onClick={ setTemplateData }
+                              title={ ["Custom Reports", r.name] }
+                              id={ r.id }
+                            />
+                        }
+                      </div>
+                    )
+                  })
+                }
+              </> :
+              recent.map(r => {
                 return r.stuff_type === "report" ?
                   <ReportLink key={ r.id }  { ...r }/> :
                   <TemplateSelector key={ r.id }
@@ -270,7 +328,7 @@ const Home = () => {
               <LinkCard
                 title="PM3 Measures"
                 description="PM3 mesures over time"
-                href="https://npmrds.transportny.org/map21"/>
+                href="/map21"/>
             </div>
           </Section>
           <Section title="TSMO">
@@ -278,7 +336,7 @@ const Home = () => {
               <LinkCard
                 title="TSMO"
                 description="Transportation Systems Management and Operations Data"
-                href="https://tsmo.transportny.org/"/>
+                href={ tsmoHref }/>
             </div>
           </Section>
         </div>
