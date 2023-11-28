@@ -19,6 +19,7 @@ const InfoBox = props => {
 
   const ways = get(props, ["layer", "state", "ways"], []);
   const tmcs = get(props, ["layer", "state", "tmcs"], []);
+  const highlighted = get(props, ["layer", "state", "highlighted"], []);
   const year = props.layer.getYear();
   const markers = get(props, ["layer", "state", "markers"], []);
 
@@ -126,12 +127,13 @@ const InfoBox = props => {
               </div>
             </div>
             <div className="overflow-auto scrollbar-sm"
-              style={ { maxHeight: "300px" } }
+              style={ { maxHeight: "450px" } }
             >
               { tmcs.map(tmc => (
                   <TmcItem key={ tmc }
                     tmc={ tmc } year={ year }
                     highlight={ doHighlight }
+                    highlighted={ highlighted.includes(tmc) }
                   />
                 ))
               }
@@ -160,13 +162,13 @@ const InfoBox = props => {
 
 export default InfoBox;
 
-const TmcItem = ({ tmc, year, highlight }) => {
+const TmcItem = ({ tmc, year, highlight, highlighted }) => {
   const { falcor, falcorCache } = useFalcor();
   const doHighlight = React.useCallback(e => {
     highlight(tmc);
   }, [tmc, highlight]);
   return (
-    <div className="border-b hover:bg-gray-200 px-1"
+    <div className={ `border-b hover:bg-gray-200 px-1 ${ highlighted ? "bg-gray-200" : "" }` }
       onMouseOver={ doHighlight }
       onMouseOut={ doHighlight }
     >

@@ -284,8 +284,7 @@ export const saveTemplate = (template, templateId = null) =>
               	year: rc.settings.year === "advanced" ? "advanced" : saveYearsAsRecent ? setRecentYear(rc.settings.year, mostRecent) : rc.settings.year,
               	startDate: saveYearsAsRecent ? setRecentDate(rc.settings.startDate, mostRecent) : rc.settings.startDate,
               	endDate: saveYearsAsRecent ? setRecentDate(rc.settings.endDate, mostRecent) : rc.settings.endDate,
-              	compTitle: saveYearsAsRecent ? setRecentText(rc.settings.compTitle, mostRecent, yearsWithData) : rc.settings.compTitle,
-                overrides: { ...rc.overrides }
+              	compTitle: saveYearsAsRecent ? setRecentText(rc.settings.compTitle, mostRecent, yearsWithData) : rc.settings.compTitle
               }
             }))
         }) : ({
@@ -298,8 +297,7 @@ export const saveTemplate = (template, templateId = null) =>
           	year: rc.settings.year === "advanced" ? "advanced" : saveYearsAsRecent ? setRecentYear(rc.settings.year, mostRecent) : rc.settings.year,
           	startDate: saveYearsAsRecent ? setRecentDate(rc.settings.startDate, mostRecent) : rc.settings.startDate,
           	endDate: saveYearsAsRecent ? setRecentDate(rc.settings.endDate, mostRecent) : rc.settings.endDate,
-          	compTitle: saveYearsAsRecent ? setRecentText(rc.settings.compTitle, mostRecent, yearsWithData) : rc.settings.compTitle,
-            overrides: { ...rc.overrides }
+          	compTitle: saveYearsAsRecent ? setRecentText(rc.settings.compTitle, mostRecent, yearsWithData) : rc.settings.compTitle
           }
         })
     )
@@ -332,7 +330,7 @@ export const saveTemplate = (template, templateId = null) =>
     }))
 
 
-    const data = {
+    const toSave = {
     	templateId,
       name: saveYearsAsRecent ? setRecentText(name, mostRecent, yearsWithData) : name,
       description: saveYearsAsRecent ? setRecentText(description, mostRecent, yearsWithData) : description,
@@ -347,9 +345,11 @@ export const saveTemplate = (template, templateId = null) =>
       thumbnail
     }
 
+console.log("SAVING TEMPLATE:", toSave);
+
 		return falcorGraph.call(
 			["templates2", "save"],
-			[data], [], []
+			[toSave], [], []
 		)
 		// .then(() => dispatch(update(falcorGraph.getCache())));
 	}
@@ -1047,7 +1047,7 @@ export const saveReport = (report, reportId = null) =>
 	(dispatch, getState) => {
 		const state = getState().report;
 
-    const args = {
+    const toSave = {
       reportId,
       ...report,
       route_comps: state.route_comps.map(rc =>
@@ -1094,9 +1094,10 @@ export const saveReport = (report, reportId = null) =>
         })
       )
     }
+
     return falcorGraph.call(
       ["reports2", "save"],
-      [args], [], []
+      [toSave], [], []
     )
     .then(res => {
       const newReportId = get(res, 'json.reports2.recentlySaved', reportId);

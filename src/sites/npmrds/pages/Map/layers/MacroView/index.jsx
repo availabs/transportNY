@@ -43,6 +43,130 @@ import HoverComp from "./HoverComp";
 import { LayerContainer } from "~/modules/avl-map/src";
 import TmcSearch from "./TmcSearch"
 
+const MEASURE_REGEX = /^([a-z]+)[_]*/;
+const MEASURE_MODIFIERS = {
+  freeflow: {
+    filter: "freeflow",
+    value: true
+  },
+
+  ris: {
+    filter: "risAADT",
+    value: true
+  },
+
+  gas: {
+    filter: "fueltype",
+    value: "gas"
+  },
+  diesel: {
+    filter: "fueltype",
+    value: "diesel"
+  },
+
+  co2: {
+    filter: "pollutant",
+    value: "co2"
+  },
+  c0: {
+    filter: "pollutant",
+    value: "c0"
+  },
+  nox: {
+    filter: "pollutant",
+    value: "nox"
+  },
+  voc: {
+    filter: "pollutant",
+    value: "voc"
+  },
+  pm2_5: {
+    filter: "pollutant",
+    value: "pm2_5"
+  },
+  pm10: {
+    filter: "pollutant",
+    value: "pm10"
+  },
+
+  per_mi: {
+    filter: "perMiles",
+    value: true
+  },
+
+  vhrs: {
+    filter: "vehicleHours",
+    value: true
+  },
+
+  "5pctl": {
+    filter: "percentiles",
+    value: "5pctl"
+  },
+  "20pctl": {
+    filter: "percentiles",
+    value: "20pctl"
+  },
+  "25pctl": {
+    filter: "percentiles",
+    value: "25pctl"
+  },
+  "50pctl": {
+    filter: "percentiles",
+    value: "50pctl"
+  },
+  "75pctl": {
+    filter: "percentiles",
+    value: "75pctl"
+  },
+  "80pctl": {
+    filter: "percentiles",
+    value: "80pctl"
+  },
+  "85pctl": {
+    filter: "percentiles",
+    value: "85pctl"
+  },
+  "95pctl": {
+    filter: "percentiles",
+    value: "95pctl"
+  },
+
+  "truck": {
+    filter: "trafficType",
+    value: "truck"
+  },
+  "singl": {
+    filter: "trafficType",
+    value: "singl"
+  },
+  "combi": {
+    filter: "trafficType",
+    value: "combi"
+  },
+
+  "am": {
+    filter: "peakSelector",
+    value: "am"
+  },
+  "off": {
+    filter: "peakSelector",
+    value: "off"
+  },
+  "pm": {
+    filter: "peakSelector",
+    value: "pm"
+  },
+  "overnight": {
+    filter: "peakSelector",
+    value: "overnight"
+  },
+  "weekend": {
+    filter: "peakSelector",
+    value: "weekend"
+  }
+}
+
 /* ---- To Do -----
 
    ---------------- */
@@ -369,6 +493,7 @@ class MacroLayer extends LayerContainer {
 
   init(map, falcor) {
     this.updateSubMeasures(this.filters.measure.value, this.filters, falcor);
+
     // console.log('----init----')
     // map.on('zoomend', () => {
     //  this.updateState({zoom: map.getZoom()})
@@ -464,13 +589,29 @@ class MacroLayer extends LayerContainer {
           measure
         } = get(this, ["props", "params"], {});
 
-        if (geoid) {
-          this.filters.geography.value = [geoid];
-          this.filters.year.value = +year;
-          this.filters.measure.value = measure;
-        }
-        this.zoomToGeography();
+        if (geoid && year && measure) {
+          const match = MEASURE_REGEX.exec(measure);
 
+          if (match) {
+            this.filters.geography.value = [geoid];
+            this.filters.year.value = +year;
+
+            const [, m] = match;
+            
+            this.updateSubMeasures(m, this.filters, falcor);
+
+            this.filters.measure.value = m;
+
+            for (const mod in MEASURE_MODIFIERS) {
+              if (measure.includes(mod)) {
+                const { filter, value } = MEASURE_MODIFIERS[mod];
+                this.filters[filter].value = value;
+              }
+            }
+          }
+        }
+
+        this.zoomToGeography();
       });
   }
 

@@ -1,7 +1,7 @@
 const ppdaf = () => {
 
   // const bg = 'gray-50'
-  const primary =  'nuetral'
+  const primary =  'neutral'
   const highlight =  'white'
   const accent =  'blue'
   // const secondary =  'green'
@@ -14,6 +14,8 @@ const ppdaf = () => {
     // ['#1e4b5a','#e75148','#0f1e37','#8c786e',],
     // ['#fde72f','#95d840','#55a488','#2f708e','#453781','#472354'],
     //  ['#5fc0c8','#5559d3','#ed8534','#7e84fa','#7fe06a']
+
+    sidebarBg: `bg-${ primary }-100`,
 
     sidenav: (opts={}) =>  {
         const {color = 'white', size = 'compact',  subMenuStyle = 'inline', responsive = 'top'} = opts
@@ -140,7 +142,7 @@ const ppdaf = () => {
          `,
         navitemSideActive: `
             group font-sans flex flex-col
-            ${sizes[size].sideItem} ${sizes[size].sideItemActive} ${colors[color].sideItemActive} 
+            ${sizes[size].sideItem} ${sizes[size].sideItemActive} ${colors[color].sideItemActive}
             hover:${colors[color].highlightColor}
             focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
             transition-all cursor-pointer
@@ -279,7 +281,7 @@ const ppdaf = () => {
                   size: sizes
               }
           }
-         
+
       },
 
     tabpanel: (opts = {}) => {

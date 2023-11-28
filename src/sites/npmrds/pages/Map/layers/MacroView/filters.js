@@ -154,7 +154,6 @@ const filters = {
       { name: "Person Hours", value: false }
     ],
     value: false,
-    value: false,
     multi: false,
     searchable: false,
     active: false
@@ -366,16 +365,20 @@ const updateSubMeasures = (measure, filters, falcor) => {
   if (!peakSelector.domain.reduce((a, c) => a || (c.value === peakSelector.value), false)) {
     peakSelector.value = measure === "speed" ? "total" : "none";
   }
-  if ((measure !== "phed") && (measure !== "ted")) {
-    freeflow.value = false;
-    perMiles.value = false;
-    vehicleHours.value = false;
-  } else {
-    freeflow.value = true;
-    perMiles.value = true;
-    vehicleHours.value = true;
-  }
 
+  // if ((measure !== "phed") && (measure !== "ted")) {
+  //   freeflow.value = false;
+  //   perMiles.value = false;
+  //   vehicleHours.value = false;
+  // } else {
+  //   freeflow.value = true;
+  //   perMiles.value = true;
+  //   vehicleHours.value = true;
+  // }
+
+  freeflow.value = false;
+  perMiles.value = false;
+  vehicleHours.value = false;
   risAADT.value = false;
 
   percentiles.value = null;

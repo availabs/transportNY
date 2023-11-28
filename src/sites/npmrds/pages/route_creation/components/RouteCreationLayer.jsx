@@ -39,6 +39,8 @@ class RouteCreationLayer extends LayerContainer {
     highlighted: []
   }
 
+  tmcsbyLayerId = {};
+
   setHighlightedTmcs(tmc) {
     const tmcs = this.state.highlighted;
     if (tmcs.includes(tmc)) {
@@ -105,7 +107,20 @@ class RouteCreationLayer extends LayerContainer {
 
   onHover = {
     layers: [...ConflationLayerIds],
-    property: "tmc"
+    property: "tmc",
+    hoverEnter: function(layerId, features = []) {
+      const route = this.state.tmcs;
+      const highlighted = this.state.highlighted;
+      features.forEach(f => {
+        const tmc = f.properties.tmc;
+        if (route.includes(tmc) && !highlighted.includes(tmc)) {
+          this.updateState({ highlighted: [...highlighted, tmc] });
+        }
+      })
+    },
+    hoverLeave: function(layerId, features = []) {
+      this.updateState({ highlighted: [] });
+    }
   }
 
   init(mapboxMap, falcor) {
