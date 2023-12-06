@@ -245,7 +245,7 @@ class HdsGraphComp extends GeneralGraphComp {
 				remove={ () => this.props.removeGraphComp(this.props.index, this.props.id) }
 				add={ () => this.props.addGraphComp(this.props.type, { x, y, w, h }) }
 				loading={ Boolean(this.state.loading) }
-				showTableModal={ () => this.props.showTableModal(this.generateTableData(graphData, station_comps, hdsData, resolution)) }
+				showTableModal={ t => this.props.showTableModal(this.generateTableData(graphData, station_comps, hdsData, resolution), t) }
 				saveImage={ saveImage }
 				addMessageBox={ this.addMessageBox.bind(this) }
 				hasMessageBox={ hasMessage }

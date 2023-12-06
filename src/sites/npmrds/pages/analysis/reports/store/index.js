@@ -107,13 +107,14 @@ export const getDataDateExtent = () =>
 				})
 			})
 
-const getRouteData = (routeIds, report) =>
-	falcorGraph.get(["routes2", "id", routeIds, ["tmc_array", "name"]])
+const getRouteData = (routeIds, report) => {
+	return falcorGraph.get(["routes2", "id", routeIds, "name"])
     .then(() =>
       falcorGraph.get(
         ["routes2", "id", routeIds, report.allYearsWithData, "tmc_array"]
       )
     )
+}
 
 const getStationData = stationIds =>
   falcorGraph.get(
@@ -1013,12 +1014,12 @@ export const loadReport = report =>
                 return a;
               }, []),
         stationIds = (get(report, "station_comps") || []).map(sc => sc.stationId);
+
 			return getStationData(stationIds)
         .then(() => getRouteData(routeIds, getState().report))
 				.then(() => dispatch(_loadReport(report)))
 		}
 		if (!isNaN(+report)) {
-			// console.log('get reportData', report)
 			return getReportData(report)
 				.then(res => {
 					const data = get(res, `json.reports2.id.${ report }`, null);

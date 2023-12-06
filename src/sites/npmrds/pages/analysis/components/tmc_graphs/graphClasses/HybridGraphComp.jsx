@@ -57,28 +57,32 @@ export default class HybridGraphComp extends GeneralGraphComp {
 		}
 	}
 
-	async fetchFalcorDeps() {
-		await super.fetchFalcorDeps(false);
+	fetchFalcorDeps() {
 
-		const stations = this.getActiveStationComponents();
-		if (!stations.length) return Promise.resolve();
+		return super.fetchFalcorDeps()
+			.then(() => {
 
-		const displayData = this.getHdsData();
-		if (!displayData.length) return Promise.resolve();
+				const stations = this.getActiveStationComponents();
+				if (!stations.length) return Promise.resolve();
 
-		this.setState(prev => ({ loading: ++prev.loading }))
+				const displayData = this.getHdsData();
+				if (!displayData.length) return Promise.resolve();
 
-    return stations.reduce((promise, station) => {
-      const requestKey = makeRequest(station.settings, displayData[0].key);
-      return promise.then(() => this.props.falcor.get(
-        ["hds", "continuous", "data", station.stationId, requestKey],
-				["hds", "continuous", "stations", "byId", station.stationId, "geom"]
-      )).then(res => {
-        const data = get(res, ["json", "hds", "continuous", "data", station.stationId, requestKey])
-        station.data[displayData[0].key] = data;
-      })
-    }, Promise.resolve())
-			.then(() => this.setState(prev => ({ loading: --prev.loading })));
+				this.setState(prev => ({ loading: ++prev.loading }))
+
+		    return stations.reduce((promise, station) => {
+		      const requestKey = makeRequest(station.settings, displayData[0].key);
+		      return promise.then(() => this.props.falcor.get(
+		        ["hds", "continuous", "data", station.stationId, requestKey],
+						["hds", "continuous", "stations", "byId", station.stationId, "geom"]
+		      )).then(res => {
+		        const data = get(res, ["json", "hds", "continuous", "data", station.stationId, requestKey])
+		        station.data[displayData[0].key] = data;
+		      })
+		    }, Promise.resolve())
+					.then(() => this.setState(prev => ({ loading: --prev.loading })))
+
+			});
 	}
 
 	getActiveRouteComponents() {
@@ -261,8 +265,6 @@ export default class HybridGraphComp extends GeneralGraphComp {
 			mWidth = location === "bottom" ? 0 : get(message, "width", 0),
 			mHeight = location === "bottom" ? get(message, "height", 0) : 0;
 
-console.log("LOADING:", this.state.loading);
-
 		// updateTitle={ title => this.props.updateGraphComp(this.props.index, { state: { title } }) }
 
 		return (
@@ -280,7 +282,7 @@ console.log("LOADING:", this.state.loading);
 				remove={ () => this.props.removeGraphComp(this.props.index, this.props.id) }
 				add={ () => this.props.addGraphComp(this.props.type, { x, y, w, h }) }
 				loading={ Boolean(this.state.loading) }
-				showTableModal={ () => this.props.showTableModal(this.generateTableData(graphData, routeComps, stationComps, displayData, hdsData, resolution)) }
+				showTableModal={ t => this.props.showTableModal(this.generateTableData(graphData, routeComps, stationComps, displayData, hdsData, resolution), t) }
 				saveImage={ saveImage }
 				addMessageBox={ this.addMessageBox.bind(this) }
 				hasMessageBox={ hasMessage }

@@ -523,7 +523,7 @@ class GeneralGraphComp extends React.Component {
 				remove={ () => this.props.removeGraphComp(this.props.index, this.props.id) }
 				add={ () => this.props.addGraphComp(this.props.type, { x, y, w, h }, this.props.state) }
 				loading={ Boolean(this.state.loading) }
-				showTableModal={ () => this.props.showTableModal(this.generateTableData(graphData, routeComps, displayData, resolution)) }
+				showTableModal={ t => this.props.showTableModal(this.generateTableData(graphData, routeComps, displayData, resolution), t) }
 				saveImage={ saveImage }
 				addMessageBox={ this.addMessageBox.bind(this) }
 				hasMessageBox={ hasMessage }

@@ -104,6 +104,9 @@ class GraphContainer extends React.Component {
 		const numIcons = this.getNumIcons();
 		return WIDTH_BREAKPOINT + numIcons * 26 + 8;
 	}
+	showTableModal() {
+		this.props.showTableModal(getDisplayTitle(this.props));
+	}
 	getHeaderHeight() {
 		const {
 			viewing,
@@ -222,7 +225,7 @@ class GraphContainer extends React.Component {
 				}
 				<IconContainer>
 					{ VIEW_MODE ? null :
-						<IconButton onClick={ this.props.showTableModal }
+						<IconButton onClick={ this.showTableModal.bind(this) }
 							id="view-data" icon="fa-eye" tooltip="View Graph Data"/>
 					}
 					{ VIEW_MODE || hasMessageBox ? null :

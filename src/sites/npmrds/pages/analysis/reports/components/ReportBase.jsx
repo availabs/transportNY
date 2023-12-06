@@ -31,6 +31,8 @@ import { ControlBox, Control } from "~/sites/npmrds/pages/analysis/components/Si
 // import * as DomainManager from "components/tmc_graphs/utils/DomainManager"
 import * as DomainManager from "~/sites/npmrds/pages/analysis/components/tmc_graphs/utils/DomainManager"
 
+import downloadjs from "downloadjs"
+
 // import {
 //   foldersFalcorRequest,
 //   getFoldersFromState
@@ -471,8 +473,8 @@ class ReportBase extends React.Component {
       !isEqual(SETTINGS.overrides, settings.overrides);
   }
 
-  showTableModal(data) {
-    this.setState({ showTableModal: true, tableModalData: data });
+  showTableModal(data, title) {
+    this.setState({ showTableModal: true, tableModalData: { ...data, title } });
   }
   hideTableModal() {
     this.setState({ showTableModal: false });
@@ -1129,16 +1131,49 @@ const LoadModal = props => {
   )
 }
 
-const TableWrapper = ({ keys, data }) => {
+const TableWrapper = ({ keys, data, title }) => {
   const columns = React.useMemo(() => {
     return keys.map(k => ({
       accessor: k,
       Header: k
     }))
-  }, [keys])
+  }, [keys]);
+
+  const [filename, setFilename] = React.useState("");
+
+  const downloadData = React.useCallback(e => {
+    const csv = [
+      keys.map(k => `"${ k }"`),
+      ...data.map(d => keys.map(k => `"${ d[k] }"`))
+    ].join("\n")
+    downloadjs(new Blob([csv]), `${ filename }.csv`, "text/csv");
+  }, [data, keys, filename]);
+
+  React.useEffect(() => {
+    if (title) {
+      setFilename(title);
+    }
+  }, [title]);
+
   return (
-    <Table data={ data }
-      columns={ columns }
-      disableFilters={ true }/>
+    <div>
+      <div className="flex items-center justify-end mb-1 mr-8">
+        <div className="flex-1 mr-2 flex items-center">
+          <div className="mr-1 text-lg font-bold">Filename:</div>
+          <Input themeOptions={ { width: "full" } }
+            value={ filename }
+            onChange={ setFilename }/>
+          <div>.csv</div>
+        </div>
+        <Button themeOptions={ { size: "sm" } }
+          onClick={ downloadData }
+        >
+          DOWNLOAD DATA AS CSV
+        </Button>
+      </div>
+      <Table data={ data }
+        columns={ columns }
+        disableFilters={ true }/>
+    </div>
   )
 }
