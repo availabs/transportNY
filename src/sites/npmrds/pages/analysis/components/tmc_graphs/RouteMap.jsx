@@ -113,12 +113,14 @@ class RouteMap extends HybridGraphComp {
 			...INDICES_BY_DATE_RANGE
 		]
 		this.timeout = null;
+
+		this.MAP_IS_LOADING = false;
 	}
 	componentDidMount() {
 		super.componentDidMount();
 
-		this.resize();
 		this.loadMap();
+		this.resize();
 	}
 	componentWillUnmount() {
 		super.componentWillUnmount();
@@ -154,7 +156,11 @@ class RouteMap extends HybridGraphComp {
 		this.timeout = setTimeout(this.resize.bind(this), 50);
 	}
 	loadMap() {
+		if (this.MAP_IS_LOADING) return;
+
 		this.setState({ loading: ++this.state.loading });
+
+		this.MAP_IS_LOADING = true;
 
     const map = new mapboxgl.Map({
       container: this.mapContainer.current,
@@ -255,7 +261,9 @@ class RouteMap extends HybridGraphComp {
 			map.on('mouseleave', "station-layer", this.stationHover);
 		}
 
-		!this.state.map && this.setState({ map });
+		this.MAP_IS_LOADING = false;
+
+		this.setState({ map });
 	}
 
 	stationHover({ features, point }) {
