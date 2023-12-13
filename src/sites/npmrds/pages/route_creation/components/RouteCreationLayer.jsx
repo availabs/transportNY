@@ -41,6 +41,16 @@ class RouteCreationLayer extends LayerContainer {
 
   tmcsbyLayerId = {};
 
+  setCreationMode(creationMode) {
+    if (creationMode === "tmc-clicks") {
+      this.state.markers.forEach(m => m.remove());
+      this.updateState({ creationMode, markers: [] });
+    }
+    else {
+      this.updateState({ creationMode, markers: [], tmcs: [] });
+    }
+  }
+
   setHighlightedTmcs(tmc) {
     const tmcs = this.state.highlighted;
     if (tmcs.includes(tmc)) {

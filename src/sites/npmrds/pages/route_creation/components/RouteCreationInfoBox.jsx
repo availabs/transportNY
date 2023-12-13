@@ -32,6 +32,7 @@ const InfoBox = props => {
   });
 
   const creationMode = props.layer.state.creationMode;
+  const cmDisplay = creationMode === "markers" ? "Marker Placement" : "TMC Clicks"
 
   const { routeId } = useParams();
 
@@ -84,6 +85,11 @@ const InfoBox = props => {
     props.layer.clearAll();
   }, [props.layer.clearAll]);
 
+  const toggleCreationMode = React.useCallback(e => {
+    const cm = creationMode === "markers" ? "tmc-clicks" : "markers";
+    props.layer.setCreationMode(cm);
+  }, [creationMode, props.layer.setCreationMode]);
+
   const totalMiles = React.useMemo(() => {
     return format(tmcs.reduce((a, c) => {
       return a + get(falcorCache, ["tmc", c, "meta", year, "miles"], 0)
@@ -98,6 +104,14 @@ const InfoBox = props => {
     <>
       <div className="grid grid-cols-1 gap-2 pb-1">
         <div>
+          <Button onClick={ toggleCreationMode } themeOptions={ { width: "full" } }>
+            Toggle Creation Mode
+          </Button>
+        </div>
+        <div className="border-y-2 py-1">
+          <span className="font-bold mr-1">Creation Mode:</span>{ cmDisplay }
+        </div>
+        <div>
           { creationMode === "markers" ?
               "Click map to place markers to define a route." :
               "Click TMCs to define a route."
@@ -106,12 +120,12 @@ const InfoBox = props => {
         <div className="border-t-2 border-current"/>
         <div className="grid grid-cols-2 gap-2">
           <Button onClick={ removeLast }
-            disabled={ !(points.length || tmcs.length) }
+            disabled={ !points.length && !tmcs.length }
           >
             Remove Last
           </Button>
           <Button onClick={ clearAll }
-            disabled={ !(points.length || tmcs.length) }
+            disabled={ !points.length && !tmcs.length }
           >
             Clear All
           </Button>
@@ -141,9 +155,10 @@ const InfoBox = props => {
             <div className="mt-1 border-t-2 border-current"/>
           </div>
         }
-        <div className="grid grid-cols-2 gap-2">
+        <div>
           <Button onClick={ open }
-            disabled={ !(points.length || tmcs.length) && !loadedRoute }
+            themeOptions={ { width: "full" } }
+            disabled={ points.length < 2 || !tmcs.length && !loadedRoute }
           >
             Save Route
           </Button>
