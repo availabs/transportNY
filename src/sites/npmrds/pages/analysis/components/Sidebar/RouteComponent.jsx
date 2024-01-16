@@ -198,6 +198,7 @@ class RouteComponent extends React.Component {
 		const SETTINGS = this.props.SETTINGS.get(this.props.compId),
 			{ settings } = this.props;
 		return this.shouldReloadData() ||
+			SETTINGS.isRelativeDateBase !== settings.isRelativeDateBase ||
 			SETTINGS.compTitle !== settings.compTitle;
 	}
 	shouldReloadData() {
@@ -206,6 +207,7 @@ class RouteComponent extends React.Component {
 
 		return SETTINGS.startDate !== settings.startDate ||
 			SETTINGS.endDate !== settings.endDate ||
+			SETTINGS.relativeDate !== settings.relativeDate ||
 			SETTINGS.startTime !== settings.startTime ||
 			SETTINGS.endTime !== settings.endTime ||
 			SETTINGS.resolution !== settings.resolution ||
@@ -276,13 +278,13 @@ class RouteComponent extends React.Component {
 				<div style={ { borderBottom: `2px solid currentColor` } }>
 					<ControlBox>
 						<Control onClick={ e => this.toggleControls() }>
-							<span className={ `fa ${ advanced ? 'fa-toggle-on' : 'fa-toggle-off' }` }/>
+							<span className={ `mx-1 fa ${ advanced ? 'fa-toggle-on' : 'fa-toggle-off' }` }/>
 							<span>{ this.state.controls }</span>
 						</Control>
 						<Control onClick={ e => needsUpdate && this.updateRouteComp() }
 							disabled={ !needsUpdate }>
 							<span>Update</span>
-							<span className='fa fa-refresh'/>
+							<span className='mx-1 fa fa-refresh'/>
 						</Control>
 					</ControlBox>
 				</div>
@@ -290,13 +292,17 @@ class RouteComponent extends React.Component {
 				<Controls SETTINGS={ SETTINGS }
 					isDifferent={ isDifferent }
 					updateSettings={ this.updateSettings.bind(this) }
+					usingRelativeDates={ this.props.usingRelativeDates }
+					relativeDateBase={ this.props.relativeDateBase }
+					compId={ this.props.compId }
 					toggleWeekday={ this.toggleWeekday.bind(this) }
 					togglePeaks={ this.togglePeaks.bind(this) }
 					PEAKS={ this.state.PEAKS }
 					dateExtent={ this.props.dateExtent }
 					yearsWithData={ this.props.yearsWithData }
 					copy={ this.copyRouteCompSettings.bind(this) }
-					route={ this.props.route }/>
+					route={ this.props.route }
+					inRouteGroup={ this.props.inRouteGroup }/>
 
 				<div style={ { paddingTop: "10px" } }>
 					<ColorPicker color={ this.state.color }

@@ -91,7 +91,9 @@ class Sidebar extends React.Component {
           dateExtent: this.props.dateExtent,
           yearsWithData: this.props.yearsWithData,
           SETTINGS: this.props.routeComponentSettings,
-          route: this.props.routes.reduce((a, c) => c.compId == compId ? c : a, null)
+          route: this.props.routes.reduce((a, c) => c.compId == compId ? c : a, null),
+					usingRelativeDates: this.props.usingRelativeDates,
+					relativeDateBase: this.props.relativeDateBase
         }
       };
       case "StationComponent": {

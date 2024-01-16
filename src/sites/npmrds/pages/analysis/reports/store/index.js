@@ -25,8 +25,12 @@ import {
 
 // import { getColorRange } from "constants/color-ranges"
 import { getColorRange } from "~/modules/avl-components/src"
-const COLORS = getColorRange(9, "Set1");//COLOR_RANGES[12][1].colors.slice();
+const COLORS = getColorRange(8, "Dark2");//COLOR_RANGES[12][1].colors.slice();
 // const COLORS = ['#FF6900', '#FCB900', '#7BDCB5', '#00D084', '#8ED1FC', '#0693E3', '#ABB8C3', '#EB144C', '#F78DA7', '#9900EF']
+
+import {
+  calculateRelativeDates
+} from "./utils/relativedates.utils.js"
 
 const DEFAULT_COLOR_RANGE = getColorRange(5, "RdYlGn");//COLOR_RANGES[5].reduce((a, c) => c.name === "RdYlGn" ? c.colors : a)
 
@@ -55,7 +59,8 @@ const YEARS_WITH_DATA = [
   2015,
   2016,
   2017,
-  2018
+  2018,
+  2019
 ]
 
 const UPDATE_STATE = "UPDATE_STATE";
@@ -112,7 +117,9 @@ const getRouteData = (routeIds, report) => {
     .then(() =>
       falcorGraph.get(
         ["routes2", "id", routeIds, report.allYearsWithData, "tmc_array"]
-      )
+      ).then(res => {
+        console.log("ROUTE TMC ARRAY RES:", res)
+      })
     )
 }
 
@@ -196,6 +203,18 @@ export const loadRoutesAndTemplate = (routeIds, templateId, stationIds = []) =>
 					state: _loadTemplate(templateId, routeIds, getState().report, stationIds)
 				})
 			)
+export const loadRoutesAndTemplateWithDates = (routeIds, templateId, startDate, endDate, stationIds = []) =>
+	(dispatch, getState) =>
+    Promise.resolve()
+      .then(() => stationIds.length && getStationData(stationIds))
+		  .then(() => routeIds.length && getRouteData(routeIds, getState().report))
+			.then(() => getTemplateData(templateId))
+			.then(() =>
+				dispatch({
+					type: UPDATE_STATE,
+					state: _loadDateRelativeTemplate(templateId, routeIds, startDate, endDate, getState().report, stationIds)
+				})
+			)
 export const loadRoutesAndTemplateByType = (routeIds, defaultType, stationIds = []) =>
 	(dispatch, getState) =>
     Promise.resolve()
@@ -211,7 +230,7 @@ export const loadRoutesAndTemplateByType = (routeIds, defaultType, stationIds = 
     				})
     			)
       })
-export const loadTemplate = templateId =>
+export const loadTemplate = (templateId) =>
 	(dispatch, getState) =>
 		getTemplateData(templateId)
 			.then(() => {
@@ -223,11 +242,14 @@ export const loadTemplate = templateId =>
 					state: _loadTemplate(templateId, routeIds, state, stationIds)
 				})
 			})
+
 export const saveTemplate = (template, templateId = null) =>
 	(dispatch, getState) => {
 		const state = getState().report,
 			yearsWithData = state.yearsWithData,
 			mostRecent = Math.max(...yearsWithData);
+
+    const usingRelativeDates = state.usingRelativeDates;
 
     const {
       name,
@@ -263,42 +285,50 @@ export const saveTemplate = (template, templateId = null) =>
     }
 
     const routeIds = template.route_comps
-      .reduce((a, c) => a.includes(c.routeId) ? a : [...a, c.routeId], []),
-      idMap = {};
-    routeIds.forEach((id, i) => {
-      idMap[id] = `$${ i }`;
-    })
+      .reduce((a, c) => {
+        if (c.type === "group") {
+          return c.route_comps.reduce((aa, cc) => {
+            aa.add(cc.routeId);
+            return aa;
+          }, a)
+        }
+        a.add(c.routeId);
+        return a;
+      }, new Set());
+
+    const idMap = [...routeIds].reduce((a, c, i) => {
+      a[c] = `$${ i }`;
+      return a;
+    }, {});
+
     const route_comps = template.route_comps.map(rc =>
         rc.type === "group" ? ({
-          compId: rc.compId,
+          ...rc,
           color: get(rc, "color", "#666666"),
           type: "group",
-          name: rc.name,
           route_comps: get(rc, "route_comps", [])
             .map(rc => ({
-              compId: rc.compId,
-              routeId: rc.routeId,
-              color: rc.color,
+              ...rc,
+              routeId: idMap[rc.routeId],
               type: "route",
               settings: {
               	...rc.settings,
-              	year: rc.settings.year === "advanced" ? "advanced" : saveYearsAsRecent ? setRecentYear(rc.settings.year, mostRecent) : rc.settings.year,
+              	year: saveYearsAsRecent ? setRecentYear(rc.settings.year, mostRecent) : rc.settings.year,
               	startDate: saveYearsAsRecent ? setRecentDate(rc.settings.startDate, mostRecent) : rc.settings.startDate,
               	endDate: saveYearsAsRecent ? setRecentDate(rc.settings.endDate, mostRecent) : rc.settings.endDate,
               	compTitle: saveYearsAsRecent ? setRecentText(rc.settings.compTitle, mostRecent, yearsWithData) : rc.settings.compTitle
               }
             }))
         }) : ({
+          ...rc,
           routeId: idMap[rc.routeId],
-          compId: rc.compId,
-          color: rc.color,
           type: "route",
           settings: {
           	...rc.settings,
-          	year: rc.settings.year === "advanced" ? "advanced" : saveYearsAsRecent ? setRecentYear(rc.settings.year, mostRecent) : rc.settings.year,
-          	startDate: saveYearsAsRecent ? setRecentDate(rc.settings.startDate, mostRecent) : rc.settings.startDate,
-          	endDate: saveYearsAsRecent ? setRecentDate(rc.settings.endDate, mostRecent) : rc.settings.endDate,
-          	compTitle: saveYearsAsRecent ? setRecentText(rc.settings.compTitle, mostRecent, yearsWithData) : rc.settings.compTitle
+            year: saveYearsAsRecent ? setRecentYear(rc.settings.year, mostRecent) : rc.settings.year,
+            startDate: saveYearsAsRecent ? setRecentDate(rc.settings.startDate, mostRecent) : rc.settings.startDate,
+            endDate: saveYearsAsRecent ? setRecentDate(rc.settings.endDate, mostRecent) : rc.settings.endDate,
+            compTitle: saveYearsAsRecent ? setRecentText(rc.settings.compTitle, mostRecent, yearsWithData) : rc.settings.compTitle
           }
         })
     )
@@ -336,7 +366,7 @@ export const saveTemplate = (template, templateId = null) =>
       name: saveYearsAsRecent ? setRecentText(name, mostRecent, yearsWithData) : name,
       description: saveYearsAsRecent ? setRecentText(description, mostRecent, yearsWithData) : description,
       folder,
-      routes: routeIds.length,
+      routes: routeIds.size,
       route_comps,
       graph_comps,
       station_comps,
@@ -346,7 +376,8 @@ export const saveTemplate = (template, templateId = null) =>
       thumbnail
     }
 
-console.log("SAVING TEMPLATE:", toSave);
+// console.log("TO SAVE:", toSave);
+// return Promise.resolve();
 
 		return falcorGraph.call(
 			["templates2", "save"],
@@ -385,21 +416,23 @@ export const updateRouteCompSettings = (compId, settings) =>
 		return Promise.resolve(
 			dispatch({
 				type: UPDATE_STATE,
-				state: {
-					routeComponentSettings
-				}
+				state: { routeComponentSettings }
 			})
 		)
 	}
+
 export const updateRouteComp = (compId, update, reloadData=true) =>
 	(dispatch, getState) =>
 		new Promise((resolve, reject) => {
 			const state = getState().report;
+
+      let prevSettings = {};
 	    let settings = {};
 
 	    const route_comps = state.route_comps.map(rc => {
         const type = get(rc, "type", "route");
         if ((type === "route") && (rc.compId === compId)) {
+          prevSettings = { ...rc.settings };
 	        settings = { ...rc.settings, ...update };
           const cache = falcorGraph.getCache();
 	        const name = get(cache, `routes2.id.${ rc.routeId }.name`, 'unknown');
@@ -420,6 +453,7 @@ export const updateRouteComp = (compId, update, reloadData=true) =>
               route_comps: get(rc, "route_comps", [])
                 .map(rc => {
                   if (rc.compId === compId) {
+                    prevSettings = { ...rc.settings };
           	        settings = { ...rc.settings, ...update };
                     const cache = falcorGraph.getCache();
           	        const name = get(cache, `routes2.id.${ rc.routeId }.name`, 'unknown');
@@ -441,54 +475,100 @@ export const updateRouteComp = (compId, update, reloadData=true) =>
 	    if (reloadData) {
 	    	delete routeDataMap[compId];
 	    }
-		  const routes = route_comps.reduce((a, c) =>
-		  	[...a, ...getRoutesForRouteComp(c, routeDataMap, true)]
-		  , [])
+		  const routes = route_comps.reduce((a, c) => {
+		  	return [...a, ...getRoutesForRouteComp(c, routeDataMap, true)];
+		  }, []);
+
+      const nextState = {
+        route_comps,
+        routes
+      }
+
+      if (prevSettings.isRelativeDateBase && !settings.isRelativeDateBase) {
+        nextState.usingRelativeDates = false;
+        nextState.relativeDateBase = {
+          compId: null,
+          startDate: null,
+          endDate: null
+        }
+      }
+      else if (settings.isRelativeDateBase) {
+        nextState.usingRelativeDates = true;
+        nextState.relativeDateBase = {
+          compId,
+          startDate: settings.startDate,
+          endDate: settings.endDate
+        }
+      }
 
 	    resolve(
 	    	dispatch({
 	    		type: UPDATE_STATE,
-	    		state: {
-	    			route_comps,
-	    			routes
-	    		}
+	    		state: nextState
 	    	})
 	    )
 		})
     .then(() => dispatch(takeSnapShot()))
+// END updateRouteComp
+
 export const updateAllRouteComps = () =>
 	(dispatch, getState) =>
 		new Promise((resolve, reject) => {
 		  const state = getState().report;
 
+      let usingRelativeDates = false;
+      let relativeDateBase = {
+        compId: null,
+        startDate: null,
+        endDate: null
+      }
+
 		  const route_comps = state.route_comps.map(rc => {
         if (get(rc, "type", "route") === "route") {
+          const next = state.routeComponentSettings.get(rc.compId);
+          if (next.isRelativeDateBase) {
+            usingRelativeDates = true;
+            relativeDateBase.compId = rc.compId;
+            relativeDateBase.startDate = next.startDate;
+            relativeDateBase.endDate = next.endDate;
+          }
           return {
     		    ...rc,
-    		    settings: { ...state.routeComponentSettings.get(rc.compId) }
+    		    settings: { ...next }
           }
         }
         else {
           return {
             ...rc,
-            route_comps: rc.route_comps.map(rc => ({
-      		    ...rc,
-      		    settings: { ...state.routeComponentSettings.get(rc.compId) }
-            }))
+            route_comps: rc.route_comps.map(rc => {
+              const next = state.routeComponentSettings.get(rc.compId);
+              if (next.isRelativeDateBase) {
+                usingRelativeDates = true;
+                relativeDateBase.compId = rc.compId;
+                relativeDateBase.startDate = next.startDate;
+                relativeDateBase.endDate = next.endDate;
+              }
+              return {
+        		    ...rc,
+        		    settings: { ...next }
+              }
+            })
           }
         }
 		  })
 	    // const routeDataMap = state.routes.reduce((a, c) => ({ ...a, [c.compId]: c.data }), {});
-		  const routes = route_comps.reduce((a, c) =>
-		  	[...a, ...getRoutesForRouteComp(c, null, true)]
-		  , [])
+		  const routes = route_comps.reduce((a, c) => {
+		  	return [...a, ...getRoutesForRouteComp(c, null, true)];
+		  }, [])
 
 		  resolve(
 		  	dispatch({
 			  	type: UPDATE_STATE,
 			  	state: {
 			  		route_comps,
-			  		routes
+			  		routes,
+            usingRelativeDates,
+            relativeDateBase
 			  	}
 			  })
 			)
@@ -1053,11 +1133,8 @@ export const saveReport = (report, reportId = null) =>
       ...report,
       route_comps: state.route_comps.map(rc =>
         get(rc, "type", "route") === "route" ?
-          ({
-            compId: rc.compId,
-            routeId: rc.routeId,
-            settings: { ...rc.settings },
-            color: rc.color,
+          ({ ...rc,
+            settings: { ...rc.settings, relativeDate: null, isRelativeDateBase: false },
             type: "route"
           }) :
           ({
@@ -1066,10 +1143,8 @@ export const saveReport = (report, reportId = null) =>
             type: "group",
             route_comps: get(rc, "route_comps", [])
               .map(rc => ({
-                compId: rc.compId,
-                routeId: rc.routeId,
+                ...rc,
                 settings: { ...rc.settings },
-                color: rc.color,
                 type: "route"
               }))
           })
@@ -1078,7 +1153,7 @@ export const saveReport = (report, reportId = null) =>
         ({
           compId: sc.compId,
           stationId: sc.stationId,
-          settings: { ...sc.settings },
+          settings: { ...sc.settings, relativeDate: null, isRelativeDateBase: false },
           color: sc.color
         })
       ),
@@ -1154,7 +1229,8 @@ export const createNewRouteGroup = (srcId = null, dstId = null) =>
       type: "group",
       name: `Route Group ${ getGroupId() }`,
       compId: getUniqueRouteCompId(),
-      route_comps: [srcComp, dstComp].filter(Boolean),
+      route_comps: [srcComp, dstComp].filter(Boolean)
+        .map(rc => ({ ...rc, inRouteGroup: true })),
       color: "#666666"
     }
 
@@ -1182,7 +1258,10 @@ export const addRouteToGroup = (groupId, compId) =>
       return c.compId === groupId ? c : a;
     }, null);
 
-    route_group.route_comps = [...route_group.route_comps, route_comp];
+    route_group.route_comps = [
+      ...route_group.route_comps,
+      { ...route_comp, inRouteGroup: true }
+    ];
 
     return Promise.resolve(
       dispatch({
@@ -1240,7 +1319,7 @@ export const removeRouteFromGroup = (groupId, compId) =>
       group.route_comps = group.route_comps.filter(rc => rc.compId !== compId);
 
       const route_comps = [...report.route_comps];
-      route_comps.splice(index, 0, comp);
+      route_comps.splice(index, 0, { ...comp, inRouteGroup: false });
 
       const routeDataMap = report.routes.reduce((a, c) => {
         a[c.compId] = c.data;
@@ -1288,6 +1367,9 @@ export const updateRouteGroupName = (groupId, name) =>
 //****************************************************************************************
 //****************************************************************************************
 //****************************************************************************************
+//****************************************************************************************
+//****************************************************************************************
+//****************************************************************************************
 
 const INITIAL_STATE = {
   reportId: null,
@@ -1311,7 +1393,14 @@ const INITIAL_STATE = {
 
   templateId: null,
   defaultType: 'none',
-  saveYearsAsRecent: false
+  saveYearsAsRecent: false,
+
+  usingRelativeDates: false,
+  relativeDateBase: {
+    compId: null,
+    startDate: null,
+    endDate: null
+  }
 }
 
 export default (state=INITIAL_STATE, action) => {
@@ -1328,6 +1417,9 @@ export default (state=INITIAL_STATE, action) => {
 	}
 }
 
+//****************************************************************************************
+//****************************************************************************************
+//****************************************************************************************
 //****************************************************************************************
 //****************************************************************************************
 //****************************************************************************************
@@ -1349,32 +1441,21 @@ export const takeSnapShot = () =>
         color_range: state.colorRange,
 	      route_comps: state.route_comps.map(rc =>
 	        get(rc, "type", "route") === "route" ? ({
-	          compId: rc.compId,
-	          routeId: rc.routeId,
+            ...rc,
 	          settings: { ...rc.settings },
-          	color: rc.color,
             type: "route"
 	        }) : ({
-            compId: rc.compId,
-          	color: rc.color,
+            ...rc,
             type: "group",
-            name: rc.name,
             route_comps: rc.route_comps.map(rc => ({
-  	          compId: rc.compId,
-  	          routeId: rc.routeId,
+              ...rc,
   	          settings: { ...rc.settings },
-            	color: rc.color,
               type: "route"
   	        }))
           })
 	      ),
         station_comps: state.station_comps.map(sc =>
-          ({
-            compId: sc.compId,
-            stationId: sc.stationId,
-            settings: { ...sc.settings },
-            color: sc.color
-          })
+          ({ ...sc, settings: { ...sc.settings } })
         ),
 	      graph_comps: state.graphs.map(g =>
 	        ({
@@ -1403,8 +1484,17 @@ const _loadReport = report =>
 	(dispatch, getState) => {
 		const state = getState().report;
 
+console.log("LOAD REPORT:", report)
+
 		AVAILABLE_COLORS = [...COLORS];
 		ROUTE_COMP_ID = -1;
+
+    let usingRelativeDates = false;
+    let relativeDateBase = {
+      compId: null,
+      startDate: null,
+      endDate: null
+    }
 
 	  report.route_comps.forEach(rc => {
       if (rc.type === "group") {
@@ -1413,12 +1503,28 @@ const _loadReport = report =>
     	  	if (AVAILABLE_COLORS.includes(rc.color)) {
     	  		AVAILABLE_COLORS = AVAILABLE_COLORS.filter(c => c !== rc.color);
     	  	}
+          if (rc.settings.isRelativeDateBase) {
+            usingRelativeDates = true;
+            relativeDateBase = {
+              compId: rc.compId,
+              startDate: rc.settings.startDate,
+              endDate: rc.settings.endDate
+            }
+          }
         })
       }
 	  	ROUTE_COMP_ID = Math.max(ROUTE_COMP_ID, +rc.compId.slice(5));
 	  	if (AVAILABLE_COLORS.includes(rc.color)) {
 	  		AVAILABLE_COLORS = AVAILABLE_COLORS.filter(c => c !== rc.color);
 	  	}
+      if (rc.settings.isRelativeDateBase) {
+        usingRelativeDates = true;
+        relativeDateBase = {
+          compId: rc.compId,
+          startDate: rc.settings.startDate,
+          endDate: rc.settings.endDate
+        }
+      }
 	  });
 
 	  const routeComponentSettings = new Map();
@@ -1463,13 +1569,16 @@ const _loadReport = report =>
           colorRange: report.color_range || DEFAULT_COLOR_RANGE,
 			  	routes,
 			  	routeComponentSettings,
-          station_comps
+          station_comps,
+
+          usingRelativeDates,
+          relativeDateBase
 			  }
 			})
 		)
 	}
 
-const _addRouteComp = (state, routeIds, settings, groupId = null) => {
+const _addRouteComp = (state, routeIds, copiedSettings, groupId = null) => {
   routeIds = Array.isArray(routeIds) ? routeIds : [routeIds];
 
 	const { yearsWithData } = state,
@@ -1490,31 +1599,35 @@ const _addRouteComp = (state, routeIds, settings, groupId = null) => {
         compId,
         routeId,
         name: data.name,
-        settings: settings ? { ...settings } : {
-          startDate: +`${ yearsWithData[yearsWithData.length - 1] }0101`,
-          endDate: +`${ yearsWithData[yearsWithData.length - 1] }1231`,
-          year: yearsWithData[yearsWithData.length - 1],
-          month: 'all',
-          startTime: DateObject.epochToTimeString(amPeakStart),
-          endTime: DateObject.epochToTimeString(pmPeakEnd),
-          resolution: '5-minutes',
-          weekdays: {
-            sunday: false,
-            monday: true,
-            tuesday: true,
-            wednesday: true,
-            thursday: true,
-            friday: true,
-            saturday: false
-          },
-          overrides: {},
-          amPeak: true,
-          offPeak: true,
-          pmPeak: true,
-          dataColumn: "travel_time_all",
-          compTitle: "",
-          routeId
-        }
+        inRouteGroup: Boolean(groupId),
+        settings: copiedSettings ?
+          { ...copiedSettings, isRelativeDateBase: false } :
+          { startDate: +`${ yearsWithData[yearsWithData.length - 1] }0101`,
+            endDate: +`${ yearsWithData[yearsWithData.length - 1] }1231`,
+            relativeDate: null,
+            isRelativeDateBase: false,
+            year: yearsWithData[yearsWithData.length - 1],
+            month: 'all',
+            startTime: DateObject.epochToTimeString(amPeakStart),
+            endTime: DateObject.epochToTimeString(pmPeakEnd),
+            resolution: '5-minutes',
+            weekdays: {
+              sunday: false,
+              monday: true,
+              tuesday: true,
+              wednesday: true,
+              thursday: true,
+              friday: true,
+              saturday: false
+            },
+            overrides: {},
+            amPeak: true,
+            offPeak: true,
+            pmPeak: true,
+            dataColumn: "travel_time_all",
+            compTitle: "",
+            routeId
+          }
       };
     routeComponentSettings.set(newRouteComp.compId, { ...newRouteComp.settings });
     newRouteComps.push(newRouteComp);
@@ -1607,6 +1720,167 @@ const _removeRouteComp = (state, compId) => {
   	routes,
   	graphs
   }
+}
+
+const _loadDateRelativeTemplate = (templateId, routeIds, startDate, endDate, state, stationIds = []) => {
+
+  const falcorCache = falcorGraph.getCache();
+  const template = get(falcorCache, `templates2.id.${ templateId }`, {});
+
+  let name = template.name,
+    description = template.description,
+    folder = template.folder,
+    route_comps = get(template, ["route_comps", "value"], []),
+    graph_comps = get(template, ["graph_comps", "value"], []),
+    station_comps = get(template, ["station_comps", "value"], []),
+    colorRange = get(template, ["color_range", "value"], DEFAULT_COLOR_RANGE),
+    defaultType = template.default_type;
+
+  const usingRelativeDates = route_comps.reduce((a, c) => {
+    if (c.type === "group") {
+      return c.route_comps.reduce((aa, cc) => {
+        return aa || Boolean(cc.settings.isRelativeDateBase);
+      }, a)
+    }
+    return a || Boolean(c.settings.isRelativeDateBase);
+  }, false);
+
+  if (!usingRelativeDates) {
+    return _loadTemplate(templateId, routeIds, state, stationIds = []);
+  }
+
+  AVAILABLE_COLORS = [...COLORS];
+  ROUTE_COMP_ID = -1;
+
+  route_comps.forEach(rc => {
+    if (rc.type === "group") {
+      rc.route_comps.forEach(rc => {
+        ROUTE_COMP_ID = Math.max(ROUTE_COMP_ID, +rc.compId.slice(5));
+        if (AVAILABLE_COLORS.includes(rc.color)) {
+          AVAILABLE_COLORS = AVAILABLE_COLORS.filter(c => c !== rc.color);
+        }
+      })
+    }
+    ROUTE_COMP_ID = Math.max(ROUTE_COMP_ID, +rc.compId.slice(5));
+    if (AVAILABLE_COLORS.includes(rc.color)) {
+      AVAILABLE_COLORS = AVAILABLE_COLORS.filter(c => c !== rc.color);
+    }
+  });
+
+  let variables = route_comps.reduce((a, rc) => {
+    if (rc.type === "group") {
+      return get(rc, "route_comps", []).reduce((aa, rc) => {
+        if (!aa.includes(rc.routeId)) {
+          aa.push(rc.routeId);
+        }
+        return aa;
+      }, a);
+    }
+    else {
+      if (!a.includes(rc.routeId)) {
+        a.push(rc.routeId);
+      }
+    }
+    return a;
+  }, []);
+
+  let idMap = variables.reduce((a, c, i) => {
+    a[c] = routeIds[i];
+    return a;
+  }, {});
+
+  const routeComponentSettings = new Map();
+
+  route_comps = route_comps.map(rc => {
+    if (rc.type === "group") {
+      return {
+        ...rc,
+        route_comps: rc.route_comps.map(rc => {
+          const routeId = idMap[rc.routeId];
+          const settings = {
+            ...rc.settings,
+            routeId
+          }
+          if (settings.isRelativeDateBase) {
+            settings.startDate = +startDate.replaceAll("-", "");
+            settings.endDate = +endDate.replaceAll("-", "");
+          }
+          else if (!settings.isRelativeDateBase) {
+            const dates = calculateRelativeDates(rc.settings.relativeDate, startDate, endDate);
+            if (dates.length) {
+              settings.startDate = +dates[0];
+              settings.endDate = +dates[1];
+            }
+          }
+          routeComponentSettings.set(rc.compId, { ...settings });
+          return {
+            ...rc,
+            settings,
+            routeId
+          };
+        })
+      }
+    }
+    else {
+      const routeId = idMap[rc.routeId];
+      const settings = {
+        ...rc.settings,
+        routeId
+      }
+      if (settings.isRelativeDateBase) {
+        settings.startDate = +startDate.replaceAll("-", "");
+        settings.endDate = +endDate.replaceAll("-", "");
+      }
+      else if (!settings.isRelativeDateBase) {
+        const dates = calculateRelativeDates(rc.settings.relativeDate, startDate, endDate);
+        if (dates.length) {
+          settings.startDate = +dates[0];
+          settings.endDate = +dates[1];
+        }
+      }
+      routeComponentSettings.set(rc.compId, { ...settings });
+      return {
+        ...rc,
+        settings,
+        routeId
+      };
+    }
+  })
+
+  const routes = route_comps.reduce((a, c) => {
+  	return [...a, ...getRoutesForRouteComp(c, null, Boolean(c.color))];
+  }, []);
+
+  const graphs = graph_comps.map(gc => ({
+    id: getUniqueGraphCompId(),
+    type: gc.type,
+    layout: { ...gc.layout },
+    state: {
+      ...gc.state,
+      title: gc.state.title || "{type}, {data}"
+    }
+  }))
+
+  return {
+    name,
+    description,
+    folder,
+    route_comps,
+    routes,
+    graphs,
+    station_comps,
+    routeComponentSettings,
+    templateId,
+    saveYearsAsRecent: false,
+    usingRelativeDates: true,
+    relativeDateBase: {
+      compId: "",
+      startDate,
+      endDate
+    },
+    colorRange,
+    defaultType
+	};
 }
 
 const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {

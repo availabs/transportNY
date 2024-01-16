@@ -158,7 +158,7 @@ const InfoBox = props => {
         <div>
           <Button onClick={ open }
             themeOptions={ { width: "full" } }
-            disabled={ points.length < 2 || !tmcs.length && !loadedRoute }
+            disabled={ !tmcs.length && !loadedRoute }
           >
             Save Route
           </Button>

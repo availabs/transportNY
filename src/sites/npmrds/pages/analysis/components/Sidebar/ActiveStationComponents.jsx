@@ -9,7 +9,7 @@ import {
 	DragDropContext,
 	Droppable,
 	Draggable
-} from 'react-beautiful-dnd';
+} from '@hello-pangea/dnd'// 'react-beautiful-dnd';
 
 import { hexColorToRgb } from "../tmc_graphs/utils"
 

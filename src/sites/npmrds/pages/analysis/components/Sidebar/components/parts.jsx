@@ -118,3 +118,19 @@ export const OpenCloseButton = ({ open, onClick }) => {
 		</div>
 	)
 }
+
+export const CheckBox = ({ value, onChange }) => {
+	const doOnChange = React.useCallback(e => {
+		onChange(!Boolean(value));
+	}, [onChange, value]);
+	return (
+		<div className="flex items-center justify-center cursor-pointer"
+			onClick={ doOnChange }
+		>
+			{ value ?
+				<span className="fa fa-square-check"/> :
+				<span className="fa-regular fa-square"/>
+			}
+		</div>
+	)
+}

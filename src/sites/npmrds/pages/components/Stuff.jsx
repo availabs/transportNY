@@ -1147,11 +1147,16 @@ const FolderStuffContainer = props => {
         <span onClick={ openInfoModal }
           className="fa-regular fa-circle-info mr-4 cursor-pointer text-gray-600"
         />
-        <input type="checkbox"
-          className="cursor-pointer"
-          onChange={ onChecked }
-          checked={ selected }
-          onClick={ stopPropagation }/>
+
+        <div>
+          <input type="checkbox"
+            className="cursor-pointer"
+            style={ { display: "block", position: "static" } }
+            onChange={ onChecked }
+            checked={ selected }
+            onClick={ stopPropagation }/>
+        </div>
+
         <div className="w-10 flex justify-end"
           onClick={ stopPropagation }>
           <div className="flex-0"

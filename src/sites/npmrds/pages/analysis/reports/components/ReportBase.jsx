@@ -49,9 +49,6 @@ const {
   ...REDUX_ACTIONS
 } = stuff;
 
-
-
-
 function withRouter(Component) {
   function ComponentWithRouterProp(props) {
     let location = useLocation();
@@ -92,7 +89,9 @@ class ReportBase extends React.Component {
           defaultType = get(this.props, 'params.defaultType', ""),
           routeId = get(this.props, 'params.routeId', ""),
           stationId = get(this.props, 'params.stationId', ""),
-          path = get(this.props, 'location.pathname', "");
+          path = get(this.props, 'location.pathname', ""),
+          startDate = get(this.props, "params.startDate", null),
+          endDate = get(this.props, "params.endDate", null);
 
         const query = new URLSearchParams(this.props.location.search);
 
@@ -139,17 +138,27 @@ class ReportBase extends React.Component {
           }
         }
         else if (path.includes("/report/new/route/") && routeId) {
-          console.log("NEW REPORT:", routeId)
           this.props.loadRoutesForReport(
             routeId.split("_").filter(Boolean)
           );
         }
         else if (templateId && (routeId || stationId)) {
-          this.props.loadRoutesAndTemplate(
-            routeId.split("_").filter(Boolean),
-            templateId,
-            stationId.split("_").filter(Boolean)
-          );
+          if (startDate && endDate) {
+            this.props.loadRoutesAndTemplateWithDates(
+              routeId.split("_").filter(Boolean),
+              templateId,
+              startDate,
+              endDate,
+              stationId.split("_").filter(Boolean)
+            );
+          }
+          else {
+            this.props.loadRoutesAndTemplate(
+              routeId.split("_").filter(Boolean),
+              templateId,
+              stationId.split("_").filter(Boolean)
+            );
+          }
         }
         else if (defaultType && (routeId || stationId)) {
           this.props.loadRoutesAndTemplateByType(
@@ -464,11 +473,13 @@ class ReportBase extends React.Component {
   _needsUpdate(SETTINGS, settings) {
     return SETTINGS.startDate !== settings.startDate ||
       SETTINGS.endDate !== settings.endDate ||
+			SETTINGS.relativeDate !== settings.relativeDate ||
       SETTINGS.startTime !== settings.startTime ||
       SETTINGS.endTime !== settings.endTime ||
       SETTINGS.resolution !== settings.resolution ||
       SETTINGS.dataColumn !== settings.dataColumn ||
       SETTINGS.compTitle !== settings.compTitle ||
+      SETTINGS.isRelativeDateBase !== settings.isRelativeDateBase ||
       !isEqual(SETTINGS.weekdays, settings.weekdays) ||
       !isEqual(SETTINGS.overrides, settings.overrides);
   }
@@ -608,7 +619,8 @@ class ReportBase extends React.Component {
         </GraphLayoutContainer>
 
         { this.state.viewing ? null :
-          <Sidebar isOpen={ this.state.isOpen }
+          <Sidebar
+            isOpen={ this.state.isOpen }
             graphs={ this.props.graphs }
             route_comps={ this.props.route_comps }
             combineRouteComps={ this.props.combineRouteComps }
@@ -621,6 +633,10 @@ class ReportBase extends React.Component {
             addGraphComp={ this.addGraphComp.bind(this) }
             removeGraphComp={ this.removeGraphComp.bind(this) }
             updateRouteCompSettings={ this.updateRouteCompSettings.bind(this) }
+
+            usingRelativeDates={ this.props.usingRelativeDates }
+            relativeDateBase={ this.props.relativeDateBase }
+
             updateRouteComp={ this.updateRouteComp.bind(this) }
             updateRouteCompColor={ this.updateRouteCompColor.bind(this) }
             updateAllComponents={ this.updateAllComponents.bind(this) }

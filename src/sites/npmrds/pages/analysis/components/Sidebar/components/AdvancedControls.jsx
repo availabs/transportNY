@@ -25,10 +25,19 @@ import {
 	Label,
 	InputBox,
 	CopyIcon,
-	ControlContainer
+	ControlContainer,
+  CheckBox
 } from "./parts"
 
 import { getRequestKey } from "../../tmc_graphs/graphClasses/GeneralGraphComp"
+
+import {
+  RELATIVE_DATE_REGEX,
+  calculateRelativeDates,
+  RelativeDateOptions,
+  SpecialOptions,
+  StartOptions
+} from "../../../reports/store/utils/relativedates.utils"
 
 const DownloadingOverlay = styled.div`
 	width: 100vw;
@@ -90,7 +99,11 @@ const AdvancedControls = props => {
     PEAKS,
     isDifferent,
     updateSettings,
-    route
+    compId,
+    route,
+    inRouteGroup,
+    usingRelativeDates,
+    relativeDateBase
   } = props;
 
   let {
@@ -101,6 +114,8 @@ const AdvancedControls = props => {
     resolution,
     weekdays,
     dataColumn,
+    isRelativeDateBase,
+    relativeDate,
     overrides = {}
   } = SETTINGS;
 
@@ -164,6 +179,11 @@ const AdvancedControls = props => {
     updateSettings("overrides", newOverrides);
   }, [updateSettings, overrides]);
 
+  const [useRelativeDateControls, setUseRelativeDateControls] = React.useState(usingRelativeDates && !isRelativeDateBase);
+  const toggleUseRelativeDateControls = React.useCallback(e => {
+    setUseRelativeDateControls(p => !p);
+  }, []);
+
   return (
     <ControlContainer>
 
@@ -177,40 +197,78 @@ const AdvancedControls = props => {
         </DownloadingOverlay>
       }
 
-      <Row>
-        <Label>Start Date</Label>
-        <InputBox>
-          <Input type="date"
-            onChange={ v => {
-              const date = +moment(v, 'YYYY-MM-DD').format('YYYYMMDD');
-              if (!isNaN(date)) {
-                updateSettings("startDate", date);
-              }
-            } }
-            value={ startDate }
-            min={ min } max={ max }/>
-        </InputBox>
-        <CopyIcon setting="startDate"
-          isDifferent={ isDifferent }
-          onClick={ props.copy }/>
-      </Row>
-      <Row>
-        <Label>End Date</Label>
-        <InputBox>
-          <Input type="date"
-            onChange={ v => {
-              const date = +moment(v, 'YYYY-MM-DD').format('YYYYMMDD');
-              if (!isNaN(date)) {
-                updateSettings("endDate", date);
-              }
-            } }
-            value={ endDate }
-            min={ min } max={ max }/>
-        </InputBox>
-        <CopyIcon setting="endDate"
-          isDifferent={ isDifferent }
-          onClick={ props.copy }/>
-      </Row>
+      { !usingRelativeDates || isRelativeDateBase ? null :
+        <div className="flex items-center border-y border-current py-2"
+          style={ { marginBottom: "10px" } }
+        >
+          <div style={ { width: "85%", display: "flex" } }>
+            Use Relative Date Controls
+          </div>
+          <div style={ { width: "15%", display: "flex" } }
+            className="flex items-center justify-center"
+          >
+            <CheckBox value={ useRelativeDateControls }
+              onChange={ setUseRelativeDateControls }/>
+          </div>
+        </div>
+      }
+
+      { !useRelativeDateControls || isRelativeDateBase ?
+        <>
+          <Row>
+            <Label>Start Date</Label>
+            <InputBox>
+              <Input type="date"
+                onChange={ v => {
+                  const date = +moment(v, 'YYYY-MM-DD').format('YYYYMMDD');
+                  if (!isNaN(date)) {
+                    updateSettings("startDate", date);
+                  }
+                } }
+                value={ startDate }
+                min={ min } max={ max }/>
+            </InputBox>
+            <CopyIcon setting="startDate"
+              isDifferent={ isDifferent }
+              onClick={ props.copy }/>
+          </Row>
+          <Row>
+            <Label>End Date</Label>
+            <InputBox>
+              <Input type="date"
+                onChange={ v => {
+                  const date = +moment(v, 'YYYY-MM-DD').format('YYYYMMDD');
+                  if (!isNaN(date)) {
+                    updateSettings("endDate", date);
+                  }
+                } }
+                value={ endDate }
+                min={ min } max={ max }/>
+            </InputBox>
+            <CopyIcon setting="endDate"
+              isDifferent={ isDifferent }
+              onClick={ props.copy }/>
+          </Row>
+        </> :
+        <RelativeDateControls
+          updateSettings={ updateSettings }
+          relativeDate={ relativeDate }
+          relativeDateBase={ relativeDateBase }/>
+      }
+
+      <div className="flex items-center border-y border-current py-2"
+        style={ { marginBottom: "10px" } }
+      >
+        <div style={ { width: "85%", display: "flex" } }>
+          Set as relative date base
+        </div>
+        <div style={ { width: "15%", display: "flex" } }
+          className="flex items-center justify-center"
+        >
+          <CheckBox value={ isRelativeDateBase }
+            onChange={ v => updateSettings("isRelativeDateBase", v) }/>
+        </div>
+      </div>
 
       <Row>
         <Label>Start Time</Label>
@@ -377,3 +435,209 @@ const AdvancedControls = props => {
   )
 }
 export default AdvancedControls
+
+const InitState = relativeDate => {
+  const match = RELATIVE_DATE_REGEX.exec(relativeDate);
+  if (match) {
+    const [, inputdate, timespan, operation = "", amount = "", duration = ""] = match;
+    return {
+      inputdate,
+      timespan,
+      operation,
+      amount,
+      duration
+    }
+  }
+  return {
+    inputdate: "startDate",
+    timespan: "",
+    operation: "-",
+    amount: "1",
+    duration: "1"
+  };
+}
+const Reducer = (state, action) => {
+  const { type, ...payload } = action;
+  switch (type) {
+    case "set-timespan": {
+      const { timespan } = payload;
+      return {
+        ...state,
+        timespan,
+        inputdate: "startDate",
+        operation: "-",
+        amount: "1",
+        duration: "1"
+      }
+    }
+    case "set-operation": {
+      const { operation } = payload;
+      return {
+        ...state,
+        operation,
+        inputdate: operation === "-" ? "startDate" : "endDate"
+      }
+    }
+    case "set-amount": {
+      const { amount } = payload;
+      return {
+        ...state,
+        amount
+      }
+    }
+    case "set-duration": {
+      const { duration } = payload;
+      return {
+        ...state,
+        duration
+      }
+    }
+    default:
+      return state;
+  }
+}
+
+const accessor = v => v.display;
+const valueAccessor = v => v.value;
+
+const RelativeDateControls = ({ updateSettings, relativeDateBase, relativeDate }) => {
+
+  const [state, dispatch] = React.useReducer(Reducer, relativeDate, InitState);
+
+  const setTimespan = React.useCallback(v => {
+    dispatch({
+      type: "set-timespan",
+      timespan: v
+    })
+  }, []);
+  const setOperation = React.useCallback(v => {
+    dispatch({
+      type: "set-operation",
+      operation: v
+    })
+  }, []);
+  const setAmount = React.useCallback(v => {
+    dispatch({
+      type: "set-amount",
+      amount: v
+    })
+  }, []);
+  const setDuration = React.useCallback(v => {
+    dispatch({
+      type: "set-duration",
+      duration: v
+    })
+  }, []);
+
+  const calculated = React.useMemo(() => {
+    let rd = `${ state.inputdate }=>${ state.timespan }`;
+    if (!SpecialOptions.includes(state.timespan)) {
+      rd = rd + state.operation + `${ state.amount }${ state.timespan }` + "->" + `${ state.duration }${ state.timespan }`
+    }
+    return RELATIVE_DATE_REGEX.test(rd) ? rd : null;
+  }, [state]);
+
+  React.useEffect(() => {
+    if (calculated) {
+      updateSettings("relativeDate", calculated);
+    }
+  }, [calculated]);
+
+  const calculatedDates = React.useMemo(() => {
+    const { startDate, endDate } = relativeDateBase;
+    return calculateRelativeDates(calculated, startDate, endDate, "YYYY-MM-DD");
+  }, [calculated, relativeDateBase]);
+
+  React.useEffect(() => {
+    const { startDate, endDate } = relativeDateBase;
+    const dates = calculateRelativeDates(calculated, startDate, endDate);
+    if (dates.length) {
+      updateSettings("startDate", +dates[0]);
+      updateSettings("endDate", +dates[1]);
+    }
+  }, [calculated, relativeDateBase]);
+
+  const inputDates = React.useMemo(() => {
+    return [
+      moment(relativeDateBase.startDate, "YYYYMMDD").format("YYYY-MM-DD"),
+      moment(relativeDateBase.endDate, "YYYYMMDD").format("YYYY-MM-DD")
+    ]
+  }, [relativeDateBase]);
+
+  return (
+    <div className="mb-2">
+
+      <div>
+        <div className="flex items-center">
+          <div className="flex-1 mr-1">Input Start Date:</div>
+          <div className="w-28 text-right">{ inputDates[0] }</div>
+        </div>
+        <div className="flex items-center">
+          <div className="flex-1 mr-1">Input End Date:</div>
+          <div className="w-28 text-right">{ inputDates[1] }</div>
+        </div>
+      </div>
+
+      <div className="flex items-center">
+        <div>Time Span</div>
+        <div className="flex-1 ml-1">
+          <Select
+            value={ state.timespan }
+            multi={ false }
+            searchable={ false }
+            accessor={ accessor }
+            valueAccessor={ valueAccessor }
+            onChange={ setTimespan }
+            options={ RelativeDateOptions }/>
+          </div>
+      </div>
+
+      { !state.timespan || SpecialOptions.includes(state.timespan) ? null :
+        <>
+          <div>
+            <div className="">Relative Start Date</div>
+            <div className="flex items-center mb-1">
+              <div className="w-12"/>
+              <Input type="number" min="1"
+                value={ state.amount }
+                onChange={ setAmount }/>
+              <div className="ml-1">{ state.timespan }(s)</div>
+            </div>
+            <Select
+              value={ state.operation }
+              multi={ false }
+              searchable={ false }
+              accessor={ accessor }
+              valueAccessor={ valueAccessor }
+              onChange={ setOperation }
+              options={ StartOptions }/>
+          </div>
+
+          <div className="flex items-center mt-1">
+            <div className="w-12 text-right">for</div>
+            <div className="flex items-center ml-1">
+              <Input type="number" min="1"
+                value={ state.duration }
+                onChange={ setDuration }/>
+              <div className="ml-1">{ state.timespan }(s)</div>
+            </div>
+          </div>
+        </>
+      }
+
+      { calculatedDates.length !== 2 ? null :
+        <div>
+          <div className="flex items-center">
+            <div className="flex-1 mr-1">Calculated Start Date:</div>
+            <div className="w-28 text-right">{ calculatedDates[0] }</div>
+          </div>
+          <div className="flex items-center">
+            <div className="flex-1 mr-1">Calculated End Date:</div>
+            <div className="w-28 text-right">{ calculatedDates[1] }</div>
+          </div>
+        </div>
+      }
+
+    </div>
+  )
+}

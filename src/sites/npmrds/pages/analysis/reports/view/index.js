@@ -15,10 +15,12 @@ const BASE = {
 }
 const PATHS = [
   '/report/view/:reportId',
-  
+
   '/template/view/:templateId/route/:routeId',
   '/template/view/:templateId/station/:routeId',
-  '/template/view/:templateId/route/:routeId/station/:stationId'
+  '/template/view/:templateId/route/:routeId/station/:stationId',
+
+  '/template/view/:templateId/route/:routeId/dates/:startDate/:endDate',
 ]
 
 export default PATHS.map(path => ({
