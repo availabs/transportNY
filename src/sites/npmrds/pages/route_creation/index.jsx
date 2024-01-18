@@ -58,7 +58,7 @@ const Config = [
     path: "/route/creation",
     exact: true,
     auth: true,
-    mainNav: true,
+    mainNav: false,
     sideNav: {
       color: 'dark',
       size: 'compact'
