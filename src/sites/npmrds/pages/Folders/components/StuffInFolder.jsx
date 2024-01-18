@@ -538,9 +538,11 @@ const ButtonNew = ({ openedFolders }) => {
             >
               <span className="fad fa-folder mr-1 px-2 text-blue-500"/>Sub Folder
             </div>
-            <div className="p-2 hover:bg-blue-100">
-              <span className="fad fa-road mr-1 px-2 text-blue-500"/>Route
-            </div>
+            <Link to='/route/creation'>
+              <div className="p-2 hover:bg-blue-100">
+                <span className="fad fa-road mr-1 px-2 text-blue-500"/>Route
+              </div>
+            </Link>
             <Link to='/report/new'>
               <div className="p-2 hover:bg-blue-100">
                   <span className="fad fa-chart-column text-blue-500 mr-1 px-2"/>Report

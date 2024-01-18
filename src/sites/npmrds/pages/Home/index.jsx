@@ -13,13 +13,13 @@ import {
 
 import { Modal, FuseWrapper } from "~/sites/npmrds/components"
 
-import FolderIcon from "./components/FolderIcon"
+import FolderIcon from "../Folders/components/FolderIcon"
 import {
   Stuff,
   ThumbnailContainer,
   ThumbnailPlaceholder,
   getStuffSorter
-} from "./components/Stuff"
+} from "../Folders/components/Stuff"
 
 import FocusAnalysis from "./FocusAnalysis.config"
 
