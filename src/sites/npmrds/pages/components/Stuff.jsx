@@ -49,7 +49,7 @@ const Folder = ({ id, openedFolders, setOpenedFolders, forFolder, ...props }) =>
     setOpen(false);
   }, []);
 
-  const folderItems = React.useMemo(() => {
+  const FolderItems = React.useMemo(() => {
     return [
       { item: (
           <ListItem onClick={ openModal }>
@@ -65,7 +65,7 @@ const Folder = ({ id, openedFolders, setOpenedFolders, forFolder, ...props }) =>
   return (
     <div onClick={ openFolder }>
       <Container { ...props } { ...folder } id={ id } type="folder"
-        items={ folderItems }
+        items={ FolderItems }
       >
         <div className="mr-1 inline-block">
           <FolderIcon size={ 1.25 }
@@ -84,8 +84,44 @@ const Folder = ({ id, openedFolders, setOpenedFolders, forFolder, ...props }) =>
     </div>
   )
 }
-const Route = ({ id, forFolder, ...props }) => {
+const Route = ({ id, forFolder = false, parent, ...props }) => {
   const { falcor, falcorCache } = useFalcor();
+
+  const [templates, setTemplates] = React.useState([]);
+
+  React.useEffect(() => {
+    if (!parent) return;
+    falcor.get(["folders2", "stuff", parent]);
+  }, [falcor, parent]);
+
+  React.useEffect(() => {
+    if (!parent) return;
+    const stuff = get(falcorCache, ["folders2", "stuff", parent, "value"], []);
+    const templates = stuff.filter(s => s.stuff_type === "template").map(s => s.stuff_id);
+    if (templates.length) {
+      falcor.get(["templates2", "id", templates, ["name", "routes", "id"]]);
+    }
+  }, [falcor, falcorCache, parent]);
+
+  React.useEffect(() => {
+    if (!parent) {
+      setTemplates([]);
+      return;
+    }
+
+    const templates = get(falcorCache, ["folders2", "stuff", parent, "value"], [])
+      .filter(s => s.stuff_type === "template")
+      .map(s => {
+        return {
+          ...s,
+          ...get(falcorCache, ["templates2", "id", s.stuff_id], {})
+        };
+      })
+      .filter(t => t.routes === 1)
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    setTemplates(templates);
+  }, [falcorCache, parent]);
 
   React.useEffect(() => {
     falcor.get(["routes2", "id", id, ["name", "description", "updated_at", "id"]]);
@@ -97,13 +133,13 @@ const Route = ({ id, forFolder, ...props }) => {
   }, [falcorCache, id]);
 
   const RouteItems = React.useMemo(() => {
-    if (!forFolder) return null;
-    return [
+    if (!forFolder) return [];
+    const items = [
       { Item: (
           () => (
             <Link to={ `/report/new/route/${ id }` }>
               <ListItem>
-                <span className="fa fa-eye mr-1"/>Open in Report
+                <span className="fa fa-eye mr-1"/>Open in New Report
               </ListItem>
             </Link>
           )
@@ -120,9 +156,36 @@ const Route = ({ id, forFolder, ...props }) => {
         )
       }
     ]
-  }, [forFolder, id]);
+    if (templates.length) {
+      items.splice(1, 0, {
+        Item: (
+          () => (
+            <ListItem>
+              <span className="fad fa-gear mr-1"/>Open in Template
+            </ListItem>
+          )
+        ),
+        children: (
+          templates.map(t => ({
+            Item: (
+              () => (
+                <Link key={ t.id } to={ `/template/edit/${ t.id }/route/${ id }` }>
+                  <ListItem>
+                    <span className="fad fa-file-invoice mr-1"/>{ t.name }
+                  </ListItem>
+                </Link>
+              )
+            )
+          }))
+        )
+      })
+    }
+    return items;
+  }, [forFolder, id, templates]);
 
   const Container = forFolder ? FolderStuffContainer : StuffContainer;
+
+forFolder && console.log("ROUTE PARENT:", parent, templates)
 
   return (
     <Container { ...props } { ...route } id={ id } type="route"

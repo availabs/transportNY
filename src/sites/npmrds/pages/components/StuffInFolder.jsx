@@ -74,6 +74,11 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
     }
 
     const stuff = get(falcorCache, ["folders2", "stuff", folder.id, "value"], [])
+      .filter(s => !filter ||
+                  (s.stuff_type === "folder") ||
+                  filter.includes(s.stuff_type) ||
+                  ((filter === "reports") && (s.stuff_type === "template"))
+      )
       .map(s => {
         switch (s.stuff_type) {
           case "folder":
@@ -98,11 +103,6 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
             };
         }
       })
-      .filter(s => !filter ||
-                  (s.stuff_type === "folder") ||
-                  filter.includes(s.stuff_type) ||
-                  ((filter === "reports") && (s.stuff_type === "template"))
-      )
       .sort(getStuffSorter(folder));
 
     setStuff(stuff);

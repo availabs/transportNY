@@ -113,13 +113,11 @@ export const getDataDateExtent = () =>
 			})
 
 const getRouteData = (routeIds, report) => {
-	return falcorGraph.get(["routes2", "id", routeIds, "name"])
+	return falcorGraph.get(["routes2", "id", routeIds, ["name", "metadata"]])
     .then(() =>
       falcorGraph.get(
         ["routes2", "id", routeIds, report.allYearsWithData, "tmc_array"]
-      ).then(res => {
-        console.log("ROUTE TMC ARRAY RES:", res)
-      })
+      )
     )
 }
 
@@ -197,12 +195,23 @@ export const loadRoutesAndTemplate = (routeIds, templateId, stationIds = []) =>
       .then(() => stationIds.length && getStationData(stationIds))
 		  .then(() => routeIds.length && getRouteData(routeIds, getState().report))
 			.then(() => getTemplateData(templateId))
-			.then(() =>
-				dispatch({
-					type: UPDATE_STATE,
-					state: _loadTemplate(templateId, routeIds, getState().report, stationIds)
-				})
-			)
+      .then(() => {
+        if (routeIds.length === 1) {
+          const dates = get(falcorGraph.getCache(), ["routes2", "id", routeIds[0], "metadata", "value", "dates"], []);
+          if (dates.length === 2) {
+    				return dispatch({
+    					type: UPDATE_STATE,
+    					state: _loadDateRelativeTemplate(templateId, routeIds, dates[0], dates[1], getState().report, stationIds)
+    				})
+          }
+          else {
+            return dispatch({
+    					type: UPDATE_STATE,
+    					state: _loadTemplate(templateId, routeIds, getState().report, stationIds)
+    				})
+          }
+        }
+      })
 export const loadRoutesAndTemplateWithDates = (routeIds, templateId, startDate, endDate, stationIds = []) =>
 	(dispatch, getState) =>
     Promise.resolve()
