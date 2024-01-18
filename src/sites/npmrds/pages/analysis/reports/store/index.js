@@ -232,11 +232,27 @@ export const loadRoutesAndTemplateByType = (routeIds, defaultType, stationIds = 
 			.then(() => getTemplateIdByType(defaultType))
 			.then(templateId => {
         return getTemplateData(templateId)
-    			.then(() =>
-    				dispatch({
-    					type: UPDATE_STATE,
-    					state: _loadTemplate(templateId, routeIds, getState().report, stationIds)
-    				})
+    			.then(() => {
+            if (routeIds.length === 1) {
+              const dates = get(falcorGraph.getCache(), ["routes2", "id", routeIds[0], "metadata", "value", "dates"], []);
+              if (dates.length === 2) {
+        				return dispatch({
+        					type: UPDATE_STATE,
+        					state: _loadDateRelativeTemplate(templateId, routeIds, dates[0], dates[1], getState().report, stationIds)
+        				})
+              }
+              else {
+                return dispatch({
+        					type: UPDATE_STATE,
+        					state: _loadTemplate(templateId, routeIds, getState().report, stationIds)
+        				})
+              }
+            }
+          }
+    				// dispatch({
+    				// 	type: UPDATE_STATE,
+    				// 	state: _loadTemplate(templateId, routeIds, getState().report, stationIds)
+    				// })
     			)
       })
 export const loadTemplate = (templateId) =>
@@ -246,10 +262,26 @@ export const loadTemplate = (templateId) =>
 				const state = getState().report,
 					routeIds = state.route_comps.reduce((a, c) => a.includes(c.routeId) ? a : [...a, c.routeId], []),
   				stationIds = state.station_comps.reduce((a, c) => a.includes(c.stationId) ? a : [...a, c.stationId], []);
-				return dispatch({
-					type: UPDATE_STATE,
-					state: _loadTemplate(templateId, routeIds, state, stationIds)
-				})
+
+        if (routeIds.length === 1) {
+          const dates = get(falcorGraph.getCache(), ["routes2", "id", routeIds[0], "metadata", "value", "dates"], []);
+          if (dates.length === 2) {
+    				return dispatch({
+    					type: UPDATE_STATE,
+    					state: _loadDateRelativeTemplate(templateId, routeIds, dates[0], dates[1], state, stationIds)
+    				})
+          }
+          else {
+            return dispatch({
+    					type: UPDATE_STATE,
+    					state: _loadTemplate(templateId, routeIds, state, stationIds)
+    				})
+          }
+        }
+				// return dispatch({
+				// 	type: UPDATE_STATE,
+				// 	state: _loadTemplate(templateId, routeIds, state, stationIds)
+				// })
 			})
 
 export const saveTemplate = (template, templateId = null) =>

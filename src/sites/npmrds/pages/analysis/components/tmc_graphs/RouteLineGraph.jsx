@@ -8,7 +8,7 @@ import GeneralGraphComp from "./graphClasses/GeneralGraphComp"
 // import { ResponsiveLine } from "@nivo/line"
 import { LineGraph } from "~/modules/avl-graph/src"
 
-import { rollup } from "d3-array"
+import { rollup, extent as d3extent, range as d3range } from "d3-array"
 
 import get from "lodash/get"
 
@@ -170,6 +170,51 @@ class RouteLineGraph extends GeneralGraphComp {
 		}, [])
 		return { data, keys: ["Route Name", "Data Type", "Value", "Resolution Type", "Resolution"] };
 	}
+	getScaleDomain(graphData, resolution) {
+		if (!graphData.length) return [];
+
+		const WEEKDAYS = [
+			"sunday",
+			"monday",
+			"tuesday",
+			"wednesday",
+			"thursday",
+			"friday",
+			"saturday"
+		]
+		const extent = graphData.reduce((a, c) => {
+			switch (resolution) {
+				case "weekday": {
+					const extent = d3extent(c.data, d => WEEKDAYS.indexOf(d.x));
+					return [Math.min(a[0], extent[0]), Math.max(a[1], extent[1])]
+				}
+				default: {
+					const extent = d3extent(c.data, d => +d.x);
+					return [Math.min(a[0], extent[0]), Math.max(a[1], extent[1])]
+				}
+			}
+		}, [Infinity, -Infinity]);
+
+		switch (resolution) {
+			case "weekday":
+				return d3range(extent[0], extent[1] + 1).map(v => WEEKDAYS[v]);
+			case "day": {
+				const domain = [],
+					start = extent[0],
+					end = +extent[1],
+					startDate = moment(start, "YYYYMMDD");
+
+				while (+startDate.format("YYYYMMDD") !== end) {
+					domain.push(startDate.format("YYYYMMDD"));
+					startDate.add(1, "day");
+				}
+				domain.push(startDate.format("YYYYMMDD"));
+				return domain;
+			}
+			default:
+				return d3range(extent[0], extent[1] + 1);
+		}
+	}
 	renderGraph(graphData, routeComps, [dd1, dd2], resolution) {
 		const resFormat = getResolutionFormat(resolution);
 
@@ -182,6 +227,8 @@ class RouteLineGraph extends GeneralGraphComp {
 		const marginLeft = dd1.key === "hoursOfDelay" ? 100 : dd1.key === "co2Emissions" ? 75 : 50;
 		const marginRight = dd2.key === "hoursOfDelay" ? 100 : dd2.key === "co2Emissions" ? 75 : dd2.key === "none" ? 20 : 50;
 
+		const xDomain = this.getScaleDomain(graphData, resolution);
+
 		return (
 			<LineGraph data={ leftGraphData }
 				secondary={ rightGraphData }
@@ -191,7 +238,8 @@ class RouteLineGraph extends GeneralGraphComp {
 				}
 				strokeWidth={ 1 }
 				xScale={ {
-					type: "point"
+					type: "point",
+					domain: xDomain
 				} }
 				yScale={ {
 					domain: [0, lMax]

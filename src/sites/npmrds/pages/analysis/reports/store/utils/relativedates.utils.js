@@ -1,6 +1,9 @@
 import moment from "moment"
 
 export const RelativeDateOptions = [
+  { value: "dayof",
+    display: "Day of"
+  },
   { value: "weekof",
     display: "Week of"
   },
@@ -33,7 +36,7 @@ export const StartOptions = [
   }
 ]
 
-export const SpecialOptions = ["weekof", "monthof", "yearof"];
+export const SpecialOptions = ["dayof", "weekof", "monthof", "yearof"];
 
 export const RELATIVE_DATE_REGEX = /^(startDate|endDate)=>(?<span>(?:day|week|month|year)(?:of)?)(?:([+-])(\d+)\k<span>->(\d+)\k<span>)?$/;
 
@@ -52,6 +55,11 @@ export const calculateRelativeDates = (relativeDate, startDate, endDate, format 
 
   if (SpecialOptions.includes(timespan)) {
     switch (timespan) {
+      case "dayof":
+        return [
+          moment(startDate, "YYYYMMDD").format(format),
+          moment(endDate, "YYYYMMDD").format(format)
+        ]
       case "weekof":
         return calculateTimespanOf(startDate, endDate, "week", format);
       case "monthof":
