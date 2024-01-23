@@ -2,7 +2,7 @@ import React from "react"
 
 import get from "lodash/get"
 import { range as d3range } from "d3-array"
-import { useParams } from "react-router-dom"
+import { useParams, useLocation } from "react-router-dom"
 
 import {
   useFalcor,
@@ -98,14 +98,23 @@ const Folders = ({ user }) => {
     }
   }, [folders, openedFolders]);
 
-  const params = useParams();
+  const [filter, setFilter] = React.useState(null);
 
-  const [filter, setFilter] = React.useState(null)
+  const params = useParams();
   React.useEffect(() => {
     if (params.stuff) {
       setFilter(params.stuff);
     }
   }, [params]);
+
+  const location = useLocation();
+  React.useEffect(() => {
+    const { pathname } = location;
+    const [,, stuff] = pathname.split("/");
+    if (stuff) {
+      setFilter(stuff);
+    }
+  }, [location]);
 
   const [open, setOpen] = React.useState(false);
   const openModal = React.useCallback(e => {

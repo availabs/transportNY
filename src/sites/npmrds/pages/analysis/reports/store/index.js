@@ -1185,7 +1185,7 @@ export const saveReport = (report, reportId = null) =>
             route_comps: get(rc, "route_comps", [])
               .map(rc => ({
                 ...rc,
-                settings: { ...rc.settings },
+                settings: { ...rc.settings, relativeDate: null, isRelativeDateBase: false },
                 type: "route"
               }))
           })
@@ -1194,7 +1194,7 @@ export const saveReport = (report, reportId = null) =>
         ({
           compId: sc.compId,
           stationId: sc.stationId,
-          settings: { ...sc.settings, relativeDate: null, isRelativeDateBase: false },
+          settings: { ...sc.settings },
           color: sc.color
         })
       ),

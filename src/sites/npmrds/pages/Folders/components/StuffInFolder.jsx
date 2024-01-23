@@ -18,6 +18,8 @@ import ConfirmModal from "./ConfirmModal"
 
 import { FuseWrapper } from "~/sites/npmrds/components"
 
+import { csvParseRows } from "d3-dsv"
+
 const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, deleteFolder }) => {
   const { falcor, falcorCache } = useFalcor();
 
@@ -132,6 +134,10 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
     return FuseWrapper(stuff, { keys: ["name", "description"] });
   }, [stuff]);
 
+  const fused = React.useMemo(() => {
+    return fuse(search);
+  }, [fuse, search]);
+
   return (
     <div>
       <FolderPath filter={ filter }
@@ -171,27 +177,176 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
           deselectAll={ deselectAll }/>
       </div>
       <div className='bg-white p-4 shadow rounded-sm border border-gray-100 mt-2'>
-        { fuse(search).map((s, i)=> (
-            <FolderStuff key={ i }
-              openedFolders={ openedFolders }
-              setOpenedFolders={ setOpenedFolders }
-              type={ s.stuff_type }
-              id={ s.stuff_id }
-              selected={
-                selectedStuff.reduce((a, c) => {
-                  return a || ((c.id == s.stuff_id) && (c.type == s.stuff_type));
-                }, false)
-              }
-              select={ selectStuff }
-              deselect={ deselectStuff }
-              parent={ folder.id }/>
-          ))
-        }
+        <DropArea hasChildren={ Boolean(fused.length )}>
+          { fused.map((s, i)=> (
+              <FolderStuff key={ i }
+                openedFolders={ openedFolders }
+                setOpenedFolders={ setOpenedFolders }
+                type={ s.stuff_type }
+                id={ s.stuff_id }
+                selected={
+                  selectedStuff.reduce((a, c) => {
+                    return a || ((c.id == s.stuff_id) && (c.type == s.stuff_type));
+                  }, false)
+                }
+                select={ selectStuff }
+                deselect={ deselectStuff }
+                parent={ folder.id }/>
+            ))
+          }
+        </DropArea>
       </div>
     </div>
   )
 }
 export default StuffInFolder;
+
+const REGEXes = [
+  /.+/,
+  /\d{4}-\d{2}-\d{2}/,
+  /\d{4}-\d{2}-\d{2}/,
+  /\d{3}[+-pnPN]\d{5}/
+]
+
+const processCsvFile = file => {
+  const filereader = new FileReader();
+  filereader.readAsText(file);
+  return new Promise((resolve, reject) => {
+    filereader.onload = () => {
+      const totalRows = csvParseRows(filereader.result);
+      const filteredRows = totalRows.filter(
+        r => r.reduce((a, c, i) => {
+          return a && REGEXes[i].test(c);
+        }, r.length === REGEXes.length)
+      )
+      resolve([totalRows.length, filteredRows.length]);
+    }
+  })
+}
+
+const processCsvFiles = async files => {
+  const response = [];
+  for (const file of files) {
+    if (file.type !== "text/csv") {
+      response.push({
+        filename: file.name,
+        message: `Incorrect file type "${ file.type }"`,
+        error: true
+      })
+      continue;
+    }
+    const [totalRows, okRows] = await processCsvFile(file);
+    response.push({
+      filename: file.name,
+      message: `${ okRows } rows out of ${ totalRows } rows are OK`,
+      error: !okRows,
+      warning: okRows < totalRows,
+      file
+    });
+  }
+  return response;
+}
+
+const DropArea = ({ children, hasChildren }) => {
+
+  const preventDefault = React.useCallback(e => {
+    e.preventDefault();
+  }, []);
+
+  const [dragging, setDragging] = React.useState(false);
+
+  const [result, setResult] = React.useState([]);
+
+  const [loading, setLoading] = React.useState(false);
+
+  const onDragEnter = React.useCallback(() => {
+    setDragging(true);
+    setResult([]);
+  }, []);
+  const onDragLeave = React.useCallback(() => {
+    setDragging(false);
+  }, []);
+
+  const onDrop = React.useCallback(e => {
+    e.preventDefault();
+    e.stopPropagation();
+    // setDragging(false);
+    const files = [...get(e, ["dataTransfer", "files"], [])];
+    processCsvFiles(files)
+      .then(res => setResult(res));
+  }, []);
+
+  React.useEffect(() => {
+    if (!result.length) return;
+
+    const okFiles = result.filter(r => !r.error);
+    if (okFiles.length) {
+      setLoading(true);
+    }
+    setTimeout(() => {
+      setLoading(false);
+      setResult([]);
+      setDragging(false);
+    }, 5000);
+  }, [result]);
+
+  return (
+    <div onDragEnter={ onDragEnter }
+      onDragOver={ preventDefault }
+    >
+      { !dragging ? null :
+        <div className={ `
+            fixed inset-0 bg-black bg-opacity-75
+            flex flex-col items-center justify-center
+            text-7xl font-bold
+          ` }
+          onDragOver={ preventDefault }
+          onDrop={ onDrop }
+        >
+          { !result.length ?
+            <div>
+              <div>Drop Routes Here</div>
+              <div><span className="fa fa-road"/></div>
+            </div> :
+            <div className="w-full">
+              { result.map((r, i) => (
+                  <div key={ i} className="grid grid-cols-2 gap-4 items-end">
+                    <div className="text-right text-4xl">
+                      { r.filename }
+                    </div>
+                    <div style={ { paddingBottom: "2px" } }
+                      className={ `
+                        text-2xl ${ r.error ? "text-red-600" : r.warning ? "text-orange-600" : "text-current" }
+                      ` }
+                    >
+                      { r.message }
+                    </div>
+                  </div>
+                ))
+              }
+              { loading ? "LOADING": "" }
+            </div>
+          }
+        </div>
+      }
+      { children }
+      { hasChildren ? null :
+        <div className={ `
+            flex flex-col items-center justify-center
+            font-bold text-7xl h-48 border rounded-xl
+          ` }
+        >
+          { dragging ? null :
+            <>
+              Drag Routes Here
+              <span className="fa fa-road"/>
+            </>
+          }
+        </div>
+      }
+    </div>
+  )
+}
 
 const defaultFoldersByType = () => ([
   { type: "User Folders", folders: [] },

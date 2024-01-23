@@ -124,12 +124,20 @@ const Route = ({ id, forFolder = false, parent, ...props }) => {
   }, [falcorCache, parent]);
 
   React.useEffect(() => {
-    falcor.get(["routes2", "id", id, ["name", "description", "updated_at", "id"]]);
+    falcor.get(["routes2", "id", id, ["name", "description", "updated_at", "id", "metadata"]]);
   }, [falcor, id]);
 
   const [route, setRoute] = React.useState({});
   React.useEffect(() => {
     setRoute(get(falcorCache, ["routes2", "id", id], {}));
+  }, [falcorCache, id]);
+
+  const dates = React.useMemo(() => {
+    const dates = get(falcorCache, ["routes2", "id", id, "metadata", "value", "dates"], []);
+    if (dates.length && (dates[0] === dates[1])) {
+      return [dates[0]];
+    }
+    return dates;
   }, [falcorCache, id]);
 
   const RouteItems = React.useMemo(() => {
@@ -185,15 +193,13 @@ const Route = ({ id, forFolder = false, parent, ...props }) => {
 
   const Container = forFolder ? FolderStuffContainer : StuffContainer;
 
-forFolder && console.log("ROUTE PARENT:", parent, templates)
-
   return (
     <Container { ...props } { ...route } id={ id } type="route"
       items={ RouteItems }
     >
       <span className="fad fa-road text-slate-500 text-sm px-2"/>
       <span className="pt-1">
-        { get(route, "name", "loading...") }
+        { get(route, "name", "loading...") } { dates.length ? `(${ dates.join(" - ") })` : null }
       </span>
     </Container>
   )

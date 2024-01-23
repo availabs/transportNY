@@ -532,7 +532,7 @@ const RelativeDateControls = ({ updateSettings, relativeDateBase, relativeDate }
   const calculated = React.useMemo(() => {
     let rd = `${ state.inputdate }=>${ state.timespan }`;
     if (!SpecialOptions.includes(state.timespan)) {
-      rd = rd + state.operation + `${ state.amount }${ state.timespan }` + "->" + `${ state.duration }${ state.timespan }`
+      rd = `${ rd }${ state.operation }${ state.amount }${ state.timespan }->${ state.duration }${ state.timespan }`
     }
     return RELATIVE_DATE_REGEX.test(rd) ? rd : null;
   }, [state]);
@@ -549,13 +549,13 @@ const RelativeDateControls = ({ updateSettings, relativeDateBase, relativeDate }
   }, [calculated, relativeDateBase]);
 
   React.useEffect(() => {
-    const { startDate, endDate } = relativeDateBase;
-    const dates = calculateRelativeDates(calculated, startDate, endDate);
-    if (dates.length) {
-      updateSettings("startDate", +dates[0]);
-      updateSettings("endDate", +dates[1]);
+    // const { startDate, endDate } = relativeDateBase;
+    // const dates = calculateRelativeDates(calculated, startDate, endDate);
+    if (calculatedDates.length) {
+      updateSettings("startDate", +calculatedDates[0].replaceAll("-", ""));
+      updateSettings("endDate", +calculatedDates[1].replaceAll("-", ""));
     }
-  }, [calculated, relativeDateBase]);
+  }, [calculatedDates]);
 
   const inputDates = React.useMemo(() => {
     return [

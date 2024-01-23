@@ -69,7 +69,7 @@ const useRouteInfo = id => {
       ["name", "description",
         "points", "tmc_array",
         "conflation_version", "confltion_array",
-        "created_at", "updated_at"]
+        "created_at", "updated_at", "metadata"]
     ]);
   }, [falcor, id]);
 
@@ -105,8 +105,16 @@ const useRouteInfo = id => {
       info.push({
         key: "version",
         name: "Conflation Version",
-        value: get(data, "conflation_version", "none")
+        value: get(data, "conflation_version") || "none"
       })
+      const dates = get(data, ["metadata", "value", "dates"], []);
+      if (dates.length) {
+        info.push({
+          key: "dates",
+          name: "Dates",
+          value: dates.join(", ")
+        })
+      }
     }
     setInfo(info);
   }, [falcorCache, id]);
