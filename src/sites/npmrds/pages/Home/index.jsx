@@ -605,7 +605,7 @@ const TemplateLoader = ({ id, title }) => {
       requests.push(["folders2", "id", folders, ["name", "description", "updated_at", "id"]]);
     }
     if (routes.length) {
-      requests.push(["routes2", "id", routes, ["name", "description", "updated_at", "id"]]);
+      requests.push(["routes2", "id", routes, ["name", "description", "updated_at", "id", "metadata"]]);
     }
     if (requests.length) {
       falcor.get(...requests);
@@ -662,6 +662,33 @@ const TemplateLoader = ({ id, title }) => {
   const totalRoutes = get(template, "routes", 0);
   const remaining = totalRoutes - selectedRoutes.length;
 
+  const [startDate, setStartDate] = React.useState(null);
+  const [endDate, setEndDate] = React.useState(null);
+
+  React.useEffect(() => {
+    if (totalRoutes !== 1) {
+      setStartDate(null);
+      setEndDate(null);
+    }
+  }, [totalRoutes]);
+
+  React.useEffect(() => {
+    if ((totalRoutes === 1) && (selectedRoutes.length === 1) && !startDate && !endDate) {
+      const dates = get(selectedRoutes, [0, "metadata", "value", "dates"], []);
+      if (dates.length) {
+        setStartDate(dates[0]);
+        setEndDate(dates[1]);
+      }
+    }
+  }, [totalRoutes, selectedRoutes]);
+
+  const doSetStartDate = React.useCallback(e => {
+    setStartDate(e.target.value);
+  }, []);
+  const doSetEndDate = React.useCallback(e => {
+    setEndDate(e.target.value);
+  }, []);
+
   const URL = React.useMemo(() => {
     if (totalRoutes > selectedRoutes.length) {
       return null;
@@ -671,9 +698,13 @@ const TemplateLoader = ({ id, title }) => {
     }
     const routeId = selectedRoutes.map(r => r.id).join("_");
 
+    if (startDate && endDate) {
+      return `/template/edit/${ template.id }/route/${ routeId }/dates/${ startDate }/${ endDate }`;
+    }
+
     return `/template/edit/${ template.id }/route/${ routeId }`;
 
-  }, [template, totalRoutes, selectedRoutes]);
+  }, [template, totalRoutes, selectedRoutes, startDate, endDate]);
 
   const routes = React.useMemo(() => {
     const routes = stuff.filter(s => s.type === "route")
@@ -793,6 +824,30 @@ const TemplateLoader = ({ id, title }) => {
                 }
               </div>
             </>
+          }
+
+          { totalRoutes !== 1 ? null :
+            <div>
+              <div className="border-b border-current w-3/4 text-lg font-bold mb-1">
+                Add Dates (optional)
+              </div>
+              <div className="grid grid-cols-2 gap-1">
+                <div className="flex items-center mb-1">
+                  <span className="font-bold">Start Date:</span>
+                  <input type="date"
+                    className="px-2 py-1 rounded ml-1"
+                    value={ startDate }
+                    onChange={ doSetStartDate }/>
+                </div>
+                <div className="flex items-center">
+                  <span className="font-bold">End Date:</span>
+                  <input type="date"
+                    className="px-2 py-1 rounded ml-1"
+                    value={ endDate }
+                    onChange={ doSetEndDate }/>
+                </div>
+              </div>
+            </div>
           }
 
           { !URL ? null :
