@@ -662,13 +662,13 @@ const TemplateLoader = ({ id, title }) => {
   const totalRoutes = get(template, "routes", 0);
   const remaining = totalRoutes - selectedRoutes.length;
 
-  const [startDate, setStartDate] = React.useState(null);
-  const [endDate, setEndDate] = React.useState(null);
+  const [startDate, setStartDate] = React.useState("");
+  const [endDate, setEndDate] = React.useState("");
 
   React.useEffect(() => {
     if (totalRoutes !== 1) {
-      setStartDate(null);
-      setEndDate(null);
+      setStartDate("");
+      setEndDate("");
     }
   }, [totalRoutes]);
 
