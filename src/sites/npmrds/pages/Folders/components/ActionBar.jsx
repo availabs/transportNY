@@ -34,7 +34,7 @@ const stuffIdsByType = stuff => {
   }, [[], [], [], []]);
 }
 
-const useStuffActions = (selectedStuff, parent) => {
+const useStuffActions = (selectedStuff, parent, deselectAll) => {
 
   const { falcor, falcorCache } = useFalcor();
 
@@ -56,12 +56,14 @@ const useStuffActions = (selectedStuff, parent) => {
 
   const moveTo = React.useCallback((e, dst) => {
     e.stopPropagation();
-    falcor.call(["folders2", "move"], [selectedStuff, parent, dst]);
+    falcor.call(["folders2", "move"], [selectedStuff, parent, dst])
+      .then(() => deselectAll());
   }, [falcor, selectedStuff, parent]);
 
   const copyTo = React.useCallback((e, dst) => {
     e.stopPropagation();
-    falcor.call(["folders2", "copy"], [selectedStuff, dst]);
+    falcor.call(["folders2", "copy"], [selectedStuff, dst])
+      .then(() => deselectAll());
   }, [falcor, selectedStuff])
 
   const [confirm, setConfirm] = React.useState({});
@@ -72,7 +74,7 @@ const useStuffActions = (selectedStuff, parent) => {
   const confirmDelete = React.useCallback(() => {
     setConfirm({
       action: "Delete",
-      onConfirm: () => { deleteSelected(); setConfirm({}); }
+      onConfirm: () => { deleteSelected(); setConfirm({}); deselectAll(); }
     });
   }, [deleteSelected])
 
@@ -179,7 +181,7 @@ const useStuffActions = (selectedStuff, parent) => {
   return [stuffActions, Confirm];
 }
 
-const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
+const ActionBar = ({ selectedStuff, selectAll, deselectAll, parent, stuff }) => {
 
   const { falcor, falcorCache } = useFalcor();
 
@@ -277,7 +279,16 @@ const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
     setTemplates(templates);
   }, [falcorCache, parent]);
 
-  const [stuffActions, confirm] = useStuffActions(selectedStuff, parent)
+  const [stuffActions, confirm] = useStuffActions(selectedStuff, parent, deselectAll);
+
+  const onChange = React.useCallback(e => {
+    if (!selectedStuff.length) {
+      selectAll();
+    }
+    else {
+      deselectAll();
+    }
+  }, [selectAll, deselectAll, selectedStuff]);
 
   return (
     <div className={ `
@@ -307,9 +318,10 @@ const ActionBar = ({ selectedStuff, deselectAll, parent }) => {
         <div className="flex items-center px-1">
           <input type="checkbox"
             className="cursor-pointer disabled:cursor-not-allowed mr-10"
+            style={ { display: "block", position: "static" } }
             checked={ Boolean(selectedStuff.length) }
-            onChange={ deselectAll }
-            disabled={ !selectedStuff.length }/>
+            onChange={ onChange }
+            disabled={ !stuff.length }/>
         </div>
       </div>
       <ConfirmModal { ...confirm }/>

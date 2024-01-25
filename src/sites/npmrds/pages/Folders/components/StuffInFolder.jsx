@@ -2,6 +2,7 @@ import React from "react"
 
 import { range as d3range } from "d3-array"
 import get from "lodash/get"
+import moment from "moment"
 
 import {
   useFalcor,
@@ -114,6 +115,9 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
   const selectStuff = React.useCallback(stuff => {
     setSelectedStuff(prev => [...prev, stuff]);
   }, []);
+  const selectAll = React.useCallback(e => {
+    setSelectedStuff(stuff.map(s => ({ id: s.stuff_id, type: s.stuff_type })));
+  }, [stuff]);
   const deselectStuff = React.useCallback(stuff => {
     setSelectedStuff(prev => prev.filter(s => !((s.type === stuff.type) && (s.id === stuff.id))));
   }, []);
@@ -173,11 +177,16 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
       </div>
       <div className='mt-2'>
         <ActionBar parent={ folder.id }
+          stuff={ stuff }
           selectedStuff={ selectedStuff }
+          selectAll={ selectAll }
           deselectAll={ deselectAll }/>
       </div>
       <div className='bg-white p-4 shadow rounded-sm border border-gray-100 mt-2'>
-        <DropArea hasChildren={ Boolean(fused.length )}>
+        <DropArea
+          hasChildren={ Boolean(fused.length )}
+          folderId={ folder.id }
+        >
           { fused.map((s, i)=> (
               <FolderStuff key={ i }
                 openedFolders={ openedFolders }
@@ -202,10 +211,10 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
 export default StuffInFolder;
 
 const REGEXes = [
-  /.+/,
+  /[A-Za-z0-9_ ]+/,
   /\d{4}-\d{2}-\d{2}/,
   /\d{4}-\d{2}-\d{2}/,
-  /\d{3}[+-pnPN]\d{5}/
+  /(\d{3}[+-pnPN]\d{5}[|]?)+/
 ]
 
 const processCsvFile = file => {
@@ -219,7 +228,7 @@ const processCsvFile = file => {
           return a && REGEXes[i].test(c);
         }, r.length === REGEXes.length)
       )
-      resolve([totalRows.length, filteredRows.length]);
+      resolve([totalRows.length, filteredRows.length, filteredRows]);
     }
   })
 }
@@ -235,19 +244,19 @@ const processCsvFiles = async files => {
       })
       continue;
     }
-    const [totalRows, okRows] = await processCsvFile(file);
+    const [totalRows, okRows, rows] = await processCsvFile(file);
     response.push({
       filename: file.name,
       message: `${ okRows } rows out of ${ totalRows } rows are OK`,
       error: !okRows,
       warning: okRows < totalRows,
-      file
+      rows
     });
   }
   return response;
 }
 
-const DropArea = ({ children, hasChildren }) => {
+const DropArea = ({ children, hasChildren, folderId }) => {
 
   const preventDefault = React.useCallback(e => {
     e.preventDefault();
@@ -276,19 +285,60 @@ const DropArea = ({ children, hasChildren }) => {
       .then(res => setResult(res));
   }, []);
 
+  const { falcor, falcorCache } = useFalcor();
+
+  const hasError = React.useMemo(() => {
+    return result.reduce((a, c) => {
+      return a || c.error;
+    }, false);
+  }, [result]);
+
   React.useEffect(() => {
     if (!result.length) return;
 
     const okFiles = result.filter(r => !r.error);
+    const hasError = result.reduce((a, c) => {
+      return a || c.error;
+    }, false);
+
+    const finished = { value: true };
+    const timeout = { value: null };
+
     if (okFiles.length) {
+      finished.value = false;
       setLoading(true);
+      const rows = okFiles.reduce((a, c) => {
+        a.push(...c.rows);
+        return a;
+      }, []);
+      falcor.call(["routes2", "batch", "upload"], [folderId, rows])
+        .catch(e => console.error(e))
+        .finally(() => {
+          finished.value = true;
+          setLoading(false);
+          if (!timeout.value) {
+            setResult([]);
+            setDragging(false);
+          }
+        })
     }
-    setTimeout(() => {
-      setLoading(false);
+    if (hasError) {
+      timeout.value = setTimeout(() => {
+        timeout.value = null;
+        if (finished.value) {
+          setResult([]);
+          setDragging(false);
+        }
+      }, 30000);
+    }
+  }, [result, falcor, folderId, hasError]);
+
+  const remove = React.useCallback(() => {
+    if (!loading) {
       setResult([]);
       setDragging(false);
-    }, 5000);
-  }, [result]);
+    }
+  }, [loading]);
 
   return (
     <div onDragEnter={ onDragEnter }
@@ -296,18 +346,20 @@ const DropArea = ({ children, hasChildren }) => {
     >
       { !dragging ? null :
         <div className={ `
-            fixed inset-0 bg-black bg-opacity-75
+            fixed inset-0 bg-black bg-opacity-90
             flex flex-col items-center justify-center
-            text-7xl font-bold
+            text-7xl font-bold text-gray-500 z-50
           ` }
           onDragOver={ preventDefault }
+          onDragLeave={ onDragLeave }
           onDrop={ onDrop }
+          onClick={ remove }
         >
           { !result.length ?
-            <div>
+            <>
               <div>Drop Routes Here</div>
               <div><span className="fa fa-road"/></div>
-            </div> :
+            </> :
             <div className="w-full">
               { result.map((r, i) => (
                   <div key={ i} className="grid grid-cols-2 gap-4 items-end">
@@ -324,8 +376,11 @@ const DropArea = ({ children, hasChildren }) => {
                   </div>
                 ))
               }
-              { loading ? "LOADING": "" }
             </div>
+          }
+          { loading ? "UPLOADING ROUTES..." : result.length ? "CLICK TO CLOSE" : null }
+          { !hasError ? null :
+            <UploadInstructions />
           }
         </div>
       }
@@ -344,6 +399,34 @@ const DropArea = ({ children, hasChildren }) => {
           }
         </div>
       }
+    </div>
+  )
+}
+
+const UploadInstructions = () => {
+  const date = new Date()
+  return (
+    <div className="text-2xl mt-2">
+      <div className="pb-1 border-b border-current mb-1">
+        You must upload a .csv text file.<br />
+        The .csv must NOT have a header row.
+      </div>
+      <div className="pb-1 border-b border-current mb-1">
+        The first column of each row must be an alphanumeric route name.
+      </div>
+      <div className="pb-1 border-b border-current mb-1">
+        The second column of each row must be the start date in the format "YYYY-MM-DD".<br />
+        { `Today's date looks like: ${ moment().format("YYYY-MM-DD") }.` }
+      </div>
+      <div className="pb-1 border-b border-current mb-1">
+        The third column of each row must be the end date in the format "YYYY-MM-DD".
+      </div>
+      <div className="">
+        The fourth column of each row must be a list of TMCs.<br />
+        Multiple TMCs must be joined with the pipe "|" character.<br />
+        A single TMC looks like: 120P12345<br />
+        Multiple TMCs look like: 120P12345|120P12346|120P12347
+      </div>
     </div>
   )
 }

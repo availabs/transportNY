@@ -15,6 +15,7 @@ const ConfirmModal = ({ action, stuff, onConfirm, isOpen = false, close }) => {
   return (
     <Modal open={ isOpen }>
       <div className="bg-gray-100 overflow-auto h-fit"
+        style={ { maxHeight: "80vh" } }
         onClick={ stopPropagation }
       >
 
@@ -33,7 +34,7 @@ const ConfirmModal = ({ action, stuff, onConfirm, isOpen = false, close }) => {
           <div className="font-bold text-xl border-b-2 border-current mb-2">
             Are you sure you wish to { action }?
           </div>
-          <div>
+          <div className="overflow-auto max-h-96">
             { stuff.map(s => {
                 return <Stuff key={ s.id } { ...s }/>
               })
