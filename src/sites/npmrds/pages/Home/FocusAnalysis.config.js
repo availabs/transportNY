@@ -1,5 +1,18 @@
 const FocusAnalysisConfig = [
+  {
+    title: 'Floating Car',
+    Templates: : [
+      {
+        title: 'One Week Study'
+        id:278
+      },
+      {
+        title: 'Annual Average Study'
+        id: 276
+      }
+    ]
 
+  },
   { title: "Behavioral",
     Templates: [
       { title: "Snapshot",
