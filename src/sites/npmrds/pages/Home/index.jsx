@@ -641,7 +641,7 @@ const TemplateLoader = ({ id, title }) => {
 
   React.useEffect(() => {
     if (folders.length && !openedFolders.length) {
-      setOpenedFolders([folders.filter(f => f.type === "user")[0].id]);
+      setOpenedFolders([folders.filter(f => f.type === "user")?.[0]?.id]);
     }
   }, [folders, openedFolders]);
 
