@@ -76,8 +76,8 @@ const ppdaf = () => {
           icon: "mr-3 text-lg",
         },
         compact: {
-          fixed: 'ml-0 md:ml-44',
-          wrapper: "w-44",
+          fixed: 'ml-0 md:ml-36',
+          wrapper: "w-36",
           itemWrapper: 'pt-5 ',
           sideItem: "group flex px-3 py-1.5 text-[14px] mx-2 hover:translate-x-1 duration-300 ease-in-out",
           sideItemActive: "group flex px-3 py-1.5 text-[14px]  mx-2 hover:translate-x-1 duration-300 ease-in-out", //"border-r-4 border-blue-500 ",

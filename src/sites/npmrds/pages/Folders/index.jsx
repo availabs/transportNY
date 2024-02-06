@@ -94,7 +94,7 @@ const Folders = ({ user }) => {
       }
     }
     if (!set && folders.length && !openedFolders.length) {
-      setOpenedFolders([folders.filter(f => f.type === "user")[0].id]);
+      setOpenedFolders([folders.filter(f => f.type === "user")?.[0]?.id]);
     }
   }, [folders, openedFolders]);
 

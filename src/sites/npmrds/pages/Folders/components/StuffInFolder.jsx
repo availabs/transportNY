@@ -26,14 +26,14 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
 
   const [stuff, setStuff] = React.useState([]);
 
-  const folder = openedFolders[openedFolders.length - 1];
+  const folder = openedFolders[openedFolders.length - 1] || {};
 
   React.useEffect(() => {
-    falcor.get(["folders2", "stuff", folder.id])
-  }, [falcor, folder.id]);
+    falcor.get(["folders2", "stuff", folder?.id])
+  }, [falcor, folder?.id]);
 
   React.useEffect(() => {
-    const stuff = get(falcorCache, ["folders2", "stuff", folder.id, "value"], []);
+    const stuff = get(falcorCache, ["folders2", "stuff", folder?.id, "value"], []);
     const [folders, routes, reports, templates] = stuff.reduce((a, c) => {
       switch (c.stuff_type) {
         case "folder":
@@ -68,7 +68,7 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
     if (requests.length) {
       falcor.get(...requests);
     }
-  }, [falcor, falcorCache, folder.id, filter]);
+  }, [falcor, falcorCache, folder?.id, filter]);
 
   React.useEffect(() => {
     if (!folder) {
@@ -76,7 +76,7 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
       return;
     }
 
-    const stuff = get(falcorCache, ["folders2", "stuff", folder.id, "value"], [])
+    const stuff = get(falcorCache, ["folders2", "stuff", folder?.id, "value"], [])
       .filter(s => !filter ||
                   (s.stuff_type === "folder") ||
                   filter.includes(s.stuff_type) ||
@@ -127,7 +127,7 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
 
   React.useEffect(() => {
     deselectAll();
-  }, [folder.id, deselectAll]);
+  }, [folder?.id, deselectAll]);
 
   const [search, setSearch] = React.useState("");
   const clearSearch = React.useCallback(() => {
@@ -176,7 +176,7 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
         </div>
       </div>
       <div className='mt-2'>
-        <ActionBar parent={ folder.id }
+        <ActionBar parent={ folder?.id }
           stuff={ stuff }
           selectedStuff={ selectedStuff }
           selectAll={ selectAll }
@@ -185,7 +185,7 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
       <div className='bg-white p-4 shadow rounded-sm border border-gray-100 mt-2'>
         <DropArea
           hasChildren={ Boolean(fused.length )}
-          folderId={ folder.id }
+          folderId={ folder?.id }
         >
           { fused.map((s, i)=> (
               <FolderStuff key={ i }
@@ -200,7 +200,7 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
                 }
                 select={ selectStuff }
                 deselect={ deselectStuff }
-                parent={ folder.id }/>
+                parent={ folder?.id }/>
             ))
           }
         </DropArea>
@@ -470,7 +470,7 @@ const FolderIconToolBase = ({ folder, deleteFolder, user }) => {
     e.preventDefault();
     setConfirm({
       action: `delete this folder`,
-      onConfirm: () => { deleteFolder(folder.id); setConfirm({}); }
+      onConfirm: () => { deleteFolder(folder?.id); setConfirm({}); }
     });
   }, [deleteFolder, folder]);
 
@@ -483,7 +483,7 @@ const FolderIconToolBase = ({ folder, deleteFolder, user }) => {
         <ConfirmModal
           isOpen={ Boolean(confirm.action) }
           close={ clearConfirm }
-          stuff={ [{ type: "folder", id: folder.id }] }
+          stuff={ [{ type: "folder", id: folder?.id }] }
           { ...confirm }/>
       </div>
 
@@ -577,7 +577,7 @@ const FolderSelector = ({ folder, setOpenedFolders, deleteFolder }) => {
 
   const openFolder = React.useCallback((e, fid) => {
     e.stopPropagation();
-    if (fid !== folder.id) {
+    if (fid !== folder?.id) {
       setOpenedFolders([fid]);
       setShow(false);
     }
@@ -605,9 +605,9 @@ const FolderSelector = ({ folder, setOpenedFolders, deleteFolder }) => {
 
       <div className="cursor-pointer inline-block"
         onMouseOver={ showSelector }
-        onClick={ e => setOpenedFolders([folder.id]) }
+        onClick={ e => setOpenedFolders([folder?.id]) }
       >
-        { folder.name }
+        { folder?.name }
         <span>&nbsp;/&nbsp;</span>
       </div>
 
@@ -631,7 +631,7 @@ const FolderSelector = ({ folder, setOpenedFolders, deleteFolder }) => {
                       onClick={ e => openFolder(e, f.id) }
                       className={ `
                         whitespace-nowrap px-2 py-1 hover:bg-blue-100 flex
-                        ${ f.id === folder.id ?
+                        ${ f.id === folder?.id ?
                           "bg-blue-300 cursor-not-allowed" : "cursor-pointer"
                         }
                       ` }
@@ -659,7 +659,7 @@ const FolderSelector = ({ folder, setOpenedFolders, deleteFolder }) => {
                       onClick={ e => openFolder(e, f.id) }
                       className={ `
                         whitespace-nowrap px-2 py-1 hover:bg-blue-100 flex
-                        ${ f.id === folder.id ?
+                        ${ f.id === folder?.id ?
                           "bg-blue-300 cursor-not-allowed" : "cursor-pointer"
                         }
                       ` }
