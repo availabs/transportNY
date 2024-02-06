@@ -79,11 +79,14 @@ class ReportBase extends React.Component {
     showTableModal: false,
     tableModalData: { data: [], keys: [] }
   }
+  MOUNTING = false;
 
   componentDidMount() {
+
     this.props.resetState();
     this.props.getDataDateExtent()
       .then(() => {
+
         const reportId = get(this.props, 'params.reportId', ""),
           templateId = get(this.props, 'params.templateId', ""),
           defaultType = get(this.props, 'params.defaultType', ""),
@@ -623,10 +626,13 @@ class ReportBase extends React.Component {
             isOpen={ this.state.isOpen }
             graphs={ this.props.graphs }
             route_comps={ this.props.route_comps }
+
             combineRouteComps={ this.props.combineRouteComps }
             createNewRouteGroup={ this.props.createNewRouteGroup }
             removeRouteFromGroup={ this.props.removeRouteFromGroup }
-            updateRouteGroupName={ this.props.updateRouteGroupName }
+            updateRouteGroup={ this.props.updateRouteGroup }
+            updateRouteGroupWorkingSettings={ this.props.updateRouteGroupWorkingSettings }
+
             routes={ this.props.routes }
             routeComponentSettings={ this.props.routeComponentSettings }
             onOpenOrClose={ this.onOpenOrClose.bind(this) }

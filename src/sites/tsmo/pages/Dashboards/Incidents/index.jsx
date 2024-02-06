@@ -168,6 +168,7 @@ const Incidents = props => {
     const fSystems = F_SYSTEM_MAP[fsystem];
     let request = requests[0];
     let eventIds = get(falcorCache, ["transcom2", "eventsbyGeom", request, "value"], [])
+console.log("EVENT IDs:", eventIds.length)
     let keys = []
     let events = []
     // let totalDuration = 0;
@@ -360,7 +361,9 @@ const Incidents = props => {
 
     // console.log('colorsForTypes', colorsForTypes)
     return {
-      events: events.slice(0, 20),
+      events: events
+        .sort((a,b) => get(b,'congestion_data.value.vehicleDelay',0) - get(a,'congestion_data.value.vehicleDelay',0))
+        .slice(0, 20),
         // .sort((a,b) => get(b,'congestion_data.value.vehicleDelay',0) - get(a,'congestion_data.value.vehicleDelay',0))
       numEvents: events.length,
       currentMonthbyCat,

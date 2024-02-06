@@ -92,7 +92,7 @@ class SideBar extends Component {
     onOpenOrClose: PropTypes.func
   };
 
-  _onOpenOrClose = () => {
+  _onOpenOrClose() {
     const openOrClose = this.props.isOpen === 0 ? 1 : -1;
     this.props.onOpenOrClose(openOrClose);
   };
@@ -155,7 +155,7 @@ class SideBar extends Component {
             onClick={ e => { e.stopPropagation(); this._onOpenOrClose(); } }>
 
             <span className="fa fa-arrow-right"
-              style={ { transform: `rotate(${isOpen ? 180 : 0}deg)` } }/>
+              style={ { transform: `rotate(${ isOpen ? 180 : 0 }deg)` } }/>
 
           </CollapseButton>
 

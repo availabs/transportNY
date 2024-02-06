@@ -32,10 +32,14 @@ const EditLabel = styled.div`
 `
 
 export default class EditableTitle extends React.Component {
-	ref = React.createRef();
-	state = {
-		editing: false,
-		title: this.props.title
+	constructor(...args) {
+		super(...args);
+		this.ref = React.createRef();
+		this.state = {
+			editing: false,
+			title: this.props.title
+		}
+		this.onKeyUp = this.onKeyUp.bind(this);
 	}
 	componentDidUpdate(oldProps) {
 		if (!this.state.editing && (this.state.title !== this.props.title)) {
@@ -44,7 +48,6 @@ export default class EditableTitle extends React.Component {
 	}
 	onChange(title) {
 		this.setState({ title });
-		this.props.onChange(title);
 	}
 	startEditing(e) {
 		e.stopPropagation();
@@ -56,7 +59,9 @@ export default class EditableTitle extends React.Component {
 	}
 	finishEditing() {
 		if (this.state.editing === true) {
+			this.ref.current.blur();
 			this.setState({ editing: false });
+			this.props.onChange(this.state.title);
 		}
 	}
 	handleClickOutside(e) {
@@ -87,7 +92,8 @@ export default class EditableTitle extends React.Component {
 						ref={ this.ref }
 						onFocus={ e => this.startEditing(e) }
 						onBlur={ e => this.finishEditing() }
-						onChange={ e => this.onChange(e.target.value) }/>
+						onChange={ e => this.onChange(e.target.value) }
+						onKeyUp={ this.onKeyUp }/>
 				</div>
 			</EditableTitleContainer>
 		)

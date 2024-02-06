@@ -255,13 +255,13 @@ class CongestionLayer extends LayerContainer {
   }
 
   init(map, falcor) {
-    console.log('----init----')
+    // console.log('----init----')
       // return falcor
       //   .get(["geo", "36", "geoLevels"])
   }
 
   fetchData(falcor) {
-    console.log('falcor',falcor)
+    // console.log('falcor',falcor)
     const {region} = this.props
     const [geolevel, value] = region.split('|')
 
@@ -309,7 +309,7 @@ class CongestionLayer extends LayerContainer {
       map.setPaintProperty("events-points", "circle-stroke-width", 2)
     }
 
-console.log('events', events)
+// console.log('events', events)
 
     // --- Process and Map Event Data
     const eventsCollection = {

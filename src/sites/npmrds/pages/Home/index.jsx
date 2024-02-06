@@ -288,6 +288,7 @@ const Home = () => {
           <Title>
             Regional Analysis
           </Title>
+
           <Section title="Region">
             <div className="col-span-2">
               <Select options={ REGIONS }
@@ -297,6 +298,24 @@ const Home = () => {
                 valueAccessor={ regionValueAccessor }/>
             </div>
           </Section>
+
+          <Section title="Floating Car">
+            <LinkCard
+              title="50th Percentile Speed"
+              description=""
+              href={ `/map/${ region }/2021/speed_50pctl_total` }/>
+            <LinkCard
+              title="80th Percentile Speed"
+              description=""
+              href={ `/map/${ region }/2021/speed_80pctl_total` }/>
+            <div className="col-span-2">
+              <LinkCard
+                title="Freeflow Speed"
+                description="85th percentile of off-peak travel speeds"
+                href={ `/map/${ region }/2021/freeflow` }/>
+            </div>
+          </Section>
+
           <Section title="Reliability">
             <LinkCard
               title="Car (LoTTR)"
@@ -307,6 +326,7 @@ const Home = () => {
               description="Truck Travel Time Reliability"
               href={ `/map/${ region }/2021/tttr` }/>
           </Section>
+
           <Section title="Congestion">
             <LinkCard
               title="Total (TED)"
@@ -323,6 +343,16 @@ const Home = () => {
                 href={ `/map/${ region }/2021/phed` }/>
             </div>
           </Section>
+
+          <Section title="Emissions">
+            <div className="col-span-2">
+              <LinkCard
+                title="Gasoline and Diesel"
+                description="CO² Emissions for all vehicles"
+                href={ `/map/${ region }/2021/emissions_co2` }/>
+            </div>
+          </Section>
+
           <Section title="PM3">
             <div className="col-span-2">
               <LinkCard
@@ -331,6 +361,7 @@ const Home = () => {
                 href="/map21"/>
             </div>
           </Section>
+
           <Section title="TSMO">
             <div className="col-span-2">
               <LinkCard
@@ -339,6 +370,7 @@ const Home = () => {
                 href={ tsmoHref }/>
             </div>
           </Section>
+
         </div>
 
         <TemplateModal close={ close }

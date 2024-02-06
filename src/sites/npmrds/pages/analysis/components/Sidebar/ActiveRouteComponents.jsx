@@ -75,10 +75,15 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 		_setState(prev => ({ ...prev, ...update }));
 	}, []);
 
-	const extendSidebar = React.useCallback(openCompId => {
-		props.extendSidebar(openCompId);
+	const extendRouteComp = React.useCallback(openCompId => {
+		props.extendRouteComp(openCompId);
 		setState({ openCompId });
-	}, [props.extendSidebar, setState]);
+	}, [props.extendRouteComp, setState]);
+
+	const extendRouteGroup = React.useCallback(openCompId => {
+		props.extendRouteGroup(openCompId);
+		setState({ openCompId });
+	}, [props.extendRouteGroup, setState]);
 
 	const add = React.useCallback((e, route, groupId) => {
 		e.stopPropagation();
@@ -87,21 +92,19 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 	const remove = React.useCallback((e, compId) => {
 		e.stopPropagation();
 		if (compId === state.openCompId) {
+console.log("??????????????")
 			setState({ openCompId: null });
 		}
 		props.remove(compId);
 	}, [props.remove, setState]);
 
 	const onDragEnd = React.useCallback(({ source, destination, combine, draggableId }) => {
-
 		if (combine) {
 			props.combineRouteComps(draggableId, combine.draggableId);
 			return;
 		}
-
 		if (destination === null) return;
 		if (source.index === destination.index) return;
-
 		props.reorderRouteComps(source.index, destination.index);
 	}, [props.reorderRouteComps]);
 
@@ -238,7 +241,7 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 													>
 														{ get(comp, "type", "route") === "route" ?
 															<RouteComp route={ comp }
-																extendSidebar={ extendSidebar }
+																extendSidebar={ extendRouteComp }
 																dragHandleProps={ provided.dragHandleProps }
 																isDragging={ snapshot.isDragging }
 																add={ add }
@@ -246,7 +249,8 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 															:
 															<RouteGroup group={ comp }
 																updateName={ props.updateRouteGroupName }
-																extendSidebar={ extendSidebar }
+																extendRouteComp={ extendRouteComp }
+																extendRouteGroup={ extendRouteGroup }
 																dragHandleProps={ provided.dragHandleProps }
 																isDragging={ snapshot.isDragging }
 																add={ add }
@@ -355,7 +359,8 @@ const RouteGroup = props => {
 		group,
 		dragHandleProps,
 		isDragging,
-		extendSidebar,
+		extendRouteComp,
+		extendRouteGroup,
 		add,
 		remove,
 		removeComp,
@@ -372,7 +377,8 @@ const RouteGroup = props => {
 	}, []);
 	const toggleOpen = React.useCallback(e => {
 		setOpen(open => !open);
-	}, []);
+		extendRouteGroup(group.compId);
+	}, [extendRouteGroup, group.compId]);
 
 	const onDragEnd = React.useCallback(({ source, destination }) => {
 		if (destination === null) return;
@@ -439,33 +445,11 @@ const RouteGroup = props => {
 				onClick={ toggleOpen }
 			>
 				<div className="relative flex">
-					{ editing ?
-						<input ref={ setRef }
-							className="flex-1 overflow-hidden"
-							value={ name } onChange={ setName }
-							onClick={ stopPropagation }
-							onFocus={ onFocus }
-							onKeyUp={ onKeyUp }
-						/> :
-						<div className="overflow-hidden flex-1 text-ellipsis">
-							{ group.name }
-						</div>
-					}
+					<div className="overflow-hidden flex-1 text-ellipsis">
+						{ group.name }
+					</div>
 					<div className="grid grid-cols-2 gap-1 flex-0">
-						{ editing ?
-							<div style={ { width: "26px" } }
-								className={ `
-									fa fa-floppy-disk hover:bg-gray-500 hover:text-white
-									rounded flex justify-center items-center cursor-pointer
-								` }
-								onClick={ stopEditing }/> :
-							<div style={ { width: "26px" } }
-								className={ `
-									fa fa-edit hover:bg-gray-500 hover:text-white
-									rounded flex justify-center items-center cursor-pointer
-								` }
-								onClick={ startEditing }/>
-						}
+						<div />
 						<div style={ { width: "26px" } }
 							className={ `
 								fa fa-minus hover:bg-gray-500 hover:text-white
@@ -497,7 +481,7 @@ const RouteGroup = props => {
 																{ ...provided.draggableProps }
 															>
 																<RouteComp route={ comp }
-																	extendSidebar={ extendSidebar }
+																	extendSidebar={ extendRouteComp }
 																	dragHandleProps={ provided.dragHandleProps }
 																	isDragging={ snapshot.isDragging }
 																	add={ doAdd }

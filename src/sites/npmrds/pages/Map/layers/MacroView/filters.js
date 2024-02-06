@@ -383,6 +383,8 @@ const updateSubMeasures = (measure, filters, falcor) => {
 
   percentiles.value = null;
   attributes.value = null;
+
+// console.log("updateSubMeasures:", filters)
 }
 
 const getMeasure = (filters) => {
@@ -400,10 +402,12 @@ const getMeasure = (filters) => {
     pollutant
   } = filters;
 
+// console.log("getMeasure:", filters)
+
   const out = [
     measure.value,
     (trafficType.value !== "all") && trafficType.value,
-    freeflow.value && "freeflow",
+    freeflow.value && measure.value !== "freeflow" ? "freeflow" : null,
     risAADT.value ? "ris" : false,
     fueltype.active && (fueltype.value !== "total") ? fueltype.value : false,
     pollutant.active && pollutant.value,
@@ -416,14 +420,14 @@ const getMeasure = (filters) => {
     attributes.value
   ].filter(Boolean).join("_")
 
-// console.log("GET MEASURE:", out);
-
-  const NOT_MEASURES = ["RIS", "TMC", "speed_total"]
+  const NOT_MEASURES = ["RIS", "TMC", "speed_total"];
 
   if (NOT_MEASURES.includes(out)) {
+// console.log("getMeasure::out", "");
     return ""
   }
-console.log("MEASURE:", out);
+
+console.log("getMeasure::out", out);
 
   return out
 }
