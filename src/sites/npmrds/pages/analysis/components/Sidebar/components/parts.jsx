@@ -36,6 +36,7 @@ export const Control = styled(ControlBase)`
 
 	:disabled {
 		cursor: not-allowed;
+		opacity: 0.25;
 	}
 	:disabled:hover {
 	}

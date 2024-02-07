@@ -145,11 +145,11 @@ class RouteBarGraph extends GeneralGraphComp {
 // 	this.updateGraph();
 // }
 
+console.log("RouteBarGraph::graphData", graphData);
+
 		return (
 			<BarGraph data={ graphData }
-				shouldComponentUpdate={
-					["data", "xScale", "yScale", "colorRange"]
-				}
+				shouldComponentUpdate={ ["data", "xScale", "yScale", "colorRange"] }
 				colorRange={ colorRange }
 				indexBy="resolution"
 				keys={ ["value"] }

@@ -12,7 +12,7 @@ const Map = ({ events, colorsForTypes, hoveredEvent }) => {
         center: [-73.911895, 40.88],
         styles: [
         {name: "Terrain",
-            style: 'mapbox://styles/am3081/cjgi6glse001h2sqgjqcuov28' 
+            style: 'mapbox://styles/am3081/cjgi6glse001h2sqgjqcuov28'
           },
           {name: "Dark",
             style: 'mapbox://styles/am3081/ckm85o7hq6d8817nr0y6ute5v' },
@@ -28,12 +28,12 @@ const Map = ({ events, colorsForTypes, hoveredEvent }) => {
       [layers.current[0].id]: { region, month, fsystem, events, colorsForTypes, hoveredEvent }
     };
   }, [region, month, events, fsystem, colorsForTypes, hoveredEvent]);
-  console.log('what is the layerprops in incidentsMat component: ', layerProps);
+  // console.log('what is the layerprops in incidentsMat component: ', layerProps);
 
     return (
 
         <div className='w-full h-full border min-h-[850px]'  >
-          
+
 
             <AvlMap accessToken={ config.MAPBOX_TOKEN }
               mapOptions={ mapOptions }
@@ -42,7 +42,7 @@ const Map = ({ events, colorsForTypes, hoveredEvent }) => {
               sidebarTabPosition='side'
               navigationControl="bottom-right"/>
 
-          
+
         </div>
 
     )

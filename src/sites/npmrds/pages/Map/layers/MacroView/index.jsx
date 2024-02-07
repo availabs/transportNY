@@ -43,7 +43,7 @@ import HoverComp from "./HoverComp";
 import { LayerContainer } from "~/modules/avl-map/src";
 import TmcSearch from "./TmcSearch"
 
-const MEASURE_REGEX = /^([a-z]+)[_]*/;
+const MEASURE_REGEX = /^([a-z]+)(_[a-z0-9_]+)*/;
 const MEASURE_MODIFIERS = {
   freeflow: {
     filter: "freeflow",
@@ -492,6 +492,8 @@ class MacroLayer extends LayerContainer {
   setActiveStation = () => {};
 
   init(map, falcor) {
+
+// console.log("MacroLayer::init")
     this.updateSubMeasures(this.filters.measure.value, this.filters, falcor);
 
     // console.log('----init----')
@@ -596,14 +598,14 @@ class MacroLayer extends LayerContainer {
             this.filters.geography.value = [geoid];
             this.filters.year.value = +year;
 
-            const [, m] = match;
-            
-            this.updateSubMeasures(m, this.filters, falcor);
+            const [, msr, mods = ""] = match;
 
-            this.filters.measure.value = m;
+            this.filters.measure.value = msr;
+
+            this.updateSubMeasures(msr, this.filters, falcor);
 
             for (const mod in MEASURE_MODIFIERS) {
-              if (measure.includes(mod)) {
+              if (mods.includes(mod)) {
                 const { filter, value } = MEASURE_MODIFIERS[mod];
                 this.filters[filter].value = value;
               }

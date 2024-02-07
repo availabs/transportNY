@@ -264,6 +264,8 @@ class RouteComponent extends React.Component {
 				.reduce((a, c) => a || !isEqual(settings[c], SETTINGS[c]), false)
 		}
 
+// console.log("RouteComponent::props", this.props);
+
 		return (
 			<div style={ {
 				padding: "10px",
@@ -302,7 +304,8 @@ class RouteComponent extends React.Component {
 					yearsWithData={ this.props.yearsWithData }
 					copy={ this.copyRouteCompSettings.bind(this) }
 					route={ this.props.route }
-					inRouteGroup={ this.props.inRouteGroup }/>
+					inRouteGroup={ this.props.inRouteGroup }
+					route_group={ this.props.route_group }/>
 
 				<div style={ { paddingTop: "10px" } }>
 					<ColorPicker color={ this.state.color }

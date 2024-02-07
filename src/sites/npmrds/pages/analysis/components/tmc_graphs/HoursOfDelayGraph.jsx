@@ -124,6 +124,7 @@ class HoursOfDelayGraph extends GeneralGraphComp {
 	renderGraph(graphData, [route], [displayData], resolution) {
 		const costPerHour = get(this.props, 'state.costPerHour', 0);
 		const resFormat = getResolutionFormat(resolution);
+
 		return (
 			<BarGraph data={ graphData }
 				shouldComponentUpdate={ ["data"] }

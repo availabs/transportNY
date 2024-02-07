@@ -253,7 +253,9 @@ const AdvancedControls = props => {
         <RelativeDateControls
           updateSettings={ updateSettings }
           relativeDate={ relativeDate }
-          relativeDateBase={ relativeDateBase }/>
+          relativeDateBase={ relativeDateBase }
+          startDate={ startDate }
+          endDate={ endDate }/>
       }
 
       <div className="flex items-center border-y border-current py-2"
@@ -500,7 +502,15 @@ const Reducer = (state, action) => {
 const accessor = v => v.display;
 const valueAccessor = v => v.value;
 
-const RelativeDateControls = ({ updateSettings, relativeDateBase, relativeDate }) => {
+const RelativeDateControls = props => {
+
+  const {
+    updateSettings,
+    relativeDateBase,
+    relativeDate,
+    startDate,
+    endDate
+  } = props;
 
   const [state, dispatch] = React.useReducer(Reducer, relativeDate, InitState);
 
@@ -542,20 +552,6 @@ const RelativeDateControls = ({ updateSettings, relativeDateBase, relativeDate }
       updateSettings("relativeDate", calculated);
     }
   }, [calculated]);
-
-  const calculatedDates = React.useMemo(() => {
-    const { startDate, endDate } = relativeDateBase;
-    return calculateRelativeDates(calculated, startDate, endDate, "YYYY-MM-DD");
-  }, [calculated, relativeDateBase]);
-
-  React.useEffect(() => {
-    // const { startDate, endDate } = relativeDateBase;
-    // const dates = calculateRelativeDates(calculated, startDate, endDate);
-    if (calculatedDates.length) {
-      updateSettings("startDate", +calculatedDates[0].replaceAll("-", ""));
-      updateSettings("endDate", +calculatedDates[1].replaceAll("-", ""));
-    }
-  }, [calculatedDates]);
 
   const inputDates = React.useMemo(() => {
     return [
@@ -625,15 +621,14 @@ const RelativeDateControls = ({ updateSettings, relativeDateBase, relativeDate }
         </>
       }
 
-      { calculatedDates.length !== 2 ? null :
-        <div>
+      { <div>
           <div className="flex items-center">
-            <div className="flex-1 mr-1">Calculated Start Date:</div>
-            <div className="w-28 text-right">{ calculatedDates[0] }</div>
+            <div className="flex-1 mr-1">Start Date:</div>
+            <div className="w-28 text-right">{ startDate }</div>
           </div>
           <div className="flex items-center">
-            <div className="flex-1 mr-1">Calculated End Date:</div>
-            <div className="w-28 text-right">{ calculatedDates[1] }</div>
+            <div className="flex-1 mr-1">End Date:</div>
+            <div className="w-28 text-right">{ endDate }</div>
           </div>
         </div>
       }

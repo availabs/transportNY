@@ -7,6 +7,7 @@ import ColorRangeSelector from "./ColorRangeSelector"
 
 import ActiveRouteComponents from "./ActiveRouteComponents"
 import RouteComponent from "./RouteComponent"
+import RouteGroupComponent from "./RouteGroupComponent"
 
 import ActiveStationComponents from "./ActiveStationComponents"
 import StationComponent from "./StationComponent"
@@ -72,16 +73,28 @@ class Sidebar extends React.Component {
   getExtendedComponentProps() {
     switch (this.state.extendedComponentMeta.comp) {
       case "RouteComponent": {
-        const { compId } = this.state.extendedComponentMeta,
-          route_comp = this.props.route_comps
+        const { compId } = this.state.extendedComponentMeta;
+        const [route_comp, route_group] = this.props.route_comps
 						.reduce((a, c) => {
 							if (c.type === "group") {
 								return c.route_comps.reduce((aa, cc) => {
-									return cc.compId === compId ? cc : aa;
+									if (cc.compId === compId) {
+										return [cc, c]
+									}
+									return aa;
 								}, a);
 							}
-							return c.compId === compId ? c : a;
-						}, { compId: "invalid" });
+							return c.compId === compId ? [c, null] : a;
+						}, [{ compId: "invalid" }, null]);
+
+				let usingRelativeDates = this.props.usingRelativeDates;
+				let relativeDateBase = this.props.relativeDateBase;
+
+				if (route_group && route_group.usingRelativeDates) {
+					usingRelativeDates = true;
+					relativeDateBase = route_group.relativeDateBase;
+				}
+
         return {
           ...route_comp,
           updateRouteCompSettings: this.props.updateRouteCompSettings,
@@ -92,8 +105,11 @@ class Sidebar extends React.Component {
           yearsWithData: this.props.yearsWithData,
           SETTINGS: this.props.routeComponentSettings,
           route: this.props.routes.reduce((a, c) => c.compId == compId ? c : a, null),
-					usingRelativeDates: this.props.usingRelativeDates,
-					relativeDateBase: this.props.relativeDateBase
+
+					route_group,
+
+					usingRelativeDates,
+					relativeDateBase
         }
       };
       case "StationComponent": {
@@ -120,6 +136,18 @@ class Sidebar extends React.Component {
           selectColorRange: this.props.selectColorRange
         }
       }
+			case "RouteGroupComponent": {
+        const { compId } = this.state.extendedComponentMeta;
+        const route_group = this.props.route_comps
+						.reduce((a, c) => {
+							return c.compId === compId ? c : a;
+						}, { compId: "invalid" });
+				return {
+					updateRouteGroupWorkingSettings: this.props.updateRouteGroupWorkingSettings,
+					updateRouteGroup: this.props.updateRouteGroup,
+					...route_group
+				}
+			}
     }
     return {};
   }
@@ -127,14 +155,18 @@ class Sidebar extends React.Component {
     const { compId, comp } = this.state.extendedComponentMeta;
     switch (comp) {
       case "RouteComponent":
+			case "RouteGroupComponent":
         return this.props.route_comps
           .reduce((a, c) => {
 						if (c.type === "group") {
+							if (c.compId === compId) {
+								return true;
+							}
 							return c.route_comps.reduce((aa, cc) => {
 								return aa || cc.compId === compId;
 							}, a)
 						}
-						return a || c.compId === compId;
+						return a || (c.compId === compId);
 					}, false);
       case "StationComponent":
         return this.props.station_comps
@@ -245,7 +277,6 @@ class Sidebar extends React.Component {
 			createNewRouteGroup,
 			removeRouteFromGroup,
       updateAllRouteComps,
-			updateRouteGroupName,
       ...rest
     } = this.props;
 
@@ -320,9 +351,11 @@ class Sidebar extends React.Component {
 								remove={ removeRouteComp }
 								createNewRouteGroup={ createNewRouteGroup }
 								removeFromGroup={ removeRouteFromGroup }
-								updateRouteGroupName={ updateRouteGroupName }
-								extendSidebar={ compId =>
+								extendRouteComp={ compId =>
 									this.extendSidebar(RouteComponent, { comp: "RouteComponent", compId })
+								}
+								extendRouteGroup={ compId =>
+									this.extendSidebar(RouteGroupComponent, { comp: "RouteGroupComponent", compId })
 								}/>
 						</div>
 

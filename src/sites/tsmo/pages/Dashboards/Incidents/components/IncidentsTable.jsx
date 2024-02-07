@@ -38,6 +38,8 @@ const calcDelayCost = (data, cache) => {
 
 const IncidentsTable = ({ events, setHoveredEvent }) => {
 
+console.log("IncidentsTable::events", events);
+
   const { falcorCache } = useFalcor();
 
   const onRowEnter = React.useCallback((e, row) => {
