@@ -15,6 +15,8 @@ export const SymbologyLayerRenderComponent = props => {
 
   const activeSymbology = get(props, ["layerState", "activeSymbology"], null);
 
+  console.log('activeSymbology', activeSymbology)
+
   const [legend, setLegend] = React.useState(null);
 
   React.useEffect(() => {
@@ -102,12 +104,24 @@ export const SymbologyLayerRenderComponent = props => {
 
 const getValidSources = sources => {
   return sources.map(src => {
-    const { id, source: { url, type } } = src;
+    let { id, source: { url, type } } = src;
+    if(url.includes('.pmtiles')){
+      url = url
+        .replace("$HOST", $HOST)
+        .replace('https://', 'pmtiles://')
+        .replace('http://', 'pmtiles://')
+
+    } else {
+      url = url.replace("$HOST", $HOST)
+    }
+    
+
+
     return {
       id,
       source: {
         type,
-        url: url.replace("$HOST", $HOST)
+        url: url
       }
     }
   });
@@ -138,6 +152,15 @@ class SymbologyLayer extends AvlLayer {
         return aa;
       }, [[], []]);
 
+    // sources.forEach(s => {
+    //   if(s?.source?.url) {
+    //     s.source.url = s.source.url.replace('$HOST', TILEHOST)
+        
+    //     }
+    //   }
+    // })
+
+    console.log('constructor', sources, layers)
     this.sources = sources;
     this.layers = layers;
   }
