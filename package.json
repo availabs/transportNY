@@ -62,7 +62,6 @@
     "lodash.get": "^4.4.2",
     "mapbox-gl": "^1.13.2",
     "maplibre-gl": "^3.3.1",
-    "maplibre-gl2": "npm:maplibre-gl@^2.4.0",
     "memoize-one": "^6.0.0",
     "moment": "^2.29.4",
     "p-event": "^5.0.1",

@@ -82,7 +82,7 @@ const SourceLayer = ({ layer, ...rest }) => {
 				<div className='flex items-center font-medium text-gray-800'>{ layer.name }</div>
 				<div className='flex-1'/>
 				<div className='flex items-center p-2  hover:text-blue-500 cursor-pointer'><span className='fa fa-info text-xs'/></div>
-				{/*<div className='flex items-center p-2  hover:text-blue-500 cursor-pointer'><span className='fa fa-download text-xs'/></div>*/}
+				<div className='flex items-center p-2  hover:text-blue-500 cursor-pointer'><span className='fa fa-download text-xs'/></div>
 			</div>
 			
 			{/*<div className='flex'>
