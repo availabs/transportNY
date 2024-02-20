@@ -240,7 +240,7 @@ class RouteComponent extends React.Component {
 			compName = get(this.props.routesGraph, `id.${ this.props.routeId }.name`, this.props.compId),
 			advanced = this.state.controls === "Advanced",
 			Controls = advanced ? AdvancedControls : SimpleControls,
-			needsUpdate = this.needsUpdate() || (this.state.color !== this.props.color);
+			needsUpdate = this.needsUpdate() || (this.props.color !== this.state.color);
 
 		const isDifferent = {};
 		for (const [compId, settings] of this.props.SETTINGS) {

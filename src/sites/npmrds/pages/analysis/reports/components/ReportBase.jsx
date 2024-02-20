@@ -93,8 +93,18 @@ class ReportBase extends React.Component {
           routeId = get(this.props, 'params.routeId', ""),
           stationId = get(this.props, 'params.stationId', ""),
           path = get(this.props, 'location.pathname', ""),
-          startDate = get(this.props, "params.startDate", null),
-          endDate = get(this.props, "params.endDate", null);
+          dates = get(this.props, "params.dates", "");
+
+        const getDates = dates => {
+          return dates.split("_").filter(Boolean)
+            .map(d => {
+              const temp = d.split("|").map(d => +d);
+              if (temp.length === 1) {
+                return [temp[0], temp[0]]
+              }
+              return temp;
+            })
+        }
 
         const query = new URLSearchParams(this.props.location.search);
 
@@ -146,12 +156,11 @@ class ReportBase extends React.Component {
           );
         }
         else if (templateId && (routeId || stationId)) {
-          if (startDate && endDate) {
+          if (dates) {
             this.props.loadRoutesAndTemplateWithDates(
               routeId.split("_").filter(Boolean),
               templateId,
-              startDate,
-              endDate,
+              getDates(dates),
               stationId.split("_").filter(Boolean)
             );
           }
@@ -244,7 +253,7 @@ class ReportBase extends React.Component {
         if (routes) {
           requests.push(
             ['routes2', 'user', 'index', { from: 0, to: routes - 1 },
-              ['id', 'name']
+              ['id', 'name', 'metadata']
             ]
           )
         }

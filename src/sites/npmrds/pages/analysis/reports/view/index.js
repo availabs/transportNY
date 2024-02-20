@@ -20,7 +20,7 @@ const PATHS = [
   '/template/view/:templateId/station/:routeId',
   '/template/view/:templateId/route/:routeId/station/:stationId',
 
-  '/template/view/:templateId/route/:routeId/dates/:startDate/:endDate',
+  '/template/view/:templateId/route/:routeId/dates/:dates',
 ]
 
 export default PATHS.map(path => ({

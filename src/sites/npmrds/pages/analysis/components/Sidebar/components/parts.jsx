@@ -24,6 +24,9 @@ const ControlBase = ({ children, className, ...props }) => {
 }
 
 export const Control = styled(ControlBase)`
+	:hover {
+		background-color: #bbb;
+	}
 	:hover,
 	&.isActive {
 	}

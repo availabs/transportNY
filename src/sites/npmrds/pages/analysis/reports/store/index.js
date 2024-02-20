@@ -202,23 +202,12 @@ export const loadRoutesAndTemplate = (routeIds, templateId, stationIds = []) =>
 		  .then(() => routeIds.length && getRouteData(routeIds, getState().report))
 			.then(() => getTemplateData(templateId))
       .then(() => {
-        if (routeIds.length === 1) {
-          const dates = get(falcorGraph.getCache(), ["routes2", "id", routeIds[0], "metadata", "value", "dates"], []);
-          if (dates.length === 2) {
-    				return dispatch({
-    					type: UPDATE_STATE,
-    					state: _loadDateRelativeTemplate(templateId, routeIds, dates[0], dates[1], getState().report, stationIds)
-    				})
-          }
-          else {
-            return dispatch({
-    					type: UPDATE_STATE,
-    					state: _loadTemplate(templateId, routeIds, getState().report, stationIds)
-    				})
-          }
-        }
+        return dispatch({
+					type: UPDATE_STATE,
+					state: _loadTemplate(templateId, routeIds, getState().report, stationIds)
+				})
       })
-export const loadRoutesAndTemplateWithDates = (routeIds, templateId, startDate, endDate, stationIds = []) =>
+export const loadRoutesAndTemplateWithDates = (routeIds, templateId, dates, stationIds = []) =>
 	(dispatch, getState) =>
     Promise.resolve()
       .then(() => stationIds.length && getStationData(stationIds))
@@ -227,7 +216,7 @@ export const loadRoutesAndTemplateWithDates = (routeIds, templateId, startDate, 
 			.then(() =>
 				dispatch({
 					type: UPDATE_STATE,
-					state: _loadDateRelativeTemplate(templateId, routeIds, startDate, endDate, getState().report, stationIds)
+					state: _loadTemplateWithDates(templateId, routeIds, dates, getState().report, stationIds)
 				})
 			)
 export const loadRoutesAndTemplateByType = (routeIds, defaultType, stationIds = []) =>
@@ -239,27 +228,11 @@ export const loadRoutesAndTemplateByType = (routeIds, defaultType, stationIds = 
 			.then(templateId => {
         return getTemplateData(templateId)
     			.then(() => {
-            if (routeIds.length === 1) {
-              const dates = get(falcorGraph.getCache(), ["routes2", "id", routeIds[0], "metadata", "value", "dates"], []);
-              if (dates.length === 2) {
-        				return dispatch({
-        					type: UPDATE_STATE,
-        					state: _loadDateRelativeTemplate(templateId, routeIds, dates[0], dates[1], getState().report, stationIds)
-        				})
-              }
-              else {
-                return dispatch({
-        					type: UPDATE_STATE,
-        					state: _loadTemplate(templateId, routeIds, getState().report, stationIds)
-        				})
-              }
-            }
-          }
-    				// dispatch({
-    				// 	type: UPDATE_STATE,
-    				// 	state: _loadTemplate(templateId, routeIds, getState().report, stationIds)
-    				// })
-    			)
+            return dispatch({
+              type: UPDATE_STATE,
+              state: _loadTemplate(templateId, routeIds, getState().report, stationIds)
+            })
+    			})
       })
 export const loadTemplate = (templateId) =>
 	(dispatch, getState) =>
@@ -269,25 +242,10 @@ export const loadTemplate = (templateId) =>
 					routeIds = state.route_comps.reduce((a, c) => a.includes(c.routeId) ? a : [...a, c.routeId], []),
   				stationIds = state.station_comps.reduce((a, c) => a.includes(c.stationId) ? a : [...a, c.stationId], []);
 
-        if (routeIds.length === 1) {
-          const dates = get(falcorGraph.getCache(), ["routes2", "id", routeIds[0], "metadata", "value", "dates"], []);
-          if (dates.length === 2) {
-    				return dispatch({
-    					type: UPDATE_STATE,
-    					state: _loadDateRelativeTemplate(templateId, routeIds, dates[0], dates[1], state, stationIds)
-    				})
-          }
-          else {
-            return dispatch({
-    					type: UPDATE_STATE,
-    					state: _loadTemplate(templateId, routeIds, state, stationIds)
-    				})
-          }
-        }
-				// return dispatch({
-				// 	type: UPDATE_STATE,
-				// 	state: _loadTemplate(templateId, routeIds, state, stationIds)
-				// })
+        return dispatch({
+					type: UPDATE_STATE,
+					state: _loadTemplate(templateId, routeIds, state, stationIds)
+				})
 			})
 
 export const saveTemplate = (template, templateId = null) =>
@@ -430,7 +388,16 @@ export const saveTemplate = (template, templateId = null) =>
 			["templates2", "save"],
 			[toSave], [], []
 		)
-		// .then(() => dispatch(update(falcorGraph.getCache())));
+    .then(res => {
+      dispatch({
+        type: UPDATE_STATE,
+        state: {
+          name: toSave.name,
+          folder: toSave.folder
+        }
+      })
+    })
+    .then(() => dispatch(removeSnapShot(templateId)));
 	}
 
 export const addRouteComp = (routeId, settings = null, groupId = null, needsSnapShot = false) =>
@@ -728,7 +695,8 @@ export const updateAllComponents = () =>
   (dispatch, getState) =>
     dispatch(updateAllRouteComps())
       .then(() => dispatch(updateAllStationComps()))
-  		.then(() => dispatch(takeSnapShot()))
+  		.then(() => dispatch(takeSnapShot()));
+
 export const updateRouteCompColor = (compId, color) =>
 	(dispatch, getState) =>
 		new Promise((resolve, reject) => {
@@ -744,6 +712,19 @@ export const updateRouteCompColor = (compId, color) =>
 						color
 					}
 				}
+        else if (rc.type === "group") {
+          rc.route_comps = rc.route_comps.map(rc => {
+    				if (rc.compId === compId) {
+    					if (!AVAILABLE_COLORS.includes(rc.color) && COLORS.includes(rc.color)) {
+    						AVAILABLE_COLORS.push(rc.color);
+    					}
+    					return {
+    						...rc,
+    						color
+    					}
+    				}
+          })
+        }
 				return rc;
 			})
 
@@ -1766,53 +1747,59 @@ const _addRouteComp = (state, routeIds, copiedSettings, groupId = null) => {
   routeIds = Array.isArray(routeIds) ? routeIds : [routeIds];
 
 	const { yearsWithData } = state,
-    routeComponentSettings = new Map(state.routeComponentSettings),
+    lastYear = yearsWithData[yearsWithData.length - 1];
+
+  const baseDates = [`${ lastYear }-01-01`, `${ lastYear }-12-31`];
+
+  const routeComponentSettings = new Map(state.routeComponentSettings),
     newRouteComps = [],
     newRoutes = [];
 
   for (const routeId of routeIds) {
-    const data = get(falcorGraph.getCache(), `routes2.id.${ routeId }`, {}),
-      {
-    		amPeakStart,
-    		// amPeakEnd,
-    		// pmPeakStart,
-    		pmPeakEnd
-    	} = getRoutePeaks(),
-      compId = getUniqueRouteCompId(),
-      newRouteComp = {
-        compId,
-        routeId,
-        name: data.name,
-        inRouteGroup: Boolean(groupId),
-        settings: copiedSettings ?
-          { ...copiedSettings, isRelativeDateBase: false } :
-          { startDate: +`${ yearsWithData[yearsWithData.length - 1] }0101`,
-            endDate: +`${ yearsWithData[yearsWithData.length - 1] }1231`,
-            relativeDate: null,
-            isRelativeDateBase: false,
-            year: yearsWithData[yearsWithData.length - 1],
-            month: 'all',
-            startTime: DateObject.epochToTimeString(amPeakStart),
-            endTime: DateObject.epochToTimeString(pmPeakEnd),
-            resolution: '5-minutes',
-            weekdays: {
-              sunday: false,
-              monday: true,
-              tuesday: true,
-              wednesday: true,
-              thursday: true,
-              friday: true,
-              saturday: false
-            },
-            overrides: {},
-            amPeak: true,
-            offPeak: true,
-            pmPeak: true,
-            dataColumn: "travel_time_all",
-            compTitle: "",
-            routeId
-          }
-      };
+    const data = get(falcorGraph.getCache(), `routes2.id.${ routeId }`, {});
+    const dates = get(data, ["metadata", "value", "dates"], baseDates)
+                    .map(d => +d.replaceAll("-", ""));
+    const {
+  		amPeakStart,
+  		pmPeakEnd
+  	} = getRoutePeaks();
+
+    const compId = getUniqueRouteCompId();
+
+    const newRouteComp = {
+      compId,
+      routeId,
+      name: data.name,
+      inRouteGroup: Boolean(groupId),
+      settings: copiedSettings ?
+        { ...copiedSettings, isRelativeDateBase: false } :
+        { startDate: dates[0],
+          endDate: dates[1],
+          relativeDate: null,
+          isRelativeDateBase: false,
+          year: yearsWithData[yearsWithData.length - 1],
+          month: 'all',
+          startTime: DateObject.epochToTimeString(amPeakStart),
+          endTime: DateObject.epochToTimeString(pmPeakEnd),
+          resolution: '5-minutes',
+          weekdays: {
+            sunday: false,
+            monday: true,
+            tuesday: true,
+            wednesday: true,
+            thursday: true,
+            friday: true,
+            saturday: false
+          },
+          overrides: {},
+          amPeak: true,
+          offPeak: true,
+          pmPeak: true,
+          dataColumn: "travel_time_all",
+          compTitle: "",
+          routeId
+        }
+    };
     routeComponentSettings.set(newRouteComp.compId, { ...newRouteComp.settings });
     newRouteComps.push(newRouteComp);
     newRoutes.push(...getRoutesForRouteComp(newRouteComp));
@@ -1906,7 +1893,9 @@ const _removeRouteComp = (state, compId) => {
   }
 }
 
-const _loadDateRelativeTemplate = (templateId, routeIds, startDate, endDate, state, stationIds = []) => {
+const _loadTemplateWithDates = (templateId, routeIds, dates, state, stationIds = []) => {
+
+console.log("_loadTemplateWithDates::dates", dates);
 
   const falcorCache = falcorGraph.getCache();
   const template = get(falcorCache, `templates2.id.${ templateId }`, {});
@@ -1973,6 +1962,12 @@ const _loadDateRelativeTemplate = (templateId, routeIds, startDate, endDate, sta
     return a;
   }, {});
 
+  const datesMap = routeIds.reduce((a, c, i) => {
+    const metaDates = get(falcorCache, ["routes2", "id", c, "metadata", "value", "dates"], []);
+    a[c] = dates.length > i ? dates[i] : metaDates.length ? metaDates : dates[i % dates.length];
+    return a;
+  }, {});
+
   const routeComponentSettings = new Map();
 
   route_comps = route_comps.map(rc => {
@@ -1981,13 +1976,14 @@ const _loadDateRelativeTemplate = (templateId, routeIds, startDate, endDate, sta
         ...rc,
         route_comps: rc.route_comps.map(rc => {
           const routeId = idMap[rc.routeId];
+          const [startDate, endDate] = datesMap[routeId];
           const settings = {
             ...rc.settings,
             routeId
           }
           if (settings.isRelativeDateBase) {
-            settings.startDate = +startDate.replaceAll("-", "");
-            settings.endDate = +endDate.replaceAll("-", "");
+            settings.startDate = startDate;
+            settings.endDate = endDate;
           }
           else if (!settings.isRelativeDateBase) {
             const dates = calculateRelativeDates(rc.settings.relativeDate, startDate, endDate);
@@ -2007,13 +2003,14 @@ const _loadDateRelativeTemplate = (templateId, routeIds, startDate, endDate, sta
     }
     else {
       const routeId = idMap[rc.routeId];
+      const [startDate, endDate] = datesMap[routeId];
       const settings = {
         ...rc.settings,
         routeId
       }
       if (settings.isRelativeDateBase) {
-        settings.startDate = +startDate.replaceAll("-", "");
-        settings.endDate = +endDate.replaceAll("-", "");
+        settings.startDate = startDate;
+        settings.endDate = endDate;
       }
       else if (!settings.isRelativeDateBase) {
         const dates = calculateRelativeDates(rc.settings.relativeDate, startDate, endDate);
@@ -2116,12 +2113,27 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
       }
     }
     return a;
-  }, [])
+  }, []);
 
-  let idMap = {};
-  variables.forEach((v, i) => {
-    idMap[v] = routeIds[i];
-  })
+  // let idMap = {};
+  // variables.forEach((v, i) => {
+  //   idMap[v] = routeIds[i];
+  // })
+
+  const cache = falcorGraph.getCache();
+
+  const datesMap = routeIds.reduce((a, c) => {
+    const dates = get(cache, `routes2.id.${ c }.metadata.value.dates`, []);
+    if (Array.isArray(dates) && dates.length === 2) {
+      a[c] = dates.map(d => +d.replaceAll("-", ""));
+    }
+    return a;
+  }, {});
+
+  const idMap = variables.reduce((a, c, i) => {
+    a[c] = routeIds[i];
+    return a;
+  }, {});
 
   route_comps = route_comps.map(rc => {
     if (rc.type === "group") {
@@ -2147,24 +2159,41 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
 
   route_comps.forEach(route_comp => {
     if (route_comp.type === "group") {
-      route_comp.route_comps.forEach(route_comp => {
+      const route_group = route_comp;
+      route_group.route_comps.forEach(route_comp => {
       	const {
       		compId,
       		settings
       	} = route_comp;
         settings.routeId = route_comp.routeId;
+
+        const { isRelativeDateBase } = settings;
+        const hasDates = route_comp.routeId in datesMap;
+
       	if (RECENT_REGEX.test(settings.year)) {
       		saveYearsAsRecent = true;
       		settings.year = +replace(settings.year, mostRecent);
       	}
+        else if (isRelativeDateBase && hasDates) {
+          settings.year = "advanced";
+        }
+
       	if (RECENT_REGEX.test(settings.startDate)) {
       		saveYearsAsRecent = true;
       		settings.startDate = +replace(settings.startDate, mostRecent);
       	}
+        else if (isRelativeDateBase && hasDates) {
+          settings.startDate = datesMap[route_comp.routeId][0];
+        }
+
       	if (RECENT_REGEX.test(settings.endDate)) {
       		saveYearsAsRecent = true;
       		settings.endDate = +replace(settings.endDate, mostRecent);
       	}
+        else if (isRelativeDateBase && hasDates) {
+          settings.endDate = datesMap[route_comp.routeId][1];
+        }
+
       	if (RECENT_REGEX.test(settings.compTitle)) {
       		saveYearsAsRecent = true;
       		settings.compTitle = replace(settings.compTitle, mostRecent);
@@ -2178,29 +2207,41 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
     		settings
     	} = route_comp;
       settings.routeId = route_comp.routeId;
+
+      const { isRelativeDateBase } = settings;
+      const hasDates = route_comp.routeId in datesMap;
+
     	if (RECENT_REGEX.test(settings.year)) {
     		saveYearsAsRecent = true;
     		settings.year = +replace(settings.year, mostRecent);
     	}
+      else if (isRelativeDateBase && hasDates) {
+        settings.year = "advanced";
+      }
+
     	if (RECENT_REGEX.test(settings.startDate)) {
     		saveYearsAsRecent = true;
     		settings.startDate = +replace(settings.startDate, mostRecent);
     	}
+      else if (isRelativeDateBase && hasDates) {
+        settings.startDate = datesMap[route_comp.routeId][0];
+      }
+
     	if (RECENT_REGEX.test(settings.endDate)) {
     		saveYearsAsRecent = true;
     		settings.endDate = +replace(settings.endDate, mostRecent);
     	}
+      else if (isRelativeDateBase && hasDates) {
+        settings.endDate = datesMap[route_comp.routeId][1];
+      }
+
     	if (RECENT_REGEX.test(settings.compTitle)) {
     		saveYearsAsRecent = true;
     		settings.compTitle = replace(settings.compTitle, mostRecent);
     	}
       routeComponentSettings.set(compId, { ...settings });
     }
-  })
-
-  const routes = route_comps.reduce((a, c) =>
-  	[...a, ...getRoutesForRouteComp(c, null, Boolean(c.color))]
-  , []);
+  });
 
   // LOAD STATION COMPS
   station_comps = loadStationCompsFromTemplate(station_comps, falcorCache, stationIds);
@@ -2244,12 +2285,11 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
   	description = replace(description, mostRecent);
   }
 
-  return {
+  let stateUpdate = {
     name,
     description,
     folder,
     route_comps,
-    routes,
     graphs,
     station_comps,
     routeComponentSettings,
@@ -2258,6 +2298,25 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
     colorRange,
     defaultType
 	};
+
+  const usingRelativeDates = route_comps.reduce((a, c) => {
+    if (c.type === "group") {
+      return c.route_comps.reduce((aa, cc) => {
+        return aa || Boolean(cc.settings.isRelativeDateBase);
+      }, a)
+    }
+    return a || Boolean(c.settings.isRelativeDateBase);
+  }, false);
+
+  if (usingRelativeDates) {
+    stateUpdate = checkRelativeDates(stateUpdate, true);
+  }
+
+  stateUpdate.routes = stateUpdate.route_comps.reduce((a, c) => {
+    return [...a, ...getRoutesForRouteComp(c, null, Boolean(c.color))];
+  }, []);
+
+  return stateUpdate;
 }
 
 const getRoutesForRouteComp = (routeComp, routeDataMap = null, preserveColors = false) => {
@@ -2341,6 +2400,8 @@ const DATA_REGEX = /{data}/g;
 
 const getRouteCompName = (name, settings) => {
   if (!settings.compTitle) return name;
+
+// console.log("getRouteCompName::settings", settings)
 
   return settings.compTitle.replace(NAME_REGEX, name)
     .replace(YEAR_REGEX, getYearString(settings))

@@ -24,7 +24,7 @@ const PATHS = [
   '/template/edit/:templateId/station/:stationId',
   '/template/edit/:templateId/route/:routeId/station/:stationId',
 
-  '/template/edit/:templateId/route/:routeId/dates/:startDate/:endDate',
+  '/template/edit/:templateId/route/:routeId/dates/:dates',
 
   '/template/edit/type/:defaultType/route/:routeId',
   '/template/edit/type/:defaultType/station/:stationId',

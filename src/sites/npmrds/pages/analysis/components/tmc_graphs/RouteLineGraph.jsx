@@ -11,6 +11,7 @@ import { LineGraph } from "~/modules/avl-graph/src"
 import { rollup, extent as d3extent, range as d3range } from "d3-array"
 
 import get from "lodash/get"
+import moment from "moment"
 
 import {
 	getResolutionFormat,

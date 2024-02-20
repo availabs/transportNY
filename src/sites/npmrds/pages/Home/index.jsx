@@ -731,7 +731,7 @@ const TemplateLoader = ({ id, title }) => {
     const routeId = selectedRoutes.map(r => r.id).join("_");
 
     if (startDate && endDate) {
-      return `/template/edit/${ template.id }/route/${ routeId }/dates/${ startDate }/${ endDate }`;
+      return `/template/edit/${ template.id }/route/${ routeId }/dates/${ startDate.replaceAll("-", "") }|${ endDate.replaceAll("-", "") }`;
     }
 
     return `/template/edit/${ template.id }/route/${ routeId }`;

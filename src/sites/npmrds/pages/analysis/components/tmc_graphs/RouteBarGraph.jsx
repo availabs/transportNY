@@ -145,7 +145,7 @@ class RouteBarGraph extends GeneralGraphComp {
 // 	this.updateGraph();
 // }
 
-console.log("RouteBarGraph::graphData", graphData);
+// console.log("RouteBarGraph::graphData", graphData);
 
 		return (
 			<BarGraph data={ graphData }

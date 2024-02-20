@@ -46,7 +46,7 @@ export const Header = styled.div`
 	}
 `
 
-export const DropdownItem = ({ children, hasChildren }) => {
+export const DropdownItem = ({ children, hasChildren, hasDates }) => {
   return (
     <div style={ { minWidth: "15rem" } }
       className={ `
@@ -54,7 +54,14 @@ export const DropdownItem = ({ children, hasChildren }) => {
         hover:bg-gray-300 bg-gray-200
       ` }
     >
-      <div className="flex-1">{ children }</div>
+      <div className="flex-1 flex">
+				<div className="flex-1">
+					{ children }
+				</div>
+				<div className="flex-0">
+					{ hasDates ? <span className="fa-regular fa-calendar ml-4"/> : null }
+				</div>
+			</div>
       { !hasChildren ? null :
         <span className="fa fa-caret-right ml-2"/>
       }
@@ -92,7 +99,6 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 	const remove = React.useCallback((e, compId) => {
 		e.stopPropagation();
 		if (compId === state.openCompId) {
-console.log("??????????????")
 			setState({ openCompId: null });
 		}
 		props.remove(compId);
@@ -115,25 +121,43 @@ console.log("??????????????")
 
 	const { falcorCache } = useFalcor();
 
-	const foldersWithRoutes = folders.filter(f =>
-		get(f, "stuff", []).reduce((a, c) => a || c.stuff_type === "route", false)
-	)
+	const foldersWithRoutes = React.useMemo(() => {
+		return folders.filter(f =>
+			get(f, "stuff", []).reduce((a, c) => a || c.stuff_type === "route", false)
+		)
+	}, [folders]);
 
-	const folderData = foldersWithRoutes.map(f => {
-		const routes = get(f, "stuff", []).filter(s => s.stuff_type === "route");
-		return {
-			label: f.name,
-			value: routes.length > 10 ? [] : routes.map(r => r.stuff_id),
-			children: routes.map(r => ({
-				label: get(falcorCache, ["routes2", "id", r.stuff_id, "name"], ""),
-				value: r.stuff_id
-			}))
-		}
-	})
+	const folderData = React.useMemo(() => {
+		return foldersWithRoutes.map(f => {
+			const routes = get(f, "stuff", []).filter(s => s.stuff_type === "route");
+			return {
+				label: f.name,
+				value: routes.length > 10 ? [] : routes.map(r => r.stuff_id),
+				children: routes.map(r => {
+					const data = get(falcorCache, ["routes2", "id", r.stuff_id], {});
+					return {
+						label: data.name,
+						value: r.stuff_id,
+						Item: props => (
+							<DropdownItem { ...props }
+								hasDates={ Boolean(data.metadata?.value?.dates?.length) }/>
+						)
+					}
+				})
+			}
+		})
+	}, [falcorCache, foldersWithRoutes]);
 
 	const availableRoutes = React.useMemo(() => {
 		return props.availableRoutes.slice()
-			.sort((a, b) => a.name.localeCompare(b.name));
+			.sort((a, b) => a.name.localeCompare(b.name))
+			.map(r => ({
+				...r,
+				Item: props => (
+					<DropdownItem { ...props }
+						hasDates={ Boolean(r.metadata?.value?.dates?.length) }/>
+				)
+			}));
 	}, [props.availableRoutes]);
 
 	const [headerRef, setHeaderRef] = React.useState();
