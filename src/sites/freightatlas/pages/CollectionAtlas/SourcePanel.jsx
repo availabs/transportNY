@@ -1,7 +1,7 @@
 import React from "react"
 import get from "lodash/get"
 import { Disclosure } from '@headlessui/react'
-
+import { useSearchParams } from "react-router-dom";
 
 import { MultiLevelSelect } from "~/modules/avl-map-2/src"
 
@@ -100,6 +100,7 @@ const SourceLayer = ({ layer, ...rest }) => {
 }
 
 const ViewLayer = ({ layerId, symbology, layerState, MapActions }) => {
+	const [searchParams, setSearchParams] = useSearchParams();
 	const symbologies = React.useMemo(() => {
 		return symbology?.symbology || []
 	}, [symbology]);
@@ -112,14 +113,31 @@ const ViewLayer = ({ layerId, symbology, layerState, MapActions }) => {
 	}, [symbologies, layerState]);
 
 	const setActiveSymbology = React.useCallback(value => {
-		console.log('setActiveSymbology', value, layerId)
+		const urlActiveLayers = searchParams.get("layers").split('|').map(id => parseInt(id));
+
 		MapActions.updateLayerState(layerId, {
 			activeSymbology: value
 		});
 		if (value) {
+			//If activating layer, add symbology_id to URL
+			setSearchParams(params => {
+				urlActiveLayers.push(symbology.symbology_id);
+				const newParams = urlActiveLayers.join('|');
+				params.set("layers", newParams);
+				return params;
+			});
+
 			MapActions.activateLayer(layerId);
 		}
 		else {
+			//If deactivating layer, remove symbology_id from URL
+			setSearchParams(params => {
+				const newActiveLayers = urlActiveLayers.filter(symbId => symbId !== symbology.symbology_id)
+				const newParams = newActiveLayers.join('|');
+				params.set("layers", newParams);
+				return params;
+			});
+
 			MapActions.deactivateLayer(layerId);
 		}
 	}, [MapActions, layerId]);
