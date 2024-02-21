@@ -1,5 +1,5 @@
 import React from "react"
-
+import { useSearchParams } from "react-router-dom";
 import get from "lodash/get"
 
 import { AvlMap as AvlMap2, ThemeProvider } from "~/modules/avl-map-2/src"
@@ -28,14 +28,21 @@ const PMTilesProtocol = {
 }
 
 const AtlasMap = props => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlActiveLayers = searchParams.get("layers").split('|').map(id => parseInt(id));
+
 	const sources = useSourcesWithViewSymbologies({categories:['Freight Atlas']});
-  //console.log('atlas map', sources)
   
 	const layers = React.useMemo(() => {
-		return sources.map(SymbologyLayerConstructor);
-	}, [sources]);
-
-  console.log('layers', layers)
+		return sources.map(SymbologyLayerConstructor).map((l) => {
+      const newLayer = { ...l };
+      if (urlActiveLayers.includes(l.symbology_id)) {
+        newLayer.startActive = true;
+        newLayer.startState = { activeSymbology: l.layers[0].symbology[0] }; //TODO may need to change this to array depending on how multi layered symbologies is implemented
+      }
+      return newLayer;
+    });
+	}, [sources]); //RYAN TODO maybe need to add urlActiveLayers to depenedencies
 
 	return (
     <div className="w-full h-full flex items-center justify-center">

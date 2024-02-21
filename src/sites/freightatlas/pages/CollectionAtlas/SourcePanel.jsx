@@ -6,7 +6,6 @@ import { Disclosure } from '@headlessui/react'
 import { MultiLevelSelect } from "~/modules/avl-map-2/src"
 
 const SourcePanel = props => {
-
   const {
   	activeLayers,
   	inactiveLayers,
@@ -15,12 +14,6 @@ const SourcePanel = props => {
     maplibreMap,
     ...rest
   } = props;
-
-  const layers = React.useMemo(() => {
-  	return [...activeLayers, ...inactiveLayers];
-  }, [activeLayers, inactiveLayers]);
-
-  
 
   const layerCategories = React.useMemo(() => {
   	return [...activeLayers, ...inactiveLayers]
@@ -33,8 +26,6 @@ const SourcePanel = props => {
 	  		return out
 	  	},{})
   },[activeLayers, inactiveLayers])
-
-  // console.log('layer categories', layerCategories)
 
   return (
 		<div className="border-t border-slate-200">
@@ -74,9 +65,8 @@ const SourcePanel = props => {
 export default SourcePanel;
 
 const SourceLayer = ({ layer, ...rest }) => {
-	
-	const [activeView, setActiveView] = React.useState(layer?.layers?.[0])
-	console.log('sourceLayer', layer)
+	const [activeSymbology, setActiveSymbology] = React.useState(layer?.layers?.[0])
+
 	return (
 		<div className='border-b pl-1'>
 			<div className="text-sm flex">
@@ -97,9 +87,12 @@ const SourceLayer = ({ layer, ...rest }) => {
 				</div>
 			</div>*/}
 			
-			<ViewLayer key={ activeView.id } { ...rest }
+			<ViewLayer
+				key={ activeSymbology.id }
+				MapActions={ rest.MapActions }
+				layerState= { rest.layerState }
 				layerId={ layer.id }
-				symbology={ activeView }
+				symbology={ activeSymbology }
 			/>
 			
 		</div>
@@ -111,8 +104,6 @@ const ViewLayer = ({ layerId, symbology, layerState, MapActions }) => {
 		return symbology?.symbology || []
 	}, [symbology]);
 
-	//console.log('symbologies', layerId, symbologies)
-
 	const activeSymbology = React.useMemo(() => {
 		const active = get(layerState, "activeSymbology", null);
 		return symbologies.reduce((a, c) => {
@@ -121,7 +112,7 @@ const ViewLayer = ({ layerId, symbology, layerState, MapActions }) => {
 	}, [symbologies, layerState]);
 
 	const setActiveSymbology = React.useCallback(value => {
-		//console.log('setActiveSymbology', value, layerId)
+		console.log('setActiveSymbology', value, layerId)
 		MapActions.updateLayerState(layerId, {
 			activeSymbology: value
 		});

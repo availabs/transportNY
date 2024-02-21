@@ -135,12 +135,10 @@ class SymbologyLayer extends AvlLayer {
     this.id = damaSource.collection_id;
 
     this.startState = { activeSymbology: null };
-
     const [sources, layers] = damaSource?.symbologies
       //.filter(sym => Boolean(view.metadata?.symbologies?.length))
       .reduce((aa, cc) => {
-        //add check for identical source urls
-        console.log('test 123', cc.tiles)
+        //TODO add check for identical source urls
         const sources = getValidSources(cc?.symbology?.[0]?.tiles?.sources || []);
         const layers = cc?.symbology?.[0]?.tiles?.layers || [];
         if (sources.length && layers.length) {
@@ -152,18 +150,9 @@ class SymbologyLayer extends AvlLayer {
         return aa;
       }, [[], []]);
 
-    // sources.forEach(s => {
-    //   if(s?.source?.url) {
-    //     s.source.url = s.source.url.replace('$HOST', TILEHOST)
-        
-    //     }
-    //   }
-    // })
-
-    //console.log('constructor', sources, layers)
+    this.symbology_id = damaSource?.symbologies[0].symbology_id; //TODO may need to change this to array depending on how multi layered symbologies is implemented
     this.sources = sources;
     this.layers = layers;
-    //this.symbologies = damaSource.symbologies
   }
   RenderComponent = SymbologyLayerRenderComponent;
 }
