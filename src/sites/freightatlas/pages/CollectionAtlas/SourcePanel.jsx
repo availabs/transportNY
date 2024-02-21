@@ -33,7 +33,7 @@ const SourcePanel = props => {
 				.sort((a,b) =>  a.localeCompare(b))
 				.map((cat,i) => {
 				return (
-					<Disclosure defaultOpen={cat === 'Highway Network'}>
+					<Disclosure key={`${cat}_disclosure`} defaultOpen={cat === 'Highway Network'}>
 						 {({ open }) => (
             	<>
 								<Disclosure.Button 
@@ -114,7 +114,6 @@ const ViewLayer = ({ layerId, symbology, layerState, MapActions }) => {
 
 	const setActiveSymbology = React.useCallback(value => {
 		const urlActiveLayers = searchParams.get("layers")?.split('|').map(id => parseInt(id)) || [];
-
 		MapActions.updateLayerState(layerId, {
 			activeSymbology: value
 		});
@@ -140,7 +139,7 @@ const ViewLayer = ({ layerId, symbology, layerState, MapActions }) => {
 
 			MapActions.deactivateLayer(layerId);
 		}
-	}, [MapActions, layerId]);
+	}, [MapActions, layerId, searchParams]);
 
 	return (
 		<div>
