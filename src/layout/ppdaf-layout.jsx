@@ -11,7 +11,7 @@ const dataManagerCats = {
 }
 
 
-const Logo = ({sideNav}) => {
+export const Logo = ({sideNav}) => {
 	const theme = useTheme()
 	const themeOptions = {size: get(sideNav, 'size','micro') ,color: get(sideNav, 'color','dark')}
 	return (

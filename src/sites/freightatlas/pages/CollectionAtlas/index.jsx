@@ -27,6 +27,10 @@ const PMTilesProtocol = {
   }
 }
 
+const SecondPanel = () => {
+  return <div> second panel </div>
+}
+
 const AtlasMap = props => {
 	const sources = useSourcesWithViewSymbologies({categories:['Freight Atlas']});
   //console.log('atlas map', sources)
@@ -35,7 +39,7 @@ const AtlasMap = props => {
 		return sources.map(SymbologyLayerConstructor);
 	}, [sources]);
 
-  console.log('layers', layers)
+  // console.log('layers', layers)
 
 	return (
     <div className="w-full h-full flex items-center justify-center">
@@ -55,6 +59,10 @@ const AtlasMap = props => {
             Panels: [
               { icon: "fad fa-layer-group",
                 Panel: SourcePanel
+              },
+              {
+                icon: "fad fa-map",
+                Panel: SecondPanel
               }
             ]
           } }

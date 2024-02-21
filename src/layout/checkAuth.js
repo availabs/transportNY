@@ -1,5 +1,5 @@
 import get from 'lodash/get'
-const checkAuth = (props, navigate, location) => {
+const checkAuth = (props, navigate) => {
   //const isAuthenticating = props?.user?.isAuthenticating
 
   //-----------------------------------------------------
@@ -26,7 +26,7 @@ const checkAuth = (props, navigate, location) => {
   // console.log('checkAuth', authLevel, props?.user?.authed, props?.user?.isAuthenticating)
   if( sendToLogin ) {
     //console.log('navigate to login', nav)
-    navigate("/auth/login", {state:{ from: location.pathname }})
+    navigate("/auth/login", {state:{ from: props.path }})
     // return <Navigate
     //   to={ "/auth/login" }
     //   state={{ from: props.path }}
