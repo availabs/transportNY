@@ -1,5 +1,5 @@
 import React from "react"
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import get from "lodash/get"
 
 import { AvlMap as AvlMap2, ThemeProvider } from "~/modules/avl-map-2/src"
@@ -27,8 +27,27 @@ const PMTilesProtocol = {
   }
 }
 
+const pages = [
+    {
+      name: 'test map 1',
+      url: '/?layers=118|144'
+    },
+    {
+      name: 'test map 2',
+      url: '/?layers=111|133'
+    }
+
+]
+
 const SecondPanel = () => {
-  return <div> second panel </div>
+  
+  return <div>
+    {pages.map(p => (
+      <div className='w-full flex items-center p-4 border border-blue-300 hover:bg-blue-100'>
+        <Link to={p.url}>{p.name}</Link>
+      </div>
+    ))}  
+  </div>
 }
 
 const AtlasMap = props => {
@@ -93,7 +112,7 @@ const AtlasPage = props => {
 const config = [{
   name: 'Freight Atlas',
   icon: 'fa-duotone fa-map',
-  path: "/colmap",
+  path: "/",
   exact: true,
   auth: false,
   mainNav: true,
