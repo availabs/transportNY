@@ -29,7 +29,7 @@ const PMTilesProtocol = {
 
 const AtlasMap = props => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const urlActiveLayers = searchParams.get("layers").split('|').map(id => parseInt(id));
+  const urlActiveLayers = searchParams.get("layers")?.split('|').map(id => parseInt(id)) || [];
 
 	const sources = useSourcesWithViewSymbologies({categories:['Freight Atlas']});
   

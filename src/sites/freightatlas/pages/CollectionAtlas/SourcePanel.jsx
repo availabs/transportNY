@@ -113,7 +113,7 @@ const ViewLayer = ({ layerId, symbology, layerState, MapActions }) => {
 	}, [symbologies, layerState]);
 
 	const setActiveSymbology = React.useCallback(value => {
-		const urlActiveLayers = searchParams.get("layers").split('|').map(id => parseInt(id));
+		const urlActiveLayers = searchParams.get("layers")?.split('|').map(id => parseInt(id)) || [];
 
 		MapActions.updateLayerState(layerId, {
 			activeSymbology: value
