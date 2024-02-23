@@ -6,6 +6,10 @@ import { useSearchParams } from "react-router-dom";
 import { MultiLevelSelect } from "~/modules/avl-map-2/src"
 
 const SourcePanel = props => {
+	const [searchParams, setSearchParams] = useSearchParams();
+
+	const urlActiveLayers = searchParams.get("layers")?.split('|').map(id => parseInt(id)).filter(item => !isNaN(item)) || [];
+
   const {
   	activeLayers,
   	inactiveLayers,
@@ -25,7 +29,7 @@ const SourcePanel = props => {
 	  		out[cat].push(layer)
 	  		return out
 	  	},{})
-  },[activeLayers, inactiveLayers])
+  },[activeLayers, inactiveLayers, urlActiveLayers])
 
   return (
 		<div className="border-t border-slate-200">
@@ -101,6 +105,8 @@ const SourceLayer = ({ layer, ...rest }) => {
 
 const ViewLayer = ({ layerId, symbology, layerState, MapActions }) => {
 	const [searchParams, setSearchParams] = useSearchParams();
+	const urlActiveLayers = searchParams.get("layers")?.split('|').map(id => parseInt(id)).filter(item => !isNaN(item)) || [];
+
 	const symbologies = React.useMemo(() => {
 		return symbology?.symbology || []
 	}, [symbology]);
@@ -113,19 +119,20 @@ const ViewLayer = ({ layerId, symbology, layerState, MapActions }) => {
 	}, [symbologies, layerState]);
 
 	const setActiveSymbology = React.useCallback(value => {
-		const urlActiveLayers = searchParams.get("layers")?.split('|').map(id => parseInt(id)) || [];
 		MapActions.updateLayerState(layerId, {
 			activeSymbology: value
 		});
-		if (value) {
-			//If activating layer, add symbology_id to URL
-			setSearchParams(params => {
-				urlActiveLayers.push(symbology.symbology_id);
-				const newParams = urlActiveLayers.join('|');
-				params.set("layers", newParams);
-				return params;
-			});
 
+		if (value) {
+			if(!urlActiveLayers.includes(symbology.symbology_id)){
+				//If activating layer, add symbology_id to URL
+				setSearchParams(params => {
+					urlActiveLayers.push(symbology.symbology_id);
+					const newParams = urlActiveLayers.join('|');
+					params.set("layers", newParams);
+					return params;
+				});
+			}
 			MapActions.activateLayer(layerId);
 		}
 		else {
@@ -139,7 +146,20 @@ const ViewLayer = ({ layerId, symbology, layerState, MapActions }) => {
 
 			MapActions.deactivateLayer(layerId);
 		}
-	}, [MapActions, layerId, searchParams]);
+	}, [MapActions, layerId, urlActiveLayers, symbology]);
+
+	React.useEffect(() => {
+		// MapActions.toggleLayerVisibility(layerId);
+		if(urlActiveLayers.includes(symbology.symbology_id)){
+			console.log("should be active on map", symbology.symbology_id);
+			setActiveSymbology(symbologies[0])
+		}
+		else{
+			console.log("should not be active on map", symbology.symbology_id)
+			setActiveSymbology()
+		}
+	},[urlActiveLayers.includes(symbology.symbology_id)])
+
 
 	return (
 		<div>
