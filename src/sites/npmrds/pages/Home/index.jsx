@@ -7,7 +7,7 @@ import { range as d3range } from "d3-array"
 import {
   Button,
   Select,
-  withAuth,
+  // withAuth,
   useFalcor
 } from "~/modules/avl-components/src"
 

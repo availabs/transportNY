@@ -81,23 +81,16 @@ class RouteComponent extends React.Component {
 		})
 	}
 	updateSettings(key, value) {
-		let settings = { [key]: value };
-		if ((key === "startTime") || (key === "endTime")) {
+		const settings = typeof key === "object" ? { ...key } : { [key]: value };
+
+		if (("startTime" in settings) || ("endTime" in settings)) {
 			settings.amPeak = false;
 			settings.offPeak = false;
 			settings.pmPeak = false;
 		}
-		else if ((key === "year") || (key === "month")) {
+		else if (("year" in settings) || ("month" in settings)) {
 			settings = this.getSimpleSettings(settings);
 		}
-		// else if (key === "overrides") {
-		// 	const SETTINGS = this.props.SETTINGS.get(this.props.compId),
-		// 		overrides = get(SETTINGS, ["overrides"], {});
-		// 	settings.overrides = {
-		// 		...overrides,
-		// 		...settings.overrides
-		// 	}
-		// }
 		else if (this.switchToAdvanced(settings)) {
 			settings.year = "advanced";
 			settings.month = "advanced";
@@ -208,6 +201,7 @@ class RouteComponent extends React.Component {
 		return SETTINGS.startDate !== settings.startDate ||
 			SETTINGS.endDate !== settings.endDate ||
 			SETTINGS.relativeDate !== settings.relativeDate ||
+      SETTINGS.useRelativeDateControls !== settings.useRelativeDateControls ||
 			SETTINGS.startTime !== settings.startTime ||
 			SETTINGS.endTime !== settings.endTime ||
 			SETTINGS.resolution !== settings.resolution ||

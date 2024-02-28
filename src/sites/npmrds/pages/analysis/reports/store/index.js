@@ -29,7 +29,9 @@ const COLORS = getColorRange(8, "Dark2");//COLOR_RANGES[12][1].colors.slice();
 // const COLORS = ['#FF6900', '#FCB900', '#7BDCB5', '#00D084', '#8ED1FC', '#0693E3', '#ABB8C3', '#EB144C', '#F78DA7', '#9900EF']
 
 import {
-  calculateRelativeDates
+  calculateRelativeDates,
+  getDatesAndTimes,
+  timeToEpoch
 } from "./utils/relativedates.utils.js"
 
 const DEFAULT_COLOR_RANGE = getColorRange(5, "RdYlGn");//COLOR_RANGES[5].reduce((a, c) => c.name === "RdYlGn" ? c.colors : a)
@@ -397,7 +399,7 @@ export const saveTemplate = (template, templateId = null) =>
         }
       })
     })
-    .then(() => dispatch(removeSnapShot(templateId)));
+    .then(() => dispatch(removeSnapShot(`template-${ templateId }`)));
 	}
 
 export const addRouteComp = (routeId, settings = null, groupId = null, needsSnapShot = false) =>
@@ -422,11 +424,14 @@ export const removeRouteComp = (compId, needsSnapShot = false) =>
 		)
 		.then(() => needsSnapShot && dispatch(takeSnapShot()));
 
-const checkRelativeDates = (nextState, updateSettings = false) => {
+const checkRelativeDates = (nextState, updateSettings = false, setTimes = false) => {
 
   const [route_comps, route_groups] = nextState.route_comps.reduce((a, c) => {
-    if (c.type === "group") {
+    if ((c.type === "group") && c.usingRelativeDates) {
       return [a[0], [...a[1], c]];
+    }
+    else if (c.type === "group") {
+      return [[...a[0], ...c.route_comps], a[1]];
     }
     return [[...a[0], c], a[1]];
   }, [[], []]);
@@ -440,6 +445,9 @@ const checkRelativeDates = (nextState, updateSettings = false) => {
     endDate: null
   }
 
+  let startTime = null;
+  let endTime = null;
+
   route_comps.forEach(rc => {
     const settings = routeComponentSettings.get(rc.compId);
     if (settings.isRelativeDateBase) {
@@ -447,6 +455,11 @@ const checkRelativeDates = (nextState, updateSettings = false) => {
       relativeDateBase.compId = rc.compId;
       relativeDateBase.startDate = settings.startDate;
       relativeDateBase.endDate = settings.endDate;
+
+      if (setTimes) {
+        startTime = settings.startTime;
+        endTime = settings.endTime;
+      }
     }
   })
   route_comps.forEach(rc => {
@@ -462,7 +475,10 @@ const checkRelativeDates = (nextState, updateSettings = false) => {
           rc.compId,
           { ...settings,
             startDate: +dates[0],
-            endDate: +dates[1]
+            endDate: +dates[1],
+            startTime: setTimes ? startTime : settings.startTime,
+            endTime: setTimes ? endTime : settings.endTime,
+            useRelativeDateControls: true
           }
         )
         if (updateSettings) {
@@ -473,76 +489,88 @@ const checkRelativeDates = (nextState, updateSettings = false) => {
   })
 
   route_groups.forEach(rg => {
-    if (rg.usingRelativeDates) {
-      rg.relativeDateBase = {
-        compId: null,
-        startDate: null,
-        endDate: null
+    // if (rg.usingRelativeDates) {
+    rg.relativeDateBase = {
+      compId: null,
+      startDate: null,
+      endDate: null
+    }
+
+    let startTime = null;
+    let endTime = null;
+
+    rg.route_comps.forEach(rc => {
+      const settings = routeComponentSettings.get(rc.compId);
+      if (settings.isRelativeDateBase) {
+        rg.relativeDateBase.compId = rc.compId;
+        rg.relativeDateBase.startDate = settings.startDate;
+        rg.relativeDateBase.endDate = settings.endDate;
+
+        if (setTimes) {
+          startTime = settings.startTime;
+          endTime = settings.endTime;
+        }
       }
-      rg.route_comps.forEach(rc => {
-        const settings = routeComponentSettings.get(rc.compId);
-        if (settings.isRelativeDateBase) {
-          rg.relativeDateBase.compId = rc.compId;
-          rg.relativeDateBase.startDate = settings.startDate;
-          rg.relativeDateBase.endDate = settings.endDate;
-        }
-      })
-      rg.route_comps.forEach(rc => {
-        const settings = routeComponentSettings.get(rc.compId);
-        if (!settings.isRelativeDateBase) {
-          const dates = calculateRelativeDates(
-            settings.relativeDate,
-            rg.relativeDateBase.startDate,
-            rg.relativeDateBase.endDate
-          )
-          if (dates.length) {
-            routeComponentSettings.set(
-              rc.compId,
-              { ...settings,
-                startDate: +dates[0],
-                endDate: +dates[1]
-              }
-            )
-            if (updateSettings) {
-              rc.settings = { ...routeComponentSettings.get(rc.compId) };
+    })
+    rg.route_comps.forEach(rc => {
+      const settings = routeComponentSettings.get(rc.compId);
+      if (!settings.isRelativeDateBase) {
+        const dates = calculateRelativeDates(
+          settings.relativeDate,
+          rg.relativeDateBase.startDate,
+          rg.relativeDateBase.endDate
+        )
+        if (dates.length) {
+          routeComponentSettings.set(
+            rc.compId,
+            { ...settings,
+              startDate: +dates[0],
+              endDate: +dates[1],
+              startTime: setTimes ? startTime : settings.startTime,
+              endTime: setTimes ? endTime : settings.endTime,
+              useRelativeDateControls: true
             }
+          )
+          if (updateSettings) {
+            rc.settings = { ...routeComponentSettings.get(rc.compId) };
           }
         }
-      })
-    } // END if (rg.usingRelativeDates)
-    else {
-      rg.route_comps.forEach(rc => {
-        const settings = routeComponentSettings.get(rc.compId);
-        if (settings.isRelativeDateBase) {
-          usingRelativeDates = true;
-          relativeDateBase.compId = rc.compId;
-          relativeDateBase.startDate = settings.startDate;
-          relativeDateBase.endDate = settings.endDate;
-        }
-      })
-      rg.route_comps.forEach(rc => {
-        const settings = routeComponentSettings.get(rc.compId);
-        if (!settings.isRelativeDateBase) {
-          const dates = calculateRelativeDates(
-            settings.relativeDate,
-            relativeDateBase.startDate,
-            relativeDateBase.endtDate
-          )
-          if (dates.length) {
-            routeComponentSettings.set(
-              rc.compId,
-              { ...settings,
-                startDate: +dates[0],
-                endDate: +dates[1]
-              }
-            )
-            if (updateSettings) {
-              rc.settings = { ...routeComponentSettings.get(rc.compId) };
-            }
-          }
-        }
-      })
-    } // END else
+      }
+    })
+    // } // END if (rg.usingRelativeDates)
+    // else {
+    //   rg.route_comps.forEach(rc => {
+    //     const settings = routeComponentSettings.get(rc.compId);
+    //     if (settings.isRelativeDateBase) {
+    //       usingRelativeDates = true;
+    //       relativeDateBase.compId = rc.compId;
+    //       relativeDateBase.startDate = settings.startDate;
+    //       relativeDateBase.endDate = settings.endDate;
+    //     }
+    //   })
+    //   rg.route_comps.forEach(rc => {
+    //     const settings = routeComponentSettings.get(rc.compId);
+    //     if (!settings.isRelativeDateBase) {
+    //       const dates = calculateRelativeDates(
+    //         settings.relativeDate,
+    //         relativeDateBase.startDate,
+    //         relativeDateBase.endtDate
+    //       )
+    //       if (dates.length) {
+    //         routeComponentSettings.set(
+    //           rc.compId,
+    //           { ...settings,
+    //             startDate: +dates[0],
+    //             endDate: +dates[1]
+    //           }
+    //         )
+    //         if (updateSettings) {
+    //           rc.settings = { ...routeComponentSettings.get(rc.compId) };
+    //         }
+    //       }
+    //     }
+    //   })
+    // } // END else
   })
 
   return {
@@ -1298,7 +1326,7 @@ export const saveReport = (report, reportId = null) =>
       	return dispatch(redirect(`/report/edit/${ newReportId }`));
       }
     })
-    .then(() => dispatch(removeSnapShot(reportId)));
+    .then(() => dispatch(removeSnapShot(`report-${ reportId }`)));
 	}
 
 export const resetState = () =>
@@ -1592,14 +1620,14 @@ export default (state=INITIAL_STATE, action) => {
 export const takeSnapShot = () =>
 	(dispatch, getState) => {
 		const state = getState().report;
-
-	  // if (!state.route_comps.length && !state.graphs.length) {
-	  //   return this.removeSnapShot();
-	  // }
 	  if (window.localStorage) {
-	    const id = state.reportId ? `report-${ state.reportId }` : LOCAL_STORAGE_REPORT_KEY;
-	    window.localStorage.setItem(id, JSON.stringify({
-        id: state.reportId,
+	    const snapShotId = state.reportId ? `report-${ state.reportId }` :
+        state.templateId ? `template-${ state.templateId }` :
+        LOCAL_STORAGE_REPORT_KEY;
+
+	    window.localStorage.setItem(snapShotId, JSON.stringify({
+        reportId: state.reportId,
+        templateId: state.templateId,
 	      name: state.name,
         folder: state.folder,
 	      description: state.description,
@@ -1637,11 +1665,13 @@ export const takeSnapShot = () =>
 	    }))
 	  }
 	}
-export const removeSnapShot = reportId =>
+export const removeSnapShot = snapShotId =>
 	(dispatch, getState) => {
 	  if (window.localStorage) {
-	    const id = reportId ? `report-${ reportId }` : LOCAL_STORAGE_REPORT_KEY;
-	    window.localStorage.removeItem(id);
+	    // const id = state.reportId ? `report-${ state.reportId }` :
+      //   state.templateId ? `template-${ state.templateId }` :
+      //   LOCAL_STORAGE_REPORT_KEY;
+	    window.localStorage.removeItem(snapShotId);
 	  }
 	}
 
@@ -1716,7 +1746,8 @@ const _loadReport = report =>
 			dispatch({
 				type: UPDATE_STATE,
 				state: {
-			  	reportId: report.id || state.reportId,
+			  	reportId: report.id || report.reportId || state.reportId,
+          templateId: report.templateId || state.templateId,
           folder: report.folder,
 			  	// type: report.type || state.type,
 			  	// owner: report.owner || state.owner,
@@ -1777,6 +1808,7 @@ const _addRouteComp = (state, routeIds, copiedSettings, groupId = null) => {
           endDate: dates[1],
           relativeDate: null,
           isRelativeDateBase: false,
+          useRelativeDateControls: false,
           year: yearsWithData[yearsWithData.length - 1],
           month: 'all',
           startTime: DateObject.epochToTimeString(amPeakStart),
@@ -1909,7 +1941,7 @@ console.log("_loadTemplateWithDates::dates", dates);
     colorRange = get(template, ["color_range", "value"], DEFAULT_COLOR_RANGE),
     defaultType = template.default_type;
 
-  const usingRelativeDates = route_comps.reduce((a, c) => {
+  const hasRelativeDates = route_comps.reduce((a, c) => {
     if (c.type === "group") {
       return c.route_comps.reduce((aa, cc) => {
         return aa || Boolean(cc.settings.isRelativeDateBase);
@@ -1918,7 +1950,7 @@ console.log("_loadTemplateWithDates::dates", dates);
     return a || Boolean(c.settings.isRelativeDateBase);
   }, false);
 
-  if (!usingRelativeDates) {
+  if (!hasRelativeDates) {
     return _loadTemplate(templateId, routeIds, state, stationIds = []);
   }
 
@@ -1968,20 +2000,36 @@ console.log("_loadTemplateWithDates::dates", dates);
     return a;
   }, {});
 
+console.log("DATES MAP:", datesMap)
+
   const routeComponentSettings = new Map();
+
+  let usingRelativeDates = false;
+  const relativeDateBase = {
+    compId: null,
+    startDate: null,
+    endDate: null
+  };
 
   route_comps = route_comps.map(rc => {
     if (rc.type === "group") {
+      const rg = rc;
       return {
         ...rc,
         route_comps: rc.route_comps.map(rc => {
           const routeId = idMap[rc.routeId];
-          const [startDate, endDate] = datesMap[routeId];
+          const [[startDate, endDate], [startTime, endTime]] = getDatesAndTimes(datesMap[routeId]);
           const settings = {
             ...rc.settings,
             routeId
           }
           if (settings.isRelativeDateBase) {
+            if (!rg.usingRelativeDates) {
+              usingRelativeDates = true;
+              relativeDateBase.compId = rc.compId;
+              relativeDateBase.startDate = startDate;
+              relativeDateBase.endDate = endDate;
+            }
             settings.startDate = startDate;
             settings.endDate = endDate;
           }
@@ -1991,6 +2039,10 @@ console.log("_loadTemplateWithDates::dates", dates);
               settings.startDate = +dates[0];
               settings.endDate = +dates[1];
             }
+          }
+          if (startTime && endTime) {
+            settings.startTime = startTime;
+            settings.endTime = endTime;
           }
           routeComponentSettings.set(rc.compId, { ...settings });
           return {
@@ -2003,7 +2055,8 @@ console.log("_loadTemplateWithDates::dates", dates);
     }
     else {
       const routeId = idMap[rc.routeId];
-      const [startDate, endDate] = datesMap[routeId];
+      // const [startDate, endDate] = datesMap[routeId];
+      const [[startDate, endDate], [startTime, endTime]] = getDatesAndTimes(datesMap[routeId]);
       const settings = {
         ...rc.settings,
         routeId
@@ -2011,6 +2064,11 @@ console.log("_loadTemplateWithDates::dates", dates);
       if (settings.isRelativeDateBase) {
         settings.startDate = startDate;
         settings.endDate = endDate;
+
+        usingRelativeDates = true;
+        relativeDateBase.compId = rc.compId;
+        relativeDateBase.startDate = startDate;
+        relativeDateBase.endDate = endDate;
       }
       else if (!settings.isRelativeDateBase) {
         const dates = calculateRelativeDates(rc.settings.relativeDate, startDate, endDate);
@@ -2018,6 +2076,10 @@ console.log("_loadTemplateWithDates::dates", dates);
           settings.startDate = +dates[0];
           settings.endDate = +dates[1];
         }
+      }
+      if (startTime && endTime) {
+        settings.startTime = startTime;
+        settings.endTime = endTime;
       }
       routeComponentSettings.set(rc.compId, { ...settings });
       return {
@@ -2053,12 +2115,10 @@ console.log("_loadTemplateWithDates::dates", dates);
     routeComponentSettings,
     templateId,
     saveYearsAsRecent: false,
-    usingRelativeDates: true,
-    relativeDateBase: {
-      compId: "",
-      startDate,
-      endDate
-    },
+
+    usingRelativeDates,
+    relativeDateBase,
+
     colorRange,
     defaultType
 	};
@@ -2125,7 +2185,7 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
   const datesMap = routeIds.reduce((a, c) => {
     const dates = get(cache, `routes2.id.${ c }.metadata.value.dates`, []);
     if (Array.isArray(dates) && dates.length === 2) {
-      a[c] = dates.map(d => +d.replaceAll("-", ""));
+      a[c] = dates.map(d => d.replace(/[-]/g, ""));
     }
     return a;
   }, {});
@@ -2174,30 +2234,35 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
       		saveYearsAsRecent = true;
       		settings.year = +replace(settings.year, mostRecent);
       	}
-        else if (isRelativeDateBase && hasDates) {
-          settings.year = "advanced";
-        }
 
       	if (RECENT_REGEX.test(settings.startDate)) {
       		saveYearsAsRecent = true;
       		settings.startDate = +replace(settings.startDate, mostRecent);
       	}
-        else if (isRelativeDateBase && hasDates) {
-          settings.startDate = datesMap[route_comp.routeId][0];
-        }
 
       	if (RECENT_REGEX.test(settings.endDate)) {
       		saveYearsAsRecent = true;
       		settings.endDate = +replace(settings.endDate, mostRecent);
       	}
-        else if (isRelativeDateBase && hasDates) {
-          settings.endDate = datesMap[route_comp.routeId][1];
-        }
 
       	if (RECENT_REGEX.test(settings.compTitle)) {
       		saveYearsAsRecent = true;
       		settings.compTitle = replace(settings.compTitle, mostRecent);
       	}
+
+        if (isRelativeDateBase && hasDates) {
+          const dates = datesMap[route_comp.routeId];
+          const [[startDate, endDate], [startTime, endTime]] = getDatesAndTimes(dates);
+
+          settings.year = "advanced";
+          settings.startDate = +startDate;
+          settings.endDate = +endDate;
+
+          if (startTime && endTime) {
+            settings.startTime = startTime;
+            settings.endTime = endTime;
+          }
+        }
         routeComponentSettings.set(compId, { ...settings });
       })
     }
@@ -2215,30 +2280,36 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
     		saveYearsAsRecent = true;
     		settings.year = +replace(settings.year, mostRecent);
     	}
-      else if (isRelativeDateBase && hasDates) {
-        settings.year = "advanced";
-      }
 
     	if (RECENT_REGEX.test(settings.startDate)) {
     		saveYearsAsRecent = true;
     		settings.startDate = +replace(settings.startDate, mostRecent);
     	}
-      else if (isRelativeDateBase && hasDates) {
-        settings.startDate = datesMap[route_comp.routeId][0];
-      }
 
     	if (RECENT_REGEX.test(settings.endDate)) {
     		saveYearsAsRecent = true;
     		settings.endDate = +replace(settings.endDate, mostRecent);
     	}
-      else if (isRelativeDateBase && hasDates) {
-        settings.endDate = datesMap[route_comp.routeId][1];
-      }
 
     	if (RECENT_REGEX.test(settings.compTitle)) {
     		saveYearsAsRecent = true;
     		settings.compTitle = replace(settings.compTitle, mostRecent);
     	}
+
+      if (isRelativeDateBase && hasDates) {
+        const dates = datesMap[route_comp.routeId];
+
+        const [[startDate, endDate], [startTime, endTime]] = getDatesAndTimes(dates);
+
+        settings.year = "advanced";
+        settings.startDate = +startDate;
+        settings.endDate = +endDate;
+
+        if (startTime && endTime) {
+          settings.startTime = startTime;
+          settings.endTime = endTime;
+        }
+      }
       routeComponentSettings.set(compId, { ...settings });
     }
   });
@@ -2309,7 +2380,7 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
   }, false);
 
   if (usingRelativeDates) {
-    stateUpdate = checkRelativeDates(stateUpdate, true);
+    stateUpdate = checkRelativeDates(stateUpdate, true, true);
   }
 
   stateUpdate.routes = stateUpdate.route_comps.reduce((a, c) => {
@@ -2401,8 +2472,6 @@ const DATA_REGEX = /{data}/g;
 const getRouteCompName = (name, settings) => {
   if (!settings.compTitle) return name;
 
-// console.log("getRouteCompName::settings", settings)
-
   return settings.compTitle.replace(NAME_REGEX, name)
     .replace(YEAR_REGEX, getYearString(settings))
     .replace(MONTH_REGEX, getMonthString(settings))
@@ -2424,39 +2493,51 @@ const getYearString = settings => {
 	return `${ end }-${ start }`;
 }
 const MONTHS = {
-	1: "January",
-	2: "February",
-	3: "March",
-	4: "April",
-	5: "May",
-	6: "June",
-	7: "July",
-	8: "August",
-	9: "September",
-	10: "October",
-	11: "November",
-	12: "December"
+	"01": "January",
+	"02": "February",
+	"03": "March",
+	"04": "April",
+	"05": "May",
+	"06": "June",
+	"07": "July",
+	"08": "August",
+	"09": "September",
+	"10": "October",
+	"11": "November",
+	"12": "December"
 }
 const getMonthString = settings => {
-	if (settings.month === 'all') return 'Jan-Dec';
-	if (settings.month !== 'advanced') return MONTHS[settings.month];
 
-	const start = +settings.startDate.toString().slice(4, 6),
-		end = +settings.endDate.toString().slice(4, 6);
+	if (settings.month === 'all') return `Jan-Dec, ${ settings.year }`;
+	if (settings.month !== 'advanced') return `${ MONTHS[settings.month].slice(0, 3) }, ${ settings.year }`;
 
-	if (start === end) return MONTHS[start];
+  const startDate = settings.startDate.toString();
+  const endDate = settings.endDate.toString();
 
-	return `${ MONTHS[start].slice(0, 3) }-${ MONTHS[end].slice(0, 3) }`;
+	const m1 = startDate.slice(4, 6);
+	const m2 = endDate.slice(4, 6);
+
+  const y1 = startDate.slice(0, 4);
+  const y2 = endDate.slice(0, 4);
+
+  if (y1 === y2) {
+  	if (m1 === m2) {
+      return `${ MONTHS[m1].slice(0, 3) }, ${ y1 }`;
+    }
+  	return `${ MONTHS[m1].slice(0, 3) }-${ MONTHS[m2].slice(0, 3) }, ${ y1 }`;
+  }
+  return getYearString(settings);
 }
 const getDateString = settings => {
 	const start = settings.startDate.toString(),
 		end = settings.endDate.toString();
 
 	if (start === end) {
-		const month = +start.slice(4, 6),
+		const month = start.slice(4, 6),
 			day = start.slice(6),
 			year = start.slice(0, 4);
-		return `${ MONTHS[month].slice(0, 3) }-${ day }-${ year }`;
+		return `${ MONTHS[month].slice(0, 3) } ${ +day }, ${ year }`;
 	}
-	return '';
+
+  return getMonthString(settings);
 }

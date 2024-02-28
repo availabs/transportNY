@@ -212,7 +212,7 @@ export default StuffInFolder;
 
 const REGEXes = [
   /[A-Za-z0-9_ ]+/,
-  /\d{4}-\d{2}-\d{2}/,
+  /\d{4}-\d{2}-\d{2}(?:T(\d{2}[:]\d{2}[:]\d{2}))?/,
   /\d{4}-\d{2}-\d{2}/,
   /(\d{3}[+-pnPN]\d{5}[|]?)+/
 ]

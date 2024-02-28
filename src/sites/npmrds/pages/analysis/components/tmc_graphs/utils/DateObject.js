@@ -6,10 +6,11 @@ const oneFifth = 1.0 / 5.0,
 const timeStringFormat = format("02d");
 
 class DateObject {
-	static timeStringToEpoch(string) {
+	static timeStringToEpoch(string, roundUp = false) {
 		if (!string) return null;
 		const temp = string.split(":");
-		return (+temp[0] * 12) + parseInt(+temp[1] * oneFifth);
+		const func = roundUp ? Math.ceil : Math.floor;
+		return (+temp[0] * 12) + func(+temp[1] * oneFifth);
 	}
 	static epochToTimeString(epoch) {
 		epoch = +epoch;

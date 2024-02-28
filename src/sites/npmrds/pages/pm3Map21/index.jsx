@@ -15,10 +15,12 @@ import {
 } from "~/sites/npmrds/components"
 
 import PM3Viewer from "./components/PM3Viewer"
+import DataDownload from "./components/DataDownload"
 
 const InitialState = {
   geoid: "STATE|36",
   geolevels: [],
+  allgeolevels: [],
   loading: 0,
   versions: [],
   year: null
@@ -80,7 +82,7 @@ const PM3 = () => {
       loading: 1
     })
   }, []);
-  const loadingEnd = React.useCallback(() => {
+  const loadingStop = React.useCallback(() => {
     dispatch({
       type: "loading",
       loading: -1
@@ -102,8 +104,9 @@ const PM3 = () => {
     const path = ["pm3", "versionedCalculations", "geoLevelVersionsMetadata"];
     falcor.get(path, ["geo", 36, "geoLevels"])
       .then(res => {
-        console.log('resp', res)
-        const geoLevels = get(res, ["json", "geo", 36, "geoLevels"], []);
+        // console.log('resp', res)
+        const geoLevels = get(res, ["json", "geo", 36, "geoLevels"], [])
+          .filter(d => d.geolevel !== "REGION");
         const groups = d3groups(geoLevels, d => d.geolevel);
         const geolevels = groups.map(([geolevel, geos]) => {
           if (geolevel === "STATE") {
@@ -141,11 +144,12 @@ const PM3 = () => {
             type: "update-state",
             versions: versionsByYear,
             year: versionsByYear[versionsByYear.length - 1].year,
-            geolevels
+            geolevels,
+            allgeolevels
           })
         }
-      }).then(() => loadingEnd());
-  }, [falcor, loadingStart, loadingEnd]);
+      }).then(() => loadingStop());
+  }, [falcor, loadingStart, loadingStop]);
 
   React.useEffect(() => {
     if (!state.versions.length) return;
@@ -159,8 +163,21 @@ const PM3 = () => {
         "geolevel",
         state.geoid
       ]
-    ).then(() => loadingEnd());
-  }, [falcor, state.versions, state.geoid, loadingStart, loadingEnd]);
+    ).then(() => loadingStop());
+  }, [falcor, state.versions, state.geoid, loadingStart, loadingStop]);
+
+  const allgeolevels = React.useMemo(() => {
+    return state.geolevels.reduce((a, c) => {
+      if (!c.children) {
+        a.push({ ...c });
+        return a;
+      }
+      return c.children.reduce((aa, cc) => {
+        aa.push({ ...cc });
+        return aa;
+      }, a);
+    }, []);
+  }, [state.geolevels]);
 
   return (
     <div className="px-4 py-4 mx-10 grid grid-cols-1 gap-4">
@@ -180,6 +197,14 @@ const PM3 = () => {
           onChange={ setGeoid }
           displayAccessor={ v => v.name }
           valueAccessor={ v => v.geoid }/>
+        <div />
+        <div>
+          <DataDownload
+            geolevels={ allgeolevels }
+            versions={ state.versions }
+            loadingStart={ loadingStart }
+            loadingStop={ loadingStop }/>
+        </div>
       </div>
       <div>
         <PM3Viewer { ...state }/>

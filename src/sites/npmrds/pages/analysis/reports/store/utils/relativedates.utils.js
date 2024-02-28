@@ -79,3 +79,21 @@ export const calculateRelativeDates = (relativeDate, startDate, endDate, format 
   const end = moment(start).add(duration, timespan).subtract(1, "day");
   return [start.format(format), end.format(format)];
 }
+
+const DATE_TIME_REGEX = /^(\d{8})(?:T(\d{2}[:]\d{2})(?:[:]\d{2}))?/
+
+export const getDatesAndTimes = dates => {
+  const response = [[null, null], [null, null]];
+  dates.forEach((date, i) => {
+    const [, d, t] = DATE_TIME_REGEX.exec(date);
+    response[0][i] = d;
+    response[1][i] = t;
+  })
+  return response;
+}
+
+export const timeToEpoch = time => {
+  const hours = +time.slice(0, 2);
+  const minutes = +time.slice(2, 4);
+  return hours * 12 + Math.floor(minutes / 5);
+}
