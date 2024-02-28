@@ -116,6 +116,7 @@ const AdvancedControls = props => {
     dataColumn,
     isRelativeDateBase,
     relativeDate,
+    useRelativeDateControls = false,
     overrides = {}
   } = SETTINGS;
 
@@ -168,6 +169,27 @@ const AdvancedControls = props => {
       })
   }, [falcor, route, setState]);
 
+  const updateStartDate = React.useCallback(v => {
+    const date = +moment(v, 'YYYY-MM-DD').format('YYYYMMDD');
+    if (!isNaN(date)) {
+      updateSettings("startDate", date);
+    }
+  }, [updateSettings]);
+  const updateEndDate = React.useCallback(v => {
+    const date = +moment(v, 'YYYY-MM-DD').format('YYYYMMDD');
+    if (!isNaN(date)) {
+      updateSettings("endDate", date);
+    }
+  }, [updateSettings]);
+
+  const setUseRelativeDateControls = React.useCallback(v => {
+    const update = { useRelativeDateControls: v };
+    if (!v) {
+      update.relativeDate = null;
+    }
+    updateSettings(update);
+  }, [updateSettings]);
+
   const updateOverrides = React.useCallback((key, value) => {
     const newOverrides = { ...overrides };
     if (!value) {
@@ -178,11 +200,6 @@ const AdvancedControls = props => {
     }
     updateSettings("overrides", newOverrides);
   }, [updateSettings, overrides]);
-
-  const [useRelativeDateControls, setUseRelativeDateControls] = React.useState(usingRelativeDates && !isRelativeDateBase);
-  const toggleUseRelativeDateControls = React.useCallback(e => {
-    setUseRelativeDateControls(p => !p);
-  }, []);
 
   return (
     <ControlContainer>
@@ -219,12 +236,7 @@ const AdvancedControls = props => {
             <Label>Start Date</Label>
             <InputBox>
               <Input type="date"
-                onChange={ v => {
-                  const date = +moment(v, 'YYYY-MM-DD').format('YYYYMMDD');
-                  if (!isNaN(date)) {
-                    updateSettings("startDate", date);
-                  }
-                } }
+                onChange={ updateStartDate }
                 value={ startDate }
                 min={ min } max={ max }/>
             </InputBox>
@@ -236,12 +248,7 @@ const AdvancedControls = props => {
             <Label>End Date</Label>
             <InputBox>
               <Input type="date"
-                onChange={ v => {
-                  const date = +moment(v, 'YYYY-MM-DD').format('YYYYMMDD');
-                  if (!isNaN(date)) {
-                    updateSettings("endDate", date);
-                  }
-                } }
+                onChange={ updateEndDate }
                 value={ endDate }
                 min={ min } max={ max }/>
             </InputBox>

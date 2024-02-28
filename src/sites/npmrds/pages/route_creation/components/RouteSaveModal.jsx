@@ -7,11 +7,36 @@ import { useFalcor, ScalableLoading } from "~/modules/avl-components/src"
 
 import { Modal, MultiLevelSelect } from "~/sites/npmrds/components"
 
+const DateTimeRegex = /(\d{8})?T(\d{6})/;
+
+const processDates = dates => {
+  const response = [["", ""], ["", ""]];
+  const [startDate, endDate] = dates;
+  if (DateTimeRegex.test(startDate)) {
+    const [, sd, st] = DateTimeRegex.exec(startDate);
+    response[0][0] = sd || "";
+    response[1][0] = st;
+  }
+  else {
+    response[0][0] = startDate || "";
+  }
+  if (DateTimeRegex.test(endDate)) {
+    const [, sd, st] = DateTimeRegex.exec(endDate);
+    response[0][1] = sd || "";
+    response[1][1] = st;
+  }
+  else {
+    response[0][1] = endDate || "";
+  }
+  return response;
+}
+
 const InitReducer = loadedRoute => ({
   name: get(loadedRoute, "name", ""),
   description: get(loadedRoute, "description", ""),
   folder: get(loadedRoute, "folder", ""),
-  id: get(loadedRoute, "id", null)
+  id: get(loadedRoute, "id", null),
+  dates: [...get(loadedRoute, "dates", [])]
 })
 const Reducer = (state, action) => {
   const { type, ...payload } = action;
@@ -21,6 +46,53 @@ const Reducer = (state, action) => {
         ...state,
         ...payload
       }
+
+    case "update-start-date": {
+      const [[startDate, endDate], [startTime, endTime]] = processDates(state.dates);
+      const update = payload.startDate.replaceAll("-", "");
+      return {
+        ...state,
+        dates: [
+          `${ update }${ startTime ? `T${ startTime }` : "" }`,
+          `${ endDate }${ endTime ? `T${ endTime }` : "" }`
+        ]
+      }
+    }
+    case "update-end-date": {
+      const [[startDate, endDate], [startTime, endTime]] = processDates(state.dates);
+      const update = payload.endDate.replaceAll("-", "");
+      return {
+        ...state,
+        dates: [
+          `${ startDate }${ startTime ? `T${ startTime }` : "" }`,
+          `${ update }${ endTime ? `T${ endTime }` : "" }`
+        ]
+      }
+    }
+
+    case "update-start-time": {
+      const [[startDate, endDate], [startTime, endTime]] = processDates(state.dates);
+      const update = `${ payload.startTime.replaceAll(":", "") }00`;
+      return {
+        ...state,
+        dates: [
+          `${ startDate }T${ update }`,
+          `${ endDate }${ endTime ? `T${ endTime }` : "" }`
+        ]
+      }
+    }
+    case "update-end-time": {
+      const [[startDate, endDate], [startTime, endTime]] = processDates(state.dates);
+      const update = `${ payload.endTime.replaceAll(":", "") }00`;
+      return {
+        ...state,
+        dates: [
+          `${ startDate }${ startTime ? `T${ startTime }` : "" }`,
+          `${ endDate }T${ update }`
+        ]
+      }
+    }
+
     case "reset":
       return InitReducer(payload.loadedRoute);
     default:
@@ -34,13 +106,7 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, ...props }) => {
 
   React.useEffect(() => {
     if (loadedRoute && (state.id !== loadedRoute.id)) {
-      dispatch({
-        type: "update-state",
-        name: loadedRoute.name,
-        description: loadedRoute.description || "",
-        folder: loadedRoute.folder,
-        id: loadedRoute.id
-      })
+      dispatch({ type: "reset", loadedRoute });
     }
   }, [state.id, loadedRoute]);
 
@@ -60,6 +126,32 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, ...props }) => {
     dispatch({
       type: "update-state",
       folder: v
+    });
+  }, []);
+
+  const setStartDate = React.useCallback(e => {
+    dispatch({
+      type: "update-start-date",
+      startDate: e.target.value
+    });
+  }, []);
+  const setEndDate = React.useCallback(e => {
+    dispatch({
+      type: "update-end-date",
+      endDate: e.target.value
+    });
+  }, []);
+
+  const setStartTime = React.useCallback(e => {
+    dispatch({
+      type: "update-start-time",
+      startTime: e.target.value
+    });
+  }, []);
+  const setEndTime = React.useCallback(e => {
+    dispatch({
+      type: "update-end-time",
+      endTime: e.target.value
     });
   }, []);
 
@@ -86,24 +178,30 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, ...props }) => {
 
   const saveRoute = React.useCallback(e => {
     const savePoints = Boolean(props.points.length);
+    const { dates, ...rest } = state;
+    const [[sd, ed], [st, et]] = processDates(state.dates);
+    const saveDates = Boolean(sd) && Boolean(ed);
+    const saveTimes = saveDates && Boolean(st) && Boolean(et);
     const data = {
-      ...state,
+      ...rest,
       routeId: state.id,
       points: savePoints ? props.points : [],
-      tmc_array: savePoints ? [] : props.tmc_array
+      tmc_array: savePoints ? [] : props.tmc_array,
+      metadata: saveTimes ? { dates: [...dates] } : saveDates ? { dates: [sd, ed] } : null
     }
-    setSaving(true);
-    falcor.call(["routes2", "save"], [data])
-      .then(() => setResult({ msg: "success" }))
-      .catch(e => setResult({ msg: "failure", error: e }))
-      .then(() => setSaving(false));
-  }, [falcor, state, props.points, props.tmc_array, doClose]);
+console.log("SAVING:", data)
+    // setSaving(true);
+    // falcor.call(["routes2", "save"], [data])
+    //   .then(() => setResult({ msg: "success" }))
+    //   .catch(e => setResult({ msg: "failure", error: e }))
+    //   .then(() => setSaving(false));
+  }, [falcor, state, props.points, props.tmc_array]);
 
   React.useEffect(() => {
     if (saving) {
-      dispatch({ type: "reset", loadedRoute })
+      dispatch({ type: "reset", loadedRoute });
     }
-  }, [loadedRoute, saving])
+  }, [loadedRoute, saving]);
 
   const canSave = React.useMemo(() => {
     const { points = [], tmc_array = [], ...route } = loadedRoute || {};
@@ -114,6 +212,18 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, ...props }) => {
         isEqual(props.tmc_array, tmc_array)) &&
       (props.points.length || props.tmc_array.length);
   }, [state, loadedRoute, props.points, props.tmc_array]);
+
+  const [[startDate, endDate], [startTime, endTime]] = React.useMemo(() => {
+    const [[sd, ed], [st, et]] = processDates(state.dates);
+    return [
+      [sd ? `${ sd.slice(0, 4) }-${ sd.slice(4, 6) }-${ sd.slice(6) }` : "",
+        ed ? `${ ed.slice(0, 4) }-${ ed.slice(4, 6) }-${ ed.slice(6) }` : ""
+      ],
+      [st ? `${ st.slice(0, 2) }:${ st.slice(2, 4) }` : "",
+        et ? `${ et.slice(0, 2) }:${ et.slice(2, 4) }` : ""
+      ]
+    ]
+  }, [state.dates]);
 
   return (
     <Modal isOpen={ isOpen } close={ doClose }>
@@ -164,6 +274,58 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, ...props }) => {
                 onChange={ setFolder }
                 displayAccessor={ f => f.name }
                 valueAccessor={ f => f.id }/>
+            </div>
+
+            <div className="col-span-6 border-t-2 border"/>
+
+            <div className="font-bold text-right pt-1">Start Date</div>
+            <div className="col-span-5">
+              <input type="date"
+                className={ `
+                  w-full px-2 py-1 rounded
+                  focus:outline-2 focus:outline focus:outline-current
+                  hover:outline-2 hover:outline hover:outline-gray-300
+                ` }
+                value={ startDate }
+                onChange={ setStartDate }/>
+            </div>
+
+            <div className="font-bold text-right pt-1">End Date</div>
+            <div className="col-span-5">
+              <input type="date"
+                className={ `
+                  w-full px-2 py-1 rounded
+                  focus:outline-2 focus:outline focus:outline-current
+                  hover:outline-2 hover:outline hover:outline-gray-300
+                ` }
+                value={ endDate }
+                onChange={ setEndDate }/>
+            </div>
+
+            <div className="col-span-6 border-t-2 border"/>
+
+            <div className="font-bold text-right pt-1">Start Time</div>
+            <div className="col-span-5">
+              <input type="time"
+                className={ `
+                  w-full px-2 py-1 rounded
+                  focus:outline-2 focus:outline focus:outline-current
+                  hover:outline-2 hover:outline hover:outline-gray-300
+                ` }
+                value={ startTime }
+                onChange={ setStartTime }/>
+            </div>
+
+            <div className="font-bold text-right pt-1">End Time</div>
+            <div className="col-span-5">
+              <input type="time"
+                className={ `
+                  w-full px-2 py-1 rounded
+                  focus:outline-2 focus:outline focus:outline-current
+                  hover:outline-2 hover:outline hover:outline-gray-300
+                ` }
+                value={ endTime }
+                onChange={ setEndTime }/>
             </div>
 
             <div className="col-span-6 border-t-2 border-current"/>

@@ -115,7 +115,7 @@ const FolderModal = ({ openedFolders = [], isOpen = false, close, folder, user }
   const { falcor } = useFalcor();
   const createFolder = React.useCallback(e => {
     falcor.call(["folders2", "create"], [{ ...state, parent: parent.id }])
-      .then(res => console.log("RES:", res))
+      // .then(res => console.log("RES:", res))
       .then(() => close(e));
   }, [falcor, state, close, parent]);
   const editFolder = React.useCallback(e => {

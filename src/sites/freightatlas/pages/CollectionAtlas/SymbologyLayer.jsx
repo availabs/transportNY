@@ -4,8 +4,12 @@ import { AvlLayer, getColorRange, useTheme } from "~/modules/avl-map-2/src"
 import { DAMA_HOST } from "~/config"
 const $HOST = `${ DAMA_HOST }/tiles`
 import SymbologyLegend from "~/pages/DataManager/DataTypes/gis_dataset/pages/Symbology/components/SymbologyLegend"
-
+import { useSearchParams } from "react-router-dom";
 export const SymbologyLayerRenderComponent = props => {
+	const [searchParams, setSearchParams] = useSearchParams();
+	const urlActiveLayers = searchParams.get("layers")?.split('|').map(id => parseInt(id)).filter(item => !isNaN(item)) || [];
+
+  const { symbology_id } = props.layer;
 
   const {
     maplibreMap,
@@ -15,8 +19,7 @@ export const SymbologyLayerRenderComponent = props => {
 
   const activeSymbology = get(props, ["layerState", "activeSymbology"], null);
 
-  console.log('activeSymbology', activeSymbology)
-
+  console.log(`symb: ${symbology_id}, props:`,props)
   const [legend, setLegend] = React.useState(null);
 
   React.useEffect(() => {

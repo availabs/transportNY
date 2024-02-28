@@ -5,15 +5,17 @@ import { range as d3range } from "d3-array"
 import { useParams, useLocation } from "react-router-dom"
 
 import {
-  useFalcor,
-  withAuth,
+  useFalcor
 } from "~/modules/avl-components/src"
+
+import { withAuth } from "@availabs/ams"
 
 import FolderIcon from "./components/FolderIcon"
 import StuffInFolder from "./components/StuffInFolder"
 import FolderModal from "./components/FolderModal"
 
 const Folders = ({ user }) => {
+
   const { falcor, falcorCache } = useFalcor();
 
   const [folders, setFolders] = React.useState([]);

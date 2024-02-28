@@ -40,7 +40,7 @@ export const getRequest = ({ settings, tmcArray }, { group, alias, key }) => {
 		startDate: settings.startDate,
 		endDate: settings.endDate,
 		startTime: DateObject.timeStringToEpoch(settings.startTime),
-		endTime: DateObject.timeStringToEpoch(settings.endTime === "00:00" ? "24:00" : settings.endTime),
+		endTime: DateObject.timeStringToEpoch(settings.endTime === "00:00" ? "24:00" : settings.endTime, true),
 		weekdays: Object.keys(settings.weekdays).filter(w => settings.weekdays[w]),
 		resolution: settings.resolution,
 		dataColumn: settings.dataColumn || "travel_time_all",
@@ -51,6 +51,7 @@ export const getRequest = ({ settings, tmcArray }, { group, alias, key }) => {
 }
 export const getRequestKey = (...args) => {
 	const request = getRequest(...args);
+
 	if (request === null) return null;
 
 	const {

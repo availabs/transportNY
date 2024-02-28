@@ -41,7 +41,7 @@ const InfoBox = props => {
     falcor.get([
       "routes2", "id", routeId,
       ["id", "name", "description", "folder",
-        "points", "tmc_array"
+        "points", "tmc_array", "metadata"
       ]
     ]);
   }, [falcor, routeId]);
@@ -62,7 +62,8 @@ const InfoBox = props => {
         folder: data.folder,
         description: data.description || "",
         points: get(data, ["points", "value"], []),
-        tmc_array: get(data, ["tmc_array", "value"], [])
+        tmc_array: get(data, ["tmc_array", "value"], []),
+        dates: get(data, ["metadata", "value", "dates"], [])
       });
     }
     else {

@@ -98,7 +98,7 @@ class ReportBase extends React.Component {
         const getDates = dates => {
           return dates.split("_").filter(Boolean)
             .map(d => {
-              const temp = d.split("|").map(d => +d);
+              const temp = d.split("|");
               if (temp.length === 1) {
                 return [temp[0], temp[0]]
               }
@@ -109,12 +109,12 @@ class ReportBase extends React.Component {
         const query = new URLSearchParams(this.props.location.search);
 
         if (reportId) {
-          let loadReport = true;
+          let hasLocalData = false;
           if (window.localStorage) {
             const key = `report-${ reportId }`,
               data = JSON.parse(window.localStorage.getItem(key));
             if (data) {
-              loadReport = false;
+              hasLocalData = true;
               this.setState({
                 showLoadModal: true,
                 loadData: {
@@ -125,8 +125,7 @@ class ReportBase extends React.Component {
               });
             }
           }
-          // console.log('load report', reportId)
-          loadReport && this.props.loadReport(reportId);
+          !hasLocalData && this.props.loadReport(reportId);
         }
         else if (path === "/report/new") {
           const routeId = query.get("routeId");
@@ -156,20 +155,41 @@ class ReportBase extends React.Component {
           );
         }
         else if (templateId && (routeId || stationId)) {
-          if (dates) {
-            this.props.loadRoutesAndTemplateWithDates(
-              routeId.split("_").filter(Boolean),
-              templateId,
-              getDates(dates),
-              stationId.split("_").filter(Boolean)
-            );
+          const loadTemplate = () => {
+            if (dates) {
+              this.props.loadRoutesAndTemplateWithDates(
+                routeId.split("_").filter(Boolean),
+                templateId,
+                getDates(dates),
+                stationId.split("_").filter(Boolean)
+              );
+            }
+            else {
+              this.props.loadRoutesAndTemplate(
+                routeId.split("_").filter(Boolean),
+                templateId,
+                stationId.split("_").filter(Boolean)
+              );
+            }
           }
-          else {
-            this.props.loadRoutesAndTemplate(
-              routeId.split("_").filter(Boolean),
-              templateId,
-              stationId.split("_").filter(Boolean)
-            );
+          let hasLocalData = false;
+          if (window.localStorage) {
+            const key = `template-${ templateId }`,
+              data = JSON.parse(window.localStorage.getItem(key));
+            if (data) {
+              hasLocalData = true;
+              this.setState({
+                showLoadModal: true,
+                loadData: {
+                  key,
+                  data,
+                  onReject: loadTemplate
+                }
+              });
+            }
+          }
+          if (!hasLocalData) {
+            loadTemplate();
           }
         }
         else if (defaultType && (routeId || stationId)) {
@@ -492,6 +512,7 @@ class ReportBase extends React.Component {
       SETTINGS.dataColumn !== settings.dataColumn ||
       SETTINGS.compTitle !== settings.compTitle ||
       SETTINGS.isRelativeDateBase !== settings.isRelativeDateBase ||
+      SETTINGS.useRelativeDateControls !== settings.useRelativeDateControls ||
       !isEqual(SETTINGS.weekdays, settings.weekdays) ||
       !isEqual(SETTINGS.overrides, settings.overrides);
   }

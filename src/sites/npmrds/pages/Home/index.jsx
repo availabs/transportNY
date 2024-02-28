@@ -7,7 +7,7 @@ import { range as d3range } from "d3-array"
 import {
   Button,
   Select,
-  withAuth,
+  // withAuth,
   useFalcor
 } from "~/modules/avl-components/src"
 
@@ -39,7 +39,7 @@ const Section = ({ title, children }) => {
       <div className="px-2 uppercase text-[12px] font-bold text-blue-500">
         { title }
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-1">
         { children }
       </div>
     </div>
@@ -77,32 +77,51 @@ const TemplateSelector = ({ id, title, onClick, children }) => {
     onClick({ templateId: id, templateTitle: title });
   }, [id, title, onClick]);
   // <img className="w-full" src={template?.thumbnail || ""}  alt="" /> :
-              
   console.log('template', template)
-  return (
-    <div
+  return(
+    
+          <div
           key={id}
           onClick={ doOnClick }
-          className="relative flex flex-col items-center space-x-2  rounded-sm border border-gray-300 shadow-sm px-2 py-2 hover:bg-blue-50 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-b-blue-400"
-        >
-          <div className="">
+           className={` cursor-pointer
+          relative flex items-center space-x-2  rounded-sm border border-gray-300 shadow-sm px-2 py-2 hover:bg-blue-50 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-b-blue-400
+        `}
+      >
+        <div className="flex-shrink-0">
+          <div className="h-16 w-16 bg-cover" style={{backgroundImage:`url(${template?.thumbnail})`}}  alt="" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <span className="absolute inset-0" aria-hidden="true" />
+          <p className="text-[14px] font-bold uppercase text-gray-500">{ title[1] }</p>
+          <p className="h-12 overflow-hidden text-[15px] font-thin text-gray-500">{ template?.description }</p>
+        </div>
+      </div>
+  )
+  // return (
+  //   <div
+  //         key={id}
+  //         onClick={ doOnClick }
+  //         className="relative flex flex-col items-center space-x-2  rounded-sm border border-gray-300 shadow-sm px-2 py-2 hover:bg-blue-50 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-b-blue-400"
+  //       >
+  //         <div className="">
             
-              <img className="w-64 h-64 bg-blue-100 bg-cover" style={{backgroundImage:`url(${template?.thumbnail})`}}  alt="" />
+  //             <img className="w-64 h-64 bg-blue-100 bg-cover" style={{backgroundImage:`url(${template?.thumbnail})`}}  alt="" />
 
             
-          </div>
-          <div className="min-w-0 flex-1">
-            <a href="#" className="focus:outline-none">
-              <span className="absolute inset-0" aria-hidden="true" />
-              <p className="text-[12px] font-bold text-slate-600 uppercase">{title[1]}</p>
-              <p className="h-14 font-thin overflow-hidden text-[12px] font-light text-slate-500">{template?.description || ''}</p>
-            </a>
-          </div>
-    </div>
-  )
+  //         </div>
+  //         <div className="min-w-0 flex-1">
+  //           <a href="#" className="focus:outline-none">
+  //             <span className="absolute inset-0" aria-hidden="true" />
+  //             <p className="text-[12px] font-bold text-slate-600 uppercase">{title[1]}</p>
+  //             <p className="h-14 font-thin overflow-hidden text-[12px] font-light text-slate-500">{template?.description || ''}</p>
+  //           </a>
+  //         </div>
+  //   </div>
+  // )
 
 
 }
+
 const ReportLink = ({ id, name, description, thumbnail  }) => {
 
   return(
@@ -191,7 +210,7 @@ const Home = () => {
 
   return (
     <div className="max-w-6xl mx-auto my-8">
-      <div className="grid grid-cols-1 gap-4 p-10">
+      <div className="grid grid-cols-2 gap-4 p-10">
 
         <div>
           <div className="mb-2 text-lg  px-2 font-medium text-gray-700 border-current">
@@ -200,30 +219,7 @@ const Home = () => {
           { FocusAnalysis.map(({ title, Templates }) => {
               return (
                 <Section key={ title } title={ title }>
-                  { Templates.length % 2 === 1 ?
-                    <>
-                      { Templates.slice(0, -1).map((t,i) => {
-                          return (
-                            <TemplateSelector
-                              key={ t.title }
-                              onClick={ setTemplateData }
-                              title={ [title, t.title] }
-                              id={ t.id }/>
-                          )
-                        })
-                      }
-                      { Templates.slice(-1).map((t,i) => {
-                          return (
-                            <div key={ t.title } className="col-span-2">
-                              <TemplateSelector
-                                onClick={ setTemplateData }
-                                title={ [title, t.title] }
-                                id={ t.id }/>
-                            </div>
-                          )
-                        })
-                      }
-                    </> :
+                  {
                     Templates.map((t,i) => {
                       return (
                         <TemplateSelector
@@ -238,36 +234,9 @@ const Home = () => {
               )
             })
           }
-          <Section title="Your Recent Reports">
+          {/*<Section title="Your Recent Reports">
 
-            { recent.length % 2 === 1 ?
-              <>
-                { recent.slice(0, -1).map(r => {
-                    return r.stuff_type === "report" ?
-                      <ReportLink key={ r.id }  { ...r }/> :
-                      <TemplateSelector key={ r.id }
-                        onClick={ setTemplateData }
-                        title={ ["Custom Reports", r.name] }
-                        id={ r.id }
-                      />
-                  })
-                }
-                { recent.slice(-1).map(r => {
-                    return (
-                      <div key={ r.id } className="col-span-2">
-                        { r.stuff_type === "report" ?
-                            <ReportLink key={ r.id }  { ...r }/> :
-                            <TemplateSelector key={ r.id }
-                              onClick={ setTemplateData }
-                              title={ ["Custom Reports", r.name] }
-                              id={ r.id }
-                            />
-                        }
-                      </div>
-                    )
-                  })
-                }
-              </> :
+            {
               recent.map(r => {
                 return r.stuff_type === "report" ?
                   <ReportLink key={ r.id }  { ...r }/> :
@@ -278,7 +247,7 @@ const Home = () => {
                   />
               })
             }
-          </Section>
+          </Section>*/}
         </div>
 
         <div className="flex flex-col">

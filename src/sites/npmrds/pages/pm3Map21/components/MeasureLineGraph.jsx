@@ -27,7 +27,7 @@ const MeasureLineGraph = ({ versions, geoid, measure, name }) => {
           values.push(d[measure]);
           a.push({
             x: c.year,
-            y: d[measure]
+            y: d[measure] || 0
           })
         }
         return a;
