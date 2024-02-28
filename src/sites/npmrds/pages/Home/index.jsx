@@ -36,10 +36,10 @@ const Title = ({ children }) => {
 const Section = ({ title, children }) => {
   return (
     <div className="pb-6">
-      <div className="px-2 uppercase text-sm font-medium text-blue-500">
+      <div className="px-2 uppercase text-[12px] font-bold text-blue-500">
         { title }
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         { children }
       </div>
     </div>
@@ -76,25 +76,26 @@ const TemplateSelector = ({ id, title, onClick, children }) => {
   const doOnClick = React.useCallback(e => {
     onClick({ templateId: id, templateTitle: title });
   }, [id, title, onClick]);
-
+  // <img className="w-full" src={template?.thumbnail || ""}  alt="" /> :
+              
+  console.log('template', template)
   return (
     <div
           key={id}
           onClick={ doOnClick }
-          className="relative flex items-center space-x-2 rounded-lg border border-gray-300 bg-white px-4 py-5 shadow-sm hover:bg-blue-50 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
+          className="relative flex flex-col items-center space-x-2  rounded-sm border border-gray-300 shadow-sm px-2 py-2 hover:bg-blue-50 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-b-blue-400"
         >
-          <div className="flex-shrink-0">
-            { template?.thumbnail ?
-              <img className="h-12 w-12" src={template?.thumbnail || ""}  alt="" /> :
-              <img className="h-12 w-12 bg-blue-100"  alt="" />
+          <div className="">
+            
+              <img className="w-64 h-64 bg-blue-100 bg-cover" style={{backgroundImage:`url(${template?.thumbnail})`}}  alt="" />
 
-            }
+            
           </div>
           <div className="min-w-0 flex-1">
             <a href="#" className="focus:outline-none">
               <span className="absolute inset-0" aria-hidden="true" />
-              <p className="text-lg font-medium text-gray-900">{title[1]}</p>
-              <p className="truncate text-xs text-gray-500">{template?.description || ''}</p>
+              <p className="text-[12px] font-bold text-slate-600 uppercase">{title[1]}</p>
+              <p className="h-14 font-thin overflow-hidden text-[12px] font-light text-slate-500">{template?.description || ''}</p>
             </a>
           </div>
     </div>
@@ -112,14 +113,14 @@ const ReportLink = ({ id, name, description, thumbnail  }) => {
         >
           <div className="flex-shrink-0">
             { thumbnail ?
-              <img className="h-12 w-12" src={thumbnail || ""}  alt="" /> :
-              <img className="h-12 w-12 bg-blue-100"  alt="" />
+              <img className="h-16 w-16" src={thumbnail || ""}  alt="" /> :
+              <img className="h-16 w-16 bg-blue-100"  alt="" />
 
             }
           </div>
           <div className="min-w-0 flex-1">
             <span className="absolute inset-0" aria-hidden="true" />
-            <p className="text-lg font-medium text-gray-900">{name}</p>
+            <p className="text-[12px] font-bold uppercase text-gray-900">{name}</p>
             <p className="truncate text-xs text-gray-500">{description || ''}</p>
           </div>
     </Link>
@@ -134,21 +135,17 @@ const regionValueAccessor = r => r.region;
 const LinkCard = ({ title, description, href }) => {
   return (
     <Link to={ href }>
-      <div className={ `
-          relative flex items-center space-x-2 rounded-lg
-          border border-gray-300 bg-white px-4 py-5
-          shadow-sm focus-within:ring-2
-          focus-within:ring-indigo-500 focus-within:ring-offset-2
-          hover:bg-blue-50 hover:border-gray-400
-        ` }
+      <div className={`
+          relative flex items-center space-x-2  rounded-sm border border-gray-300 shadow-sm px-2 py-2 hover:bg-blue-50 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-b-blue-400
+        `}
       >
         <div className="flex-shrink-0">
-          <div className="h-12 w-12 bg-gray-300"  alt="" />
+          <div className="h-16 w-16 bg-cover bg-[url('/img/macroview.png')]"  alt="" />
         </div>
         <div className="min-w-0 flex-1">
           <span className="absolute inset-0" aria-hidden="true" />
-          <p className="text-lg font-medium text-gray-900">{ title }</p>
-          <p className="truncate text-xs text-gray-500">{ description }</p>
+          <p className="text-[12px] font-bold uppercase text-gray-500">{ title }</p>
+          <p className="h-14 truncate text-xs text-gray-500">{ description }</p>
         </div>
       </div>
     </Link>
@@ -194,12 +191,12 @@ const Home = () => {
 
   return (
     <div className="max-w-6xl mx-auto my-8">
-      <div className="grid grid-cols-2 gap-4 p-10">
+      <div className="grid grid-cols-1 gap-4 p-10">
 
         <div>
-          <Title>
-            Route Analysis
-          </Title>
+          <div className="mb-2 text-lg  px-2 font-medium text-gray-700 border-current">
+            Choose a Route Analysis Template...
+          </div>
           { FocusAnalysis.map(({ title, Templates }) => {
               return (
                 <Section key={ title } title={ title }>

@@ -26,7 +26,7 @@ const Routes = [
         useFalcor: useFalcor,
         logo: <Logo />, 
         rightMenu: <AuthMenu />,
-        baseUrl: "",
+        baseUrl: "/docs",
         checkAuth
       }), 
       "/documentation", 

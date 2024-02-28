@@ -12,6 +12,13 @@ const FocusAnalysisConfig = [
       }
     ]
   },
+  { title: "Before & After",
+    Templates: [
+      { title: "Single Route",
+        id: 221
+      }
+    ]
+  },
   { title: "Behavioral",
     Templates: [
       { title: "Snapshot",
@@ -31,13 +38,7 @@ const FocusAnalysisConfig = [
       }
     ]
   },
-  { title: "Before & After",
-    Templates: [
-      { title: "Single Route",
-        id: 221
-      }
-    ]
-  },
+  
   { title: "Change Over Time",
     Templates: [
       { title: "Year Over Year",
