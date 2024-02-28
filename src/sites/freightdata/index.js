@@ -7,6 +7,8 @@ import FreightAtlas from './Atlas'
 import { useFalcor } from "~/modules/avl-components/src"
 import { useAuth } from "@availabs/ams"
 
+import FreightDocs from './FreightDocs'
+
 const DAMA_ARGS = {
   baseUrl: '',
   defaultPgEnv: 'freight_data',
@@ -18,7 +20,8 @@ const Routes = [
   ...DataManager(DAMA_ARGS),
   FreightAtlas,
   MapPageConfig,
-  SymbologyMapConfig
+  SymbologyMapConfig,
+  ...FreightDocs
 ]
 
 const site = {

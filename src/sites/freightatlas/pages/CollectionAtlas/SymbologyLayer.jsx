@@ -4,8 +4,12 @@ import { AvlLayer, getColorRange, useTheme } from "~/modules/avl-map-2/src"
 import { DAMA_HOST } from "~/config"
 const $HOST = `${ DAMA_HOST }/tiles`
 import SymbologyLegend from "~/pages/DataManager/DataTypes/gis_dataset/pages/Symbology/components/SymbologyLegend"
-
+import { useSearchParams } from "react-router-dom";
 export const SymbologyLayerRenderComponent = props => {
+	const [searchParams, setSearchParams] = useSearchParams();
+	const urlActiveLayers = searchParams.get("layers")?.split('|').map(id => parseInt(id)).filter(item => !isNaN(item)) || [];
+
+  const { symbology_id } = props.layer;
 
   const {
     maplibreMap,
@@ -15,8 +19,7 @@ export const SymbologyLayerRenderComponent = props => {
 
   const activeSymbology = get(props, ["layerState", "activeSymbology"], null);
 
-  console.log('activeSymbology', activeSymbology)
-
+  console.log(`symb: ${symbology_id}, props:`,props)
   const [legend, setLegend] = React.useState(null);
 
   React.useEffect(() => {
@@ -135,12 +138,10 @@ class SymbologyLayer extends AvlLayer {
     this.id = damaSource.collection_id;
 
     this.startState = { activeSymbology: null };
-
     const [sources, layers] = damaSource?.symbologies
       //.filter(sym => Boolean(view.metadata?.symbologies?.length))
       .reduce((aa, cc) => {
-        //add check for identical source urls
-        console.log('test 123', cc.tiles)
+        //TODO add check for identical source urls
         const sources = getValidSources(cc?.symbology?.[0]?.tiles?.sources || []);
         const layers = cc?.symbology?.[0]?.tiles?.layers || [];
         if (sources.length && layers.length) {
@@ -152,18 +153,9 @@ class SymbologyLayer extends AvlLayer {
         return aa;
       }, [[], []]);
 
-    // sources.forEach(s => {
-    //   if(s?.source?.url) {
-    //     s.source.url = s.source.url.replace('$HOST', TILEHOST)
-        
-    //     }
-    //   }
-    // })
-
-    //console.log('constructor', sources, layers)
+    this.symbology_id = damaSource?.symbologies[0].symbology_id; //TODO may need to change this to array depending on how multi layered symbologies is implemented
     this.sources = sources;
     this.layers = layers;
-    //this.symbologies = damaSource.symbologies
   }
   RenderComponent = SymbologyLayerRenderComponent;
 }
