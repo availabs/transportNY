@@ -2,7 +2,7 @@ import React from 'react'
 import {
   useFalcor
 } from "~/modules/avl-components/src";
-import get from 'lodash.get'
+import get from 'lodash/get'
 
 
 const rawDataKeys = [

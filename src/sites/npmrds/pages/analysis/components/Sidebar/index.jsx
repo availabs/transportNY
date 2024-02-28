@@ -200,11 +200,12 @@ class Sidebar extends React.Component {
 				}
 			]
 		}
-		const oneThird = max * 0.33333;
 
 		const routeHeight = getSectionHeight("route");
 		const stationHeight = getSectionHeight("station");
 		const graphHeight = getSectionHeight("graph");
+
+		const minRouteHeight = 300;
 
 		const total = routeHeight + stationHeight + graphHeight;
 
@@ -221,41 +222,52 @@ class Sidebar extends React.Component {
 				}
 			]
 		}
-
 		let available = max;
-		let aboveOneThird = 0;
 
 		let routeStyle = null;
 		let stationStyle = null;
 		let graphStyle = null;
 
-		if (routeHeight < oneThird) {
+		const numRouteComps = this.props.route_comps.length;
+		const numStationComps = this.props.station_comps.length;
+		const numGraphComps = this.props.graphs.length;
+
+		let numSharing = 0;
+
+		if (!numRouteComps) {
 			available -= routeHeight;
+			routeStyle = routeHeight;
 		}
 		else {
-			aboveOneThird += routeHeight;
+			++numSharing;
 		}
-		if (stationHeight < oneThird) {
+		if (!numStationComps) {
 			available -= stationHeight;
+			stationStyle = stationHeight;
 		}
 		else {
-			aboveOneThird += stationHeight;
+			++numSharing;
 		}
-		if (graphHeight < oneThird) {
+		if (!numGraphComps) {
 			available -= graphHeight;
+			graphStyle = graphHeight;
 		}
 		else {
-			aboveOneThird += graphHeight;
+			++numSharing;
 		}
 
-		if (routeHeight >= oneThird) {
-			routeStyle = available * (routeHeight / aboveOneThird);
+		if (numRouteComps) {
+			routeStyle = routeHeight < minRouteHeight ? routeHeight : Math.max(minRouteHeight, available / numSharing);
+			available -= routeStyle;
+			--numSharing;
 		}
-		if (stationHeight >= oneThird) {
-			stationStyle = available * (stationHeight / aboveOneThird);
+		if (numStationComps) {
+			stationStyle = available / numSharing;
+			available -= stationStyle;
+			--numSharing;
 		}
-		if (graphHeight >= oneThird) {
-			graphStyle = available * (graphHeight / aboveOneThird);
+		if (numGraphComps) {
+			graphStyle = available / numSharing;
 		}
 
 		return [
@@ -284,6 +296,7 @@ class Sidebar extends React.Component {
 		const headerHeight = get(this.headerRef, ["current", "clientHeight"], 0);
 
 		const [routeStyle, stationStyle, graphStyle] = this.calcSectionHeights(sidebarHeight - headerHeight);
+console.log("????????????", routeStyle, stationStyle, graphStyle)
 
     return (
       <SidebarContainer
@@ -294,6 +307,7 @@ class Sidebar extends React.Component {
 
 				<div ref={ this.sidebarRef } className="h-full">
 
+{ /*HEADER START*/ }
 					<div ref={ this.headerRef }
 						style={ {
 							padding: "10px",
@@ -334,6 +348,7 @@ class Sidebar extends React.Component {
 						</div>
 
 					</div>
+{ /*HEADER END*/ }
 
 					<div className="relative"
 						style={ {

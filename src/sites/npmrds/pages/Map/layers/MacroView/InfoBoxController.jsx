@@ -1,6 +1,6 @@
 import React from "react";
 import { Select } from "~/modules/avl-components/src";
-// import get from "lodash.get";
+// import get from "lodash/get";
 
 //import { format as d3format } from "d3-format";
 

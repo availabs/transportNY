@@ -4,7 +4,7 @@ import { sum, mean, rollup } from "d3-array"
 
 import { format } from "d3-format"
 
-import get from "lodash.get"
+import get from "lodash/get"
 
 const oneSixtieth = 1.0 / 60.0,
 

@@ -3,7 +3,7 @@ import React from "react"
 import colorbrewer from "colorbrewer"
 
 import styled from "styled-components"
-import get from "lodash.get"
+import get from "lodash/get"
 
 const ColorRanges = {}
 

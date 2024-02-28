@@ -1,6 +1,6 @@
 import { LayerContainer } from "~/modules/avl-map/src";
 
-import get from "lodash.get"
+import get from "lodash/get"
 
 class TmcLayer extends LayerContainer {
   sources = [

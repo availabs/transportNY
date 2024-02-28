@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 // import {ArrowRight} from 'components/common/icons';
 
-import get from "lodash.get"
+import get from "lodash/get"
 
 const StyledSidePanelContainer = styled.div`
   transition: width 250ms;

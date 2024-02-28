@@ -1,4 +1,4 @@
-import get from "lodash.get"
+import get from "lodash/get"
 
 export const getRoutePeaks = (graph, path) => {
   if (graph && path) {

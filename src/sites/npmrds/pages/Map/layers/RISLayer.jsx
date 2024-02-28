@@ -1,5 +1,5 @@
 import React from 'react'
-import get from 'lodash.get'
+import get from 'lodash/get'
 
 import { getColorRange, Legend } from "avl-components"
 import { Select, useFalcor } from "~/modules/avl-components/src"

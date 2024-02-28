@@ -2,7 +2,7 @@ import React from "react"
 
 import GeneralGraphComp from "./graphClasses/GeneralGraphComp"
 
-import get from "lodash.get"
+import get from "lodash/get"
 
 import { rollup } from "d3-array"
 

@@ -9,7 +9,7 @@ import {
   // Select
 } from "~/modules/avl-components/src"
 
-// import get from "lodash.get"
+// import get from "lodash/get"
 // import styled from "styled-components"
 
 // import ColorRangeSelector from "pages/auth/Routes/analysis/components/Sidebar/ColorRangeSelector"
