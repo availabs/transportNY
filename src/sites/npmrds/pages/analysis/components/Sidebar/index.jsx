@@ -33,10 +33,15 @@ import get from "lodash/get"
 import { select as d3select } from "d3-selection"
 
 const getSectionHeight = type => {
-	const header = d3select(`div#${ type }-comps div#${ type }-comps-header`).node()
+	const header = d3select(`div#${ type }-comps div#${ type }-comps-header`).node();
 	const container = d3select(`div#${ type }-comps div#${ type }-comps-container`).node();
 
 	return get(header, "clientHeight", 0) + get(container, "scrollHeight", 0);
+}
+
+const getSectionHeaderHeight = type => {
+	const header = d3select(`div#${ type }-comps div#${ type }-comps-header`).node();
+	return get(header, "clientHeight", 0);
 }
 
 class Sidebar extends React.Component {
@@ -201,11 +206,17 @@ class Sidebar extends React.Component {
 			]
 		}
 
-		const routeHeight = getSectionHeight("route");
-		const stationHeight = getSectionHeight("station");
-		const graphHeight = getSectionHeight("graph");
+		const routeHeaderHeight = getSectionHeaderHeight("route");
+		const stationHeaderHeight = getSectionHeaderHeight("station");
+		const graphHeaderHeight = getSectionHeaderHeight("graph");
 
-		const minRouteHeight = 300;
+		const numRouteComps = this.props.route_comps.length;
+		const numStationComps = this.props.station_comps.length;
+		const numGraphComps = this.props.graphs.length;
+
+		const routeHeight = routeHeaderHeight + numRouteComps * 24;
+		const stationHeight = stationHeaderHeight + numStationComps * 24;
+		const graphHeight = graphHeaderHeight + numGraphComps * 24;
 
 		const total = routeHeight + stationHeight + graphHeight;
 
@@ -224,50 +235,20 @@ class Sidebar extends React.Component {
 		}
 		let available = max;
 
-		let routeStyle = null;
-		let stationStyle = null;
-		let graphStyle = null;
+		const minRouteHeight = routeHeaderHeight + 312;
+		const minStationHeight = stationHeaderHeight + 96;
 
-		const numRouteComps = this.props.route_comps.length;
-		const numStationComps = this.props.station_comps.length;
-		const numGraphComps = this.props.graphs.length;
+		let routeStyle = Math.min(minRouteHeight, routeHeight);
+		available -= routeStyle;
 
-		let numSharing = 0;
+		let stationStyle = Math.min(minStationHeight, stationHeight);
+		available -= stationStyle;
 
-		if (!numRouteComps) {
-			available -= routeHeight;
-			routeStyle = routeHeight;
-		}
-		else {
-			++numSharing;
-		}
-		if (!numStationComps) {
-			available -= stationHeight;
-			stationStyle = stationHeight;
-		}
-		else {
-			++numSharing;
-		}
-		if (!numGraphComps) {
-			available -= graphHeight;
-			graphStyle = graphHeight;
-		}
-		else {
-			++numSharing;
-		}
+		let graphStyle = Math.min(available, graphHeight);
+		available -= graphStyle;
 
-		if (numRouteComps) {
-			routeStyle = routeHeight < minRouteHeight ? routeHeight : Math.max(minRouteHeight, available / numSharing);
-			available -= routeStyle;
-			--numSharing;
-		}
-		if (numStationComps) {
-			stationStyle = available / numSharing;
-			available -= stationStyle;
-			--numSharing;
-		}
-		if (numGraphComps) {
-			graphStyle = available / numSharing;
+		if (available > 0) {
+			routeStyle += available;
 		}
 
 		return [
@@ -296,7 +277,7 @@ class Sidebar extends React.Component {
 		const headerHeight = get(this.headerRef, ["current", "clientHeight"], 0);
 
 		const [routeStyle, stationStyle, graphStyle] = this.calcSectionHeights(sidebarHeight - headerHeight);
-console.log("????????????", routeStyle, stationStyle, graphStyle)
+// console.log("????????????", routeStyle, stationStyle, graphStyle)
 
     return (
       <SidebarContainer

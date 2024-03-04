@@ -131,7 +131,7 @@ const useReportInfo = id => {
     if (!id) return;
     falcor.get([
       "reports2", "id", id,
-      ["name", "description",
+      ["name", "description", "pic",
         "route_comps", "graph_comps", "station_comps",
         "color_range", "created_at", "updated_at"]
     ]);
@@ -140,7 +140,6 @@ const useReportInfo = id => {
   React.useEffect(() => {
     const info = [];
     const data = get(falcorCache, ["reports2", "id", id], null);
-
     if (data) {
       info.push({
         key: "name",
@@ -185,6 +184,12 @@ const useReportInfo = id => {
         name: "Number of Graphs",
         value: get(data, ["graph_comps", "value", "length"], 0)
       })
+      if (data.pic) {
+        info.push({
+          key: "pic",
+          comp: <img src={ data.pic } width="345" height="240"/>
+        })
+      }
     }
     setInfo(info);
   }, [falcorCache, id]);
@@ -201,7 +206,7 @@ const useTemplateInfo = id => {
     if (!id) return;
     falcor.get([
       "templates2", "id", id,
-      ["name", "description",
+      ["name", "description", "pic",
         "routes", "route_comps", "graph_comps",
         "stations", "station_comps",
         "color_range", "special", "default_type",
@@ -248,6 +253,12 @@ const useTemplateInfo = id => {
         name: "Number of Graphs",
         value: get(data, ["graph_comps", "value", "length"], 0)
       })
+      if (data.pic) {
+        info.push({
+          key: "pic",
+          comp: <img src={ data.pic } width="345" height="240"/>
+        })
+      }
     }
     setInfo(info);
   }, [falcorCache, id]);
@@ -296,9 +307,9 @@ const StuffInfoModal = ({ type, id, isOpen = false, close }) => {
         <div className="px-4 py-4">
           { info.map(({ key, name, value, className, icon, comp }) => (
               <div key={ key } className={ className || null }>
-                { comp ? comp : null }
                 { icon ? <span className={ icon }/> : null }
                 { name ? <span className="font-bold mr-1">{ name }:</span> : null }
+                { comp ? comp : null }
                 { value }
               </div>
             ))
