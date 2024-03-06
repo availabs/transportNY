@@ -449,27 +449,51 @@ class ReportBase extends React.Component {
         return true;
       }
     };
+    return toPng(node, options);
+  }
+  getPic() {
+    const node = document.getElementById('react-grid-layout');
+    const width = node.clientWidth;
+    const height = node.clientHeight;
 
-    // const previewing = this.state.previewing;
-    //
-    // this.setState({ previewing: true });
+    const nodeRect = node.getBoundingClientRect();
 
-    return toPng(node, options)
-      // .then(dataUrl => {
-      //   this.setState({ previewing });
-      //   return dataUrl;
-      // });
+    const options = {
+      width, height: width * 240 / 345,
+      style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden"
+      },
+      canvasWidth: 345, canvasHeight: 240,
+      filter: child => {
+        if (child.classList &&
+            child.getBoundingClientRect &&
+            child.classList.contains("react-grid-item")) {
+
+          const rect = child.getBoundingClientRect();
+          return (rect.top - nodeRect.top) < (width * 240 / 345);
+        }
+        return true;
+      }
+    };
+    return toPng(node, options);
   }
 
   updateReport(update) {
     this.props.updateReport(update);
   }
-  saveReport(update, reportId = null) {
+  saveReport(report, reportId = null) {
     return this.getThumbail()
       .then(dataUrl => {
-        update.thumbnail = dataUrl;
-        return this.props.saveReport(update, reportId)
-          .then(() => this.hideSaveModal());
+        report.thumbnail = dataUrl;
+        return this.getPic()
+          .then(dataUrl => {
+            report.pic = dataUrl;
+            return this.props.saveReport(report, reportId)
+              .then(() => this.hideSaveModal());
+          })
       });
   }
 
@@ -477,8 +501,12 @@ class ReportBase extends React.Component {
     return this.getThumbail()
       .then(dataUrl => {
         template.thumbnail = dataUrl;
-        return this.props.saveTemplate(template, templateId)
-          .then(() => this.hideTemplateModal())
+        return this.getPic()
+          .then(dataUrl => {
+            template.pic = dataUrl;
+            return this.props.saveTemplate(template, templateId)
+              .then(() => this.hideSaveModal());
+          })
       });
   }
 

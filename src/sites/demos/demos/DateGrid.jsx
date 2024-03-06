@@ -86,7 +86,7 @@ const MonthGrid = () => {
     const date = `${ year }-${ `0${ month }`.slice(-2) }`;
     navigate(`/dategrid/${ geoid }_${ tmclinearKey }/${ date }`);
   }, [navigate, year, tmclinearKey, selectedGeo]);
-  
+
   const setUrlFromYear = React.useCallback(year => {
     const [/*level*/, geoid] = selectedGeo.split("|");
     const date = `${ year }-${ `0${ month }`.slice(-2) }`;

@@ -20,13 +20,13 @@ const HeaderInner = styled.div`
 
 const ActiveGraphItem = styled.div`
 	color: ${ props => props.theme.textColor };
-	padding: 3px 10px;
+	padding: 0px 10px;
 `
 
 const Icon = styled.span`
 	color: ${ props => props.theme.textColor };
 	border-radius: 4px;
-	padding: 5px;
+	padding: 4px 5px;
 	cursor: pointer;
 	float: right;
 	transition: color 0.15s,

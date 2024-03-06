@@ -261,11 +261,9 @@ export const saveTemplate = (template, templateId = null) =>
     const {
       name,
       description,
-      folder,
       defaultType,
       saveYearsAsRecent,
-      colorRange,
-      thumbnail
+      ...rest
     } = template;
 
     const setRecentYear = (year, mostRecent) => {
@@ -372,15 +370,13 @@ export const saveTemplate = (template, templateId = null) =>
     	templateId,
       name: saveYearsAsRecent ? setRecentText(name, mostRecent, yearsWithData) : name,
       description: saveYearsAsRecent ? setRecentText(description, mostRecent, yearsWithData) : description,
-      folder,
-      routes: routeIds.size,
       route_comps,
-      graph_comps,
       station_comps,
+      graph_comps,
+      routes: routeIds.size,
       stations: stationIds.length,
       default_type: defaultType,
-      colorRange,
-      thumbnail
+      ...rest
     }
 
 // console.log("TO SAVE:", toSave);
