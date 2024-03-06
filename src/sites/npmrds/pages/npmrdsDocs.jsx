@@ -17,7 +17,6 @@ registerDataType("selector", Selector)
 
 
 const Routes = [
-
   {
     ...dmsPageFactory(
       siteConfig({ 
@@ -29,13 +28,14 @@ const Routes = [
         baseUrl: "/docs",
         checkAuth
       }), 
-      "/docs", 
+      "/docs/", 
       withAuth
     ),
     authLevel: 5,
     name: "CMS",
     sideNav: {
-      size: "none"
+      color: 'dark',
+      size: 'none'
     },
     topNav: {
       size: "none"
