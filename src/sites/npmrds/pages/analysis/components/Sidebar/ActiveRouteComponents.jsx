@@ -140,7 +140,7 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 						value: r.stuff_id,
 						Item: props => (
 							<DropdownItem { ...props }
-								hasDates={ Boolean(data.metadata?.value?.dates?.length) }/>
+								hasDates={ Boolean(data?.metadata?.value?.dates?.length) }/>
 						)
 					}
 				})
@@ -150,7 +150,7 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 
 	const availableRoutes = React.useMemo(() => {
 		return props.availableRoutes.slice()
-			.sort((a, b) => a.name.localeCompare(b.name))
+			.sort((a, b) => a?.name?.localeCompare(b?.name))
 			.map(r => ({
 				...r,
 				Item: props => (
