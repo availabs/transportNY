@@ -81,7 +81,7 @@ class RouteComponent extends React.Component {
 		})
 	}
 	updateSettings(key, value) {
-		const settings = typeof key === "object" ? { ...key } : { [key]: value };
+		let settings = typeof key === "object" ? { ...key } : { [key]: value };
 
 		if (("startTime" in settings) || ("endTime" in settings)) {
 			settings.amPeak = false;

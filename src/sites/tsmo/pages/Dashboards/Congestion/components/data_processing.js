@@ -1,4 +1,4 @@
-import get from "lodash.get";
+import get from "lodash/get";
 
 export const getTMCs = (rawDelayData,year,month,region,f_systems,prevYearMonth) => {
   let total = f_systems.reduce((out,fclass) => {

@@ -2,7 +2,7 @@ import React from "react"
 
 import { useNavigate, useParams, Link } from "react-router-dom"
 
-import get from "lodash.get"
+import get from "lodash/get"
 import { groups as d3groups, range as d3range } from "d3-array"
 import { scaleQuantile, scaleThreshold } from "d3-scale"
 

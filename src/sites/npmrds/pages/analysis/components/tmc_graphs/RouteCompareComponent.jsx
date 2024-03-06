@@ -4,7 +4,7 @@ import GeneralGraphComp from "./graphClasses/GeneralGraphComp"
 
 import TableContainer from "./components/TableContainer"
 
-import get from "lodash.get"
+import get from "lodash/get"
 
 import {
 	BASE_DATA_TYPES,

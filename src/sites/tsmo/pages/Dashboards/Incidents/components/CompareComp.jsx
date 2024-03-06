@@ -1,5 +1,5 @@
 import React from "react"
-import get from 'lodash.get'
+import get from 'lodash/get'
 
 export const fraction = (f, perUnit=1, d = 1) => (f/perUnit).toLocaleString('en-US', { maximumFractionDigits: d } );
 

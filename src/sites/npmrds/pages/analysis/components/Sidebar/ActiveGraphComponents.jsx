@@ -1,6 +1,6 @@
 import React from "react"
 
-import get from "lodash.get"
+import get from "lodash/get"
 import styled from "styled-components"
 
 import { Header } from "./ActiveRouteComponents"

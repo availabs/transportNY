@@ -11,7 +11,7 @@ import FreightDocs from './FreightDocs'
 
 const DAMA_ARGS = {
   baseUrl: '',
-  defaultPgEnv: 'freight_data',
+  defaultPgEnv: 'kari',
   useFalcor,
   useAuth
 }

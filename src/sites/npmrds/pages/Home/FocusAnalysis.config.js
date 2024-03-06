@@ -4,11 +4,11 @@ const FocusAnalysisConfig = [
     Templates: [
       {
         title: 'One Week Study',
-        id:278
+        id: 276
       },
       {
         title: 'Annual Average Study',
-        id: 276
+        id: 278
       }
     ]
   },
@@ -58,7 +58,7 @@ const FocusAnalysisConfig = [
   { title: "Events",
     Templates: [
       { title: "Single Day (Advanced)",
-        id: 245
+        id: 291
       }
     ]
   },

@@ -1,5 +1,5 @@
 import React from "react"
-// import get from "lodash.get";
+// import get from "lodash/get";
 import Map from './components/FreightMap'
 import { DamaContext } from "~/pages/DataManager/store"
 import { useFalcor } from "~/modules/avl-components/src"

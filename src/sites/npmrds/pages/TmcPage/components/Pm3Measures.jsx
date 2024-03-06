@@ -1,6 +1,6 @@
 import React from "react"
 
-import get from "lodash.get"
+import get from "lodash/get"
 import { format as d3format } from "d3-format"
 
 import { useFalcor } from "~/modules/avl-components/src"

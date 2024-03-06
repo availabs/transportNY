@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import get from 'lodash.get'
+import get from 'lodash/get'
 
 const now = new Date()
 now.setMonth(now.getMonth() - 1)

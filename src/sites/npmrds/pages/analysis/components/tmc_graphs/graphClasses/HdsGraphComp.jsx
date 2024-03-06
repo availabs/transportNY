@@ -5,7 +5,7 @@ import GraphContainer from "./GraphContainer"
 import MessageBox from "./components/MessageBox"
 
 import deepequal from "deep-equal"
-import get from "lodash.get"
+import get from "lodash/get"
 import { format } from "d3-format"
 import { sum } from "d3-array"
 

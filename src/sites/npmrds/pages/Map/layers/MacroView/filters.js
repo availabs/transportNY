@@ -1,4 +1,4 @@
-import get from 'lodash.get'
+import get from 'lodash/get'
 import { getColorRange } from "../../utils"
 
 const YEARS = [2023,2022,2021, 2020, 2019, 2018, 2017, 2016];

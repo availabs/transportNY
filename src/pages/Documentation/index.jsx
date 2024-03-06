@@ -65,7 +65,7 @@ const siteConfig = {
 }
 
 export default [{ 
-  ...dmsPageFactory(siteConfig, "/docs/", withAuth),
+  ...dmsPageFactory(siteConfig, "/docs_old/", withAuth),
   name: "Home",
   mainNav: false,
   sideNav: {

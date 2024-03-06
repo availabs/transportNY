@@ -10,7 +10,7 @@ import { /*Select,*/
 import { LayerContext } from './FreightMap'
 import LayerManager from './LayerManager'
 import LayerControlPanel from './LayerControlPanel'
-// import get from 'lodash.get'
+// import get from 'lodash/get'
 
 
 export const Icon = ({

@@ -2,7 +2,7 @@ import React from "react"
 import { connect } from "react-redux"
 import { reduxFalcor } from 'utils/redux-falcor';
 
-import get from "lodash.get"
+import get from "lodash/get"
 
 import HoverComp from "./HoverComp"
 

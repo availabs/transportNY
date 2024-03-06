@@ -93,7 +93,7 @@ const TemplateSelector = ({ id, title, onClick, children }) => {
         <div className="min-w-0 flex-1">
           <span className="absolute inset-0" aria-hidden="true" />
           <p className="text-[14px] font-bold uppercase text-gray-500">{ title[1] }</p>
-          <p className="h-12 overflow-hidden text-[15px] font-thin text-gray-500">{ template?.description }</p>
+          <p className="h-12 overflow-hidden text-[12px] font-thin text-gray-500">{ template?.description }</p>
         </div>
       </div>
   )
@@ -269,16 +269,16 @@ const Home = () => {
             <LinkCard
               title="50th Percentile Speed"
               description=""
-              href={ `/map/${ region }/2021/speed_50pctl_total` }/>
+              href={ `/map/${ region }/2023/speed_50pctl_total` }/>
             <LinkCard
               title="80th Percentile Speed"
               description=""
-              href={ `/map/${ region }/2021/speed_80pctl_total` }/>
+              href={ `/map/${ region }/2023/speed_80pctl_total` }/>
             <div className="col-span-2">
               <LinkCard
                 title="Freeflow Speed"
                 description="85th percentile of off-peak travel speeds"
-                href={ `/map/${ region }/2021/freeflow` }/>
+                href={ `/map/${ region }/2023/freeflow` }/>
             </div>
           </Section>
 
@@ -286,27 +286,27 @@ const Home = () => {
             <LinkCard
               title="Car (LoTTR)"
               description="Level of Travel Time Realiability"
-              href={ `/map/${ region }/2021/lottr` }/>
+              href={ `/map/${ region }/2023/lottr` }/>
             <LinkCard
               title="Truck (TTTR)"
               description="Truck Travel Time Reliability"
-              href={ `/map/${ region }/2021/tttr` }/>
+              href={ `/map/${ region }/2023/tttr` }/>
           </Section>
 
           <Section title="Congestion">
             <LinkCard
               title="Total (TED)"
               description="Total Excessive Delay"
-              href={ `/map/${ region }/2021/ted` }/>
+              href={ `/map/${ region }/2023/ted` }/>
             <LinkCard
               title="Per Mile (TED)"
               description="Excessive Delay Per Mile"
-              href={ `/map/${ region }/2021/ted_per_mi` }/>
+              href={ `/map/${ region }/2023/ted_per_mi` }/>
             <div className="col-span-2">
               <LinkCard
                 title="Peak Hours (PHED)"
                 description="Peak Hours Excessive Delay"
-                href={ `/map/${ region }/2021/phed` }/>
+                href={ `/map/${ region }/2023/phed` }/>
             </div>
           </Section>
 
@@ -315,7 +315,7 @@ const Home = () => {
               <LinkCard
                 title="Gasoline and Diesel"
                 description="CO² Emissions for all vehicles"
-                href={ `/map/${ region }/2021/emissions_co2` }/>
+                href={ `/map/${ region }/2023/emissions_co2` }/>
             </div>
           </Section>
 

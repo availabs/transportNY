@@ -5,6 +5,7 @@ import RouteCreation from "./pages/route_creation"
 import Map from "./pages/Map"
 import TmcPage from "./pages/TmcPage"
 import PM3 from "./pages/pm3Map21"
+import NpmrdsDocs from "./pages/npmrdsDocs"
 
 const Routes = [
   Home,
@@ -13,7 +14,8 @@ const Routes = [
   ...Analysis,
   TmcPage,
   ...Map,
-  PM3
+  PM3,
+  ...NpmrdsDocs
 ]
 
 const site =  {

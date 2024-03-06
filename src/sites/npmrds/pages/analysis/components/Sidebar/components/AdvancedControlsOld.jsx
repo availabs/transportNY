@@ -1,6 +1,6 @@
 import React from "react"
 
-import get from "lodash.get"
+import get from "lodash/get"
 
 import moment from "moment"
 import styled from "styled-components"
