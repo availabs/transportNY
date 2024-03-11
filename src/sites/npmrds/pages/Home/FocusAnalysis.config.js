@@ -1,6 +1,8 @@
 const FocusAnalysisConfig = [
-  {
-    title: 'Floating Car',
+  { title: "TESTING",
+    Templates: [{ title: "Test", id: 270 }]
+  },
+  { title: 'Floating Car',
     Templates: [
       {
         title: 'One Week Study',

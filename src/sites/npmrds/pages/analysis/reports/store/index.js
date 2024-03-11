@@ -209,7 +209,7 @@ export const loadRoutesAndTemplate = (routeIds, templateId, stationIds = []) =>
 					state: _loadTemplate(templateId, routeIds, getState().report, stationIds)
 				})
       })
-export const loadRoutesAndTemplateWithDates = (routeIds, templateId, dates, stationIds = []) =>
+export const loadRoutesAndTemplateWithDates = (routeIds, templateId, datesMap, stationIds = []) =>
 	(dispatch, getState) =>
     Promise.resolve()
       .then(() => stationIds.length && getStationData(stationIds))
@@ -218,7 +218,7 @@ export const loadRoutesAndTemplateWithDates = (routeIds, templateId, dates, stat
 			.then(() =>
 				dispatch({
 					type: UPDATE_STATE,
-					state: _loadTemplateWithDates(templateId, routeIds, dates, getState().report, stationIds)
+					state: _loadTemplateWithDates(templateId, routeIds, datesMap, getState().report, stationIds)
 				})
 			)
 export const loadRoutesAndTemplateByType = (routeIds, defaultType, stationIds = []) =>
@@ -1921,9 +1921,9 @@ const _removeRouteComp = (state, compId) => {
   }
 }
 
-const _loadTemplateWithDates = (templateId, routeIds, dates, state, stationIds = []) => {
+const _loadTemplateWithDates = (templateId, routeIds, datesMap, state, stationIds = []) => {
 
-console.log("_loadTemplateWithDates::dates", dates);
+console.log("_loadTemplateWithDates::datesMap", datesMap);
 
   const falcorCache = falcorGraph.getCache();
   const template = get(falcorCache, `templates2.id.${ templateId }`, {});
@@ -1990,11 +1990,16 @@ console.log("_loadTemplateWithDates::dates", dates);
     return a;
   }, {});
 
-  const datesMap = routeIds.reduce((a, c, i) => {
-    const metaDates = get(falcorCache, ["routes2", "id", c, "metadata", "value", "dates"], []);
-    a[c] = dates.length > i ? dates[i] : metaDates.length ? metaDates : dates[i % dates.length];
+  datesMap = routeIds.reduce((a, c) => {
+    if (a[c]) {
+      return a;
+    }
+    const metadates = get(falcorCache, ["routes2", "id", c, "metadata", "value", "dates"], []);
+    if (metadates.length) {
+      a[c] = metadates;
+    }
     return a;
-  }, {});
+  }, datesMap);
 
 console.log("DATES MAP:", datesMap)
 

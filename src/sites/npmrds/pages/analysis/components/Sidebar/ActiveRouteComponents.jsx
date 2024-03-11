@@ -150,6 +150,7 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 
 	const availableRoutes = React.useMemo(() => {
 		return props.availableRoutes.slice()
+			.filter(r => r.id !== null)
 			.sort((a, b) => a.name.localeCompare(b.name))
 			.map(r => ({
 				...r,

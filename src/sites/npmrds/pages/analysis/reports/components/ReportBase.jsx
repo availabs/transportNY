@@ -95,16 +95,38 @@ class ReportBase extends React.Component {
           path = get(this.props, 'location.pathname', ""),
           dates = get(this.props, "params.dates", "");
 
-        const getDates = dates => {
-          return dates.split("_").filter(Boolean)
-            .map(d => {
-              const temp = d.split("|");
-              if (temp.length === 1) {
-                return [temp[0], temp[0]]
+        // const getDates = dates => {
+        //   return dates.split("_").filter(Boolean)
+        //     .map(d => {
+        //       const temp = d.split("|");
+        //       if (temp.length === 1) {
+        //         return [temp[0], temp[0]]
+        //       }
+        //       return temp;
+        //     })
+        // }
+
+        const routeDateRegex = /^(\d+)(?:D(.+))?$/
+
+        const [routeIds, datesMap] = routeId.split("_").filter(Boolean)
+          .reduce((a, c) => {
+            const [, routeId, date] = routeDateRegex.exec(c);
+            if (routeId) {
+              a[0].push(routeId);
+            }
+            if (date) {
+              const [d1, d2] = date.split("|").map(d => d.replaceAll("-", ""));
+              if (d1 && d2) {
+                a[1][routeId] = [d1, d2];
               }
-              return temp;
-            })
-        }
+              else if (d1) {
+                a[1][routeId] = [d1, d1];
+              }
+            }
+            return a;
+          }, [[], {}]);
+
+console.log("ReportBase::componentDidMount", routeIds, datesMap)
 
         const query = new URLSearchParams(this.props.location.search);
 
@@ -149,24 +171,22 @@ class ReportBase extends React.Component {
             }
           }
         }
-        else if (path.includes("/report/new/route/") && routeId) {
-          this.props.loadRoutesForReport(
-            routeId.split("_").filter(Boolean)
-          );
+        else if (path.includes("/report/new/route/") && routeIds.length) {
+          this.props.loadRoutesForReport(routeIds);
         }
-        else if (templateId && (routeId || stationId)) {
+        else if (templateId && (routeIds.length || stationId)) {
           const loadTemplate = () => {
-            if (dates) {
+            if (Object.keys(datesMap).length) {
               this.props.loadRoutesAndTemplateWithDates(
-                routeId.split("_").filter(Boolean),
+                routeIds,
                 templateId,
-                getDates(dates),
+                datesMap,
                 stationId.split("_").filter(Boolean)
               );
             }
             else {
               this.props.loadRoutesAndTemplate(
-                routeId.split("_").filter(Boolean),
+                routeIds,
                 templateId,
                 stationId.split("_").filter(Boolean)
               );
@@ -192,9 +212,9 @@ class ReportBase extends React.Component {
             loadTemplate();
           }
         }
-        else if (defaultType && (routeId || stationId)) {
+        else if (defaultType && (routeIds.length || stationId)) {
           this.props.loadRoutesAndTemplateByType(
-            routeId.split("_").filter(Boolean),
+            routeIds,
             defaultType,
             stationId.split("_").filter(Boolean)
           );
@@ -894,9 +914,8 @@ const getAvailableRoutes = falcorCache => {
     }
   }
 
-  return refs.map(ref => ({
-    ...get(falcorCache, ref)
-  })).filter(Boolean);
+  return refs.map(ref => ({ ...get(falcorCache, ref) }))
+    .filter(Boolean).filter(r => r.id !== null);
 }
 const getTemplates = (falcorCache, props) => {
 

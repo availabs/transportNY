@@ -84,7 +84,7 @@ const Folder = ({ id, openedFolders, setOpenedFolders, forFolder, ...props }) =>
     </div>
   )
 }
-const Route = ({ id, forFolder = false, parent, ...props }) => {
+const Route = ({ id, forFolder = false, parent, children, ...props }) => {
   const { falcor, falcorCache } = useFalcor();
 
   const [templates, setTemplates] = React.useState([]);
@@ -196,6 +196,7 @@ const Route = ({ id, forFolder = false, parent, ...props }) => {
   return (
     <Container { ...props } { ...route } id={ id } type="route"
       items={ RouteItems }
+      childrenFromParent={ children }
     >
       <span className="fad fa-road text-slate-500 text-sm px-2"/>
       <span className="pt-1">
@@ -334,6 +335,8 @@ const Template = ({ id, forFolder = false, ...props }) => {
   )
 }
 
+const DateTimeRegex = /(\d{4}[-]\d{2}[-]\d{2})(?:T(\d{2}[:]\d{2}[:]\d{2}))?/;
+
 const RouteSelectModal = ({ folders, template, action, ...props }) => {
 
   const { falcor, falcorCache } = useFalcor();
@@ -382,13 +385,90 @@ const RouteSelectModal = ({ folders, template, action, ...props }) => {
   const numStations = get(template, "stations", 0);
 
   const [selectedRoutes, setSelectedRoutes] = React.useState([]);
+  const [routeDates, _setRouteDates] = React.useState({});
+  const [routeTimes, _setRouteTimes] = React.useState({});
+
   const addRoute = React.useCallback(rt => {
     setSelectedRoutes(prev => [...prev, rt]);
+    const dates = get(rt, ["metadata", "value", "dates"], []);
+    if (dates.length) {
+      const [date1, date2] = dates;
+      const [, startDate, startTime] = DateTimeRegex.exec(date1);
+      const [, endDate, endTime] = DateTimeRegex.exec(date2);
+      _setRouteDates(prev => ({ ...prev, [rt.id]: [startDate, endDate] }));
+      if (startTime && endTime) {
+        _setRouteTimes(prev => ({ ...prev, [rt.id]: [startTime, endTime] }));
+      }
+    }
   }, []);
   const removeRoute = React.useCallback(rt => {
     setSelectedRoutes(prev => {
       return prev.filter(p => p.id !== rt.id);
     });
+  }, []);
+
+  const setRouteDates = React.useCallback((rid, dates) => {
+    _setRouteDates(prev => ({ ...prev, [rid]: [...dates] }));
+  }, []);
+  const setRouteStartDate = React.useCallback((rid, date) => {
+    _setRouteDates(prev => {
+      if (!(rid in prev)) {
+        return {
+          ...prev,
+          [rid]: [date, null]
+        }
+      }
+      return {
+        ...prev,
+        [rid]: [date, prev[rid][1]]
+      }
+    })
+  }, []);
+  const setRouteEndDate = React.useCallback((rid, date) => {
+    _setRouteDates(prev => {
+      if (!(rid in prev)) {
+        return {
+          ...prev,
+          [rid]: [null, date]
+        }
+      }
+      return {
+        ...prev,
+        [rid]: [prev[rid][0], date]
+      }
+    })
+  }, []);
+
+  const setRouteTimes = React.useCallback((rid, times) => {
+    _setRouteTimes(prev => ({ ...prev, [rid]: [...times] }));
+  }, []);
+  const setRouteStartTime = React.useCallback((rid, time) => {
+    _setRouteTimes(prev => {
+      if (!(rid in prev)) {
+        return {
+          ...prev,
+          [rid]: [time, null]
+        }
+      }
+      return {
+        ...prev,
+        [rid]: [time, prev[rid][1]]
+      }
+    })
+  }, []);
+  const setRouteEndTime = React.useCallback((rid, time) => {
+    _setRouteTimes(prev => {
+      if (!(rid in prev)) {
+        return {
+          ...prev,
+          [rid]: [null, time]
+        }
+      }
+      return {
+        ...prev,
+        [rid]: [prev[rid][0], time]
+      }
+    })
   }, []);
 
   const [selectedStations, setSelectedStations] = React.useState([]);
@@ -404,11 +484,47 @@ const RouteSelectModal = ({ folders, template, action, ...props }) => {
   const remainingRoutes = numRoutes - selectedRoutes.length;
   const remainingStations = numStations - selectedStations.length;
 
+  // const URL = React.useMemo(() => {
+  //   if ((numRoutes > selectedRoutes.length) || (numStations > selectedStations.length)) {
+  //     return null;
+  //   }
+  //   const routeId = selectedRoutes.map(r => r.id).join("_");
+  //   const stationId = selectedStations.map(r => r.stationId).join("_");
+  //
+  //   if (numRoutes && numStations) {
+  //     return `/template/${ action }/${ template.id }/route/${ routeId }/station/${ stationId }`
+  //   }
+  //   if (numRoutes) {
+  //     return `/template/${ action }/${ template.id }/route/${ routeId }`
+  //   }
+  //   if (numStations) {
+  //     return `/template/${ action }/${ template.id }/station/${ stationId }`
+  //   }
+  //   return null;
+  // }, [template, action, numRoutes, selectedRoutes, numStations, selectedStations]);
+
   const URL = React.useMemo(() => {
     if ((numRoutes > selectedRoutes.length) || (numStations > selectedStations.length)) {
       return null;
     }
-    const routeId = selectedRoutes.map(r => r.id).join("_");
+
+    const routeId = selectedRoutes.reduce((a, c) => {
+      const [date1, date2] = get(c, ["metadata", "value", "dates"], []);
+
+      const [startDate, endDate] = get(routeDates, c.id, []);
+      const [startTime, endTime] = get(routeTimes, c.id, []);
+
+      const d1 = [startDate, startTime].filter(Boolean).join("T");
+      const d2 = [endDate, endTime].filter(Boolean).join("T");
+
+      let rid = `${ c.id }`;
+
+      if (d1 && d2 && ((d1 !== date1) || (d2 !== date2))) {
+        rid += `D${ d1 }|${ d2 }`;
+      }
+      return [...a, rid];
+    }, []).join("_");
+
     const stationId = selectedStations.map(r => r.stationId).join("_");
 
     if (numRoutes && numStations) {
@@ -420,7 +536,10 @@ const RouteSelectModal = ({ folders, template, action, ...props }) => {
     if (numStations) {
       return `/template/${ action }/${ template.id }/station/${ stationId }`
     }
-  }, [template, action, numRoutes, selectedRoutes, numStations, selectedStations])
+    return null;
+
+    // return `/template/edit/${ template.id }/route/${ routeIds }`;
+  }, [template, action, numRoutes, selectedRoutes, routeDates, routeTimes, numStations, selectedStations]);
 
   const stationList = React.useMemo(() => {
     return stations.filter(st => {
@@ -430,9 +549,13 @@ const RouteSelectModal = ({ folders, template, action, ...props }) => {
     });
   }, [stations, selectedStations]);
 
+  const stopPropagation = React.useCallback(e => {
+    e.stopPropagation();
+  }, []);
+
   return (
     <Modal { ...props }>
-      <div className="w-screen max-w-lg">
+      <div className="w-screen max-w-6xl">
 
         <div className="font-bold text-2xl border-b-2 border-current">
           { template.name }
@@ -456,6 +579,60 @@ const RouteSelectModal = ({ folders, template, action, ...props }) => {
                           >
                             <span className="fa fa-close"/>
                           </div>
+                        </div>
+                      )
+                    })
+                  }
+                  { selectedRoutes.map(r => {
+                      return (
+                        <div key={ r.id }>
+                          <Stuff { ...r }>
+                            <div className="flex">
+                              <button className="px-4 rounded bg-gray-200 hover:bg-gray-300 mx-2 flex-none"
+                                onClick={ e => removeRoute(r) }
+                              >
+                                <span className="fa fa-remove"/>
+                              </button>
+                              <div className="font-normal grid grid-cols-1 gap-1"
+                                onClick={ stopPropagation }
+                              >
+                                <div className="flex items-center">
+                                  <div className="flex items-center mr-1">
+                                    <div className="w-20">Start&nbsp;Date</div>
+                                    <input type="date"
+                                      className="px-2 py-1 flex-1 ml-1"
+                                      value={ get(routeDates, [r.id, 0], "") }
+                                      onChange={ e => setRouteStartDate(r.id, e.target.value) }/>
+                                  </div>
+                                  <div className="flex items-center ml-1">
+                                    <div className="w-20">Start&nbsp;Time</div>
+                                    <input type="time" step={ 1 }
+                                      className="px-2 py-1 flex-1 ml-1"
+                                      value={ get(routeTimes, [r.id, 0], "") }
+                                      onChange={ e => setRouteStartTime(r.id, e.target.value) }
+                                      disabled={ !Boolean(get(routeDates, [r.id, 0], "")) }/>
+                                  </div>
+                                </div>
+                                <div className="flex items-center">
+                                  <div className="flex items-center mr-1">
+                                    <div className="w-20">End&nbsp;Date</div>
+                                    <input type="date"
+                                      className="px-2 py-1 flex-1 ml-1"
+                                      value={ get(routeDates, [r.id, 1], "") }
+                                      onChange={ e => setRouteEndDate(r.id, e.target.value) }/>
+                                  </div>
+                                  <div className="flex items-center ml-1">
+                                    <div className="w-20">End&nbsp;Time</div>
+                                    <input type="time" step={ 1 }
+                                      className="px-2 py-1 flex-1 ml-1"
+                                      value={ get(routeTimes, [r.id, 1], "") }
+                                      onChange={ e => setRouteEndTime(r.id, e.target.value) }
+                                      disabled={ !Boolean(get(routeDates, [r.id, 1], "")) }/>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Stuff>
                         </div>
                       )
                     })
@@ -681,7 +858,7 @@ const RouteSelector = ({ onClick, selectedRoutes, children }) => {
       requests.push(["folders2", "id", folders, ["name", "description", "updated_at", "id"]]);
     }
     if (routes.length) {
-      requests.push(["routes2", "id", routes, ["name", "description", "updated_at", "id"]]);
+      requests.push(["routes2", "id", routes, ["name", "description", "updated_at", "id", "metadata"]]);
     }
     if (requests.length) {
       falcor.get(...requests);
@@ -934,9 +1111,9 @@ const FolderSelector = ({ folder = {}, openedFolders, setOpenedFolders, foldersB
   )
 }
 
-const StuffContainer = ({ description, updated_at, children, ...rest }) => {
+const StuffContainer = ({ description, updated_at, children, childrenFromParent, ...rest }) => {
   return (
-    <div className="flex items-center border-b px-1">
+    <div className="flex items-center border-b px-1 pb-1">
       <div className="flex-1">
         <div className="flex items-center font-bold">
           { children }
@@ -946,6 +1123,11 @@ const StuffContainer = ({ description, updated_at, children, ...rest }) => {
         </div>
         <div className="text-sm italic">
           { description }
+        </div>
+      </div>
+      <div>
+        <div>
+          { childrenFromParent }
         </div>
       </div>
     </div>
@@ -1212,7 +1394,7 @@ const FolderStuffContainer = props => {
           { new Date(updated_at).toLocaleString() }
         </div>
       </div>
-      <div className="flex-0 flex items-center px-1">
+      <div className="flex items-center px-1">
         <span onClick={ openInfoModal }
           className="fa-regular fa-circle-info mr-4 cursor-pointer text-gray-600"
         />
@@ -1228,8 +1410,7 @@ const FolderStuffContainer = props => {
 
         <div className="w-10 flex justify-end"
           onClick={ stopPropagation }>
-          <div className="flex-0"
-            onClick={ stopPropagation }>
+          <div onClick={ stopPropagation }>
             <StuffDropdown items={ StuffItems }>
               <span className="fa text-lg fa-list mr-1"/>
             </StuffDropdown>

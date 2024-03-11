@@ -528,6 +528,8 @@ const getDefaultFoldersByType = () => ([
   { type: "Default Folders", folders: [] }
 ])
 
+const DateTimeRegex = /(\d{4}[-]\d{2}[-]\d{2})(?:T(\d{2}[:]\d{2}[:]\d{2}))?/;
+
 const TemplateLoader = ({ id, title }) => {
 
   const { falcor, falcorCache } = useFalcor();
@@ -678,11 +680,28 @@ const TemplateLoader = ({ id, title }) => {
   }, [folders, openedFolders]);
 
   const [selectedRoutes, setSelectedRoutes] = React.useState([]);
+  const [routeDates, _setRouteDates] = React.useState({});
+  const [routeTimes, _setRouteTimes] = React.useState({});
+
   const addRoute = React.useCallback(rt => {
     setSelectedRoutes(prev => [...prev, rt]);
+    const dates = get(rt, ["metadata", "value", "dates"], []);
+    if (dates.length) {
+      const [date1, date2] = dates;
+      const [, startDate, startTime] = DateTimeRegex.exec(date1);
+      const [, endDate, endTime] = DateTimeRegex.exec(date2);
+      _setRouteDates(prev => ({ ...prev, [rt.id]: [startDate, endDate] }));
+      if (startTime && endTime) {
+        _setRouteTimes(prev => ({ ...prev, [rt.id]: [startTime, endTime] }));
+      }
+    }
   }, []);
   const removeRoute = React.useCallback(rt => {
     setSelectedRoutes(prev => prev.filter(r => r.id !== rt.id));
+    _setRouteDates(prev => {
+      delete prev[rt.id];
+      return { ...prev };
+    })
   }, []);
 
   React.useEffect(() => {
@@ -694,49 +713,97 @@ const TemplateLoader = ({ id, title }) => {
   const totalRoutes = get(template, "routes", 0);
   const remaining = totalRoutes - selectedRoutes.length;
 
-  const [startDate, setStartDate] = React.useState("");
-  const [endDate, setEndDate] = React.useState("");
-
-  React.useEffect(() => {
-    if (totalRoutes !== 1) {
-      setStartDate("");
-      setEndDate("");
-    }
-  }, [totalRoutes]);
-
-  React.useEffect(() => {
-    if ((totalRoutes === 1) && (selectedRoutes.length === 1) && !startDate && !endDate) {
-      const dates = get(selectedRoutes, [0, "metadata", "value", "dates"], []);
-      if (dates.length) {
-        setStartDate(dates[0]);
-        setEndDate(dates[1]);
-      }
-    }
-  }, [totalRoutes, selectedRoutes]);
-
-  const doSetStartDate = React.useCallback(e => {
-    setStartDate(e.target.value);
+  const setRouteDates = React.useCallback((rid, dates) => {
+    _setRouteDates(prev => ({ ...prev, [rid]: [...dates] }));
   }, []);
-  const doSetEndDate = React.useCallback(e => {
-    setEndDate(e.target.value);
+  const setRouteStartDate = React.useCallback((rid, date) => {
+    _setRouteDates(prev => {
+      if (!(rid in prev)) {
+        return {
+          ...prev,
+          [rid]: [date, null]
+        }
+      }
+      return {
+        ...prev,
+        [rid]: [date, prev[rid][1]]
+      }
+    })
+  }, []);
+  const setRouteEndDate = React.useCallback((rid, date) => {
+    _setRouteDates(prev => {
+      if (!(rid in prev)) {
+        return {
+          ...prev,
+          [rid]: [null, date]
+        }
+      }
+      return {
+        ...prev,
+        [rid]: [prev[rid][0], date]
+      }
+    })
+  }, []);
+
+  const setRouteTimes = React.useCallback((rid, times) => {
+    _setRouteTimes(prev => ({ ...prev, [rid]: [...times] }));
+  }, []);
+  const setRouteStartTime = React.useCallback((rid, time) => {
+    _setRouteTimes(prev => {
+      if (!(rid in prev)) {
+        return {
+          ...prev,
+          [rid]: [time, null]
+        }
+      }
+      return {
+        ...prev,
+        [rid]: [time, prev[rid][1]]
+      }
+    })
+  }, []);
+  const setRouteEndTime = React.useCallback((rid, time) => {
+    _setRouteTimes(prev => {
+      if (!(rid in prev)) {
+        return {
+          ...prev,
+          [rid]: [null, time]
+        }
+      }
+      return {
+        ...prev,
+        [rid]: [prev[rid][0], time]
+      }
+    })
   }, []);
 
   const URL = React.useMemo(() => {
-    if (totalRoutes > selectedRoutes.length) {
-      return null;
-    }
     if (!template) {
       return null;
     }
-    const routeId = selectedRoutes.map(r => r.id).join("_");
-
-    if (startDate && endDate) {
-      return `/template/edit/${ template.id }/route/${ routeId }/dates/${ startDate.replaceAll("-", "") }|${ endDate.replaceAll("-", "") }`;
+    if (totalRoutes > selectedRoutes.length) {
+      return null;
     }
 
-    return `/template/edit/${ template.id }/route/${ routeId }`;
+    const routeIds = selectedRoutes.reduce((a, c) => {
+      const [date1, date2] = get(c, ["metadata", "value", "dates"], []);
 
-  }, [template, totalRoutes, selectedRoutes, startDate, endDate]);
+      const [startDate, endDate] = get(routeDates, c.id, []);
+      const [startTime, endTime] = get(routeTimes, c.id, []);
+
+      const d1 = [startDate, startTime].filter(Boolean).join("T");
+      const d2 = [endDate, endTime].filter(Boolean).join("T");
+
+      let rid = `${ c.id }`;
+
+      if (d1 && d2 && ((d1 !== date1) || (d2 !== date2))) {
+        rid += `D${ d1 }|${ d2 }`;
+      }
+      return [...a, rid];
+    }, []).join("_");
+
+    return `/template/edit/${ template.id }/route/${ routeIds }`;
+  }, [template, totalRoutes, selectedRoutes, routeDates, routeTimes]);
 
   const routes = React.useMemo(() => {
     const routes = stuff.filter(s => s.type === "route")
@@ -763,6 +830,10 @@ const TemplateLoader = ({ id, title }) => {
       }
     );
   }, [routes, getRouteName]);
+
+  const stopPropagation = React.useCallback(e => {
+    e.stopPropagation();
+  }, []);
 
   return (
     <div className="grid grid-cols-1 gap-2">
@@ -798,17 +869,60 @@ const TemplateLoader = ({ id, title }) => {
 
           { !selectedRoutes.length ? null :
             <>
-              <div className="border-b border-current w-3/4 text-lg font-bold">
+              <div className="border-b border-current w-full text-lg font-bold">
                 Selected Route{ selectedRoutes.length > 1 ? "s" : "" }
               </div>
-              <div className="w-3/4">
+              <div className="w-full">
                 { selectedRoutes.map(r => {
                     return (
-                      <div key={ r.id }
-                        onClick={ e => removeRoute(r) }
-                        className="cursor-pointer"
-                      >
-                        <Stuff { ...r }/>
+                      <div key={ r.id }>
+                        <Stuff { ...r }>
+                          <div className="flex">
+                            <button className="px-4 rounded bg-gray-200 hover:bg-gray-300 mx-2 flex-none"
+                              onClick={ e => removeRoute(r) }
+                            >
+                              <span className="fa fa-remove"/>
+                            </button>
+                            <div className="font-normal grid grid-cols-1 gap-1"
+                              onClick={ stopPropagation }
+                            >
+                              <div className="flex items-center">
+                                <div className="flex items-center mr-1">
+                                  <div className="w-20">Start&nbsp;Date</div>
+                                  <input type="date"
+                                    className="px-2 py-1 flex-1 ml-1"
+                                    value={ get(routeDates, [r.id, 0], "") }
+                                    onChange={ e => setRouteStartDate(r.id, e.target.value) }/>
+                                </div>
+                                <div className="flex items-center ml-1">
+                                  <div className="w-20">Start&nbsp;Time</div>
+                                  <input type="time" step={ 1 }
+                                    className="px-2 py-1 flex-1 ml-1"
+                                    value={ get(routeTimes, [r.id, 0], "") }
+                                    onChange={ e => setRouteStartTime(r.id, e.target.value) }
+                                    disabled={ !Boolean(get(routeDates, [r.id, 0], "")) }/>
+                                </div>
+                              </div>
+                              <div className="flex items-center">
+                                <div className="flex items-center mr-1">
+                                  <div className="w-20">End&nbsp;Date</div>
+                                  <input type="date"
+                                    className="px-2 py-1 flex-1 ml-1"
+                                    value={ get(routeDates, [r.id, 1], "") }
+                                    onChange={ e => setRouteEndDate(r.id, e.target.value) }/>
+                                </div>
+                                <div className="flex items-center ml-1">
+                                  <div className="w-20">End&nbsp;Time</div>
+                                  <input type="time" step={ 1 }
+                                    className="px-2 py-1 flex-1 ml-1"
+                                    value={ get(routeTimes, [r.id, 1], "") }
+                                    onChange={ e => setRouteEndTime(r.id, e.target.value) }
+                                    disabled={ !Boolean(get(routeDates, [r.id, 1], "")) }/>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </Stuff>
                       </div>
                     )
                   })
@@ -818,7 +932,7 @@ const TemplateLoader = ({ id, title }) => {
           }
 
           { !remaining ? null :
-            <div className="w-3/4 cursor-pointer">
+            <div className="w-full cursor-pointer">
               <FolderSelector Folder={ Folder }
                 OpenedFolders={ OpenedFolders }
                 setOpenedFolders={ setOpenedFolders }
@@ -829,20 +943,20 @@ const TemplateLoader = ({ id, title }) => {
 
           { !remaining ? null :
             !routes.length ?
-            <div className="w-3/4 text-lg font-bold">
+            <div className="w-full text-lg font-bold">
               No Routes in Selected Folder
             </div> :
             <>
-              <div className="border-b border-current w-3/4 text-lg font-bold">
+              <div className="border-b border-current w-full text-lg font-bold">
                 Select { remaining } Route{ remaining > 1 ? "s" : "" }
               </div>
               <div>
-                <input type="text" className="w-3/4 px-2 py-1 rounded"
+                <input type="text" className="w-full px-2 py-1 rounded"
                   value={ search }
                   onChange={ onChange }
                   placeholder="search for a route..."/>
               </div>
-              <div className="w-3/4 max-h-96 overflow-auto">
+              <div className="w-full max-h-96 overflow-auto">
                 { fuse(search).map(r => {
                     return (
                       <div key={ r.id }
@@ -858,9 +972,9 @@ const TemplateLoader = ({ id, title }) => {
             </>
           }
 
-          { totalRoutes !== 1 ? null :
+          { /*totalRoutes !== 1 ? null :
             <div>
-              <div className="border-b border-current w-3/4 text-lg font-bold mb-1">
+              <div className="border-b border-current w-full text-lg font-bold mb-1">
                 Add Dates (optional)
               </div>
               <div className="grid grid-cols-2 gap-1">
@@ -879,7 +993,7 @@ const TemplateLoader = ({ id, title }) => {
                     onChange={ doSetEndDate }/>
                 </div>
               </div>
-            </div>
+            </div>*/
           }
 
           { !URL ? null :
@@ -906,7 +1020,7 @@ const TemplateModal = ({ templateId, templateTitle = [], close }) => {
     <Modal close={ close }
       isOpen={ templateId !== null }
     >
-      <div className="w-screen max-w-4xl">
+      <div className="w-screen max-w-6xl">
         <TemplateLoader id={ templateId }
           title={ templateTitle }/>
       </div>
