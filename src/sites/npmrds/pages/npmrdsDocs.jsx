@@ -17,25 +17,25 @@ registerDataType("selector", Selector)
 
 
 const Routes = [
-
   {
     ...dmsPageFactory(
       siteConfig({ 
         app: "dms-site",
-        type: "docs-freight-data",
+        type: "docs-npmrds",
         useFalcor: useFalcor,
         logo: <Logo />, 
         rightMenu: <AuthMenu />,
         baseUrl: "/docs",
         checkAuth
       }), 
-      "/documentation", 
+      "/docs/", 
       withAuth
     ),
     authLevel: 5,
     name: "CMS",
     sideNav: {
-      size: "none"
+      color: 'dark',
+      size: 'none'
     },
     topNav: {
       size: "none"

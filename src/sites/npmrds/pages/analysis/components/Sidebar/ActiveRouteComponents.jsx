@@ -140,7 +140,7 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 						value: r.stuff_id,
 						Item: props => (
 							<DropdownItem { ...props }
-								hasDates={ Boolean(data.metadata?.value?.dates?.length) }/>
+								hasDates={ Boolean(data?.metadata?.value?.dates?.length) }/>
 						)
 					}
 				})

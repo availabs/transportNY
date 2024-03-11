@@ -1,9 +1,9 @@
 export const PROJECT_NAME = "NPMRDS";
 
-let API_HOST = "https://graph.availabs.org";
-let AUTH_HOST = "https://availauth.availabs.org";
+let API_HOST = "https://graph2.availabs.org";
+let AUTH_HOST = "https://graph2.availabs.org";
 let CLIENT_HOST = "https://transportny.org";
-let DAMA_HOST = "https://graph.availabs.org";
+let DAMA_HOST = "https://graph2.availabs.org";
 
 if (process.env.NODE_ENV === "development") {
   API_HOST = "http://localhost:4444";

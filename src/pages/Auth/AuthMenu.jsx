@@ -49,16 +49,15 @@ export default withAuth(({title, shadowed = true, user, children}) => {
             {!user.authed ?
                 <Link className={`${theme.topnav({}).navitemTop}`} to="/auth/login">Login</Link> :
                 <Dropdown control={<UserMenu user={user}/>} className={`hover:bg-blue-500 group z-50`} >
-                    <div className='p-1 bg-blue-500'>
+                    <div key={'x'} className='p-1 bg-blue-500'>
                         { user.authLevel >= 10 ? 
-                        <div className='py-1 '> 
+                        <div key={'docs'} className='py-1 '> 
                             {Item('/docs/edit', 'fad fa-docs flex-shrink-0  pr-1', 'Edit Docs')}
                         </div> : ''}
-                        <div className='py-1 border-t border-blue-400'> 
+                        <div key={'logout'} className='py-1 border-t border-blue-400'> 
                             {Item('/auth/logout', 'fad fa-sign-out-alt pb-2 pr-1', 'Logout')}
                         </div>
                     </div>
-                       
                 </Dropdown>
             }
         </div>

@@ -6,11 +6,18 @@ const FocusAnalysisConfig = [
     Templates: [
       {
         title: 'One Week Study',
-        id:278
+        id: 276
       },
       {
         title: 'Annual Average Study',
-        id: 276
+        id: 278
+      }
+    ]
+  },
+  { title: "Before & After",
+    Templates: [
+      { title: "Single Route",
+        id: 221
       }
     ]
   },
@@ -33,13 +40,7 @@ const FocusAnalysisConfig = [
       }
     ]
   },
-  { title: "Before & After",
-    Templates: [
-      { title: "Single Route",
-        id: 221
-      }
-    ]
-  },
+  
   { title: "Change Over Time",
     Templates: [
       { title: "Year Over Year",
@@ -59,7 +60,7 @@ const FocusAnalysisConfig = [
   { title: "Events",
     Templates: [
       { title: "Single Day (Advanced)",
-        id: 245
+        id: 291
       }
     ]
   },

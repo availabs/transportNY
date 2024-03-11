@@ -137,7 +137,7 @@ const AtlasPage = props => {
 const config = [{
   name: 'Freight Atlas',
   icon: 'fa-duotone fa-map',
-  path: "/",
+  path: "/colmap",
   exact: true,
   auth: false,
   mainNav: true,

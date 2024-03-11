@@ -36,10 +36,10 @@ const Title = ({ children }) => {
 const Section = ({ title, children }) => {
   return (
     <div className="pb-6">
-      <div className="px-2 uppercase text-sm font-medium text-blue-500">
+      <div className="px-2 uppercase text-[12px] font-bold text-blue-500">
         { title }
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-1">
         { children }
       </div>
     </div>
@@ -76,32 +76,52 @@ const TemplateSelector = ({ id, title, onClick, children }) => {
   const doOnClick = React.useCallback(e => {
     onClick({ templateId: id, templateTitle: title });
   }, [id, title, onClick]);
-
-  return (
-    <div
+  // <img className="w-full" src={template?.thumbnail || ""}  alt="" /> :
+  console.log('template', template)
+  return(
+    
+          <div
           key={id}
           onClick={ doOnClick }
-          className="relative flex items-center space-x-2 rounded-lg border border-gray-300 bg-white px-4 py-5 shadow-sm hover:bg-blue-50 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
-        >
-          <div className="flex-shrink-0">
-            { template?.thumbnail ?
-              <img className="h-12 w-12" src={template?.thumbnail || ""}  alt="" /> :
-              <img className="h-12 w-12 bg-blue-100"  alt="" />
-
-            }
-          </div>
-          <div className="min-w-0 flex-1">
-            <a href="#" className="focus:outline-none">
-              <span className="absolute inset-0" aria-hidden="true" />
-              <p className="text-lg font-medium text-gray-900">{title[1]}</p>
-              <p className="truncate text-xs text-gray-500">{template?.description || ''}</p>
-            </a>
-          </div>
-    </div>
+           className={` cursor-pointer
+          relative flex items-center space-x-2  rounded-sm border border-gray-300 shadow-sm px-2 py-2 hover:bg-blue-50 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-b-blue-400
+        `}
+      >
+        <div className="flex-shrink-0">
+          <div className="h-16 w-16 bg-cover" style={{backgroundImage:`url(${template?.thumbnail})`}}  alt="" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <span className="absolute inset-0" aria-hidden="true" />
+          <p className="text-[14px] font-bold uppercase text-gray-500">{ title[1] }</p>
+          <p className="h-12 overflow-hidden text-[12px] font-thin text-gray-500">{ template?.description }</p>
+        </div>
+      </div>
   )
+  // return (
+  //   <div
+  //         key={id}
+  //         onClick={ doOnClick }
+  //         className="relative flex flex-col items-center space-x-2  rounded-sm border border-gray-300 shadow-sm px-2 py-2 hover:bg-blue-50 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-b-blue-400"
+  //       >
+  //         <div className="">
+            
+  //             <img className="w-64 h-64 bg-blue-100 bg-cover" style={{backgroundImage:`url(${template?.thumbnail})`}}  alt="" />
+
+            
+  //         </div>
+  //         <div className="min-w-0 flex-1">
+  //           <a href="#" className="focus:outline-none">
+  //             <span className="absolute inset-0" aria-hidden="true" />
+  //             <p className="text-[12px] font-bold text-slate-600 uppercase">{title[1]}</p>
+  //             <p className="h-14 font-thin overflow-hidden text-[12px] font-light text-slate-500">{template?.description || ''}</p>
+  //           </a>
+  //         </div>
+  //   </div>
+  // )
 
 
 }
+
 const ReportLink = ({ id, name, description, thumbnail  }) => {
 
   return(
@@ -112,14 +132,14 @@ const ReportLink = ({ id, name, description, thumbnail  }) => {
         >
           <div className="flex-shrink-0">
             { thumbnail ?
-              <img className="h-12 w-12" src={thumbnail || ""}  alt="" /> :
-              <img className="h-12 w-12 bg-blue-100"  alt="" />
+              <img className="h-16 w-16" src={thumbnail || ""}  alt="" /> :
+              <img className="h-16 w-16 bg-blue-100"  alt="" />
 
             }
           </div>
           <div className="min-w-0 flex-1">
             <span className="absolute inset-0" aria-hidden="true" />
-            <p className="text-lg font-medium text-gray-900">{name}</p>
+            <p className="text-[12px] font-bold uppercase text-gray-900">{name}</p>
             <p className="truncate text-xs text-gray-500">{description || ''}</p>
           </div>
     </Link>
@@ -134,21 +154,17 @@ const regionValueAccessor = r => r.region;
 const LinkCard = ({ title, description, href }) => {
   return (
     <Link to={ href }>
-      <div className={ `
-          relative flex items-center space-x-2 rounded-lg
-          border border-gray-300 bg-white px-4 py-5
-          shadow-sm focus-within:ring-2
-          focus-within:ring-indigo-500 focus-within:ring-offset-2
-          hover:bg-blue-50 hover:border-gray-400
-        ` }
+      <div className={`
+          relative flex items-center space-x-2  rounded-sm border border-gray-300 shadow-sm px-2 py-2 hover:bg-blue-50 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-b-blue-400
+        `}
       >
         <div className="flex-shrink-0">
-          <div className="h-12 w-12 bg-gray-300"  alt="" />
+          <div className="h-16 w-16 bg-cover bg-[url('/img/macroview.png')]"  alt="" />
         </div>
         <div className="min-w-0 flex-1">
           <span className="absolute inset-0" aria-hidden="true" />
-          <p className="text-lg font-medium text-gray-900">{ title }</p>
-          <p className="truncate text-xs text-gray-500">{ description }</p>
+          <p className="text-[12px] font-bold uppercase text-gray-500">{ title }</p>
+          <p className="h-14 truncate text-xs text-gray-500">{ description }</p>
         </div>
       </div>
     </Link>
@@ -197,36 +213,13 @@ const Home = () => {
       <div className="grid grid-cols-2 gap-4 p-10">
 
         <div>
-          <Title>
-            Route Analysis
-          </Title>
+          <div className="mb-2 text-lg  px-2 font-medium text-gray-700 border-current">
+            Choose a Route Analysis Template...
+          </div>
           { FocusAnalysis.map(({ title, Templates }) => {
               return (
                 <Section key={ title } title={ title }>
-                  { Templates.length % 2 === 1 ?
-                    <>
-                      { Templates.slice(0, -1).map((t,i) => {
-                          return (
-                            <TemplateSelector
-                              key={ t.title }
-                              onClick={ setTemplateData }
-                              title={ [title, t.title] }
-                              id={ t.id }/>
-                          )
-                        })
-                      }
-                      { Templates.slice(-1).map((t,i) => {
-                          return (
-                            <div key={ t.title } className="col-span-2">
-                              <TemplateSelector
-                                onClick={ setTemplateData }
-                                title={ [title, t.title] }
-                                id={ t.id }/>
-                            </div>
-                          )
-                        })
-                      }
-                    </> :
+                  {
                     Templates.map((t,i) => {
                       return (
                         <TemplateSelector
@@ -241,36 +234,9 @@ const Home = () => {
               )
             })
           }
-          <Section title="Your Recent Reports">
+          {/*<Section title="Your Recent Reports">
 
-            { recent.length % 2 === 1 ?
-              <>
-                { recent.slice(0, -1).map(r => {
-                    return r.stuff_type === "report" ?
-                      <ReportLink key={ r.id }  { ...r }/> :
-                      <TemplateSelector key={ r.id }
-                        onClick={ setTemplateData }
-                        title={ ["Custom Reports", r.name] }
-                        id={ r.id }
-                      />
-                  })
-                }
-                { recent.slice(-1).map(r => {
-                    return (
-                      <div key={ r.id } className="col-span-2">
-                        { r.stuff_type === "report" ?
-                            <ReportLink key={ r.id }  { ...r }/> :
-                            <TemplateSelector key={ r.id }
-                              onClick={ setTemplateData }
-                              title={ ["Custom Reports", r.name] }
-                              id={ r.id }
-                            />
-                        }
-                      </div>
-                    )
-                  })
-                }
-              </> :
+            {
               recent.map(r => {
                 return r.stuff_type === "report" ?
                   <ReportLink key={ r.id }  { ...r }/> :
@@ -281,7 +247,7 @@ const Home = () => {
                   />
               })
             }
-          </Section>
+          </Section>*/}
         </div>
 
         <div className="flex flex-col">
@@ -303,16 +269,16 @@ const Home = () => {
             <LinkCard
               title="50th Percentile Speed"
               description=""
-              href={ `/map/${ region }/2021/speed_50pctl_total` }/>
+              href={ `/map/${ region }/2023/speed_50pctl_total` }/>
             <LinkCard
               title="80th Percentile Speed"
               description=""
-              href={ `/map/${ region }/2021/speed_80pctl_total` }/>
+              href={ `/map/${ region }/2023/speed_80pctl_total` }/>
             <div className="col-span-2">
               <LinkCard
                 title="Freeflow Speed"
                 description="85th percentile of off-peak travel speeds"
-                href={ `/map/${ region }/2021/freeflow` }/>
+                href={ `/map/${ region }/2023/freeflow` }/>
             </div>
           </Section>
 
@@ -320,27 +286,27 @@ const Home = () => {
             <LinkCard
               title="Car (LoTTR)"
               description="Level of Travel Time Realiability"
-              href={ `/map/${ region }/2021/lottr` }/>
+              href={ `/map/${ region }/2023/lottr` }/>
             <LinkCard
               title="Truck (TTTR)"
               description="Truck Travel Time Reliability"
-              href={ `/map/${ region }/2021/tttr` }/>
+              href={ `/map/${ region }/2023/tttr` }/>
           </Section>
 
           <Section title="Congestion">
             <LinkCard
               title="Total (TED)"
               description="Total Excessive Delay"
-              href={ `/map/${ region }/2021/ted` }/>
+              href={ `/map/${ region }/2023/ted` }/>
             <LinkCard
               title="Per Mile (TED)"
               description="Excessive Delay Per Mile"
-              href={ `/map/${ region }/2021/ted_per_mi` }/>
+              href={ `/map/${ region }/2023/ted_per_mi` }/>
             <div className="col-span-2">
               <LinkCard
                 title="Peak Hours (PHED)"
                 description="Peak Hours Excessive Delay"
-                href={ `/map/${ region }/2021/phed` }/>
+                href={ `/map/${ region }/2023/phed` }/>
             </div>
           </Section>
 
@@ -349,7 +315,7 @@ const Home = () => {
               <LinkCard
                 title="Gasoline and Diesel"
                 description="CO² Emissions for all vehicles"
-                href={ `/map/${ region }/2021/emissions_co2` }/>
+                href={ `/map/${ region }/2023/emissions_co2` }/>
             </div>
           </Section>
 

@@ -27,43 +27,83 @@ export const Logo = ({sideNav}) => {
 
 const noop = () => <></>;
 
+const PROJECT_HOST = getDomain(window.location.host)//psl.parse(window.location.host).domain
+const SUBDOMAIN = getSubdomain(window.location.host)
+
+
+const defaultMenuItems = [
+	{
+		name: "Docs",
+		path: `/docs`,
+		icon: "os-icon os-icon-home-10",
+	},
+	{
+		name: "Data Sources",
+		path: `/datasources${dataManagerCats[SUBDOMAIN] ? '/cat/'+dataManagerCats[SUBDOMAIN] : ''}`,
+		icon: "os-icon os-icon-grid-squares2",
+	},
+]
+
+// const transportNYItems = [
+//     {
+//       title: 'NPMRDS',
+//       description: 'Probe speed data analytics platform',
+//       href: `http://npmrds.${PROJECT_HOST}`,
+//       icon: 'fa-duotone fa-cars',
+//     },
+//     {
+//       title: 'Freight Atlas',
+//       description: 'Freight infrastructure and commodity flow.',
+//       href: `http://freightatlas.${PROJECT_HOST}`,
+//       icon: 'fa-duotone fa-truck-container',
+//     },
+//     {
+//       title: 'Transit',
+//       description: 'Transit data and accesibility tools for planning.',
+//       href: `http://transit.${PROJECT_HOST}`,
+//       icon: 'fa-duotone fa-bus-simple',
+//     },
+//     {
+//       title: 'TSMO',
+//       description: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
+//       href: `http://tsmo.${PROJECT_HOST}`,
+//       icon: 'fa-duotone fa-traffic-light',
+//     },
+//   ]
+
 	
-const Layout = ({ children, menus, sideNav, title, site }) => {
+const Layout = ({ children, menus, sideNav={},topNav={}, title, site }) => {
+
+	const sideNavOptions = {
+		size: sideNav?.size || 'none',
+		color: sideNav?.color || 'dark',
+		menuItems: sideNav?.menuItems || menus
+	}
+
+	const topNavOptions = {
+		position: topNav?.position || 'block',
+		size: topNav?.size || 'compact',
+		menu: topNav?.menu || 'left',
+		subMenuStyle: topNav?.subMenuStyle || 'row',
+		menuItems: (topNav?.menuItems || defaultMenuItems).filter(page => !page.hideInNav),
+		logo: topNav?.logo || (
+			<div className='flex items-center justify-center h-12'>
+				<div to="/" className={`${['none'].includes(sideNavOptions.size)  ? '' : 'md:hidden'}` }>
+					<Logo sideNav={sideNavOptions}/>
+				</div>
+				{title}
+			</div>
+		)
+	}
 	const TitleComp = title || noop;
 	// console.log('TitleComp', TitleComp, title)
 	const theme = useTheme()
 	const themeOptions = {size: get(sideNav, 'size','micro') ,color: get(sideNav, 'color','dark')}
 	const [flyoutOpen, setFlyoutOpen] = React.useState(false)
 
-	const PROJECT_HOST = getDomain(window.location.host)//psl.parse(window.location.host).domain
-	const SUBDOMAIN = getSubdomain(window.location.host)
+	
 
-	const transportNYItems = [
-    {
-      title: 'NPMRDS',
-      description: 'Probe speed data analytics platform',
-      href: `http://npmrds.${PROJECT_HOST}`,
-      icon: 'fa-duotone fa-cars',
-    },
-    {
-      title: 'Freight Atlas',
-      description: 'Freight infrastructure and commodity flow.',
-      href: `http://freightatlas.${PROJECT_HOST}`,
-      icon: 'fa-duotone fa-truck-container',
-    },
-    {
-      title: 'Transit',
-      description: 'Transit data and accesibility tools for planning.',
-      href: `http://transit.${PROJECT_HOST}`,
-      icon: 'fa-duotone fa-bus-simple',
-    },
-    {
-      title: 'TSMO',
-      description: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
-      href: `http://tsmo.${PROJECT_HOST}`,
-      icon: 'fa-duotone fa-traffic-light',
-    },
-  ]
+	
 
   // console.log('layout menus', menus, themeOptions)
 
@@ -83,63 +123,24 @@ const Layout = ({ children, menus, sideNav, title, site }) => {
 			<div className={`flex-1 flex items-start flex-col items-stretch min-h-screen`}>
 				
 				<div className={`${theme.sidenav(themeOptions).fixed}`}>
-					<TopNav
-						leftMenu={
-							<>
-								<div className='flex items-center justify-center h-12'>
-									<Link to="/" className={`${themeOptions.size === 'none' ? '' : 'md:hidden'}` }>
-										<div>
-											<img src='/nys_logo_blue.svg' className='w-full h-12' alt='New York State Logo' />
-										</div>
-									</Link>
-									{/*<div 
-										className={`text-lg font-bold text-gray-800 hover:text-gray-600 cursor-pointer px-4 `}
-										onClick={() => setFlyoutOpen(!flyoutOpen)}
-									>
-										{site} <span className='fal fa-angle-down pl-2 relative top-[2px]'/>
-									</div>*/ }
-									<div className={`text-2xl font-thin text-blue-500  flex-1` }>
-										<div className='h-[34px] overflow-hidden'> {TitleComp} </div>
-									</div>
-								</div>
-								<div>
-									<FlyoutMenu 
-										open={flyoutOpen} 
-										items={transportNYItems} 
-										bottomItems={[
-											
-												<a href={`http://${PROJECT_HOST}`} className='flex-1 flex items-center justify-center h-12 shrink' >
-													<div>
-														<img src='/nys_logo_blue.svg' className='w-full h-12' alt='New York State Logo' />
-													</div>
-												
-													<div 
-														className={`-ml-4 text-lg font-bold text-gray-800 cursor-pointer px-4`}
-														onClick={() => setFlyoutOpen(!flyoutOpen)}
-													>
-														TransportNY
-													</div>
-												</a>
-											
-										]}
+					{
+						topNavOptions.size === 'none' ? '' : (<>
+							<div className={`${
+								topNavOptions?.position === 'fixed' ? 
+									`sticky top-0 z-20 w-full ` 
+									: ''
+								}`}>
+									<TopNav
+										themeOptions={topNavOptions}
+										// subMenuActivate={'onHover'}
+										leftMenu={topNavOptions.logo}
+										menuItems={topNavOptions.menuItems}
+										rightMenu={<AuthMenu />}
+										
 									/>
-								</div>
-							</>
-						}
-						rightMenu={<AuthMenu />}
-						menuItems={[
-							{
-								name: "Docs",
-								path: `/docs`,
-								icon: "os-icon os-icon-home-10",
-							},
-							{
-								name: "Data Sources",
-								path: `/datasources${dataManagerCats[SUBDOMAIN] ? '/cat/'+dataManagerCats[SUBDOMAIN] : ''}`,
-								icon: "os-icon os-icon-grid-squares2",
-							},
-						]}
-					/>
+							</div>
+						</>)
+					}
 				</div>
 				<div className={`h-full flex-1 bg-slate-100 ${theme.sidenav(themeOptions).fixed}`}>{children}</div>
 			</div>

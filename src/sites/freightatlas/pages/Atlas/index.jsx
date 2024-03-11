@@ -75,7 +75,7 @@ const AtlasPage = props => {
 const config = [{
   name: 'Freight Atlas',
   icon: 'fa-duotone fa-map',
-  path: "/old2",
+  path: "/",
   exact: true,
   auth: false,
   mainNav: true,
