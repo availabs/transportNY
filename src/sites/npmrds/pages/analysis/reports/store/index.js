@@ -30,8 +30,7 @@ const COLORS = getColorRange(8, "Dark2");//COLOR_RANGES[12][1].colors.slice();
 
 import {
   calculateRelativeDates,
-  getDatesAndTimes,
-  timeToEpoch
+  getDatesAndTimes
 } from "./utils/relativedates.utils.js"
 
 const DEFAULT_COLOR_RANGE = getColorRange(5, "RdYlGn");//COLOR_RANGES[5].reduce((a, c) => c.name === "RdYlGn" ? c.colors : a)
@@ -236,6 +235,16 @@ export const loadRoutesAndTemplateByType = (routeIds, defaultType, stationIds = 
             })
     			})
       })
+export const loadTemplateWithSyntheticRoute = (tmcArray, templateId, dates) =>
+  (dispatch, getState) =>
+    Promise.resolve()
+      .then(() => getTemplateData(templateId))
+			.then(() =>
+				dispatch({
+					type: UPDATE_STATE,
+					state: _loadTemplateWithSyntheticRoute(templateId, tmcArray, dates, getState().report)
+				})
+			)
 export const loadTemplate = (templateId) =>
 	(dispatch, getState) =>
 		getTemplateData(templateId)
@@ -399,8 +408,18 @@ export const saveTemplate = (template, templateId = null) =>
 	}
 
 export const addRouteComp = (routeId, settings = null, groupId = null, needsSnapShot = false) =>
-	(dispatch, getState) =>
-		getRouteData(routeId, getState().report)
+	(dispatch, getState) => {
+    if (isNaN(routeId)) {
+      return Promise.resolve()
+        .then(() =>
+  				dispatch({
+  					type: UPDATE_STATE,
+  					state: _addRouteComp(getState().report, routeId, settings, groupId)
+  				})
+        )
+  			.then(() => needsSnapShot && dispatch(takeSnapShot()))
+    }
+  	return getRouteData(routeId, getState().report)
 			.then(() =>
 				dispatch({
 					type: UPDATE_STATE,
@@ -408,6 +427,7 @@ export const addRouteComp = (routeId, settings = null, groupId = null, needsSnap
 				})
 			)
 			.then(() => needsSnapShot && dispatch(takeSnapShot()))
+  }
 export const removeRouteComp = (compId, needsSnapShot = false) =>
 	(dispatch, getState) =>
 		Promise.resolve(
@@ -607,6 +627,14 @@ export const updateRouteComp = (compId, update, reloadData=true) =>
 	          name: getRouteCompName(name, settings)
 	        }
         }
+        else if ((type === "synthetic") && (rc.compId === compId)) {
+          const settings = { ...rc.settings, ...update };
+	        return {
+	          ...rc,
+	          settings,
+	          name: getRouteCompName("Synthetic Route", settings)
+	        }
+        }
         else if (type === "group") {
           const hasComp = get(rc, "route_comps", [])
             .reduce((a, c) => {
@@ -664,23 +692,23 @@ export const updateAllRouteComps = () =>
 		  const state = getState().report;
 
 		  const route_comps = state.route_comps.map(rc => {
-        if (get(rc, "type", "route") === "route") {
-          const next = state.routeComponentSettings.get(rc.compId);
-          return {
-    		    ...rc,
-    		    settings: { ...next }
-          }
-        }
-        else {
+        if (get(rc, "type", "route") === "group") {
           return {
             ...rc,
             route_comps: rc.route_comps.map(rc2 => {
               const next = state.routeComponentSettings.get(rc2.compId);
               return {
-        		    ...rc2,
-        		    settings: { ...next }
+                ...rc2,
+                settings: { ...next }
               }
             })
+          }
+        }
+        else {
+          const next = state.routeComponentSettings.get(rc.compId);
+          return {
+    		    ...rc,
+    		    settings: { ...next }
           }
         }
 		  })
@@ -1229,7 +1257,7 @@ export const loadReport = report =>
                 if (get(rc, "type", "route") === "route") {
                   a.push(rc.routeId)
                 }
-                else {
+                else if (get(rc, "type", "route") === "group") {
                   a.push(...rc.route_comps.map(rc => rc.routeId));
                 }
                 return a;
@@ -1237,7 +1265,7 @@ export const loadReport = report =>
         stationIds = (get(report, "station_comps") || []).map(sc => sc.stationId);
 
 			return getStationData(stationIds)
-        .then(() => getRouteData(routeIds, getState().report))
+        .then(() => getRouteData([...new Set(routeIds)], getState().report))
 				.then(() => dispatch(_loadReport(report)))
 		}
 		if (!isNaN(+report)) {
@@ -1273,34 +1301,29 @@ export const saveReport = (report, reportId = null) =>
       reportId,
       ...report,
       route_comps: state.route_comps.map(rc =>
-        get(rc, "type", "route") === "route" ?
+        get(rc, "type", "route") === "group" ?
           ({ ...rc,
-            settings: { ...rc.settings, relativeDate: null, isRelativeDateBase: false },
-            type: "route"
-          }) :
-          ({
             compId: rc.compId,
             color: get(rc, "color", "#666666"),
             type: "group",
             route_comps: get(rc, "route_comps", [])
               .map(rc => ({
                 ...rc,
-                settings: { ...rc.settings, relativeDate: null, isRelativeDateBase: false },
+                settings: { ...rc.settings },
                 type: "route"
               }))
+          }) :
+          ({ ...rc,
+            settings: { ...rc.settings },
+            type: get(rc, "type", "route")
           })
+
       ),
       station_comps: state.station_comps.map(sc =>
-        ({
-          compId: sc.compId,
-          stationId: sc.stationId,
-          settings: { ...sc.settings },
-          color: sc.color
-        })
+        ({ ...sc, settings: { ...sc.settings } })
       ),
       graph_comps: state.graphs.map(g =>
-        ({
-          type: g.type,
+        ({ ...g,
           layout: {
             x: g.layout.x,
             y: g.layout.y,
@@ -1434,7 +1457,7 @@ export const combineRouteComps = (srcId, dstId) =>
     }, null);
     const dstType = get(dstComp, "type", "route");
 
-    if ((srcType === "route") && (dstType === "route")) {
+    if ((srcType !== "group") && (dstType !== "group")) {
       return dispatch(createNewRouteGroup(srcId, dstId));
     }
 
@@ -1633,6 +1656,10 @@ export const takeSnapShot = () =>
             ...rc,
 	          settings: { ...rc.settings },
             type: "route"
+	        }) : get(rc, "type", "route") === "synthetic" ? ({
+            ...rc,
+	          settings: { ...rc.settings },
+            type: "synthetic"
 	        }) : ({
             ...rc,
             type: "group",
@@ -1771,6 +1798,9 @@ const _loadReport = report =>
 	}
 
 const _addRouteComp = (state, routeIds, copiedSettings, groupId = null) => {
+
+console.log("ADD ROUTE COMP:", routeIds)
+
   routeIds = Array.isArray(routeIds) ? routeIds : [routeIds];
 
 	const { yearsWithData } = state,
@@ -1796,7 +1826,8 @@ const _addRouteComp = (state, routeIds, copiedSettings, groupId = null) => {
     const newRouteComp = {
       compId,
       routeId,
-      name: data.name,
+      name: `${ routeId }`.includes("synthetic") ? "Synthetic Route" : data.name,
+      type: `${ routeId }`.includes("synthetic") ? "synthetic" : "route",
       inRouteGroup: Boolean(groupId),
       settings: copiedSettings ?
         { ...copiedSettings, isRelativeDateBase: false } :
@@ -2125,6 +2156,161 @@ console.log("DATES MAP:", datesMap)
 	};
 }
 
+const _loadTemplateWithSyntheticRoute = (templateId, tmcArray, dates, reportState) => {
+
+console.log("_loadTemplateWithSyntheticRoute", tmcArray, dates)
+
+  const falcorCache = falcorGraph.getCache();
+  const template = get(falcorCache, `templates2.id.${ templateId }`, {});
+
+  let name = template.name,
+    description = template.description,
+    folder = template.folder,
+    route_comps = get(template, ["route_comps", "value"], []),
+    graph_comps = get(template, ["graph_comps", "value"], []),
+    station_comps = get(template, ["station_comps", "value"], []),
+    colorRange = get(template, ["color_range", "value"], DEFAULT_COLOR_RANGE),
+    defaultType = template.default_type;
+
+	AVAILABLE_COLORS = [...COLORS];
+	ROUTE_COMP_ID = -1;
+  route_comps.forEach(rc => {
+    if (rc.type === "group") {
+      rc.route_comps.forEach(rc => {
+        ROUTE_COMP_ID = Math.max(ROUTE_COMP_ID, +rc.compId.slice(5));
+        if (AVAILABLE_COLORS.includes(rc.color)) {
+          AVAILABLE_COLORS = AVAILABLE_COLORS.filter(c => c !== rc.color);
+        }
+      })
+    }
+  	ROUTE_COMP_ID = Math.max(ROUTE_COMP_ID, +rc.compId.slice(5));
+  	if (AVAILABLE_COLORS.includes(rc.color)) {
+  		AVAILABLE_COLORS = AVAILABLE_COLORS.filter(c => c !== rc.color);
+  	}
+  });
+
+  const routeId = `synthetic:${ tmcArray.join("_") }`;
+
+  route_comps = route_comps.map(rc => {
+    if (rc.type === "group") {
+      return {
+        ...rc,
+        route_comps: rc.route_comps.map(rc => ({
+          ...rc,
+          type: "synthetic",
+          routeId
+        }))
+      }
+    }
+    else {
+      return {
+        ...rc,
+        type: "synthetic",
+        routeId
+      }
+    }
+  })
+
+  const routeComponentSettings = new Map();
+
+  route_comps.forEach(route_comp => {
+    if (route_comp.type === "group") {
+      const route_group = route_comp;
+      route_group.route_comps.forEach(route_comp => {
+      	const {
+      		compId,
+      		settings
+      	} = route_comp;
+        settings.routeId = routeId;
+
+        const { isRelativeDateBase } = settings;
+
+        if (isRelativeDateBase) {
+          const [[startDate, endDate], [startTime, endTime]] = getDatesAndTimes(dates);
+
+          settings.year = "advanced";
+          settings.startDate = +startDate;
+          settings.endDate = +endDate;
+
+          if (startTime && endTime) {
+            settings.startTime = startTime;
+            settings.endTime = endTime;
+          }
+        }
+        routeComponentSettings.set(compId, { ...settings });
+      })
+    }
+    else {
+    	const {
+    		compId,
+    		settings
+    	} = route_comp;
+      settings.routeId = routeId;
+
+      const { isRelativeDateBase } = settings;
+
+      if (isRelativeDateBase) {
+        const [[startDate, endDate], [startTime, endTime]] = getDatesAndTimes(dates);
+
+console.log("??????????????", startDate, startTime, endDate, endTime)
+
+        settings.year = "advanced";
+        settings.startDate = +startDate;
+        settings.endDate = +endDate;
+
+        if (startTime && endTime) {
+          settings.startTime = startTime;
+          settings.endTime = endTime;
+        }
+      }
+      routeComponentSettings.set(compId, { ...settings });
+    }
+  });
+
+  const graphs = graph_comps.map(gc => ({
+    id: getUniqueGraphCompId(),
+    type: gc.type,
+    layout: { ...gc.layout },
+    state: {
+      ...gc.state,
+      title: gc.state.title || "{type}, {data}"
+    }
+  }))
+
+  let stateUpdate = {
+    name,
+    description,
+    folder,
+    route_comps,
+    graphs,
+    station_comps,
+    routeComponentSettings,
+    templateId,
+    saveYearsAsRecent: false,
+    colorRange,
+    defaultType
+	};
+
+  const usingRelativeDates = route_comps.reduce((a, c) => {
+    if (c.type === "group") {
+      return c.route_comps.reduce((aa, cc) => {
+        return aa || Boolean(cc.settings.isRelativeDateBase);
+      }, a)
+    }
+    return a || Boolean(c.settings.isRelativeDateBase);
+  }, false);
+
+  if (usingRelativeDates) {
+    stateUpdate = checkRelativeDates(stateUpdate, true, true);
+  }
+
+  stateUpdate.routes = stateUpdate.route_comps.reduce((a, c) => {
+    return [...a, ...getRoutesForRouteComp(c, null, Boolean(c.color))];
+  }, []);
+
+  return stateUpdate;
+}
+
 const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
 	const yearsWithData = state.yearsWithData,
 		mostRecent = Math.max(...yearsWithData);
@@ -2176,15 +2362,8 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
     return a;
   }, []);
 
-  // let idMap = {};
-  // variables.forEach((v, i) => {
-  //   idMap[v] = routeIds[i];
-  // })
-
-  const cache = falcorGraph.getCache();
-
   const datesMap = routeIds.reduce((a, c) => {
-    const dates = get(cache, `routes2.id.${ c }.metadata.value.dates`, []);
+    const dates = get(falcorCache, `routes2.id.${ c }.metadata.value.dates`, []);
     if (Array.isArray(dates) && dates.length === 2) {
       a[c] = dates.map(d => d.replace(/[-]/g, ""));
     }
@@ -2404,6 +2583,22 @@ const getRoutesForRouteComp = (routeComp, routeDataMap = null, preserveColors = 
       }, [])
   }
 
+  if (type === "synthetic") {
+    const tmcArray = routeComp.routeId.slice(10).split("_");
+    const color = preserveColors ? routeComp.color : getRouteColor();
+    routeComp.name = getRouteCompName("Synthetic Route", routeComp.settings);
+    routeComp.color = color;
+    routeComp.isValid = true;
+    return [{
+      tmcArray,
+      name: routeComp.name,
+      settings: { ...routeComp.settings },
+      data: get(routeDataMap, `[${ routeComp.compId }]`, {}),
+      compId: routeComp.compId,
+      color
+    }]
+  }
+
   const cache = falcorGraph.getCache(),
 
     data = get(cache, `routes2.id.${ routeComp.routeId }`, null),
@@ -2439,23 +2634,6 @@ const getRoutesForRouteComp = (routeComp, routeDataMap = null, preserveColors = 
     routeComp.isValid = false;
     routeComp.color = getRouteColor();
   }
-  // else if (data.colltype === "network") {
-  //   const meta = data.meta.value,
-  //   	ids = Object.keys(meta.routes)
-	//       .sort((a, b) => a < b ? -1 : a > b ? 1 : 0),
-  //   	colors = preserveColors ? routeComp.colors : ids.map(() => getRouteColor()),
-  //   	routes = ids.map((id, i) => ({
-  //       tmcArray: [...meta.routes[id]],
-  //       name: `${ routeComp.name }-${ id }`,
-  //       settings: { ...routeComp.settings },
-  //       data: get(routeDataMap, `[${ routeComp.compId }-${ id }]`, {}),
-  //       compId: `${ routeComp.compId }-${ id }`,
-  //       color: colors[i]
-	//     }))
-  //   routes.push(...routes);
-  //   routeComp.colors = colors;
-  //   routeComp.color = "#ccc";
-  // }
   return routes;
 }
 

@@ -3,12 +3,23 @@ import {
   useFalcor
 } from "~/modules/avl-components/src";
 import get from 'lodash/get'
+import { format as d3format } from "d3-format"
+import { Link } from "react-router-dom"
 
 import { timeConvert } from '~/sites/tsmo/pages/Dashboards/Incidents/components/utils'
 //import {getTMCs, getCorridors} from 'sites/tsmo/pages/Dashboards/Congestion/components/data_processing'
 
 import { getCorridors } from './utils'
 
+/********************
+*
+* EDIT THIS FOR INCIDENT TEMPLATE
+*/
+const INCIDENT_TEMPLATE_ID = 298;
+/*
+*
+*
+*******************/
 
 
 export const congestionController = (Component) => (props) => {
@@ -46,11 +57,11 @@ export const congestionController = (Component) => (props) => {
     const start_date = get(
       falcorCache,
       ["transcom2", "eventsbyId", event_id, "start_date_time"],
-      new Date().toISOString() //if no date, use now 
+      new Date().toISOString() //if no date, use now
     );
     return  new Date(start_date).getFullYear();
   }, [event_id, falcorCache]);
-  
+
 
   React.useEffect(() => {
     if (tmcs.length === 0 )
@@ -93,12 +104,18 @@ export const congestionController = (Component) => (props) => {
       congestionData={congestionData}
     />
   );
-} 
+}
 
-
+const oneTwelfth = 1.0 / 12.0;
+const timeStringFormat = d3format("02d");
+const epochToTimeString = epoch => {
+  epoch = +epoch;
+  epoch %= 288;
+  return `${ timeStringFormat(parseInt(epoch * oneTwelfth)) }:${ timeStringFormat((epoch % 12) * 5) }`;
+}
 
 const CongestionInfo = ({
-  event_id, 
+  event_id,
   year,
   tmcs,
   corridors,
@@ -115,7 +132,7 @@ const CongestionInfo = ({
       corridors.forEach(c => {
         if(Object.values(c.tmcs).includes(eventTmc)) {
           activeBranch = c.corridor
-        } 
+        }
       })
       console.log('activeBranch', activeBranch, eventTmc, congestionData)
       if(activeBranch) {
@@ -124,22 +141,45 @@ const CongestionInfo = ({
     }
   },[corridors,congestionData,activeBranch,setActiveBranch])
 
-  
+  const stopPropagation = React.useCallback(e => {
+    e.stopPropagation();
+  }, []);
+
+  const npmrdsHref = React.useMemo(() => {
+    const origin = window.location.origin;
+    const { dates = [], startTime: startEpoch, endTime: endEpoch } = congestionData;
+
+    if (!dates.length) return null;
+
+    const startDate = dates[0];
+    const endDate = dates[dates.length - 1];
+    const startTime = epochToTimeString(startEpoch);
+    const endTime = epochToTimeString(endEpoch);
+    return `${ origin.replace("tsmo", "npmrds") }/template/edit/${ INCIDENT_TEMPLATE_ID }/tmcs/${ tmcs.join("_") }/dates/${ startDate }T${ startTime }|${ endDate }T${ endTime }`
+  }, [tmcs, congestionData]);
+
 	return !congestionData ? <div className='p-24 bg-white shadow font-medium'>Speed / Congestion data is not yet available for this incident. Check back next month.</div> : (
 		<div className="p-4 bg-white shadow">
 				<div className='leading-8 flex-1'>
           <div className='font-medium text-gray-500'>Congestion Totals by Branch</div>
 		    	<div className='text-xs text-blue-400'>Click branch to view on map / grid.</div>
-		    	
+
 		    </div>
 		    <div className=''>
 		    	<div className='flex'>
 			    	<div className='flex-1'>Branch</div>
-			    	<div> Delay </div>
+			    	<div style={ { marginRight: "3.5rem" } }> Delay </div>
 			    </div>
 			    {corridors.map((cor,i) => {
 			    	return (
-			    		<div onClick={(e) => setActiveBranch(cor.corridor) }className={`flex flex-1 hover:bg-blue-100 cursor-pointer  ${cor.corridor === activeBranch ? 'border-blue-600 border-b-2 bg-blue-100' :  'border-gray-100 border-b-2'}`} key={i}>
+			    		<div key={i} onClick={(e) => setActiveBranch(cor.corridor) }
+                className={`
+                  flex flex-1 items-center hover:bg-blue-100 cursor-pointer
+                  ${cor.corridor === activeBranch ?
+                    'border-blue-600 border-b-2 bg-blue-100' :
+                    'border-gray-100 border-b-2'}
+                `}
+              >
 					    	<div className='flex-1'>
 					    		<div className='text-xl'>{cor.roadname} {cor.direction} </div>
 					    		<div className='text-xs'>
@@ -147,6 +187,14 @@ const CongestionInfo = ({
 					    		</div>
 					    	</div>
 					    	<div> {timeConvert(cor.total_delay)} </div>
+                <div onClick={ stopPropagation }>
+                  <Link to={ npmrdsHref }>
+                    <span className={ `
+                        fad fa-file-invoice text-lime-500 text-xl px-2 rounded mx-2
+                        hover:bg-lime-500 hover:text-white
+                      ` }/>
+                  </Link>
+                </div>
 					    </div>
 			    	)
 			    })}

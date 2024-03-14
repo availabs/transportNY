@@ -1,16 +1,17 @@
 import { format } from "d3-format"
 
 const oneFifth = 1.0 / 5.0,
-	oneTwelfth = 1.0 / 12.0;
+	oneTwelfth = 1.0 / 12.0,
+	oneSixtieth = 1.0 / 60.0;
 
 const timeStringFormat = format("02d");
 
 class DateObject {
 	static timeStringToEpoch(string, roundUp = false) {
 		if (!string) return null;
-		const temp = string.split(":");
+		const [hours, mins, secs = 0] = string.split(":");
 		const func = roundUp ? Math.ceil : Math.floor;
-		return (+temp[0] * 12) + func(+temp[1] * oneFifth);
+		return (+hours * 12) + func(+(mins + (+secs * oneSixtieth)) * oneFifth);
 	}
 	static epochToTimeString(epoch) {
 		epoch = +epoch;

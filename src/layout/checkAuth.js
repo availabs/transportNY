@@ -1,5 +1,5 @@
 import get from 'lodash/get'
-const checkAuth = (props, navigate) => {
+const checkAuth = (props, navigate, location) => {
   //const isAuthenticating = props?.user?.isAuthenticating
 
   //-----------------------------------------------------
@@ -13,10 +13,22 @@ const checkAuth = (props, navigate) => {
   // can we switch to isAuthenticating is true on load?
   //-----------------------------------------------------
 
-  const authLevel = props.auth ? 0 : (props?.authLevel || -1);
-  const sendToLogin = authLevel > -1 && !get(props, ["user", "authed"], false)
-  const sendToHome = (get(props , ["user", "authLevel"], -1) < authLevel);
-  //console.log('lw login:', sendToLogin, 'home:',sendToHome, props.path)
+  let reqAuthLevel = get(props, "authLevel", -1);
+  const authReq = get(props, "auth", false);
+  reqAuthLevel = Math.max(reqAuthLevel, authReq ? 0 : -1);
+
+  const userAuthed = get(props, ["user", "authed"], false);
+  const userAuthLevel = get(props, ["user", "authLevel"], -1);
+
+  const sendToLogin = !userAuthed && (reqAuthLevel >= 0);
+  const sendToHome = userAuthLevel < reqAuthLevel;
+
+//   const authLevel = props.auth ? 0 : (props?.authLevel || -1);
+//   const sendToLogin = authLevel > -1 && !get(props, ["user", "authed"], false)
+//   const sendToHome = (get(props , ["user", "authLevel"], -1) < authLevel);
+//   //console.log('lw login:', sendToLogin, 'home:',sendToHome, props.path)
+//
+// console.log("CHECK AUTH:", reqAuthLevel, userAuthed, userAuthLevel, sendToLogin, location, sendToHome)
 
   //----------------------------------------
   // if page requires auth
@@ -26,7 +38,7 @@ const checkAuth = (props, navigate) => {
   // console.log('checkAuth', authLevel, props?.user?.authed, props?.user?.isAuthenticating)
   if( sendToLogin ) {
     //console.log('navigate to login', nav)
-    navigate("/auth/login", {state:{ from: props.path }})
+    navigate("/auth/login", { state: { from: location.pathname } });
     // return <Navigate
     //   to={ "/auth/login" }
     //   state={{ from: props.path }}

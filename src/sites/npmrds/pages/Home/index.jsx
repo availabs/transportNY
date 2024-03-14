@@ -77,9 +77,9 @@ const TemplateSelector = ({ id, title, onClick, children }) => {
     onClick({ templateId: id, templateTitle: title });
   }, [id, title, onClick]);
   // <img className="w-full" src={template?.thumbnail || ""}  alt="" /> :
-  console.log('template', template)
+  // console.log('template', template)
   return(
-    
+
           <div
           key={id}
           onClick={ doOnClick }
@@ -104,10 +104,10 @@ const TemplateSelector = ({ id, title, onClick, children }) => {
   //         className="relative flex flex-col items-center space-x-2  rounded-sm border border-gray-300 shadow-sm px-2 py-2 hover:bg-blue-50 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-b-blue-400"
   //       >
   //         <div className="">
-            
+
   //             <img className="w-64 h-64 bg-blue-100 bg-cover" style={{backgroundImage:`url(${template?.thumbnail})`}}  alt="" />
 
-            
+
   //         </div>
   //         <div className="min-w-0 flex-1">
   //           <a href="#" className="focus:outline-none">
@@ -180,26 +180,26 @@ const Home = () => {
 
   const { falcor, falcorCache } = useFalcor();
 
-  const [recent, setRecent] = React.useState([]);
+  // const [recent, setRecent] = React.useState([]);
 
-  React.useEffect(() => {
-    falcor.get([
-      "reports2", "user", "recent", [0, 1, 2, 3, 4],
-      ["name", "thumbnail", "description", "updated_at", "stuff_type", "id"]
-    ])
-  }, [falcor]);
+  // React.useEffect(() => {
+  //   falcor.get([
+  //     "reports2", "user", "recent", [0, 1, 2, 3, 4],
+  //     ["name", "thumbnail", "description", "updated_at", "stuff_type", "id"]
+  //   ])
+  // }, [falcor]);
 
-  React.useEffect(() => {
-    const recent = [];
-    for (let i = 0; i < 5; ++i) {
-      const ref = get(falcorCache, ["reports2", "user", "recent", i, "value"]);
-      const stuff = get(falcorCache, ref);
-      if (stuff) {
-        recent.push(stuff);
-      }
-    }
-    setRecent(recent);
-  }, [falcorCache]);
+  // React.useEffect(() => {
+  //   const recent = [];
+  //   for (let i = 0; i < 5; ++i) {
+  //     const ref = get(falcorCache, ["reports2", "user", "recent", i, "value"]);
+  //     const stuff = get(falcorCache, ref);
+  //     if (stuff) {
+  //       recent.push(stuff);
+  //     }
+  //   }
+  //   setRecent(recent);
+  // }, [falcorCache]);
 
   const [region, setRegion] = React.useState("1");
 
@@ -210,9 +210,25 @@ const Home = () => {
 
   return (
     <div className="max-w-6xl mx-auto my-8">
+
+{/*
+      <div className="font-bold text-3xl text-center grid grid-cols-1 gap-2">
+        <Link to="/template/edit/270/tmcs/120+05861_120P05861_120+05862_120P05862_120+05863/dates/2022-04-08T06:00:00|2022-04-08T21:00:00">
+          { ">>>>> TESTING SYNTHETIC ROUTES WITH SECONDS <<<<<" }
+        </Link>
+        <Link to="/template/edit/270/tmcs/120+05861_120P05861_120+05862_120P05862_120+05863/dates/2022-04-08T06:00|2022-04-08T21:00">
+          { ">>>>> TESTING SYNTHETIC ROUTES WITHOUT SECONDS <<<<<" }
+        </Link>
+        <Link to="/template/edit/270/tmcs/120+05861_120P05861_120+05862_120P05862_120+05863/dates/2022-04-08|2022-04-08">
+          { ">>>>> TESTING SYNTHETIC ROUTES WITHOUT TIME <<<<<" }
+        </Link>
+      </div>
+*/}
+
       <div className="grid grid-cols-2 gap-4 p-10">
 
         <div>
+
           <div className="mb-2 text-lg  px-2 font-medium text-gray-700 border-current">
             Choose a Route Analysis Template...
           </div>

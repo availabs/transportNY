@@ -203,6 +203,8 @@ class GeneralGraphComp extends React.Component {
 				requestKeys = displayData.map(dd => ({ dd: dd.key, alias: dd.alias, group: dd.group, key: getRequestKey(route, dd) }))
 					.filter(({ key }) => Boolean(key));
 
+// console.log("GeneralGraphComp::fetchFalcorDeps", route, tmcArray, year)
+
 			// routeData[route.compId] = {};
 
 			return promise.then(() => {

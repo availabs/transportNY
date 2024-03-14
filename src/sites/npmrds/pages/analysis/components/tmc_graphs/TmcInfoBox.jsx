@@ -38,8 +38,8 @@ class TmcInfoBox extends GeneralGraphComp {
 			tmcArray = route.tmcArray,
 			overrides = get(route, ["settings", "overrides"], {}),
 			rolls = displayData.reduce((rolls, dd) => {
-				const { key, alias, group, tmcReducer, transform, overrideValue } = dd,
-					KEY = alias || key;
+				const { key, alias, group, tmcReducer, transform, overrideValue } = dd;
+					// KEY = alias || key;
 				if (group === 'tmcAttribute') {
 					const data = get(route, `data.${ key }`, []);
 					rolls.push({

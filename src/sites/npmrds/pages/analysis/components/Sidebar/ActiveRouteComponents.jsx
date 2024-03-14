@@ -264,24 +264,24 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 													<div ref={ provided.innerRef }
 														{ ...provided.draggableProps }
 													>
-														{ get(comp, "type", "route") === "route" ?
-															<RouteComp route={ comp }
-																extendSidebar={ extendRouteComp }
-																dragHandleProps={ provided.dragHandleProps }
-																isDragging={ snapshot.isDragging }
-																add={ add }
-															 	remove={ remove }/>
+														{ get(comp, "type", "route") === "group" ?
+																<RouteGroup group={ comp }
+																	updateName={ props.updateRouteGroupName }
+																	extendRouteComp={ extendRouteComp }
+																	extendRouteGroup={ extendRouteGroup }
+																	dragHandleProps={ provided.dragHandleProps }
+																	isDragging={ snapshot.isDragging }
+																	add={ add }
+																	remove={ remove }
+																	removeComp={ props.removeFromGroup }
+																	reorderRouteComps={ props.reorderRouteComps }/>
 															:
-															<RouteGroup group={ comp }
-																updateName={ props.updateRouteGroupName }
-																extendRouteComp={ extendRouteComp }
-																extendRouteGroup={ extendRouteGroup }
-																dragHandleProps={ provided.dragHandleProps }
-																isDragging={ snapshot.isDragging }
-																add={ add }
-															 	remove={ remove }
-															 	removeComp={ props.removeFromGroup }
-																reorderRouteComps={ props.reorderRouteComps }/>
+																<RouteComp route={ comp }
+																	extendSidebar={ extendRouteComp }
+																	dragHandleProps={ provided.dragHandleProps }
+																	isDragging={ snapshot.isDragging }
+																	add={ add }
+																 	remove={ remove }/>
 														}
 													</div>
 												) }

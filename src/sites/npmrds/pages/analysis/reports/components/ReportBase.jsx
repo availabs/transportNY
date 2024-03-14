@@ -2,6 +2,7 @@ import React from 'react';
 // import { reduxFalcor } from 'utils/redux-falcor';
 import { avlFalcor } from "~/modules/avl-components/src"
 import { connect } from 'react-redux';
+import { pathValue } from "falcor"
 import {
   useLocation,
   useNavigate,
@@ -93,6 +94,7 @@ class ReportBase extends React.Component {
           routeId = get(this.props, 'params.routeId', ""),
           stationId = get(this.props, 'params.stationId', ""),
           path = get(this.props, 'location.pathname', ""),
+          tmcArray = get(this.props, 'params.tmcArray', ""),
           dates = get(this.props, "params.dates", "");
 
         // const getDates = dates => {
@@ -125,8 +127,6 @@ class ReportBase extends React.Component {
             }
             return a;
           }, [[], {}]);
-
-console.log("ReportBase::componentDidMount", routeIds, datesMap)
 
         const query = new URLSearchParams(this.props.location.search);
 
@@ -173,6 +173,13 @@ console.log("ReportBase::componentDidMount", routeIds, datesMap)
         }
         else if (path.includes("/report/new/route/") && routeIds.length) {
           this.props.loadRoutesForReport(routeIds);
+        }
+        else if (templateId && tmcArray && dates) {
+          this.props.loadTemplateWithSyntheticRoute(
+            tmcArray.split("_").filter(Boolean),
+            templateId,
+            dates.split("|").filter(Boolean)
+          )
         }
         else if (templateId && (routeIds.length || stationId)) {
           const loadTemplate = () => {
@@ -572,7 +579,9 @@ console.log("ReportBase::componentDidMount", routeIds, datesMap)
     this.setState({ showTableModal: false });
   }
 
-  render () {
+  render() {
+
+// console.log("ReportBase::render::falcorGraph", this.props.falcorCache);
 
     const numRouteIds = [
       ...new Set(this.props.route_comps.map(rc => rc.routeId))
@@ -591,6 +600,8 @@ console.log("ReportBase::componentDidMount", routeIds, datesMap)
         .reduce((a, c) => a || (c.colltype === "network"), false);
 
 // console.log("REPORT BASE FOLDER:", this.props.folder)
+
+// console.log("ReportBase::render", this.props.route_comps, this.props.routes)
 
     return (
       <div style={ { position: "relative" } }>

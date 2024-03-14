@@ -20,6 +20,8 @@ const PATHS = [
   '/template/view/:templateId/station/:routeId',
   '/template/view/:templateId/route/:routeId/station/:stationId',
 
+  '/template/view/:templateId/tmcs/:tmcArray/dates/:dates',
+
   // '/template/view/:templateId/route/:routeId/dates/:dates',
 ]
 

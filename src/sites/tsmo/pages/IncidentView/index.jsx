@@ -10,43 +10,43 @@ import CongestionInfo, {congestionController} from './components/CongestionInfo'
 
 
 const IncidentViewNew = (props) => {
-  const { event_id } = useParams(); 
+  const { event_id } = useParams();
 
   const [activeBranch, setActiveBranch] = React.useState(null)
   const [showRaw, setShowRaw] = React.useState(true);
   console.log('event_id', event_id)
-  
+
   return (
     <div className='w-full'>
       <div className={`max-w-7xl mx-auto pb-4 px-4`}>
         <div>
           <div className="grid grid-cols-2 gap-4">
-            
+
             <div className='col-span-2 pt-4'>
               <IncidentTitle event_id={event_id} />
             </div>
-            
+
             <IncidentInfo event_id={event_id} />
-            
-            
-              <CongestionInfo 
+
+
+              <CongestionInfo
                 event_id={event_id}
                 activeBranch={activeBranch}
                 setActiveBranch={setActiveBranch}
                 showRaw={showRaw}
                 setShowRaw={setShowRaw}
-              /> 
+              />
           </div>
         </div>
       </div>
       <div className='max-w-7xl mx-auto grid grid-cols-3 gap-4 px-4 mb-8'>
-        
+
           <TmcMap
             event_id={event_id}
             activeBranch={activeBranch}
             showRaw={showRaw}
           />
-        
+
 
         <div className="col-span-2">
           <IncidentGrid

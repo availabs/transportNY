@@ -1,7 +1,7 @@
 const FocusAnalysisConfig = [
-  { title: "TESTING",
-    Templates: [{ title: "Test", id: 270 }]
-  },
+  // { title: "TESTING",
+  //   Templates: [{ title: "Test", id: 270 }]
+  // },
   { title: 'Floating Car',
     Templates: [
       {
@@ -40,7 +40,7 @@ const FocusAnalysisConfig = [
       }
     ]
   },
-  
+
   { title: "Change Over Time",
     Templates: [
       { title: "Year Over Year",

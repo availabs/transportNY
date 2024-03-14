@@ -80,8 +80,8 @@ export const calculateRelativeDates = (relativeDate, startDate, endDate, format 
   return [start.format(format), end.format(format)];
 }
 
-const DATE_TIME_REGEX_1 = /^(\d{8})(?:T(\d{2}[:]\d{2})(?:[:]\d{2}))?/
-const DATE_TIME_REGEX_2 = /^(\d{4}[-]\d{2}[-]\d{2})(?:T(\d{2}[:]\d{2})(?:[:]\d{2}))?/
+const DATE_TIME_REGEX_1 = /^(\d{8})(?:T(\d{2}[:]\d{2}(?:[:]\d{2})?))?/
+const DATE_TIME_REGEX_2 = /^(\d{4}[-]\d{2}[-]\d{2})(?:T(\d{2}[:]\d{2}(?:[:]\d{2})?))?/
 
 export const getDatesAndTimes = dates => {
   const response = [[null, null], [null, null]];
@@ -102,6 +102,7 @@ export const getDatesAndTimes = dates => {
 
 export const timeToEpoch = time => {
   const hours = +time.slice(0, 2);
-  const minutes = +time.slice(2, 4);
-  return hours * 12 + Math.floor(minutes / 5);
+  const minutes = +time.slice(3, 5);
+  const seconds = +time.slice(6);
+  return hours * 12 + Math.floor((minutes + (seconds / 60)) / 5);
 }

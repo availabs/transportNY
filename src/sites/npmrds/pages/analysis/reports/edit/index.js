@@ -26,6 +26,8 @@ const PATHS = [
 
   // '/template/edit/:templateId/route/:routeId/dates/:dates',
 
+  '/template/edit/:templateId/tmcs/:tmcArray/dates/:dates',
+
   '/template/edit/type/:defaultType/route/:routeId',
   '/template/edit/type/:defaultType/station/:stationId',
   '/template/edit/type/:defaultType/route/:routeId/station/:stationId'
