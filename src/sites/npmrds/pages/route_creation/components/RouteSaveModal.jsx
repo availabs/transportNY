@@ -189,12 +189,12 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, ...props }) => {
       tmc_array: savePoints ? [] : props.tmc_array,
       metadata: saveTimes ? { dates: [...dates] } : saveDates ? { dates: [sd, ed] } : null
     }
-console.log("SAVING:", data)
-    // setSaving(true);
-    // falcor.call(["routes2", "save"], [data])
-    //   .then(() => setResult({ msg: "success" }))
-    //   .catch(e => setResult({ msg: "failure", error: e }))
-    //   .then(() => setSaving(false));
+// console.log("SAVING:", data)
+    setSaving(true);
+    falcor.call(["routes2", "save"], [data])
+      .then(() => setResult({ msg: "success" }))
+      .catch(e => setResult({ msg: "failure", error: e }))
+      .then(() => setSaving(false));
   }, [falcor, state, props.points, props.tmc_array]);
 
   React.useEffect(() => {
