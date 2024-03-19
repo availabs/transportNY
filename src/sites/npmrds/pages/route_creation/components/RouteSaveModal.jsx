@@ -31,10 +31,10 @@ const processDates = dates => {
   return response;
 }
 
-const InitReducer = loadedRoute => ({
+const InitReducer = ([loadedRoute, folderId = ""]) => ({
   name: get(loadedRoute, "name", ""),
   description: get(loadedRoute, "description", ""),
-  folder: get(loadedRoute, "folder", ""),
+  folder: get(loadedRoute, "folder", folderId),
   id: get(loadedRoute, "id", null),
   dates: [...get(loadedRoute, "dates", [])]
 })
@@ -100,9 +100,9 @@ const Reducer = (state, action) => {
   }
 }
 
-const RouteSaveModal = ({ isOpen, close, loadedRoute, ...props }) => {
+const RouteSaveModal = ({ isOpen, close, loadedRoute, folderId, ...props }) => {
 
-  const [state, dispatch] = React.useReducer(Reducer, loadedRoute, InitReducer);
+  const [state, dispatch] = React.useReducer(Reducer, [loadedRoute, folderId], InitReducer);
 
   React.useEffect(() => {
     if (loadedRoute && (state.id !== loadedRoute.id)) {

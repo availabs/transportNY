@@ -1,6 +1,7 @@
 /*import { createStore, combineReducers, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'*/
-import { Reducers, messages } from "@availabs/ams";
+// import { Reducers, messages } from "@availabs/ams";
+import { Reducers, messages } from "~/modules/ams/src"
 
 import dashboard from "~/sites/tsmo/pages/Dashboards/components/dashboardSlice";
 

@@ -1,11 +1,12 @@
 import React from "react"
-import { 
+import {
   registerDataType,
   dmsPageFactory
 } from "~/modules/dms/src"
 
 //import DmsLexical from "~/modules/dms-custom/lexical"
-import { withAuth } from "@availabs/ams" 
+// import { withAuth } from "@availabs/ams"
+import { withAuth } from "~/modules/ams/src"
 import Layout from "./components/layout"
 import { PageView, PageEdit } from "./components/page"
 
@@ -29,32 +30,32 @@ const siteConfig = {
   //       }
   //       return Math.max(out, authLevel)
   //     },-1)
-  //   } 
+  //   }
 
   //   let requiredAuth = getReqAuth(activeConfig)
   //   checkAuth({user, authLevel:requiredAuth}, navigate)
-    
+
   // },
   children: [
-    { 
+    {
       type: Layout,
       action: "list",
       path: "/*",
       children: [
-        { 
+        {
           type: PageView,
           path: "/*",
           action: "view"
         },
       ]
     },
-    { 
+    {
       type: (props) => <Layout {...props} edit={true}/>,
       action: "list",
       path: "/edit/*",
       authLevel: 5,
       children: [
-        { 
+        {
           type: PageEdit,
           action: "edit",
           path: "/edit/*"
@@ -64,7 +65,7 @@ const siteConfig = {
   ]
 }
 
-export default [{ 
+export default [{
   ...dmsPageFactory(siteConfig, "/docs_old/", withAuth),
   name: "Home",
   mainNav: false,

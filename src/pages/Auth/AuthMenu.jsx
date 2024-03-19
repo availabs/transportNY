@@ -1,6 +1,7 @@
 import React from "react"
 import {useTheme, Dropdown } from '~/modules/avl-components/src'
-import { withAuth } from "@availabs/ams"
+// import { withAuth } from "@availabs/ams"
+import { withAuth } from "~/modules/ams/src"
 import {Link} from 'react-router-dom'
 // import {NavItem, NavMenu, NavMenuItem, NavMenuSeparator, withAuth} from 'components/avl-components/src'
 // import user from "@availabs/ams/dist/reducers/user";
@@ -11,13 +12,13 @@ const UserMenu = ({user}) => {
         <div className={`flex justify-column align-middle py-1 px-4`}>
             <div className='pt-[4px]'>
                 <span className={`rounded-full border-2 border-blue-400
-                    inline-flex items-center justify-center 
-                    h-6 w-6 sm:h-8 sm:w-8 ring-white text-white 
+                    inline-flex items-center justify-center
+                    h-6 w-6 sm:h-8 sm:w-8 ring-white text-white
                     bg-blue-500 overflow-hidden`}>
                     <i className="fa-duotone fa-user fa-fw pt-2 text-2xl" aria-hidden="true"></i>
                 </span>
             </div>
-            
+
             <span className='pl-2'>
                 <div className='text-md font-thin tracking-tighter  text-left text-blue-600 group-hover:text-white '>{user.email ? user.email : ''}</div>
                 <div className='text-xs font-medium -mt-1 tracking-widest text-left text-gray-500 group-hover:text-gray-200'>{user.groups[0] ? user.groups[0] : ''}</div>
@@ -41,7 +42,7 @@ export const Item = (to, icon, span, condition) => (
 
 
 export default withAuth(({title, shadowed = true, user, children}) => {
-   
+
     const theme = useTheme()
     // console.log('Auth Menu', theme)
     return (
@@ -50,11 +51,11 @@ export default withAuth(({title, shadowed = true, user, children}) => {
                 <Link className={`${theme.topnav({}).navitemTop}`} to="/auth/login">Login</Link> :
                 <Dropdown control={<UserMenu user={user}/>} className={`hover:bg-blue-500 group z-50`} >
                     <div key={'x'} className='p-1 bg-blue-500'>
-                        { user.authLevel >= 10 ? 
-                        <div key={'docs'} className='py-1 '> 
+                        { user.authLevel >= 10 ?
+                        <div key={'docs'} className='py-1 '>
                             {Item('/docs/edit', 'fad fa-docs flex-shrink-0  pr-1', 'Edit Docs')}
                         </div> : ''}
-                        <div key={'logout'} className='py-1 border-t border-blue-400'> 
+                        <div key={'logout'} className='py-1 border-t border-blue-400'>
                             {Item('/auth/logout', 'fad fa-sign-out-alt pb-2 pr-1', 'Logout')}
                         </div>
                     </div>

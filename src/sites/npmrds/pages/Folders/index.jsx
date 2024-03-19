@@ -8,7 +8,8 @@ import {
   useFalcor
 } from "~/modules/avl-components/src"
 
-import { withAuth } from "@availabs/ams"
+// import { withAuth } from "@availabs/ams"
+import { withAuth } from "~/modules/ams/src"
 
 import FolderIcon from "./components/FolderIcon"
 import StuffInFolder from "./components/StuffInFolder"

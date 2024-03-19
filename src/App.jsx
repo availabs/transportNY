@@ -6,9 +6,13 @@ import get from 'lodash/get'
 
 import { getSubdomain }  from '~/utils'
 
+// import {
+//   Messages
+// } from "@availabs/ams"
+
 import {
   Messages
-} from "@availabs/ams"
+} from "~/modules/ams/src"
 
 import DefaultRoutes from '~/Routes';
 
@@ -38,7 +42,7 @@ const Sites = {
 
 const App = (props) => {
   const SUBDOMAIN = getSubdomain(window.location.host)
-  
+
   const site = useMemo(() => {
       return get(Sites, SUBDOMAIN, Sites['transportNY'])
   },[SUBDOMAIN])
@@ -47,17 +51,17 @@ const App = (props) => {
     const Routes = [...site.Routes, ...DefaultRoutes]
     return LayoutWrapper(Routes, Layout)
   }, [site])
-  
+
   return (
     <>
-      <RouterProvider 
-        router={createBrowserRouter(WrappedRoutes)} 
+      <RouterProvider
+        router={createBrowserRouter(WrappedRoutes)}
       />
       <Messages />
     </>
   )
 
-  
+
 }
 
 export default App;

@@ -34,7 +34,7 @@ const InfoBox = props => {
   const creationMode = props.layer.state.creationMode;
   const cmDisplay = creationMode === "markers" ? "Marker Placement" : "TMC Clicks"
 
-  const { routeId } = useParams();
+  const { routeId, folderId } = useParams();
 
   React.useEffect(() => {
     if (!routeId) return;
@@ -171,7 +171,8 @@ const InfoBox = props => {
         close={ close }
         points={ points }
         tmc_array={ tmcs }
-        loadedRoute={ loadedRoute }/>
+        loadedRoute={ loadedRoute }
+        folderId={ folderId }/>
     </>
   )
 }

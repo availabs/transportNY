@@ -369,7 +369,6 @@ class RouteCreationLayer extends LayerContainer {
 
     return this.falcor.get(["routes2", "get", "route", request])
       .then(res => {
-console.log("RES:", res)
         const tmcs = get(res, ["json", "routes2", "get", "route", request], []);
         return this.falcor.get(["tmc", tmcs, "meta", year, "bounding_box"])
           .then(() => ({ tmcs, ways: [] }));

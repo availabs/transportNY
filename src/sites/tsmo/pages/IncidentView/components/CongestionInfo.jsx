@@ -15,7 +15,7 @@ import { getCorridors } from './utils'
 *
 * EDIT THIS FOR INCIDENT TEMPLATE
 */
-const INCIDENT_TEMPLATE_ID = 298;
+const INCIDENT_TEMPLATE_ID = 291;
 /*
 *
 *
@@ -134,7 +134,7 @@ const CongestionInfo = ({
           activeBranch = c.corridor
         }
       })
-      console.log('activeBranch', activeBranch, eventTmc, congestionData)
+      // console.log('activeBranch', activeBranch, eventTmc, congestionData)
       if(activeBranch) {
         setActiveBranch(activeBranch)
       }
@@ -145,18 +145,36 @@ const CongestionInfo = ({
     e.stopPropagation();
   }, []);
 
-  const npmrdsHref = React.useMemo(() => {
+  // const npmrdsHref = React.useMemo(() => {
+  //   const origin = window.location.origin;
+  //   const { dates = [], startTime: startEpoch, endTime: endEpoch } = congestionData;
+  //
+  //   if (!dates.length) return null;
+  //
+  //   const startDate = dates[0];
+  //   const endDate = dates[dates.length - 1];
+  //   const startTime = epochToTimeString(startEpoch);
+  //   const endTime = epochToTimeString(endEpoch);
+  //   return `${ origin.replace("tsmo", "npmrds") }/template/edit/${ INCIDENT_TEMPLATE_ID }/tmcs/${ tmcs.join("_") }/dates/${ startDate }T${ startTime }|${ endDate }T${ endTime }`
+  // }, [tmcs, congestionData]);
+
+  const makeNpmrdsHref = React.useCallback(tmcMap => {
     const origin = window.location.origin;
     const { dates = [], startTime: startEpoch, endTime: endEpoch } = congestionData;
 
     if (!dates.length) return null;
+
+    const tmcs = Object.keys(tmcMap)
+                  .map(Number)
+                  .sort((a, b) => a - b)
+                  .map(k => tmcMap[k]);
 
     const startDate = dates[0];
     const endDate = dates[dates.length - 1];
     const startTime = epochToTimeString(startEpoch);
     const endTime = epochToTimeString(endEpoch);
     return `${ origin.replace("tsmo", "npmrds") }/template/edit/${ INCIDENT_TEMPLATE_ID }/tmcs/${ tmcs.join("_") }/dates/${ startDate }T${ startTime }|${ endDate }T${ endTime }`
-  }, [tmcs, congestionData]);
+  }, [congestionData])
 
 	return !congestionData ? <div className='p-24 bg-white shadow font-medium'>Speed / Congestion data is not yet available for this incident. Check back next month.</div> : (
 		<div className="p-4 bg-white shadow">
@@ -188,7 +206,7 @@ const CongestionInfo = ({
 					    	</div>
 					    	<div> {timeConvert(cor.total_delay)} </div>
                 <div onClick={ stopPropagation }>
-                  <Link to={ npmrdsHref }>
+                  <Link to={ makeNpmrdsHref(cor.tmcs) }>
                     <span className={ `
                         fad fa-file-invoice text-lime-500 text-xl px-2 rounded mx-2
                         hover:bg-lime-500 hover:text-white

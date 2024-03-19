@@ -749,6 +749,12 @@ const ButtonNew = ({ openedFolders }) => {
   const closeModal = React.useCallback(e => {
     setOpen(false);
   }, []);
+
+  const folderId = React.useMemo(() => {
+    const length = openedFolders.length;
+    return get(openedFolders, [length - 1, "id"], "");
+  }, [openedFolders]);
+
   return (
     <div className='px-2 pt-0.5'>
       <div className='flex items-center bg-blue-500 border border-lime-300 text-gray-50 rounded-md'
@@ -776,12 +782,12 @@ const ButtonNew = ({ openedFolders }) => {
             >
               <span className="fad fa-folder mr-1 px-2 text-blue-500"/>Sub Folder
             </div>
-            <Link to='/route/creation'>
+            <Link to={ `/route/creation/folder/${ folderId }` }>
               <div className="p-2 hover:bg-blue-100">
                 <span className="fad fa-road mr-1 px-2 text-blue-500"/>Route
               </div>
             </Link>
-            <Link to='/report/new'>
+            <Link to={ `/report/new/folder/${ folderId }` }>
               <div className="p-2 hover:bg-blue-100">
                   <span className="fad fa-chart-column text-blue-500 mr-1 px-2"/>Report
               </div>
