@@ -6,11 +6,11 @@ const AuthConfig = {
   children: [
     { type: "ams-login" ,
       path: "login",
-      props: {title: "TransportNY"}
+      props: { title: "TransportNY" }
     },
     { ype: "ams-reset-password",
       path: "reset-password",
-      props: {title: "TransportNY"}
+      props: { title: "TransportNY" }
     },
     { type: "ams-logout",
       path: "logout"
@@ -24,17 +24,20 @@ const AuthConfig = {
     { type: "ams-signup",
       path: "register",
       // props: { addToGroup: "123" },
-      props: {title: "TransportNY"}
+      props: {
+        title: "TransportNY",
+        addToGroup: "NPMRDS_PM3 New Users"
+      }
     },
-    // { type: "ams-profile",
-    //   path: "profile"
-    // },
-    // { type: "ams-verify-request" ,
-    //   path: "verify-request"
-    // },
-    { type: "ams-verify-email",
-      path: "verify-email"
+    { type: "ams-profile",
+      path: "profile"
     },
+    { type: "ams-verify-request" ,
+      path: "verify-request"
+    },
+    // { type: "ams-verify-email",
+    //   path: "verify-email"
+    // },
     { type: "ams-set-password",
       path: "set-password"
     },
@@ -52,4 +55,4 @@ const AuthConfig = {
 }
 
 
-export default amsFactory(AuthConfig, "/auth/")
+export default amsFactory(AuthConfig, "/auth")

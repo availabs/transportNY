@@ -1,5 +1,8 @@
 
 import Auth from "~/pages/Auth"
+
+// import Auth from "~/pages/Auth/Auth1.0.14"
+
 import NoMatch from "~/pages/404"
 import DataManager from "~/pages/DataManager"
 import Documentation from "~/pages/Documentation"
@@ -21,7 +24,7 @@ const DAMA_ARGS = {
 }
 
 const Routes = [
-  Auth,
+  ...Auth,
   ...DataManager(DAMA_ARGS),
   ...Documentation,
   GraphTest,
