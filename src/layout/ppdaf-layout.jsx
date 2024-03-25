@@ -14,6 +14,7 @@ const dataManagerCats = {
 export const Logo = ({sideNav}) => {
 	const theme = useTheme()
 	const themeOptions = {size: get(sideNav, 'size','micro') ,color: get(sideNav, 'color','dark')}
+	// console.log('logo sideNav',sideNav)
 	return (
 		<>
 		<Link to="/" className={`${theme.sidenav(themeOptions).logoWrapper} flex flex-col items-center justify-center`}>
@@ -72,13 +73,15 @@ const defaultMenuItems = [
 //   ]
 
 	
-const Layout = ({ children, menus, sideNav={},topNav={}, title, site }) => {
+const Layout = ({ children, menus, sideNav={},topNav={}, Title, site }) => {
 
 	const sideNavOptions = {
 		size: sideNav?.size || 'none',
 		color: sideNav?.color || 'dark',
 		menuItems: sideNav?.menuItems || menus
 	}
+
+	// console.log('ppdaf layout', topNav)
 
 	const topNavOptions = {
 		position: topNav?.position || 'block',
@@ -91,12 +94,11 @@ const Layout = ({ children, menus, sideNav={},topNav={}, title, site }) => {
 				<div to="/" className={`${['none'].includes(sideNavOptions.size)  ? '' : 'md:hidden'}` }>
 					<Logo sideNav={sideNavOptions}/>
 				</div>
-				{title}
+				{typeof Title === 'function' ? <Title /> : Title}
 			</div>
 		)
 	}
-	const TitleComp = title || noop;
-	// console.log('TitleComp', TitleComp, title)
+	
 	const theme = useTheme()
 	const themeOptions = {size: get(sideNav, 'size','micro') ,color: get(sideNav, 'color','dark')}
 	const [flyoutOpen, setFlyoutOpen] = React.useState(false)
