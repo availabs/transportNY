@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
-import { withAuth } from '@availabs/ams'
+import { withAuth } from '~/modules/ams/src'
 import get from 'lodash/get'
 import cloneDeep from 'lodash/cloneDeep'
 import checkAuth from './checkAuth'
