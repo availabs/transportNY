@@ -1,20 +1,18 @@
 //import Login from "./components/login"
-import { amsFactory } from "@availabs/ams"
+// import { amsFactory } from "@availabs/ams"
+import { amsFactory } from "~/modules/ams/src"
 
 const AuthConfig = {
   children: [
-    { 
-      type: "ams-login" , 
+    { type: "ams-login" ,
       path: "login",
       props: {title: "TransportNY"}
     },
-    { 
-      type: "ams-reset-password", 
+    { ype: "ams-reset-password",
       path: "reset-password",
       props: {title: "TransportNY"}
     },
-    { 
-      type: "ams-logout", 
+    { type: "ams-logout",
       path: "logout"
 
     // @props.redirectTo
@@ -23,31 +21,25 @@ const AuthConfig = {
     // props: { redirectTo: "/" }
     },
 
-    { 
-      type: "ams-signup", 
+    { type: "ams-signup",
       path: "register",
-      props: { addToGroup: "123" },
+      // props: { addToGroup: "123" },
       props: {title: "TransportNY"}
     },
-    { 
-      type: "ams-profile", 
-      path: "profile" 
-    },
-    { 
-      type: "ams-verify-request" , 
-      path: "verify-request"
-    }, 
-    { 
-      type: "ams-verify-email", 
+    // { type: "ams-profile",
+    //   path: "profile"
+    // },
+    // { type: "ams-verify-request" ,
+    //   path: "verify-request"
+    // },
+    { type: "ams-verify-email",
       path: "verify-email"
-    }, 
-    { 
-      type: "ams-set-password",
+    },
+    { type: "ams-set-password",
       path: "set-password"
-    }, 
-    { 
-      type: "ams-accept-invite",
-      path: "accept-invite" 
+    },
+    { type: "ams-accept-invite",
+      path: "accept-invite"
     },
 
     { type: "ams-project-management", path: "project-management",

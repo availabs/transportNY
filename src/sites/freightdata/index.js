@@ -5,7 +5,8 @@ import SymbologyMapConfig from "./SymbologyMapPage"
 import FreightAtlas from './Atlas'
 
 import { useFalcor } from "~/modules/avl-components/src"
-import { useAuth } from "@availabs/ams"
+// import { useAuth } from "@availabs/ams"
+import { useAuth } from "~/modules/ams/src"
 
 import FreightDocs from './FreightDocs'
 

@@ -18,9 +18,13 @@ import reportWebVitals from './reportWebVitals';
 
 //import { falcorGraph as falcor } from "~/store/falcorGraph"
 
+// import {
+//   enableAuth
+// } from "@availabs/ams"
+
 import {
   enableAuth
-} from "@availabs/ams"
+} from "~/modules/ams/src"
 
 import "~/index.css";
 

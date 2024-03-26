@@ -31,13 +31,13 @@ const RouteCreation = () => {
   const layers = React.useRef([layerFunc()]);
   const layerId = get(layers, ["current", 0, "id"]);
 
-  const { routeId } = useParams();
+  const { routeId, folderId } = useParams();
 
   const layerProps = React.useMemo(() => {
     return {
-      [layerId]: { routeId }
+      [layerId]: { routeId, folderId }
     }
-  }, [layerId, routeId]);
+  }, [layerId, routeId, folderId]);
 
   return (
     <div className="w-full h-full">
@@ -68,6 +68,18 @@ const Config = [
   { name: 'Route Creation',
     icon: 'fa fa-road',
     path: "/route/creation/:routeId",
+    exact: true,
+    auth: true,
+    mainNav: false,
+    sideNav: {
+      color: 'dark',
+      size: 'compact'
+    },
+    component: RouteCreation
+  },
+  { name: 'Route Creation',
+    icon: 'fa fa-road',
+    path: "/route/creation/folder/:folderId",
     exact: true,
     auth: true,
     mainNav: false,

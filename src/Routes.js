@@ -7,7 +7,8 @@ import Documentation from "~/pages/Documentation"
 import GraphTest from "./GraphTest"
 
 import { useFalcor } from "~/modules/avl-components/src"
-import { useAuth } from "@availabs/ams"
+// import { useAuth } from "@availabs/ams"
+import { useAuth } from "~/modules/ams/src"
 
 import transportNYDataTypes from '~/pages/TransportNYDataTypes'
 
