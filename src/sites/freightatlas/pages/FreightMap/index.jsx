@@ -16,7 +16,6 @@ const FreightMap = props => {
   return (
     <DamaContext.Provider value={{pgEnv: defaultPgEnv, baseUrl, falcor, falcorCache, user}}>
       <div className='h-full'>
-
         <Map />
       </div>
     </DamaContext.Provider>

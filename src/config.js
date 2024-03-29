@@ -7,7 +7,7 @@ let DAMA_HOST = "https://graph2.availabs.org";
 
 if (process.env.NODE_ENV === "development") {
   API_HOST = "http://localhost:4444";
-  // DAMA_HOST = "http://localhost:4444";
+  DAMA_HOST = "http://localhost:4444";
   CLIENT_HOST = "localhost:5173";
   AUTH_HOST = "http://localhost:4444";
 }

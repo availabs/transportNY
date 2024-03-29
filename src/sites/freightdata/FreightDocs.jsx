@@ -29,7 +29,7 @@ const Routes = [
         baseUrl: "/docs",
         checkAuth
       }), 
-      "/documentation", 
+      "/docs", 
       withAuth
     ),
     authLevel: 5,

@@ -136,23 +136,23 @@ const mapIncidents = data => {
     }))
   }
 
-  let incidentsGeo = { type: "FeatureCollection", features: [] };
+  // let incidentsGeo = { type: "FeatureCollection", features: [] };
 
-  data.forEach((incident, i) => {
-     incidentsGeo.features.push({
-        type: "Feature",
-        id: i,
-        properties: {
-          event_id: incident.event_id,
-          category: incident.event_category,
-          color: incidentsColors[incident.event_category],
-          open_time: incident.open_time,
-          vehicle_delay: incident.vehicle_delay ? incident.vehicle_delay.toLocaleString() : 0,
-          type: 'incident'
-        },
-        geometry: JSON.parse(incident.point)
-    })
-  });
+  // data.forEach((incident, i) => {
+  //    incidentsGeo.features.push({
+  //       type: "Feature",
+  //       id: i,
+  //       properties: {
+  //         event_id: incident.event_id,
+  //         category: incident.event_category,
+  //         color: incidentsColors[incident.event_category],
+  //         open_time: incident.open_time,
+  //         vehicle_delay: incident.vehicle_delay ? incident.vehicle_delay.toLocaleString() : 0,
+  //         type: 'incident'
+  //       },
+  //       geometry: JSON.parse(incident.point)
+  //   })
+  // });
 /*
   let source = {
     type: "geojson",
@@ -188,7 +188,7 @@ const mapIncidents = data => {
 
   // map.getSource("incidents-source").setData(incidentsGeo);
 
-  console.log('incidentgeo', incidentsGeo)
+  //console.log('incidentgeo', incidentsGeo)
   // return incidentsGeo;
 };
 

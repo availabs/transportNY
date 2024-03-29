@@ -12,9 +12,15 @@ import FreightDocs from './FreightDocs'
 
 const DAMA_ARGS = {
   baseUrl: '',
-  defaultPgEnv: 'kari',
+  defaultPgEnv: 'freight_data',
   useFalcor,
-  useAuth
+  useAuth,
+  navSettings: {
+    topNav: {
+      position: 'fixed',
+      size: 'compact',
+    },
+  }
 }
 
 const Routes = [
