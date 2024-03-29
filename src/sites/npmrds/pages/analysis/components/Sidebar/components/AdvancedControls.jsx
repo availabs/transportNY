@@ -282,7 +282,7 @@ const AdvancedControls = props => {
       <Row>
         <Label>Start Time</Label>
         <InputBox>
-          <Input type="time"
+          <Input type="time" step={ 1 }
             onChange={ v => updateSettings("startTime", v) }
             value={ startTime }/>
         </InputBox>
@@ -293,7 +293,7 @@ const AdvancedControls = props => {
       <Row>
         <Label>End Time</Label>
         <InputBox>
-          <Input type="time"
+          <Input type="time" step={ 1 }
             onChange={ v => updateSettings("endTime", v) }
             value={ endTime }/>
         </InputBox>

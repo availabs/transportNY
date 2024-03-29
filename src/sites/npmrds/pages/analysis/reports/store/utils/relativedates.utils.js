@@ -99,10 +99,3 @@ export const getDatesAndTimes = dates => {
   })
   return response;
 }
-
-export const timeToEpoch = time => {
-  const hours = +time.slice(0, 2);
-  const minutes = +time.slice(3, 5);
-  const seconds = +time.slice(6);
-  return hours * 12 + Math.floor((minutes + (seconds / 60)) / 5);
-}
