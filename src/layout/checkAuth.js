@@ -29,7 +29,7 @@ const checkAuth = (props, navigate, location) => {
 //   //console.log('lw login:', sendToLogin, 'home:',sendToHome, props.path)
 //
 // console.log("CHECK AUTH:", reqAuthLevel, userAuthed, userAuthLevel, sendToLogin, location, sendToHome)
-console.log("CHECK AUTH:", props.user, reqAuthLevel, sendToLogin, sendToHome)
+// console.log("CHECK AUTH:", props.user, reqAuthLevel, sendToLogin, sendToHome)
   //----------------------------------------
   // if page requires auth
   // && user isn't logged in

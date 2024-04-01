@@ -123,6 +123,7 @@ class ExperientialTravelTime extends GeneralGraphComp {
 		return (
 			<BarGraph data={ graphData }
 				shouldComponentUpdate={ ["data"] }
+				showAnimations={ false }
 				indexBy="start"
 				keys={ get(route, "tmcArray", []) }
 				axisLeft={ {

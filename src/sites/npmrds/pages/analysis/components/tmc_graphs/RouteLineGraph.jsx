@@ -210,7 +210,7 @@ class RouteLineGraph extends GeneralGraphComp {
 					startDate.add(1, "day");
 				}
 				domain.push(startDate.format("YYYYMMDD"));
-				return domain;
+				return domain.map(Number);
 			}
 			default:
 				return d3range(extent[0], extent[1] + 1);
@@ -237,6 +237,7 @@ class RouteLineGraph extends GeneralGraphComp {
 				shouldComponentUpdate={
 					["data", "secondary", "yScale", "secScale"]
 				}
+				showAnimations={ false }
 				strokeWidth={ 1 }
 				xScale={ {
 					type: "point",

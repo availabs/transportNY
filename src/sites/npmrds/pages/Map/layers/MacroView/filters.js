@@ -427,7 +427,7 @@ const getMeasure = (filters) => {
     return ""
   }
 
-console.log("getMeasure::out", out);
+// console.log("getMeasure::out", out);
 
   return out
 }

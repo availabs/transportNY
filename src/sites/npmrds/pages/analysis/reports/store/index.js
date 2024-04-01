@@ -1785,7 +1785,7 @@ const _loadReport = report =>
             gc.state.title = gc.state.title || "{type}, {data}"
             return gc;
           }),
-          colorRange: report.color_range || DEFAULT_COLOR_RANGE,
+          colorRange: report.color_range?.length ? [...report.color_range] : [...DEFAULT_COLOR_RANGE],
 			  	routes,
 			  	routeComponentSettings,
           station_comps,
@@ -1965,8 +1965,10 @@ console.log("_loadTemplateWithDates::datesMap", datesMap);
     route_comps = get(template, ["route_comps", "value"], []),
     graph_comps = get(template, ["graph_comps", "value"], []),
     station_comps = get(template, ["station_comps", "value"], []),
-    colorRange = get(template, ["color_range", "value"], DEFAULT_COLOR_RANGE),
+    colorRangeFromTemplate = get(template, ["color_range", "value"], []),
     defaultType = template.default_type;
+
+  let colorRange = colorRangeFromTemplate.length ? [...colorRangeFromTemplate] : [...DEFAULT_COLOR_RANGE];
 
   const hasRelativeDates = route_comps.reduce((a, c) => {
     if (c.type === "group") {
@@ -2032,7 +2034,7 @@ console.log("_loadTemplateWithDates::datesMap", datesMap);
     return a;
   }, datesMap);
 
-console.log("DATES MAP:", datesMap)
+// console.log("DATES MAP:", datesMap)
 
   const routeComponentSettings = new Map();
 
@@ -2158,7 +2160,7 @@ console.log("DATES MAP:", datesMap)
 
 const _loadTemplateWithSyntheticRoute = (templateId, tmcArray, dates, reportState) => {
 
-console.log("_loadTemplateWithSyntheticRoute", tmcArray, dates)
+// console.log("_loadTemplateWithSyntheticRoute", tmcArray, dates)
 
   const falcorCache = falcorGraph.getCache();
   const template = get(falcorCache, `templates2.id.${ templateId }`, {});
@@ -2169,8 +2171,10 @@ console.log("_loadTemplateWithSyntheticRoute", tmcArray, dates)
     route_comps = get(template, ["route_comps", "value"], []),
     graph_comps = get(template, ["graph_comps", "value"], []),
     station_comps = get(template, ["station_comps", "value"], []),
-    colorRange = get(template, ["color_range", "value"], DEFAULT_COLOR_RANGE),
+    colorRangeFromTemplate = get(template, ["color_range", "value"], []),
     defaultType = template.default_type;
+
+  let colorRange = colorRangeFromTemplate.length ? [...colorRangeFromTemplate] : [...DEFAULT_COLOR_RANGE];
 
 	AVAILABLE_COLORS = [...COLORS];
 	ROUTE_COMP_ID = -1;
@@ -2252,7 +2256,7 @@ console.log("_loadTemplateWithSyntheticRoute", tmcArray, dates)
       if (isRelativeDateBase) {
         const [[startDate, endDate], [startTime, endTime]] = getDatesAndTimes(dates);
 
-console.log("??????????????", startDate, startTime, endDate, endTime)
+// console.log("??????????????", startDate, startTime, endDate, endTime)
 
         settings.year = "advanced";
         settings.startDate = +startDate;
@@ -2324,8 +2328,10 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
 	  route_comps = get(template, ["route_comps", "value"], []),
 	  graph_comps = get(template, ["graph_comps", "value"], []),
     station_comps = get(template, ["station_comps", "value"], []),
-    colorRange = get(template, ["color_range", "value"], DEFAULT_COLOR_RANGE),
+    colorRangeFromTemplate = get(template, ["color_range", "value"], DEFAULT_COLOR_RANGE),
     defaultType = template.default_type;
+
+  let colorRange = colorRangeFromTemplate.length ? [...colorRangeFromTemplate] : [...DEFAULT_COLOR_RANGE];
 
 	AVAILABLE_COLORS = [...COLORS];
 	ROUTE_COMP_ID = -1;
