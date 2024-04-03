@@ -35,7 +35,7 @@ const checkAuth = (props, navigate, location) => {
   // && user isn't logged in
   // send to login
   //----------------------------------------
-  // console.log('checkAuth', authLevel, props?.user?.authed, props?.user?.isAuthenticating)
+  // console.log('checkAuth', authLevel, props?.user?.authed, props?.user?.navigate("/auth/login", { state: { from: location.pathname } });isAuthenticating)
   if( sendToLogin ) {
     //console.log('navigate to login', nav)
     navigate("/auth/login", { state: { from: location.pathname } });
