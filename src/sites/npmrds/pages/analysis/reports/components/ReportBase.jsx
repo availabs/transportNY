@@ -599,10 +599,6 @@ class ReportBase extends React.Component {
     const isNetwork = this.props.route_comps
         .reduce((a, c) => a || (c.colltype === "network"), false);
 
-// console.log("REPORT BASE FOLDER:", this.props.folder)
-
-// console.log("ReportBase::render", this.props.route_comps, this.props.routes)
-
     return (
       <div style={ { position: "relative" } }>
 

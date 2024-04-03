@@ -9,9 +9,9 @@ const timeStringFormat = format("02d");
 class DateObject {
 	static timeStringToEpoch(string, roundUp = false) {
 		if (!string) return null;
-		const [hours, mins, secs = 0] = string.split(":");
+		const [hours, mins, secs = 0] = string.split(":").map(Number);
 		const func = roundUp ? Math.ceil : Math.floor;
-		return (+hours * 12) + func(+(mins + (+secs * oneSixtieth)) * oneFifth);
+		return (hours * 12) + func((mins + (secs * oneSixtieth)) * oneFifth);
 	}
 	static epochToTimeString(epoch) {
 		epoch = +epoch;

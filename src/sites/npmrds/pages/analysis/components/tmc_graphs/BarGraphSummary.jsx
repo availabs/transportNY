@@ -66,6 +66,7 @@ class BarGraphSummary extends GeneralGraphComp {
 			<BarGraph
 				data={ graphData }
 				shouldComponentUpdate={ ["data"] }
+				showAnimations={ false }
 				indexBy="key"
 				keys={ ["value"] }
 				colors={ (v, i, data) => data.color }

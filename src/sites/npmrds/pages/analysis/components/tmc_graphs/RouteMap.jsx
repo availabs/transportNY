@@ -296,7 +296,7 @@ class RouteMap extends HybridGraphComp {
 // check if bounds is a point.
 // occurs when a single station is active.
 			if ((bounds.getWest() === bounds.getEast()) && (bounds.getNorth() === bounds.getSouth())) {
-				map.flyTo({
+				map.jumpTo({
 					center: bounds.getSouthWest(),
 					zoom: 12,
 					bearing: 0,
@@ -304,7 +304,7 @@ class RouteMap extends HybridGraphComp {
 				})
 			}
 			else {
-				map.fitBounds(bounds, { padding: 50, bearing: 0, pitch: 0 });
+				map.fitBounds(bounds, { padding: 50, bearing: 0, pitch: 0, duration: 0 });
 			}
 		}
 	}

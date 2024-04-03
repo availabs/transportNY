@@ -238,6 +238,7 @@ class TmcDifferenceGrid extends GeneralGraphComp {
 				shouldComponentUpdate={
 					["data", "colorRange"]
 				}
+				showAnimations={ false }
 				indexBy="tmc"
 				keys={ keys }
 				colors={ this.getColorScale(graphData, keys, colorRange) }

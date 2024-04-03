@@ -27,6 +27,9 @@ import "./styles.css"
 
 import { GRAPH_TYPES } from "../index"
 
+import Scheduler from "./components/GraphLoadingScheduler"
+const SCHEDULER = new Scheduler();
+
 export const getRequest = ({ settings, tmcArray }, { group, alias, key }) => {
 	// if (group === "tmcAttribute") return null;
 
@@ -147,6 +150,8 @@ class GeneralGraphComp extends React.Component {
 
 		this.updateTitle = this.updateTitle.bind(this);
 		this.setSavingImage = this.setSavingImage.bind(this);
+		this.fetchFalcorDeps = this.fetchFalcorDeps.bind(this);
+		this.doFetchFalcorDeps = this.doFetchFalcorDeps.bind(this);
 	}
 
 	setSavingImage(savingImage) {
@@ -187,7 +192,12 @@ class GeneralGraphComp extends React.Component {
 	}
 
 	fetchFalcorDeps() {
+		// this.setState(prev => ({ loading: prev.loading + 1 }));
+		return SCHEDULER.request(this.props.id, this.doFetchFalcorDeps)
+			// .then(() => this.setState(prev => ({ loading: prev.loading - 1 })))
+	}
 
+	doFetchFalcorDeps() {
 		const routes = this.getActiveRouteComponents().filter(r => get(r, 'tmcArray.length', 0));
 		if (!routes.length) return Promise.resolve();
 
@@ -195,17 +205,12 @@ class GeneralGraphComp extends React.Component {
 		if (!displayData.length) return Promise.resolve();
 
 		this.setState(prev => ({ loading: prev.loading + 1 }));
-		// const routeData = {};
 
 		return routes.reduce((promise, route) => {
 			const { tmcArray } = route,
 				year = this.getMaxYear(route),
 				requestKeys = displayData.map(dd => ({ dd: dd.key, alias: dd.alias, group: dd.group, key: getRequestKey(route, dd) }))
 					.filter(({ key }) => Boolean(key));
-
-// console.log("GeneralGraphComp::fetchFalcorDeps", route, tmcArray, year)
-
-			// routeData[route.compId] = {};
 
 			return promise.then(() => {
 				return this.props.falcor.get(
@@ -220,45 +225,6 @@ class GeneralGraphComp extends React.Component {
 								['routes', 'data', key]
 							)
 							.then(res => {
-								// if (group === "indices") {
-								// 	INDICES.forEach(index => {
-								// 		routeData[route.compId][index.key] = get(res, `json.routes.data.${ key }`, [])
-								// 			.map(d => ({ tmc: d.tmc, resolution: d.resolution, value: d[index.key] }))
-								// 			.filter(({ value }) => value !== undefined)
-								// 	})
-								// }
-								// else if (group === "indices-byDateRange") {
-								// 	INDICES_BY_DATE_RANGE.forEach(index => {
-								// 		routeData[route.compId][index.key] = get(res, `json.routes.data.${ key }`, [])
-								// 			.map(d => ({ tmc: d.tmc, value: d[index.key] }))
-								// 			.filter(({ value }) => value !== undefined)
-								// 	})
-								// }
-								// else if (group === "tmcAttribute") {
-								// 	TMC_ATTRIBUTES.forEach(att => {
-								// 		routeData[route.compId][att.key] = get(res, `json.routes.data.${ key }`, [])
-								// 			.map(d => ({ tmc: d.tmc, value: d[att.alias || att.key] }))
-								// 			.filter(({ value }) => value !== undefined)
-								// 	})
-								// }
-								// else if (group === "hoursOfDelay") {
-								// 	routeData[route.compId]["hoursOfDelay"] = get(res, `json.routes.data.${ key }`, [])
-								// 		.map(d => ({ ...d, value: d["hoursOfDelay"] }));
-								// 	routeData[route.compId]["avgHoursOfDelay"] = get(res, `json.routes.data.${ key }`, [])
-								// 		.map(d => ({ ...d, value: d["avgHoursOfDelay"] }));
-								// }
-								// else if (group === "co2Emissions") {
-								// 	routeData[route.compId]["co2Emissions"] = get(res, `json.routes.data.${ key }`, [])
-								// 		.map(d => ({ ...d, value: d["co2Emissions"] }));
-								// 	routeData[route.compId]["avgCo2Emissions"] = get(res, `json.routes.data.${ key }`, [])
-								// 		.map(d => ({ ...d, value: d["avgCo2Emissions"] }));
-								// }
-								// else {
-								// 	routeData[route.compId][dd] = get(res, `json.routes.data.${ key }`, []);
-								// 	if (alias) {
-								// 		routeData[route.compId][alias] = get(res, `json.routes.data.${ key }`, []);
-								// 	}
-								// }
 								if (group === "indices") {
 									INDICES.forEach(index => {
 										route.data[index.key] = get(res, `json.routes.data.${ key }`, [])
@@ -307,9 +273,6 @@ class GeneralGraphComp extends React.Component {
 		.then(() => {
 			this.setState(prev => ({ loading: prev.loading - 1 }));
 		})
-		// .then(() => {
-		// 	this.props.updateRouteData(routeData);
-		// })
 	}
 	getMaxYear({ settings }) {
 		return +settings.endDate.toString().slice(0, 4);

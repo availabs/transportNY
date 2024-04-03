@@ -130,6 +130,7 @@ class RouteBarGraph extends GeneralGraphComp {
 												this.props.id,
 												graphData.map(d => d.value));
 
+console.log("RouteBarGraph::renderGraph", min, max, colorRange)
 		const colorScale = d3scale.scaleQuantize()
 			.domain([min, max])
 			.range(colorRange);
@@ -151,6 +152,7 @@ class RouteBarGraph extends GeneralGraphComp {
 			<BarGraph data={ graphData }
 				shouldComponentUpdate={ ["data", "xScale", "yScale", "colorRange"] }
 				colorRange={ colorRange }
+				showAnimations={ false }
 				indexBy="resolution"
 				keys={ ["value"] }
 				colors={ colorScale }

@@ -226,25 +226,24 @@ class DataDownloader extends React.Component {
     this.setState({ loading: true, show: false });
      this.props.falcor.get(...this.props.layer.fetchRequestsForGeography())
       .then(() =>{
+        const n = this.props.network,
+          selection = this.props.layer.getSelectionForGeography();
+          // console.log('download csv, selection.length', selection.length)
 
-      const n = this.props.network,
-        selection = this.props.layer.getSelectionForGeography();
-        // console.log('download csv, selection.length', selection.length)
 
-
-      this.downloadMeasures(selection)
-        .then(() => {
-          const rows = this.createCsv(),
-            header = [this.props.network, ...this.state.measures, ...get(this.state, ["metaVars", n], []), "year"];
-          if (this.props.compareYear !== "none") {
-            header.push("compare year");
-          }
-          // console.log('download csv rows', rows)
-          rows.unshift(header.join(","))
-          const blob = new Blob([rows.join("\n")], { type: "text/csv" });
-          saveAs(blob, this.makeFileName() + '.csv');
-        })
-        .then(() => this.setState({ loading: false }));
+        this.downloadMeasures(selection)
+          .then(() => {
+            const rows = this.createCsv(),
+              header = [this.props.network, ...this.state.measures, ...get(this.state, ["metaVars", n], []), "year"];
+            if (this.props.compareYear !== "none") {
+              header.push("compare year");
+            }
+            // console.log('download csv rows', rows)
+            rows.unshift(header.join(","))
+            const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+            saveAs(blob, this.makeFileName() + '.csv');
+          })
+          .then(() => this.setState({ loading: false }));
       })
   }
   downloadGeometry(selection) {

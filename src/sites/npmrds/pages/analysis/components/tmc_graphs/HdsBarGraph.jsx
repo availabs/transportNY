@@ -67,6 +67,7 @@ class HdsBarGraph extends HdsGraphComp {
 				shouldComponentUpdate={ ["data"] }
 				indexBy="resolution"
 				keys={ key === "volume" ? ["value"] : CLASSES }
+				showAnimations={ false }
 				hoverComp={ {
 					indexFormat: resFormat,
 					valueFormat: ",d",
