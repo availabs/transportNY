@@ -1,9 +1,10 @@
-import FreightMap from "~/sites/freightatlas/pages/FreightMap"
-import FreightAtlas from "~/sites/freightatlas/pages/Atlas"
-import CollectionAtlas from "~/sites/freightatlas/pages/CollectionAtlas"
-
-
+import FreightMap from "./pages/FreightMap"
+import FreightAtlas from "./pages/Atlas"
+import CollectionAtlas from "./pages/CollectionAtlas"
+import FreightAtlasCMS from "./pages/freightAtlasCMS.jsx"
+ 
 const Routes = [
+  ...FreightAtlasCMS,
   ...FreightMap,
   ...FreightAtlas,
   ...CollectionAtlas

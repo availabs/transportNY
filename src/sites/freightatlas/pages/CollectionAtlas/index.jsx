@@ -30,15 +30,15 @@ const PMTilesProtocol = {
 const pages = [
     {
       name: 'test map 0',
-      url: '/'
+      url: '/colmap'
     },
     {
       name: 'test map 1',
-      url: '/?layers=140|144|74'
+      url: '/col?layers=140|144|74'
     },
     {
       name: 'test map 2',
-      url: '/?layers=136'
+      url: '/colmap?layers=136'
     }
 
 ]
