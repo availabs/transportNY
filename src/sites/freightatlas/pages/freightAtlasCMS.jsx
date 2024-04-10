@@ -20,7 +20,7 @@ registerComponents({
 //registerComponents(ComponentRegistry)
 registerDataType("selector", Selector)
 
-console.log('components', DamaMap)
+//console.log('components', DamaMap)
 
 
 const theme = {
