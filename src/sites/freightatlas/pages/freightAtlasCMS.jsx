@@ -49,7 +49,7 @@ const Routes = [
       withAuth,
       
     ),
-    authLevel: 5,
+    authLevel: -1,
     name: "CMS",
     sideNav: {
       color: 'dark',

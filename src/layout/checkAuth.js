@@ -38,8 +38,8 @@ const checkAuth = (props, navigate, location) => {
   // console.log('checkAuth', authLevel, props?.user?.authed, props?.user?.navigate("/auth/login", { state: { from: location.pathname } });isAuthenticating)
   if( sendToLogin ) {
 
-    //console.log('navigate to login', nav)
-    navigate("/auth/login", { state: { from: location.pathname } });
+    console.log('navigate to login', props, location)
+    navigate("/auth/login", { state: { from: location?.pathname } });
     // return <Navigate
     //   to={ "/auth/login" }
     //   state={{ from: props.path }}
