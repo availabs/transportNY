@@ -223,6 +223,9 @@ class DataDownloader extends React.Component {
     );
   }
   downloadCsv() {
+
+console.log("downloadCsv", this.props.layer.fetchRequestsForGeography())
+
     this.setState({ loading: true, show: false });
      this.props.falcor.get(...this.props.layer.fetchRequestsForGeography())
       .then(() =>{

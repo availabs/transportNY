@@ -210,12 +210,19 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
 }
 export default StuffInFolder;
 
+const DateTimeRegex = /(\d{2})[/](\d{2})[/](\d{4}) (\d{2}:\d{2}:\d{2})/;
+
 const REGEXes = [
   /[A-Za-z0-9_ ]+/,
-  /\d{4}-\d{2}-\d{2}(?:T(\d{2}[:]\d{2}[:]\d{2}))?/,
-  /\d{4}-\d{2}-\d{2}/,
+  DateTimeRegex,
+  DateTimeRegex,
   /(\d{3}[+-pnPN]\d{5}[|]?)+/
 ]
+
+const mapDateTime = dt => {
+  const [, MM, DD, YYYY, T] = DateTimeRegex.exec(dt);
+  return `${ YYYY }-${ MM }-${ DD }T${ T }`;
+}
 
 const processCsvFile = file => {
   const filereader = new FileReader();
@@ -227,7 +234,10 @@ const processCsvFile = file => {
         r => r.reduce((a, c, i) => {
           return a && REGEXes[i].test(c);
         }, r.length === REGEXes.length)
-      )
+      ).map(row => {
+        const [name, sdt, edt, tmcs] = row;
+        return [name, mapDateTime(sdt), mapDateTime(edt), tmcs];
+      })
       resolve([totalRows.length, filteredRows.length, filteredRows]);
     }
   })
@@ -415,11 +425,11 @@ const UploadInstructions = () => {
         The first column of each row must be an alphanumeric route name.
       </div>
       <div className="pb-1 border-b border-current mb-1">
-        The second column of each row must be the start date in the format "YYYY-MM-DD".<br />
-        { `Today's date looks like: ${ moment().format("YYYY-MM-DD") }.` }
+        The second column of each row must be the start date and time in the format: "MM/DD/YYYY hh:mm:ss".<br />
+        { `The current date and time looks like: "${ moment().format("MM/DD/YYYY hh:mm:ss") }".` }
       </div>
       <div className="pb-1 border-b border-current mb-1">
-        The third column of each row must be the end date in the format "YYYY-MM-DD".
+        The third column of each row must be the end date and time in the format "MM/DD/YYYY hh:mm:ss".
       </div>
       <div className="">
         The fourth column of each row must be a list of TMCs.<br />
