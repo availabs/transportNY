@@ -47,3 +47,20 @@ export const DATA_COLUMNS = [
     type: "data"
   }
 ]
+export const PERCENT_CHANGE_COLUMNS = [
+  { key: "speed-pc",
+    header: "Speed Percent Change",
+    comp: "data:speed-pc",
+    type: "data"
+  },
+  { key: "traveltime-pc",
+    header: "Travel Time Percent Change",
+    comp: "data:traveltime-pc",
+    type: "data"
+  },
+  { key: "delay-pc",
+    header: "Hours of Delay Percent Change",
+    comp: "data:delay-pc",
+    type: "data"
+  }
+]

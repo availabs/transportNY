@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { withAuth } from '~/modules/ams/src'
 import get from 'lodash/get'
 import cloneDeep from 'lodash/cloneDeep'
@@ -14,29 +14,26 @@ const LayoutWrapper = withAuth(({
 }) => {
 
   const Child = Element || Comp // support old react router routes
-  const navigate = useNavigate();
+  
+  // const navigate = useNavigate();
   const location = useLocation();
 
-  const { auth, authLevel, user } = props;
+  // const { auth, authLevel, user } = props;
 
-  React.useEffect(() => {
-    checkAuth({ auth, authLevel, user }, navigate, location);
-  }, [auth, authLevel, user, navigate, location]);
+  // React.useEffect(() => {
+  //   checkAuth({ auth, authLevel, user }, navigate, location);
+  // }, [auth, authLevel, user, navigate, location]);
 
-  // console.log('LayoutWrapper props', props)
-  // console.log('LayoutWrapper comp',  typeof Comp, Comp )
-  // console.log('LayoutWrapper Element',  typeof Element, Element )
-  //console.log('LayoutWrapper child', props, typeof Child, Child )
-  // console.log('LayoutWrapper layout', typeof Layout, Layout)
-  // -------------------------------------
-  // we may want to restore this ??
-  // -------------------------------------
-  // if(authLevel > -1 && props?.user?.isAuthenticating) {
-  //   return <Layout {...props}>Loading</Layout>
-  // }
-
+  const check = checkAuth(props);
+  if (check === "sendToLogin") {
+    return <Navigate to="/auth/login"
+              state={ { from: location.pathname } }/>;
+  }
+  else if (check === "sendToHome") {
+    return <Navigate to="/"/>
+  }
   return (
-    <Layout {...props}>
+    <Layout { ...props }>
       <Child />
     </Layout>
   )

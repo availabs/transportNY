@@ -46,9 +46,12 @@ const Sidebar = props => {
     addRoutes,
     activeDataColumns,
     setActiveDataColumns,
+    activePCColumns,
+    setActivePCColumns,
     activeDateColumns,
     setActiveDateColumns,
     dataColumns,
+    pcColumns,
     children
   } = props;
 
@@ -116,7 +119,7 @@ const Sidebar = props => {
           </MultiLevelSelect>
           <div className="col-span-2"/>
 
-          <div className="col-span-2 border-b-2">Data Column Selection</div>
+          <div className="col-span-2 border-b-2">Data Selection</div>
           <div className="col-span-2">
             <MultiLevelSelect isMulti
               onChange={ setActiveDataColumns }
@@ -124,6 +127,17 @@ const Sidebar = props => {
               displayAccessor={ c => c.header }
               value={ activeDataColumns }
               placeholder="Add a data column..."/>
+          </div>
+          <div className="col-span-2"/>
+
+          <div className="col-span-2 border-b-2">Percent Change Selection</div>
+          <div className="col-span-2">
+            <MultiLevelSelect isMulti
+              onChange={ setActivePCColumns }
+              options={ pcColumns }
+              displayAccessor={ c => c.header }
+              value={ activePCColumns }
+              placeholder="Add a percent change column..."/>
           </div>
           <div className="col-span-2"/>
 

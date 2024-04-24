@@ -94,7 +94,7 @@ const RemoveTD = ({ remove }) => {
     <RouteTD>
       <div onClick={ remove }
         className={ `
-          flex items-center justify-center py-1 rounded
+          flex items-center justify-center py-1 px-2 rounded
           bg-gray-200 hover:bg-white cursor-pointer
           text-red-300 hover:text-red-600
         `}

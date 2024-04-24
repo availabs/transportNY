@@ -11,7 +11,11 @@ import { useFalcor } from "~/modules/avl-components/src"
 
 import { Input, Button } from "~/modules/avl-map-2/src/uicomponents"
 
-import { DEFAULT_COLUMNS, DATA_COLUMNS } from "./utils"
+import {
+  DEFAULT_COLUMNS,
+  DATA_COLUMNS,
+  PERCENT_CHANGE_COLUMNS
+} from "./utils"
 import Route from "./components/Route"
 
 import {
@@ -121,15 +125,28 @@ const BatchReports = props => {
     })
   }, []);
 
-  const [activeDataColumns, setActiveDataColumns] = React.useState([]);
+  const [activeDataColumns, _setActiveDataColumns] = React.useState([]);
+  const [activePCColumns, setActivePCColumns] = React.useState([]);
   const [activeDateColumns, setActiveDateColumns] = React.useState([]);
 
-  const addDataColumn = React.useCallback(col => {
-    setActiveDataColumns(prev => [...prev, col]);
-  }, []);
-  const addDateColumns = React.useCallback(cols => {
-    setActiveDateColumns(prev => [...prev, ...cols]);
-  }, []);
+  const setActiveDataColumns = React.useCallback(cols => {
+    _setActiveDataColumns(cols);
+    setActivePCColumns(prev => {
+      return prev.filter(col => {
+        return cols.reduce((a, c) => {
+          return a || col.key.includes(c.key);
+        }, false)
+      })
+    })
+  }, [activePCColumns]);
+
+  const pcColumns = React.useMemo(() => {
+    return PERCENT_CHANGE_COLUMNS.filter(col => {
+      return activeDataColumns.reduce((a, c) => {
+        return a || col.key.includes(c.key);
+      }, false)
+    })
+  }, [activeDataColumns]);
 
   const activeColumns = React.useMemo(() => {
     return [
@@ -139,37 +156,44 @@ const BatchReports = props => {
         a.push(c);
         if (i % 2 === 1) {
           a.push(...activeDataColumns);
+          a.push(...activePCColumns);
         }
         return a;
       }, [])
     ]
-  }, [activeDataColumns, activeDateColumns, activeDateColumns]);
+  }, [activeDataColumns, activePCColumns, activeDateColumns]);
 
   const routes = React.useMemo(() => {
     return selectedRoutes.map(route => {
       const { startDate, endDate } = route;
       return {
         ...route,
-        ...activeDataColumns.reduce((a, c) => {
-          a[c.key] = c.header;
-          return a;
-        }, {}),
+        // ...activeDataColumns.reduce((a, c) => {
+        //   a[c.key] = c.header;
+        //   return a;
+        // }, {}),
         ...activeDateColumns
           .filter(adc => adc.relativeDate)
           .reduce((a, c, i) => {
             const [sd, ed] = calculateRelativeDates(c.relativeDate, startDate, endDate, "YYYY-MM-DD");
             a[c.key] = (i % 2 === 0) ? sd : ed;
-            if (i % 2 === 1) {
-              return activeDataColumns.reduce((a, c) => {
-                a[c.key] = c.header;
-                return a;
-              }, a)
-            }
+            // if (i % 2 === 1) {
+            //   // return activeDataColumns.reduce((a, c) => {
+            //   //   a[c.key] = c.header;
+            //   //   return a;
+            //   // }, a)
+            //   activeDataColumns.forEach(c => {
+            //     a[c.key] = c.header;
+            //   });
+            //   activePCColumns.forEach(c => {
+            //     a[c.key] = c.header;
+            //   });
+            // }
             return a;
           }, {})
       }
     })
-  }, [selectedRoutes, activeDataColumns, activeDateColumns]);
+  }, [selectedRoutes, activeDateColumns]);
 
   const [filename, setFilename] = React.useState(`csv_data_${ moment().format("MM_DD_YYYY") }`);
 
@@ -180,6 +204,7 @@ const BatchReports = props => {
 
     const timeRegex = /\d\d:\d\d(:\d\d)?/;
     const dateRetgex = /\d{4}-\d\d-\d\d/;
+
     return routes.reduce((a, c) => {
       return activeColumns.reduce((aa, cc) => {
         if (cc.key === "name") {
@@ -204,12 +229,20 @@ const BatchReports = props => {
     startLoading("Sending data to server and generating .csv file...")
     fetch("http://localhost:4444/batchreports", {
       method: "POST",
-      body: JSON.stringify({ routes, dataColumns: activeDataColumns, dateColumns: activeDateColumns })
+      body: JSON.stringify({
+        routes,
+        dataColumns: activeDataColumns,
+        pcColumns: activePCColumns,
+        dateColumns: activeDateColumns
+      })
     }).then(res => res.json())
       .then(json => {
         return download(new Blob([json.csv]), `${ filename }.csv`, "text/csv");
       }).then(() => { stopLoading(); })
-  }, [routes, activeDataColumns, activeDateColumns, okToSend, filename, startLoading, stopLoading]);
+  }, [routes, okToSend, filename,
+      activeDataColumns, activePCColumns, activeDateColumns,
+      startLoading, stopLoading
+  ]);
 
   const [ref, setRef] = React.useState(null);
   const [height, setHeight] = React.useState(null);
@@ -238,9 +271,12 @@ const BatchReports = props => {
           addRoutes={ addRoutes }
           activeDataColumns={ activeDataColumns }
           setActiveDataColumns={ setActiveDataColumns }
+          activePCColumns={ activePCColumns }
+          setActivePCColumns={ setActivePCColumns }
           activeDateColumns={ activeDateColumns }
           setActiveDateColumns={ setActiveDateColumns }
           dataColumns={ DATA_COLUMNS }
+          pcColumns={ pcColumns }
         >
           <div className="grid grid-cols-1 gap-4">
             <div className="flex items-center">
@@ -266,6 +302,7 @@ const BatchReports = props => {
         <table className="w-full">
           <thead>
             <tr>
+              <th />
               { activeColumns.map((col, i) => (
                   <th key={ i }>{ col.header }</th>
                 ))

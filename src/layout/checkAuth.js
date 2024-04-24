@@ -21,7 +21,10 @@ const checkAuth = (props, navigate, location) => {
   const userAuthLevel = get(props, ["user", "authLevel"], -1);
 
   const sendToLogin = !userAuthed && (reqAuthLevel >= 0);
+  if (sendToLogin) return "sendToLogin";
+
   const sendToHome = userAuthLevel < reqAuthLevel;
+  if (sendToHome) return "sendToHome";
 
 //   const authLevel = props.auth ? 0 : (props?.authLevel || -1);
 //   const sendToLogin = authLevel > -1 && !get(props, ["user", "authed"], false)
@@ -35,24 +38,25 @@ const checkAuth = (props, navigate, location) => {
   // && user isn't logged in
   // send to login
   //----------------------------------------
-  // console.log('checkAuth', authLevel, props?.user?.authed, props?.user?.isAuthenticating)
-  if (sendToLogin ) {
-    //console.log('navigate to login', nav)
-    navigate("/auth/login", { state: { from: location.pathname } });
-    // return <Navigate
-    //   to={ "/auth/login" }
-    //   state={{ from: props.path }}
-    // />
-  }
-  //----------------------------------------
-  // if page requires auth level
-  // && user is below that
-  // send to home
-  //----------------------------------------
-  else if (sendToHome) {
-    navigate('/')
-    //return <Navigate to='/' />
-  }
+  // console.log('checkAuth', authLevel, props?.user?.authed, props?.user?.navigate("/auth/login", { state: { from: location.pathname } });isAuthenticating)
+  // if( sendToLogin ) {
+  //
+  //   console.log('navigate to login', props, location)
+  //   navigate("/auth/login", { state: { from: location?.pathname } });
+  //   // return <Navigate
+  //   //   to={ "/auth/login" }
+  //   //   state={{ from: props.path }}
+  //   // />
+  // }
+  // //----------------------------------------
+  // // if page requires auth level
+  // // && user is below that
+  // // send to home
+  // //----------------------------------------
+  // else if (sendToHome) {
+  //   navigate('/')
+  //   //return <Navigate to='/' />
+  // }
 
   return false
 }
