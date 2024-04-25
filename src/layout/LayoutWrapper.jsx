@@ -14,7 +14,7 @@ const LayoutWrapper = withAuth(({
 }) => {
 
   const Child = Element || Comp // support old react router routes
-  
+
   // const navigate = useNavigate();
   const location = useLocation();
 
@@ -25,6 +25,7 @@ const LayoutWrapper = withAuth(({
   // }, [auth, authLevel, user, navigate, location]);
 
   const check = checkAuth(props);
+
   if (check === "sendToLogin") {
     return <Navigate to="/auth/login"
               state={ { from: location.pathname } }/>;

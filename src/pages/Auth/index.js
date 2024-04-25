@@ -8,13 +8,12 @@ const AuthConfig = {
       path: "login",
       props: { title: "TransportNY" }
     },
-    { ype: "ams-reset-password",
+    { type: "ams-reset-password",
       path: "reset-password",
       props: { title: "TransportNY" }
     },
     { type: "ams-logout",
-      path: "logout"
-
+      path: "logout",
     // @props.redirectTo
     // Optional prop. Defaults to "/".
     // Redirects user to URL after logging out.
