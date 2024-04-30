@@ -394,7 +394,7 @@ const MonthGrid = () => {
       { dateType === "month" ? null :
         <div className="my-2 flex justify-center font-bold text-lg">
           <Link to={ reportURL } target="_blank">
-            <div className="bg-white rounded hover:bg-gray-200 px-4 py-2">
+            <div className="bg-white rounded hover:bg-gray-200 px-4 py-2 w-72">
               <span>Open in NPMRDS Reports</span><span className="fa fa-arrow-up-right-from-square ml-2"/>
             </div>
           </Link>
@@ -407,7 +407,7 @@ const MonthGrid = () => {
         </div>
         <div className="flex-1 flex justify-center items-center">
           { dateType === "month" ? null :
-            <div className="w-60">
+            <div className="w-72">
               <Select options={ dateOptions }
                 value={ date }
                 onChange={ setUrlFromDate }/>
