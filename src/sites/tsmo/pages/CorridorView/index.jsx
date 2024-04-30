@@ -148,7 +148,7 @@ const MonthGrid = () => {
   React.useEffect(() => {
     if (!counties.length) return;
     falcor.get(["geo", counties.map(c => c.geoid), "name"])
-    
+
   }, [falcor, counties]);
 
   /*const name = React.useMemo(() => {
@@ -158,7 +158,7 @@ const MonthGrid = () => {
   React.useEffect(() => {
     if (!counties.length) return;
     falcor.get(["geo", counties.map(c => c.geo), year, "tmclinear"])
-      
+
   }, [falcor, counties, year]);
 
   const tmclinearsByCounties = React.useMemo(() => {
@@ -181,7 +181,7 @@ const MonthGrid = () => {
         ["tmc", "tmclinear", year, geo, tmclinear, direction],
         ["tmclinear", "meta", year, geo, tmclinear, direction, 'roadname']
       )
-    
+
   }, [falcor, year, geo, tmclinear, direction, loadingStart, loadingStop]);
 
   /*const roadname = React.useMemo(() => {
@@ -198,7 +198,7 @@ const MonthGrid = () => {
   React.useEffect(() => {
     if (TMCs.length) {
       falcor.get(["tmc", TMCs, dataType, dateType, date, "by", resolution])
-      
+
     }
   }, [falcor, date, dateType, dataType, resolution, TMCs]);
 
@@ -313,6 +313,11 @@ const MonthGrid = () => {
     };
   }, [dateType, setUrlFromDate]);
 
+  const reportURL = React.useMemo(() => {
+    const origin = window.location.origin;
+    return `${ origin.replace("tsmo", "npmrds") }/template/edit/291/tmcs/${ TMCs.join("_") }/dates/${ date }T00:00_${ date }T24:00`
+  }, [TMCs, ]);
+
   return (
     <div style={ { width: "calc(100vw - 3.5rem)"}}>
       <div className={ `
@@ -333,6 +338,7 @@ const MonthGrid = () => {
             onChange={ setDataType }/>
         </div>
       </div>
+
       <div className="px-12 grid grid-cols-12 gap-1">
         <div className="text-xl font-bold col-span-8 grid grid-cols-10 gap-1">
           <div className="col-span-3">
@@ -366,14 +372,27 @@ const MonthGrid = () => {
           <Scale scale={ scale }/>
         </div>
       </div>
-      <div className="flex mx-8 font-bold text-lg my-2">
-        <div className="flex-1">
+
+      <div className="my-2 flex justify-center font-bold text-lg">
+        <Link to={ reportURL } target="_blank">
+          <div className="bg-white rounded hover:bg-gray-200 px-2 py-1">
+            <span>Open in reports</span><span className="fa fa-arrow-up-right-from-square ml-2"/>
+          </div>
+        </Link>
+      </div>
+
+      <div className="flex justify-center items-center mx-8 font-bold text-lg my-2">
+        <div className="flex-0 w-40">
           <Link to={ prev }><span className="fa fa-caret-left"/> Previous { dateType }</Link>
         </div>
-        <div className="flex-0">
+        <div className="flex-1 flex justify-center items-center">
+          ???????????????????????
+        </div>
+        <div className="flex-0 w-40 text-right">
           <Link to={ next }>Next { dateType } <span className="fa fa-caret-right"/></Link>
         </div>
       </div>
+
       <GridComp date={ date }
         TMCs={ TMCs }
         tmcWidths={ tmcWidths }

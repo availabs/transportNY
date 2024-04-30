@@ -178,7 +178,7 @@ class ReportBase extends React.Component {
           this.props.loadTemplateWithSyntheticRoute(
             tmcArray.split("_").filter(Boolean),
             templateId,
-            dates.split("|").filter(Boolean)
+            dates.split("_").filter(Boolean)
           )
         }
         else if (templateId && (routeIds.length || stationId)) {

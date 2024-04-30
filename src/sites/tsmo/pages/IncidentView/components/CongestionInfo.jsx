@@ -173,7 +173,7 @@ const CongestionInfo = ({
     const endDate = dates[dates.length - 1];
     const startTime = epochToTimeString(startEpoch);
     const endTime = epochToTimeString(endEpoch);
-    return `${ origin.replace("tsmo", "npmrds") }/template/edit/${ INCIDENT_TEMPLATE_ID }/tmcs/${ tmcs.join("_") }/dates/${ startDate }T${ startTime }|${ endDate }T${ endTime }`
+    return `${ origin.replace("tsmo", "npmrds") }/template/edit/${ INCIDENT_TEMPLATE_ID }/tmcs/${ tmcs.join("_") }/dates/${ startDate }T${ startTime }_${ endDate }T${ endTime }`
   }, [congestionData])
 
 	return !congestionData ? <div className='p-24 bg-white shadow font-medium'>Speed / Congestion data is not yet available for this incident. Check back next month.</div> : (
