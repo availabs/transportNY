@@ -5,6 +5,8 @@ import { range as d3range } from "d3-array"
 import download from "downloadjs"
 import moment from "moment"
 
+import {API_HOST} from "~/config"
+
 import Sidebar from "./components/Sidebar"
 
 import { useFalcor } from "~/modules/avl-components/src"
@@ -227,7 +229,7 @@ const BatchReports = props => {
   const sendToServer = React.useCallback(e => {
     if (!okToSend) return;
     startLoading("Sending data to server and generating .csv file...")
-    fetch("http://localhost:4444/batchreports", {
+    fetch(`${API_HOST}/batchreports`, {
       method: "POST",
       body: JSON.stringify({
         routes,
