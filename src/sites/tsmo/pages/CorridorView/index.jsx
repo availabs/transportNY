@@ -3,6 +3,7 @@ import React from "react"
 import { useNavigate, useParams, Link } from "react-router-dom"
 
 import get from "lodash/get"
+import moment from "moment"
 import { groups as d3groups, /*extent as d3extent, */ range as d3range } from "d3-array"
 import { scaleQuantile, /*scaleQuantize,*/ scaleThreshold } from "d3-scale"
 
@@ -318,6 +319,23 @@ const MonthGrid = () => {
     return `${ origin.replace("tsmo", "npmrds") }/template/edit/291/tmcs/${ TMCs.join("_") }/dates/${ date }T00:00_${ date }T24:00`
   }, [TMCs, ]);
 
+  const dateOptions = React.useMemo(() => {
+    if (dateType === "month") return [];
+
+    let [year, month] = date.split("-").map(Number);
+    const start = moment(`${ year }-${ month }-1`, "YYYY-MM-DD");
+    if (month === 12) {
+      ++year;
+    }
+    const end = moment(`${ year }-${ (month % 12) + 1 }-1`, "YYYY-MM-DD");
+    const options = [];
+    while (start.isBefore(end)) {
+      options.push(start.format("YYYY-MM-DD"));
+      start.add(1, "days");
+    }
+    return options;
+  }, [dateType, date]);
+
   return (
     <div style={ { width: "calc(100vw - 3.5rem)"}}>
       <div className={ `
@@ -373,20 +391,28 @@ const MonthGrid = () => {
         </div>
       </div>
 
-      <div className="my-2 flex justify-center font-bold text-lg">
-        <Link to={ reportURL } target="_blank">
-          <div className="bg-white rounded hover:bg-gray-200 px-2 py-1">
-            <span>Open in reports</span><span className="fa fa-arrow-up-right-from-square ml-2"/>
-          </div>
-        </Link>
-      </div>
+      { dateType === "month" ? null :
+        <div className="my-2 flex justify-center font-bold text-lg">
+          <Link to={ reportURL } target="_blank">
+            <div className="bg-white rounded hover:bg-gray-200 px-4 py-2">
+              <span>Open in NPMRDS Reports</span><span className="fa fa-arrow-up-right-from-square ml-2"/>
+            </div>
+          </Link>
+        </div>
+      }
 
       <div className="flex justify-center items-center mx-8 font-bold text-lg my-2">
         <div className="flex-0 w-40">
           <Link to={ prev }><span className="fa fa-caret-left"/> Previous { dateType }</Link>
         </div>
         <div className="flex-1 flex justify-center items-center">
-          ???????????????????????
+          { dateType === "month" ? null :
+            <div className="w-60">
+              <Select options={ dateOptions }
+                value={ date }
+                onChange={ setUrlFromDate }/>
+            </div>
+          }
         </div>
         <div className="flex-0 w-40 text-right">
           <Link to={ next }>Next { dateType } <span className="fa fa-caret-right"/></Link>
