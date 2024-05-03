@@ -5,6 +5,8 @@ import { range as d3range } from "d3-array"
 import download from "downloadjs"
 import moment from "moment"
 
+import { csvFormatRows as d3csvFormatRows } from "d3-dsv";
+
 import { API_HOST } from "~/config"
 
 import Sidebar from "./components/Sidebar"
@@ -128,6 +130,7 @@ const BatchReports = props => {
     setDataFromServer([]);
   }, []);
   const updateRouteData = React.useCallback((i, k, v) => {
+console.log("updateRouteData", i, k, v)
     setSelectedRoutes(prev => {
       const update = [...prev];
       update[i] = { ...update[i], [k]: v };
@@ -280,7 +283,6 @@ const BatchReports = props => {
       })
     }).then(res => res.json())
       .then(json => {
-        // return download(new Blob([json.csv]), `${ filename }.csv`, "text/csv");
         setDataFromServer(json.data);
       }).then(() => { stopLoading(); })
   }, [routes, okToSend, startLoading, stopLoading,
@@ -386,8 +388,19 @@ const brConfig = {
 }
 export default brConfig
 
-const FileSaver = ({ data }) => {
+const FileSaver = ({ data, columns }) => {
   const [filename, setFilename] = React.useState(`csv_data_${ moment().format("MM_DD_YYYY") }`);
+  const saveData = React.useCallback(e => {
+  e.stopPropagation();
+    data = data.map(row => {
+      const sliced = row.slice(1);
+      sliced[1] = sliced[1].join(", ");
+      return sliced;
+    });
+    data.unshift(columns.map(col => col.header));
+    const csv = d3csvFormatRows(data);
+    download(new Blob([csv]), `${ filename }.csv`, "text/csv");
+  }, [data, columns, filename]);
   return (
     <div>
       <div className="flex items-center mb-2">
@@ -397,10 +410,10 @@ const FileSaver = ({ data }) => {
         <div className="ml-2">.csv</div>
       </div>
       <Button className="buttonBlock"
-        onClick={ null }
+        onClick={ saveData }
         disabled={ !data.length }
       >
-        Save Data as .csv
+        Save Data as CSV
       </Button>
     </div>
   )
