@@ -53,6 +53,13 @@ const DataTypes = [
   { name: "Non-recurrent Delay", value: "nrd" },
   { name: "Recurrent Delay", value: "rd" }
 ]
+//
+//
+//
+const REPORT_ID = 291;
+//
+//
+//
 
 const MonthGrid = () => {
 
@@ -316,8 +323,8 @@ const MonthGrid = () => {
 
   const reportURL = React.useMemo(() => {
     const origin = window.location.origin;
-    return `${ origin.replace("tsmo", "npmrds") }/template/edit/291/tmcs/${ TMCs.join("_") }/dates/${ date }T00:00_${ date }T24:00`
-  }, [TMCs, ]);
+    return `${ origin.replace("tsmo", "npmrds") }/template/edit/${ REPORT_ID }/tmcs/${ TMCs.join("_") }/dates/${ date }T00:00_${ date }T24:00`
+  }, [TMCs, date]);
 
   const dateOptions = React.useMemo(() => {
     if (dateType === "month") return [];

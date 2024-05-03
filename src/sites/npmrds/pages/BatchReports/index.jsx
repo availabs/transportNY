@@ -5,7 +5,7 @@ import { range as d3range } from "d3-array"
 import download from "downloadjs"
 import moment from "moment"
 
-import {API_HOST} from "~/config"
+import { API_HOST } from "~/config"
 
 import Sidebar from "./components/Sidebar"
 
@@ -19,11 +19,15 @@ import {
   PERCENT_CHANGE_COLUMNS
 } from "./utils"
 import Route from "./components/Route"
+import ColumnNamer from "./components/ColumnNamer"
 
 import {
   getDatesAndTimes,
-  calculateRelativeDates
+  calculateRelativeDates,
+  RelativeDateOptions
 } from "~/sites/npmrds/pages/analysis/reports/store/utils/relativedates.utils"
+
+import "./utils/animations.css"
 
 const BatchReports = props => {
   const { falcor, falcorCache } = useFalcor();
@@ -80,6 +84,8 @@ const BatchReports = props => {
       }
   }, [falcor, falcorCache, startLoading, stopLoading]);
 
+  const [dataFromServer, setDataFromServer] = React.useState([]);
+
   const [selectedRoutes, setSelectedRoutes] = React.useState([]);
   const addRoutes = React.useCallback(rids => {
     if (!Array.isArray(rids)) {
@@ -115,9 +121,11 @@ const BatchReports = props => {
         })
       ]
     });
+    setDataFromServer([]);
   }, [falcorCache]);
   const removeRoute = React.useCallback(i => {
-    setSelectedRoutes(routes => [...routes.slice(0, i), ...routes.slice(i + 1)])
+    setSelectedRoutes(routes => [...routes.slice(0, i), ...routes.slice(i + 1)]);
+    setDataFromServer([]);
   }, []);
   const updateRouteData = React.useCallback((i, k, v) => {
     setSelectedRoutes(prev => {
@@ -125,24 +133,35 @@ const BatchReports = props => {
       update[i] = { ...update[i], [k]: v };
       return update;
     })
+    setDataFromServer([]);
   }, []);
 
+  const [defaultColumns, setDefaultColumns] = React.useState(DEFAULT_COLUMNS.map(col => ({ ...col })));
   const [activeDataColumns, _setActiveDataColumns] = React.useState([]);
-  const [activePCColumns, setActivePCColumns] = React.useState([]);
-  const [activeDateColumns, setActiveDateColumns] = React.useState([]);
+  const [activePCColumns, _setActivePCColumns] = React.useState([]);
+  const [activeDateColumns, _setActiveDateColumns] = React.useState([]);
 
   const setActiveDataColumns = React.useCallback(cols => {
-    _setActiveDataColumns(cols);
-    setActivePCColumns(prev => {
+    _setActiveDataColumns(cols.map(col => ({ ...col })));
+    _setActivePCColumns(prev => {
       return prev.filter(col => {
         return cols.reduce((a, c) => {
           return a || col.key.includes(c.key);
         }, false)
       })
-    })
+    });
+    setDataFromServer([]);
   }, [activePCColumns]);
+  const setActivePCColumns = React.useCallback(cols => {
+    _setActivePCColumns(cols.map(col => ({ ...col })));
+    setDataFromServer([]);
+  }, []);
+  const setActiveDateColumns = React.useCallback(func => {
+    _setActiveDateColumns(func);
+    setDataFromServer([]);
+  }, []);
 
-  const pcColumns = React.useMemo(() => {
+  const pcColumnOptions = React.useMemo(() => {
     return PERCENT_CHANGE_COLUMNS.filter(col => {
       return activeDataColumns.reduce((a, c) => {
         return a || col.key.includes(c.key);
@@ -150,59 +169,81 @@ const BatchReports = props => {
     })
   }, [activeDataColumns]);
 
-  const activeColumns = React.useMemo(() => {
-    return [
-      ...DEFAULT_COLUMNS,
-      ...activeDataColumns,
+  const [activeColumns, setActiveColumns] = React.useState([]);
+
+  React.useEffect(() => {
+    const pcColumnsMap = activePCColumns.reduce((a, c) => {
+      const [base] = c.key.split("-");
+      a[base] = c;
+      return a;
+    }, {});
+    setActiveColumns([
+      ...defaultColumns,
+      ...activeDataColumns.map(col => ({ ...col, key: `${ col.key }-0` })),
       ...activeDateColumns.reduce((a, c, i) => {
         a.push(c);
         if (i % 2 === 1) {
-          a.push(...activeDataColumns);
-          a.push(...activePCColumns);
+          activeDataColumns.forEach(col => {
+            const header = c.header.replace("End Date", col.header);
+            a.push({ ...col, header, key: `${ col.key }-${ (i + 1) / 2 }`});
+            if (col.key in pcColumnsMap) {
+              const pcCol = pcColumnsMap[col.key];
+              const header = c.header.replace("End Date", pcCol.header);
+              a.push({ ...pcCol, header, key: `${ pcCol.key }-${ (i + 1) / 2 }`});
+            }
+          })
         }
         return a;
       }, [])
-    ]
-  }, [activeDataColumns, activePCColumns, activeDateColumns]);
+    ])
+  }, [defaultColumns, activeDataColumns, activePCColumns, activeDateColumns]);
+
+  const updateColumnHeaders = React.useCallback(updates => {
+    setActiveColumns(prev => {
+      return prev.map(column => {
+        if (column.key in updates) {
+          return { ...column, header: updates[column.key] };
+        }
+        return column;
+      })
+    })
+  }, []);
 
   const routes = React.useMemo(() => {
-    return selectedRoutes.map(route => {
-      const { startDate, endDate } = route;
-      return {
-        ...route,
-        // ...activeDataColumns.reduce((a, c) => {
-        //   a[c.key] = c.header;
-        //   return a;
-        // }, {}),
-        ...activeDateColumns
-          .filter(adc => adc.relativeDate)
-          .reduce((a, c, i) => {
-            const [sd, ed] = calculateRelativeDates(c.relativeDate, startDate, endDate, "YYYY-MM-DD");
-            a[c.key] = (i % 2 === 0) ? sd : ed;
-            // if (i % 2 === 1) {
-            //   // return activeDataColumns.reduce((a, c) => {
-            //   //   a[c.key] = c.header;
-            //   //   return a;
-            //   // }, a)
-            //   activeDataColumns.forEach(c => {
-            //     a[c.key] = c.header;
-            //   });
-            //   activePCColumns.forEach(c => {
-            //     a[c.key] = c.header;
-            //   });
-            // }
-            return a;
-          }, {})
-      }
-    })
-  }, [selectedRoutes, activeDateColumns]);
+    const dataMap = dataFromServer
+      .reduce((a, c) => {
+        a[c[0]] = c.slice(1);
+        return a;
+      }, {});
 
-  const [filename, setFilename] = React.useState(`csv_data_${ moment().format("MM_DD_YYYY") }`);
+    return selectedRoutes.map((route, i) => {
+      const { startDate, endDate } = route;
+      return activeColumns.reduce((a, c, ii) => {
+        if (get(dataMap, [i, ii], null)) {
+          a[c.key] = dataMap[i][ii];
+        }
+        else if (c.relativeDate && (c.type === "date:start")) {
+          const [sd] = calculateRelativeDates(c.relativeDate, startDate, endDate, "YYYY-MM-DD");
+          a[c.key] = sd;
+        }
+        else if (c.relativeDate && (c.type === "date:end")) {
+          const [, ed] = calculateRelativeDates(c.relativeDate, startDate, endDate, "YYYY-MM-DD");
+          a[c.key] = ed;
+        }
+        else if (c.key in route) {
+          a[c.key] = route[c.key];
+        }
+        else {
+          a[c.key] = c.header;
+        }
+        return a;
+      }, { ...route })
+    })
+  }, [selectedRoutes, activeColumns, dataFromServer]);
 
   const okToSend = React.useMemo(() => {
     if (!activeDataColumns.length) return false;
     if (!routes.length) return false;
-    if (!filename.replace(".csv", "").length) return false;
 
     const timeRegex = /\d\d:\d\d(:\d\d)?/;
     const dateRetgex = /\d{4}-\d\d-\d\d/;
@@ -224,26 +265,26 @@ const BatchReports = props => {
         return aa;
       }, a);
     }, true);
-  }, [routes, activeColumns, activeDataColumns, filename]);
+  }, [routes, activeColumns, activeDataColumns]);
 
   const sendToServer = React.useCallback(e => {
     if (!okToSend) return;
-    startLoading("Sending data to server and generating .csv file...")
+    startLoading("Sending selections to server and generating data...")
     fetch(`${API_HOST}/batchreports`, {
       method: "POST",
       body: JSON.stringify({
-        routes,
+        routes: routes.map((r, i) => ({ ...r, index: i })),
         dataColumns: activeDataColumns,
         pcColumns: activePCColumns,
         dateColumns: activeDateColumns
       })
     }).then(res => res.json())
       .then(json => {
-        return download(new Blob([json.csv]), `${ filename }.csv`, "text/csv");
+        // return download(new Blob([json.csv]), `${ filename }.csv`, "text/csv");
+        setDataFromServer(json.data);
       }).then(() => { stopLoading(); })
-  }, [routes, okToSend, filename,
-      activeDataColumns, activePCColumns, activeDateColumns,
-      startLoading, stopLoading
+  }, [routes, okToSend, startLoading, stopLoading,
+      activeDataColumns, activePCColumns, activeDateColumns
   ]);
 
   const [ref, setRef] = React.useState(null);
@@ -268,34 +309,44 @@ const BatchReports = props => {
         { loadingMessage }
       </div>
 
-      <div className="h-full w-fit">
-        <Sidebar
-          addRoutes={ addRoutes }
-          activeDataColumns={ activeDataColumns }
-          setActiveDataColumns={ setActiveDataColumns }
-          activePCColumns={ activePCColumns }
-          setActivePCColumns={ setActivePCColumns }
-          activeDateColumns={ activeDateColumns }
-          setActiveDateColumns={ setActiveDateColumns }
-          dataColumns={ DATA_COLUMNS }
-          pcColumns={ pcColumns }
-        >
-          <div className="grid grid-cols-1 gap-4">
-            <div className="flex items-center">
-              <div className="mr-2">Filename:</div>
-              <Input value={ filename }
-                onChange={ setFilename }/>
-              <div className="ml-2">.csv</div>
+      <Collapsable>
+        <div className="flex h-full flex-col">
+          <Sidebar
+            addRoutes={ addRoutes }
+            activeDataColumns={ activeDataColumns }
+            setActiveDataColumns={ setActiveDataColumns }
+            activePCColumns={ activePCColumns }
+            setActivePCColumns={ setActivePCColumns }
+            activeDateColumns={ activeDateColumns }
+            setActiveDateColumns={ setActiveDateColumns }
+            dataColumnOptions={ DATA_COLUMNS }
+            pcColumnOptions={ pcColumnOptions }/>
+
+          <div className="flex-1 flex flex-col justify-end">
+
+            <div className="grid grid-cols-1 gap-4 p-4">
+              <div className="border-2 border-current"/>
+
+              <ColumnNamer columns={ activeColumns }
+                updateHeaders={ updateColumnHeaders }/>
+
+              <div className="border-2 border-current"/>
+
+              <Button className="buttonBlock"
+                onClick={ sendToServer }
+                disabled={ !okToSend }
+              >
+                Generate Data
+              </Button>
+
+              <FileSaver data={ dataFromServer }
+                columns={ activeColumns }/>
+
             </div>
-            <Button className="buttonBlock"
-              onClick={ sendToServer }
-              disabled={ !okToSend }
-            >
-              Generate .csv file
-            </Button>
+
           </div>
-        </Sidebar>
-      </div>
+        </div>
+      </Collapsable>
 
       <div ref={ setRef }
         className="flex-1 p-4 overflow-auto scrollbar"
@@ -334,3 +385,58 @@ const brConfig = {
   auth: true
 }
 export default brConfig
+
+const FileSaver = ({ data }) => {
+  const [filename, setFilename] = React.useState(`csv_data_${ moment().format("MM_DD_YYYY") }`);
+  return (
+    <div>
+      <div className="flex items-center mb-2">
+        <div className="mr-2">Filename:</div>
+        <Input value={ filename }
+          onChange={ setFilename }/>
+        <div className="ml-2">.csv</div>
+      </div>
+      <Button className="buttonBlock"
+        onClick={ null }
+        disabled={ !data.length }
+      >
+        Save Data as .csv
+      </Button>
+    </div>
+  )
+}
+
+const Collapsable = ({ children }) => {
+  const [isOpen, setIsOpen] = React.useState(true);
+  const toggle = React.useCallback(e => {
+    e.stopPropagation();
+    setIsOpen(isOpen => !isOpen);
+  }, []);
+
+  return (
+    <div className={ `
+        h-full relative bg-white
+        ${ isOpen ? `w-[400px] overflow-visible` : "w-8 overflow-hidden" }
+      ` }
+    >
+      <div className={ `
+          absolute top-0 right-0 z-20
+          bg-gray-300 hover:bg-gray-400
+          w-8 h-8 flex items-center justify-center
+          rounded cursor-pointer
+        ` }
+        onClick={ toggle }
+      >
+        <span className={ `
+            fa ${ isOpen ? "fa-chevron-left" : "fa-chevron-right" }
+          ` }/>
+      </div>
+      { isOpen ? null :
+        <div className="absolute inset-0 z-10 bg-white"/>
+      }
+      <div className="w-fit h-full">
+        { children }
+      </div>
+    </div>
+  )
+}

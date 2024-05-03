@@ -218,8 +218,19 @@ const RelativeDateControls = props => {
         }
       )
       return a;
-    }, [])
-    setActiveDateColumns(columns);
+    }, []);
+    setActiveDateColumns(prev => {
+      const prevMap = prev.reduce((a, c) => {
+        a[c.key] = c;
+        return a;
+      }, {});
+      return columns.map(col => {
+        if (col.key in prevMap) {
+          return { ...col, ...prev[col.key] };
+        }
+        return col;
+      });
+    });
   }, [state.relativeDates, setActiveDateColumns]);
 
   const [show, setShow] = React.useState(false);

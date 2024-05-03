@@ -1,0 +1,22 @@
+@keyframes open {
+  from {
+    overflow: visible;
+  }
+  99% {
+    overflow: visible;
+  }
+  to {
+    overflow: hidden;
+  }
+}
+@keyframes close {
+  from {
+    overflow: hidden;
+  }
+  99% {
+    overflow: hidden;
+  }
+  to {
+    overflow: visible;
+  }
+}

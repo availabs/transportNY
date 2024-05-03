@@ -41,6 +41,12 @@ const fillFolders = (falcorCache, fids) => {
   }, []);
 }
 
+const nameAccessor = r => r.name;
+const idAccessor = r => r.id;
+const valueAccessor = r => r.value;
+const headerAccessor = c => c.header;
+const valueComparator = (a, b) => a.key === b.key;
+
 const Sidebar = props => {
   const {
     addRoutes,
@@ -50,8 +56,8 @@ const Sidebar = props => {
     setActivePCColumns,
     activeDateColumns,
     setActiveDateColumns,
-    dataColumns,
-    pcColumns,
+    dataColumnOptions,
+    pcColumnOptions,
     children
   } = props;
 
@@ -87,8 +93,8 @@ const Sidebar = props => {
   }, [falcorCache]);
 
   return (
-    <div className="w-[400px] bg-white h-full">
-      <div className="h-full w-full relative">
+    <div className="w-[400px] h-fit">
+      <div className="h-fit relative">
 
         <div className="grid grid-cols-2 gap-2 p-4">
           <div className="col-span-2 text-2xl font-bold">
@@ -99,8 +105,8 @@ const Sidebar = props => {
           <MultiLevelSelect isDropdown searchable
             onChange={ addRoutes }
             options={ routes }
-            displayAccessor={ r => r.name }
-            valueAccessor={ r => r.id }
+            displayAccessor={ nameAccessor }
+            valueAccessor={ idAccessor }
           >
             <div className="px-2 py-1 outline outline-2 rounded hover:bg-gray-300">
               Select a Route
@@ -110,8 +116,8 @@ const Sidebar = props => {
           <MultiLevelSelect isDropdown searchable
             onChange={ addRoutes }
             options={ folders }
-            displayAccessor={ r => r.name }
-            valueAccessor={ r => r.value }
+            displayAccessor={ nameAccessor }
+            valueAccessor={ valueAccessor }
           >
             <div className="px-2 py-1 outline outline-2 rounded hover:bg-gray-300">
               Search Folders
@@ -123,9 +129,10 @@ const Sidebar = props => {
           <div className="col-span-2">
             <MultiLevelSelect isMulti
               onChange={ setActiveDataColumns }
-              options={ dataColumns }
-              displayAccessor={ c => c.header }
+              options={ dataColumnOptions }
+              displayAccessor={ headerAccessor }
               value={ activeDataColumns }
+              valueComparator={ valueComparator }
               placeholder="Add a data column..."/>
           </div>
           <div className="col-span-2"/>
@@ -134,9 +141,10 @@ const Sidebar = props => {
           <div className="col-span-2">
             <MultiLevelSelect isMulti
               onChange={ setActivePCColumns }
-              options={ pcColumns }
-              displayAccessor={ c => c.header }
+              options={ pcColumnOptions }
+              displayAccessor={ headerAccessor }
               value={ activePCColumns }
+              valueComparator={ valueComparator }
               placeholder="Add a percent change column..."/>
           </div>
           <div className="col-span-2"/>

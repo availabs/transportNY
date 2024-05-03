@@ -77,10 +77,6 @@ const RouteColumn = ({ route, column, update, isOdd }) => {
         <DisaplyDiv>
           { (route.tmcs || []).join(", ") || NBSP }
         </DisaplyDiv> :
-        comp === "data" ?
-        <DisaplyDiv>
-          { column.header }
-        </DisaplyDiv> :
         <DisaplyDiv>
           { get(route, column.key) || NBSP }
         </DisaplyDiv>
@@ -138,7 +134,7 @@ const Route = ({ route, columns, update, index, remove }) => {
     <tr className="odd:bg-gray-500 even:bg-gray-200">
       <RemoveTD remove={ doRemove }/>
       { columns.map((col, i) => (
-          <RouteColumn key={ i }
+          <RouteColumn key={ `${ col.key }-${ i }` }
             route={ route }
             column={ col }
             update={ doUpdate }
