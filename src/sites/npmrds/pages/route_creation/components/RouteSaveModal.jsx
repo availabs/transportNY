@@ -7,7 +7,7 @@ import { useFalcor, ScalableLoading } from "~/modules/avl-components/src"
 
 import { Modal, MultiLevelSelect } from "~/sites/npmrds/components"
 
-const DateTimeRegex = /(\d{8})?T(\d{6})/;
+const DateTimeRegex = /(\d{4}-\d\d-\d\d)(?:T(\d\d[:]\d\d[:]\d\d))?/;
 
 const processDates = dates => {
   const response = [["", ""], ["", ""]];
@@ -15,7 +15,7 @@ const processDates = dates => {
   if (DateTimeRegex.test(startDate)) {
     const [, sd, st] = DateTimeRegex.exec(startDate);
     response[0][0] = sd || "";
-    response[1][0] = st;
+    response[1][0] = st || "";
   }
   else {
     response[0][0] = startDate || "";
@@ -23,7 +23,7 @@ const processDates = dates => {
   if (DateTimeRegex.test(endDate)) {
     const [, sd, st] = DateTimeRegex.exec(endDate);
     response[0][1] = sd || "";
-    response[1][1] = st;
+    response[1][1] = st || "";
   }
   else {
     response[0][1] = endDate || "";
@@ -49,52 +49,52 @@ const Reducer = (state, action) => {
 
     case "update-start-date": {
       const [[startDate, endDate], [startTime, endTime]] = processDates(state.dates);
-      const update = payload.startDate.replaceAll("-", "");
+      // const update = payload.startDate.replaceAll("-", "");
       return {
         ...state,
         dates: [
-          `${ update }${ startTime ? `T${ startTime }` : "" }`,
+          `${ payload.startDate }${ startTime ? `T${ startTime }` : "" }`,
           `${ endDate }${ endTime ? `T${ endTime }` : "" }`
         ]
       }
     }
     case "update-end-date": {
       const [[startDate, endDate], [startTime, endTime]] = processDates(state.dates);
-      const update = payload.endDate.replaceAll("-", "");
+      // const update = payload.endDate.replaceAll("-", "");
       return {
         ...state,
         dates: [
           `${ startDate }${ startTime ? `T${ startTime }` : "" }`,
-          `${ update }${ endTime ? `T${ endTime }` : "" }`
+          `${ payload.endDate }${ endTime ? `T${ endTime }` : "" }`
         ]
       }
     }
 
     case "update-start-time": {
       const [[startDate, endDate], [startTime, endTime]] = processDates(state.dates);
-      const update = `${ payload.startTime.replaceAll(":", "") }00`;
+      // const update = `${ payload.startTime.replaceAll(":", "") }00`;
       return {
         ...state,
         dates: [
-          `${ startDate }T${ update }`,
+          `${ startDate }T${ payload.startTime }`,
           `${ endDate }${ endTime ? `T${ endTime }` : "" }`
         ]
       }
     }
     case "update-end-time": {
       const [[startDate, endDate], [startTime, endTime]] = processDates(state.dates);
-      const update = `${ payload.endTime.replaceAll(":", "") }00`;
+      // const update = `${ payload.endTime.replaceAll(":", "") }00`;
       return {
         ...state,
         dates: [
           `${ startDate }${ startTime ? `T${ startTime }` : "" }`,
-          `${ endDate }T${ update }`
+          `${ endDate }T${ payload.endTime }`
         ]
       }
     }
 
     case "reset":
-      return InitReducer(payload.loadedRoute);
+      return InitReducer(payload.data);
     default:
       return state;
   }
@@ -106,9 +106,9 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, folderId, ...props }) => {
 
   React.useEffect(() => {
     if (loadedRoute && (state.id !== loadedRoute.id)) {
-      dispatch({ type: "reset", loadedRoute });
+      dispatch({ type: "reset", data: [loadedRoute, folderId] });
     }
-  }, [state.id, loadedRoute]);
+  }, [state.id, loadedRoute, folderId]);
 
   const setName = React.useCallback(e => {
     dispatch({
@@ -130,12 +130,14 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, folderId, ...props }) => {
   }, []);
 
   const setStartDate = React.useCallback(e => {
+console.log("setStartDate:", e.target.value)
     dispatch({
       type: "update-start-date",
       startDate: e.target.value
     });
   }, []);
   const setEndDate = React.useCallback(e => {
+console.log("setEndDate:", e.target.value)
     dispatch({
       type: "update-end-date",
       endDate: e.target.value
@@ -143,12 +145,14 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, folderId, ...props }) => {
   }, []);
 
   const setStartTime = React.useCallback(e => {
+console.log("setStartTime:", e.target.value)
     dispatch({
       type: "update-start-time",
       startTime: e.target.value
     });
   }, []);
   const setEndTime = React.useCallback(e => {
+console.log("setEndTime:", e.target.value)
     dispatch({
       type: "update-end-time",
       endTime: e.target.value
@@ -189,7 +193,6 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, folderId, ...props }) => {
       tmc_array: savePoints ? [] : props.tmc_array,
       metadata: saveTimes ? { dates: [...dates] } : saveDates ? { dates: [sd, ed] } : null
     }
-// console.log("SAVING:", data)
     setSaving(true);
     falcor.call(["routes2", "save"], [data])
       .then(() => setResult({ msg: "success" }))
@@ -199,9 +202,9 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, folderId, ...props }) => {
 
   React.useEffect(() => {
     if (saving) {
-      dispatch({ type: "reset", loadedRoute });
+      dispatch({ type: "reset", data: [loadedRoute, folderId] });
     }
-  }, [loadedRoute, saving]);
+  }, [loadedRoute, folderId, saving]);
 
   const canSave = React.useMemo(() => {
     const { points = [], tmc_array = [], ...route } = loadedRoute || {};
@@ -214,15 +217,7 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, folderId, ...props }) => {
   }, [state, loadedRoute, props.points, props.tmc_array]);
 
   const [[startDate, endDate], [startTime, endTime]] = React.useMemo(() => {
-    const [[sd, ed], [st, et]] = processDates(state.dates);
-    return [
-      [sd ? `${ sd.slice(0, 4) }-${ sd.slice(4, 6) }-${ sd.slice(6) }` : "",
-        ed ? `${ ed.slice(0, 4) }-${ ed.slice(4, 6) }-${ ed.slice(6) }` : ""
-      ],
-      [st ? `${ st.slice(0, 2) }:${ st.slice(2, 4) }` : "",
-        et ? `${ et.slice(0, 2) }:${ et.slice(2, 4) }` : ""
-      ]
-    ]
+    return processDates(state.dates);
   }, [state.dates]);
 
   return (
@@ -306,7 +301,7 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, folderId, ...props }) => {
 
             <div className="font-bold text-right pt-1">Start Time</div>
             <div className="col-span-5">
-              <input type="time"
+              <input type="time" step={ 1 }
                 className={ `
                   w-full px-2 py-1 rounded
                   focus:outline-2 focus:outline focus:outline-current
@@ -318,7 +313,7 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, folderId, ...props }) => {
 
             <div className="font-bold text-right pt-1">End Time</div>
             <div className="col-span-5">
-              <input type="time"
+              <input type="time" step={ 1 }
                 className={ `
                   w-full px-2 py-1 rounded
                   focus:outline-2 focus:outline focus:outline-current

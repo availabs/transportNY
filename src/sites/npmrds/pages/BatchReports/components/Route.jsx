@@ -121,7 +121,9 @@ const Route = ({ route, columns, update, index, remove }) => {
     if (startDate) {
       const year = startDate.slice(0, 4);
       const tmcs = get(falcorCache, ["routes2", "id", id, year, "tmc_array", "value"], [])
-      doUpdate("tmcs", tmcs);
+      if (tmcs.length) {
+        doUpdate("tmcs", tmcs);
+      }
     }
   }, [falcorCache, route, doUpdate]);
 
