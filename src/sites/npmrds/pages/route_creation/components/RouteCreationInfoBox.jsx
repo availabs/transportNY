@@ -6,12 +6,15 @@ import { useParams } from "react-router-dom"
 
 import {
   Button,
+  Input,
   useFalcor
 } from "~/modules/avl-components/src"
 
 import RouteSaveModal from "./RouteSaveModal"
 
-const format = d3format(",.2f")
+const format = d3format(",.2f");
+
+const TMC_REGEX = /^\d{3}[pnPN+-]\d{5}$/;
 
 const InfoBox = props => {
 
@@ -99,7 +102,25 @@ const InfoBox = props => {
 
   const doHighlight = React.useCallback(tmc => {
     props.layer.setHighlightedTmcs(tmc);
-  }, [props.layer.setHighlightedTmcs])
+  }, [props.layer.setHighlightedTmcs]);
+
+  const [tmcSearch, setTmcSearch] = React.useState("");
+  const [tmcBoundingBox, setTmcBoundingBox] = React.useState(null);
+  const disabled = React.useMemo(() => {
+    return !TMC_REGEX.test(tmcSearch);
+  }, [tmcSearch]);
+  const searchForTmc = React.useCallback(e => {
+    falcor.get(["tmc", tmcSearch, "meta", year, "bounding_box"]);
+  }, [falcor, tmcSearch, year]);
+  React.useEffect(() => {
+    const bb = get(falcorCache, ["tmc", tmcSearch, "meta", year, "bounding_box", "value"], null);
+    setTmcBoundingBox(bb);
+  }, [falcorCache, tmcSearch, year]);
+  React.useEffect(() => {
+    if (tmcBoundingBox) {
+      props.mapboxMap.fitBounds(tmcBoundingBox, { padding: { top: 200, bottom: 200, left: 300, right: 300 } });
+    }
+  }, [props.mapboxMap, tmcBoundingBox]);
 
   return (
     <>
@@ -117,6 +138,23 @@ const InfoBox = props => {
               "Click map to place markers to define a route." :
               "Click TMCs to define a route."
           }
+        </div>
+        <div className="border-t-2 border-current"/>
+        <div>
+          <div className="font-bold">TMC Search</div>
+          <Input type="text"
+            placeholder="Search for a TMC..."
+            value={ tmcSearch }
+            onChange={ setTmcSearch }
+            themeOptions={ { width: "full" } }/>
+          <div className="mt-2">
+            <Button onClick={ searchForTmc }
+              themeOptions={ { width: "full" } }
+              disabled={ disabled }
+            >
+              { disabled ? "Invalid TMC" : "Search for TMC" }
+            </Button>
+          </div>
         </div>
         <div className="border-t-2 border-current"/>
         <div className="grid grid-cols-2 gap-2">

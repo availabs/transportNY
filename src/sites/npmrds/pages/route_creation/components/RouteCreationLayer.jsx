@@ -28,6 +28,21 @@ const GEO_LEVEL_ORDER = {
   UA: 3
 }
 
+const HoverComp = ({ data }) => {
+  const tmcs = [...new Set(data)];
+console.log("DATA:", data)
+  return (
+    <div className="bg-gray-100 rounded z-10 px-4 py-1">
+      { tmcs.map(tmc => (
+          <div key={ tmc } className="py-1">
+            { tmc }
+          </div>
+        ))
+      }
+    </div>
+  )
+}
+
 class RouteCreationLayer extends LayerContainer {
   name = "Route Creation";
 
@@ -38,8 +53,6 @@ class RouteCreationLayer extends LayerContainer {
     creationMode: "markers",
     highlighted: []
   }
-
-  tmcsbyLayerId = {};
 
   setCreationMode(creationMode) {
     if (creationMode === "tmc-clicks") {
@@ -118,6 +131,9 @@ class RouteCreationLayer extends LayerContainer {
   onHover = {
     layers: [...ConflationLayerIds],
     property: "tmc",
+    HoverComp,
+    pinnable: false,
+    callback: (layerId, features) => features.map(f => get(f, ["properties", "tmc"], null)).filter(Boolean),
     hoverEnter: function(layerId, features = []) {
       const route = this.state.tmcs;
       const highlighted = this.state.highlighted;
