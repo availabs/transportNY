@@ -130,14 +130,12 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, folderId, ...props }) => {
   }, []);
 
   const setStartDate = React.useCallback(e => {
-console.log("setStartDate:", e.target.value)
     dispatch({
       type: "update-start-date",
       startDate: e.target.value
     });
   }, []);
   const setEndDate = React.useCallback(e => {
-console.log("setEndDate:", e.target.value)
     dispatch({
       type: "update-end-date",
       endDate: e.target.value
@@ -145,14 +143,12 @@ console.log("setEndDate:", e.target.value)
   }, []);
 
   const setStartTime = React.useCallback(e => {
-console.log("setStartTime:", e.target.value)
     dispatch({
       type: "update-start-time",
       startTime: e.target.value
     });
   }, []);
   const setEndTime = React.useCallback(e => {
-console.log("setEndTime:", e.target.value)
     dispatch({
       type: "update-end-time",
       endTime: e.target.value
@@ -169,7 +165,9 @@ console.log("setEndTime:", e.target.value)
 
   React.useEffect(() => {
     const folders = get(falcorCache, ["folders2", "for", "user", "value"], []);
-    setFolders(folders);
+    if (Array.isArray(folders)) {
+      setFolders(folders);
+    }
   }, [falcorCache]);
 
   const [saving, setSaving] = React.useState(false);

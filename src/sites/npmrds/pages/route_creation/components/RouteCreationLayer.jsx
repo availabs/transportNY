@@ -30,7 +30,6 @@ const GEO_LEVEL_ORDER = {
 
 const HoverComp = ({ data }) => {
   const tmcs = [...new Set(data)];
-console.log("DATA:", data)
   return (
     <div className="bg-gray-100 rounded z-10 px-4 py-1">
       { tmcs.map(tmc => (
@@ -50,7 +49,7 @@ class RouteCreationLayer extends LayerContainer {
     markers: [],
     ways: [],
     tmcs: [],
-    creationMode: "markers",
+    creationMode: "tmc-clicks",
     highlighted: []
   }
 

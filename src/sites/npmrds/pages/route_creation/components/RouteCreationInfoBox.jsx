@@ -180,7 +180,7 @@ const InfoBox = props => {
               </div>
             </div>
             <div className="overflow-auto scrollbar-sm"
-              style={ { maxHeight: "450px" } }
+              style={ { maxHeight: "350px" } }
             >
               { tmcs.map(tmc => (
                   <TmcItem key={ tmc }
@@ -228,14 +228,14 @@ const TmcItem = ({ tmc, year, highlight, highlighted }) => {
       onMouseOut={ doHighlight }
     >
       <div className="flex items-center">
-        <div className="font-bold flex-1">
+        <div className="font-bold text-sm flex-1">
           { tmc }
         </div>
-        <div className="text-sm">
+        <div className="text-xs">
           { format(get(falcorCache, ["tmc", tmc, "meta", year, "miles"], 0)) } miles
         </div>
       </div>
-      <div className="text-sm">
+      <div className="text-xs">
         { get(falcorCache, ["tmc", tmc, "meta", year, "roadname"]) } { get(falcorCache, ["tmc", tmc, "meta", year, "direction"]) }
       </div>
     </div>

@@ -1,7 +1,7 @@
 export const DEFAULT_COLUMNS = [
   { key: "name",
     header: "Name",
-    comp: "name-input",
+    comp: "input:text",
     type: "route-data"
   },
   { key: "tmcs",
