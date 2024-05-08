@@ -1,5 +1,6 @@
 import { useFalcor } from "~/modules/avl-components/src"
 import { useAuth } from "~/modules/ams/src";
+import {Link} from 'react-router-dom'
 
 import { dmsPageFactory, registerDataType } from "~/modules/dms/src"
 import { withAuth } from "~/modules/ams/src" 
@@ -39,7 +40,16 @@ const Routes = [
         type: "cms-freightatlas",
         useFalcor: useFalcor,
         logo: <Logo />, 
-        rightMenu: <AuthMenu />,
+        rightMenu: ( 
+          <div className='flex'>
+            <Link to='/datasources' className='w-fit group font-display whitespace-nowrap
+        flex font-medium tracking-widest items-center text-[14px] px-4 h-12 text-slate-700 border-slate-100
+        hover:bg-white hover:text-blue-500
+        focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
+        transition cursor-pointer'>Data Manager</Link> 
+            <AuthMenu />
+          </div>
+        ),
         baseUrl: "",
         checkAuth,
         theme,
