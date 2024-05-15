@@ -3,8 +3,6 @@ import React from "react"
 import get from "lodash/get"
 import moment from "moment"
 
-import ReactTooltip from "react-tooltip"
-
 import { Input } from "~/modules/avl-map-2/src/uicomponents"
 
 import {
@@ -44,11 +42,13 @@ const RouteTd = props => {
     setYDir(1);
   }, []);
 
-  const isShaded = (index !== null) && (index % 2 === 0);
+  const isShaded = React.useMemo(() => {
+    return (index !== null) && (index % 2 === 0);
+  }, [index]);
 
-  const Children = React.Children.toArray(children);
-
-hover && console.log("DIRS:", xDir, yDir)
+  const Children = React.useMemo(() => {
+    return React.Children.toArray(children);
+  }, [children]);
 
   return (
     <td ref={ setRef }
@@ -56,62 +56,50 @@ hover && console.log("DIRS:", xDir, yDir)
       className={ `
         pl-1 last:pr-1 py-1 ml-1 last:mr-1 relative bg-gray-600
         ${ isShaded ? "bg-opacity-25" : "bg-opacity-0" }
-        ${ Children.length === 2 ? "cursor-pointer" : "" }
+        ${ Children.length === 1 ? "cursor-pointer" : "" }
          whitespace-nowrap
       ` }
       onMouseEnter={ onMouseEnter }
       onMouseLeave={ onMouseLeave }
     >
       { Children[0] }
-      <div className="absolute inset-0">
-        <div className={ `
-            absolute z-10 pointer-events-none w-full min-w-fit
-            ${ hover ? "block" : "hidden" }
-            ${ xDir === 1 ? "right-0" : "right-0" }
-            ${ yDir === 1 ? "top-0" : "bottom-0" }
-          ` }
-        >
-          <div className="w-full min-w-fit relative">
-            <div style={ hoverStyle }
-              className="pointer-events-auto relative"
-            >
-              { Children[1] }
+      { Children.length === 1 ? null :
+        <div className="absolute inset-0">
+          <div className={ `
+              absolute z-10 pointer-events-none w-full min-w-fit
+              ${ hover ? "block" : "hidden" }
+              ${ xDir === 1 ? "right-0" : "right-0" }
+              ${ yDir === 1 ? "top-0" : "bottom-0" }
+            ` }
+          >
+            <div className="w-full min-w-fit relative">
+              <div style={ hoverStyle }
+                className="pointer-events-auto relative"
+              >
+                { Children[1] }
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      }
     </td>
   )
 }
 
-const HasDates = () => {
-  return (
-    <div>
-      <span data-tip data-for="has-dates"
-        className="fa-regular fa-calendar mx-1 text-gray-500"/>
-      <ReactTooltip id="has-dates">
-        Has Dates
-      </ReactTooltip>
-    </div>
-  )
-}
-const HasTimes = () => {
-  return (
-    <div>
-      <span data-tip data-for="has-times"
-        className="fa-regular fa-clock mx-1 text-gray-500"/>
-      <ReactTooltip id="has-times">
-        Has Times
-      </ReactTooltip>
-    </div>
-  )
-}
+const HasDates = (
+  <span className="fa-regular fa-calendar mx-1 text-gray-500"/>
+)
+const HasTimes = (
+  <span className="fa-regular fa-clock mx-1 text-gray-500"/>
+)
+
+const TD = ({ children }) => <td>{ children }</td>
 
 const RouteTableRow = ({ route, remove, update, index, columns }) => {
   const doRemove = React.useCallback(e => {
     e.stopPropagation();
     remove(index);
-  },[ remove, index]);
+  },[remove, index]);
   const doUpdate = React.useCallback((v, e) => {
     update(index, e.target.id, v);
   }, [update, index]);
@@ -140,13 +128,15 @@ const RouteTableRow = ({ route, remove, update, index, columns }) => {
           <div className="flex-1">
             { route.name }
           </div>
+
           <div className="flex items-center justify-center w-14">
-            { hasDates ? <HasDates /> : null }
-            { hasTimes ? <HasTimes /> : null }
+            { hasDates ? HasDates : null }
+            { hasTimes ? HasTimes : null }
             { hasDates || hasTimes ? null :
               <span className="fa fa-eye px-2 text-gray-500"/>
             }
           </div>
+
         </div>
         <div className="w-full py-2 shadow-lg shadow-black bg-white px-2">
           <div className="font-bold text-lg">
@@ -199,6 +189,7 @@ const RouteTableRow = ({ route, remove, update, index, columns }) => {
           </div>
         </div>
       </RouteTd>
+
 
       { columns.map((col, i) => {
           return (

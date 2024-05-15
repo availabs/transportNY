@@ -106,10 +106,10 @@ const BatchReports = props => {
             rid,
             uuid: uuidv4(),
             name: data.name,
-            tmcs: [...(data.tmc_array?.value || [])],
-            dates: get(data, ["metadata", "value", "dates"], [])
+            tmcs: [...(data.tmc_array?.value || [])]
           };
-          const [[sd, ed], [st, et]] = getDatesAndTimes(route.dates, "YYYY-MM-DD");
+          const dates = get(data, ["metadata", "value", "dates"], []);
+          const [[sd, ed], [st, et]] = getDatesAndTimes(dates, "YYYY-MM-DD");
           if (sd && ed) {
             route.startDate = sd;
             route.endDate = ed;
@@ -122,7 +122,7 @@ const BatchReports = props => {
         })
       ]
     });
-  }, [falcorCache, startTime, endTime, timeSource]);
+  }, [falcorCache]);
   const removeRoute = React.useCallback(i => {
     setSelectedRoutes(routes => [...routes.slice(0, i), ...routes.slice(i + 1)]);
   }, []);
@@ -216,6 +216,7 @@ const BatchReports = props => {
 
       <div className="flex-1 relative">
         <div className="absolute inset-0 p-4 overflow-auto scrollbar-xl">
+
           { !routes.length ? null :
             <table>
               <thead>
@@ -273,6 +274,7 @@ const BatchReports = props => {
               </tbody>
             </table>
           }
+
         </div>
       </div>
 
