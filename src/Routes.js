@@ -17,10 +17,16 @@ import transportNYDataTypes from '~/pages/TransportNYDataTypes'
 
 const DAMA_ARGS = {
   baseUrl: '/datasources',
-  defaultPgEnv: 'npmrds',
+  defaultPgEnv: 'freight_data',
   dataTypes: transportNYDataTypes,
   useFalcor,
-  useAuth
+  useAuth,
+  navSettings: {
+    topNav: {
+      position: 'fixed',
+      size: 'compact',
+    },
+  }
 }
 
 const Routes = [
