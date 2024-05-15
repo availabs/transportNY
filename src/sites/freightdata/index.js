@@ -1,8 +1,8 @@
 import DataManager from "~/pages/DataManager"
 
-import MapPageConfig from "./MapPage"
-import SymbologyMapConfig from "./SymbologyMapPage"
-import FreightAtlas from './Atlas'
+// import MapPageConfig from "./MapPage"
+// import SymbologyMapConfig from "./SymbologyMapPage"
+// import FreightAtlas from './Atlas'
 
 import { useFalcor } from "~/modules/avl-components/src"
 // import { useAuth } from "@availabs/ams"
@@ -25,9 +25,6 @@ const DAMA_ARGS = {
 
 const Routes = [
   ...DataManager(DAMA_ARGS),
-  FreightAtlas,
-  MapPageConfig,
-  SymbologyMapConfig,
   ...FreightDocs
 ]
 

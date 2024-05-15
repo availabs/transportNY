@@ -15,6 +15,14 @@ import { useAuth } from "~/modules/ams/src"
 
 import transportNYDataTypes from '~/pages/TransportNYDataTypes'
 
+// const authMenuConfig = {
+  
+//   topNav: {
+//     position: 'fixed',
+//     size: 'compact'
+//   },
+// }
+
 const DAMA_ARGS = {
   baseUrl: '/datasources',
   defaultPgEnv: 'freight_data',
@@ -25,6 +33,10 @@ const DAMA_ARGS = {
     topNav: {
       position: 'fixed',
       size: 'compact',
+    },
+    sideNav: {
+      size: 'none',
+      color: 'white'
     },
   }
 }
