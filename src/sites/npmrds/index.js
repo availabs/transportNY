@@ -7,6 +7,7 @@ import TmcPage from "./pages/TmcPage"
 import PM3 from "./pages/pm3Map21"
 import NpmrdsDocs from "./pages/npmrdsDocs"
 import BatchReports from "./pages/BatchReports"
+import BatchReportsNew from "./pages/BatchReportsNew"
 
 const Routes = [
   Home,
@@ -17,7 +18,8 @@ const Routes = [
   ...Map,
   PM3,
   ...NpmrdsDocs,
-  BatchReports
+  BatchReports,
+  BatchReportsNew
 ]
 
 const site =  {

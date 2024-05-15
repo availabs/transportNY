@@ -157,10 +157,6 @@ const Sidebar = props => {
           </div>
 
         </div>
-
-        <div className="absolute bottom-0 w-full p-4">
-          { children }
-        </div>
       </div>
     </div>
   )

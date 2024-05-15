@@ -114,7 +114,7 @@ const BatchReports = props => {
               row.startDate = sd;
               row.endDate = ed;
             }
-            if (st && ed) {
+            if (st && et) {
               row.startTime = st;
               row.endTime = et;
             }
@@ -130,7 +130,6 @@ const BatchReports = props => {
     setDataFromServer([]);
   }, []);
   const updateRouteData = React.useCallback((i, k, v) => {
-console.log("updateRouteData", i, k, v)
     setSelectedRoutes(prev => {
       const update = [...prev];
       update[i] = { ...update[i], [k]: v };
