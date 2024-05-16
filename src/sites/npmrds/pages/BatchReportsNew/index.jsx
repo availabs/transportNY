@@ -364,7 +364,7 @@ const BatchReports = props => {
                   { columns.map((col, i) => (
                       <th key={ col.name }
                         className={ `
-                          ${ i % 2 === 0 ? "bg-gray-300" : "" }
+                          text-xl ${ i % 2 === 0 ? "bg-gray-300" : "" }
                         ` }
                       >
                         { col.name }
