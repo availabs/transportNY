@@ -98,7 +98,13 @@ const Reducer = (state, action) => {
 
 const ColumnAdder = props => {
 
-  const { addColumn, editColumn, columns, ...rest } = props;
+  const {
+    addColumn,
+    editColumn,
+    columns,
+    deleteColumn,
+    ...rest
+  } = props;
 
   const [isOpen, setIsOpen] = React.useState(false);
   const toggle = React.useCallback(e => {
@@ -278,12 +284,26 @@ const ColumnAdder = props => {
         }
       </Button>
 
-      { columns.map(column => (
-          <Button key={ column.name } className="buttonSmall ml-8"
-            onClick={ e => startEditColumn(column) }
+      { columns.map((column, i) => (
+          <div key={ column.name }
+            className="flex"
           >
-            Edit Column: { column.name } <ChevronsRight />
-          </Button>
+            <div>
+              <Button className="buttonDangerSmall"
+                onClick={ e => deleteColumn(column.uuid) }
+                disabled={ columns.length > 1 && i === 0 }
+              >
+                Delete
+              </Button>
+            </div>
+            <div className="flex-1 ml-2">
+              <Button className="buttonSmallBlock"
+                onClick={ e => startEditColumn(column) }
+              >
+                Edit Column: { column.name } <ChevronsRight />
+              </Button>
+            </div>
+          </div>
         ))
       }
 
@@ -310,6 +330,10 @@ const ColumnAdder = props => {
                   onChange={ setName }
                   placeholder="Name your column..."/>
               </div>
+            </div>
+
+            <div className="border-b-2 font-bold border-current">
+              Date Selection
             </div>
 
             <div className="grid grid-cols-3">

@@ -1,6 +1,7 @@
 import React from "react"
 
 import get from "lodash/get"
+import isEqual from "lodash/isEqual"
 import { range as d3range } from "d3-array"
 import { v4 as uuidv4 } from "uuid"
 import moment from "moment"
@@ -28,6 +29,79 @@ const LoadingScreen = ({ loading, message }) => {
       { message }
     </div>
   )
+}
+
+const BATCH_REPORT_STORAGE_KEY = "batch-report-data";
+
+const InitialState = {
+  selectedRoutes: [],
+  columns: [],
+  timeSource: TimeSourceOptions[0],
+  startTime: "06:00:00",
+  endTime: "21:00:00"
+}
+const Reducer = (state, action) => {
+  const { type, ...payload } = action;
+  switch (type) {
+    case "load-state":
+      return payload.state;
+    case "update-state":
+      return { ...state, ...payload };
+    case "add-routes":
+      return {
+        ...state,
+        selectedRoutes: [
+          ...state.selectedRoutes,
+          ...payload.routes
+        ]
+      }
+    case "remove-route": {
+      const srs = state.selectedRoutes;
+      const { index: i } = payload;
+      return {
+        ...state,
+        selectedRoutes: [...srs.slice(0, i), ...srs.slice(i + 1)]
+      }
+    }
+    case "update-route-data": {
+      const { index, key, value } = payload;
+      return {
+        ...state,
+        selectedRoutes: state.selectedRoutes.map((route, i) => {
+          if (index === i) {
+            return { ...route, [key]: value };
+          }
+          return route;
+        })
+      }
+    }
+    case "add-column":
+      return {
+        ...state,
+        columns: [...state.columns, payload.column]
+      }
+    case "edit-column": {
+      const { edit } = payload;
+      return {
+        ...state,
+        columns: state.columns.map(column => {
+          if (column.uuid === edit.uuid) {
+            return edit;
+          }
+          return column;
+        })
+      }
+    }
+    case "delete-column": {
+      const { uuid } = payload;
+      return {
+        ...state,
+        columns: state.columns.filter(c => c.uuid !== uuid)
+      }
+    }
+    default:
+      return state;
+  }
 }
 
 const BatchReports = props => {
@@ -89,63 +163,103 @@ const BatchReports = props => {
       }
   }, [falcor, falcorCache, startLoading, stopLoading]);
 
-  const [selectedRoutes, setSelectedRoutes] = React.useState([]);
-  const [timeSource, setTimeSource] = React.useState(TimeSourceOptions[0]);
-  const [startTime, setStartTime] = React.useState("06:00:00");
-  const [endTime, setEndTime] = React.useState("21:00:00");
+  const [state, dispatch] = React.useReducer(Reducer, InitialState);
+
+  const loadState = React.useCallback(state => {
+    dispatch({
+      type: "load-state",
+      state
+    })
+  }, []);
+
+  const {
+    selectedRoutes,
+    timeSource,
+    startTime,
+    endTime
+  } = state;
+
+  const setTimeSource = React.useCallback(ts => {
+    dispatch({
+      type: "update-state",
+      timeSource: ts
+    });
+  }, []);
+  const setStartTime = React.useCallback(st => {
+    dispatch({
+      type: "update-state",
+      startTime: st
+    });
+  }, []);
+  const setEndTime = React.useCallback(et => {
+    dispatch({
+      type: "update-state",
+      endTime: et
+    });
+  }, []);
+
   const addRoutes = React.useCallback(rids => {
     if (!Array.isArray(rids)) {
       rids = [rids];
     }
-    setSelectedRoutes(prev => {
-      return [
-        ...prev,
-        ...rids.map(rid => {
-          const data = get(falcorCache, ["routes2", "id", rid]);
-          const route = {
-            rid,
-            uuid: uuidv4(),
-            name: data.name,
-            tmcs: [...(data.tmc_array?.value || [])]
-          };
-          const dates = get(data, ["metadata", "value", "dates"], []);
-          const [[sd, ed], [st, et]] = getDatesAndTimes(dates, "YYYY-MM-DD");
-          if (sd && ed) {
-            route.startDate = sd;
-            route.endDate = ed;
-          }
-          if (st && et) {
-            route.startTime = st;
-            route.endTime = et;
-          }
-          return route;
-        })
-      ]
-    });
+    const routes = rids.map(rid => {
+      const data = get(falcorCache, ["routes2", "id", rid]);
+      const route = {
+        rid,
+        uuid: uuidv4(),
+        name: data.name,
+        tmcs: [...(data.tmc_array?.value || [])]
+      };
+      const dates = get(data, ["metadata", "value", "dates"], []);
+      const [[sd, ed], [st, et]] = getDatesAndTimes(dates, "YYYY-MM-DD");
+      if (sd && ed) {
+        route.startDate = sd;
+        route.endDate = ed;
+      }
+      if (st && et) {
+        route.startTime = st;
+        route.endTime = et;
+      }
+      return route;
+    })
+    dispatch({
+      type: "add-routes",
+      routes
+    })
   }, [falcorCache]);
-  const removeRoute = React.useCallback(i => {
-    setSelectedRoutes(routes => [...routes.slice(0, i), ...routes.slice(i + 1)]);
+  const removeRoute = React.useCallback(index => {
+    dispatch({
+      type: "remove-route",
+      index
+    })
   }, []);
   const updateRouteData = React.useCallback((i, k, v) => {
-    setSelectedRoutes(prev => {
-      const updated = [...prev];
-      updated[i] = { ...updated[i], [k]: v };
-      return updated;
+    dispatch({
+      type: "update-route-data",
+      index: i,
+      key: k,
+      value: v
     })
   }, []);
 
-  const [columns, setColumns] = React.useState([]);
+  const { columns } = state;
+
   const addColumn = React.useCallback(column => {
-    setColumns(prev => [...prev, column]);
+    dispatch({
+      type: "add-column",
+      column
+    })
   }, []);
   const editColumn = React.useCallback(edit => {
-    setColumns(columns => {
-      return columns.map(column => {
-        if (column.uuid === edit.uuid) {
-          return edit;
-        }
-        return column;
-      })
+    dispatch({
+      type: "edit-column",
+      edit
+    })
+  }, []);
+  const deleteColumn = React.useCallback(uuid => {
+    dispatch({
+      type: "delete-column",
+      uuid
     })
   }, []);
 
@@ -196,6 +310,29 @@ const BatchReports = props => {
     })
   }, [selectedRoutes, columns, timeSource, startTime, endTime]);
 
+  React.useEffect(() => {
+    if (window.localStorage) {
+      const data = window.localStorage.getItem(BATCH_REPORT_STORAGE_KEY);
+      if (data) {
+        loadState(JSON.parse(data));
+      }
+    }
+  }, [loadState]);
+
+  React.useEffect(() => {
+    if (window.localStorage) {
+      if (!isEqual(state, InitialState)) {
+        window.localStorage.setItem(
+          BATCH_REPORT_STORAGE_KEY,
+          JSON.stringify(state)
+        )
+      }
+      else {
+        window.localStorage.removeItem(BATCH_REPORT_STORAGE_KEY);
+      }
+    }
+  }, [state]);
+
   return (
     <div className="h-full max-h-full flex">
 
@@ -212,7 +349,8 @@ const BatchReports = props => {
         setEndTime={ setEndTime }
         columns={ columns }
         addColumn={ addColumn }
-        editColumn={ editColumn }/>
+        editColumn={ editColumn }
+        deleteColumn={ deleteColumn }/>
 
       <div className="flex-1 relative">
         <div className="absolute inset-0 p-4 overflow-auto scrollbar-xl">

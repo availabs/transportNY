@@ -195,7 +195,7 @@ const RouteTableRow = ({ route, remove, update, index, columns }) => {
           return (
             <RouteTd key={ col.name }
               index={ i }
-              minWidth={ col.dataColumns.length * 12 }
+              minWidth={ col.dataColumns.length * 10 }
               hoverStyle={ { pointerEvents: "none" } }
             >
               <div className={ `grid grid-cols-${ col.dataColumns.length } gap-2` }>
@@ -240,7 +240,7 @@ const RouteTableRow = ({ route, remove, update, index, columns }) => {
                   { col.dataColumns.map((dc, i) => {
                       return (
                         <div key={ dc.key }
-                          className="font-bold border-b-2 border-current"
+                          className="font-bold border-b-2 border-current whitespace-pre-wrap text-center"
                         >
                           { dc.header }
                         </div>
