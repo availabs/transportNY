@@ -1,3 +1,5 @@
+const defaultTheme = require('tailwindcss/defaultTheme')
+
 module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
@@ -5,7 +7,13 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Proxima Nova W01"','ui-sans-serif', 'system-ui', '-apple-system'],
+        'sans': [
+          'Rubik',
+          ...defaultTheme.fontFamily.sans],
+
+        'display': [
+          'Rubik',
+          ...defaultTheme.fontFamily.sans],
       },
     },
   },
