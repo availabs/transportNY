@@ -201,6 +201,8 @@ const AdvancedControls = props => {
     updateSettings("overrides", newOverrides);
   }, [updateSettings, overrides]);
 
+console.log("AdvancedControls", useRelativeDateControls, usingRelativeDates, isRelativeDateBase);
+
   return (
     <ControlContainer>
 

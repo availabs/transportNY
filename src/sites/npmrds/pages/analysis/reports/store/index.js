@@ -486,7 +486,7 @@ const checkRelativeDates = (nextState, updateSettings = false, setTimes = false)
         relativeDateBase.startDate,
         relativeDateBase.endDate
       )
-      if (dates.length) {
+      if (dates.filter(Boolean).length) {
         routeComponentSettings.set(
           rc.compId,
           { ...settings,
@@ -536,7 +536,7 @@ const checkRelativeDates = (nextState, updateSettings = false, setTimes = false)
           rg.relativeDateBase.startDate,
           rg.relativeDateBase.endDate
         )
-        if (dates.length) {
+        if (dates.filter(Boolean).length) {
           routeComponentSettings.set(
             rc.compId,
             { ...settings,
@@ -2716,7 +2716,6 @@ const getMonthString = settings => {
 const getDateString = settings => {
 	const start = settings.startDate.toString(),
 		end = settings.endDate.toString();
-
 	if (start === end) {
 		const month = start.slice(4, 6),
 			day = start.slice(6),

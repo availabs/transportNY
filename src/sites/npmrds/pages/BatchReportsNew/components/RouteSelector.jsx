@@ -19,6 +19,12 @@ const fillFolders = (falcorCache, fids) => {
       .map(stuff => stuff.stuff_id);
     const folderIds = stuff.filter(stuff => stuff.stuff_type === "folder")
       .map(stuff => stuff.stuff_id);
+if (folder && folder.name === "AVAIL") {
+  console.log("fillFolders", folder, stuff, folderIds)
+}
+else if (!folder) {
+  console.log("????????????", c, folder)
+}
     const subFolders = fillFolders(falcorCache, folderIds)
     if (folder && (routeIds.length || subFolders.length)) {
       a.push({

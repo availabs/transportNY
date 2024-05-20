@@ -11,18 +11,18 @@ export default request => {
     dataType,
     state = 'ny'
   } = request;
-console.log("?????",[
-  tmcArray,
-  startDate,
-  endData,
-  startTime,
-  endTime,
-  weekdays,
-  resolution,
-  dataColumn,
-  dataType,
-  state
-].join("|"))
+// console.log("?????",[
+//   tmcArray,
+//   startDate,
+//   endData,
+//   startTime,
+//   endTime,
+//   weekdays,
+//   resolution,
+//   dataColumn,
+//   dataType,
+//   state
+// ].join("|"))
   return [
     tmcArray,
     startDate,

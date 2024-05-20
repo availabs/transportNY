@@ -68,8 +68,8 @@ const RelativeDateControls = ({ relativeDate, setRelativeDate }) => {
   }, [doSetRelativeDate, inputDate, timespan, operation, duration]);
 
   const setOperation = React.useCallback(operation => {
-    doSetRelativeDate(`${ inputDate }=>${ timespan }${ operation }${ amount }${ timespan }->${ duration }${ timespan }`);
-  }, [doSetRelativeDate, inputDate, timespan, amount, duration]);
+    doSetRelativeDate(`${ operation === "+" ? "endDate" : "startDate" }=>${ timespan }${ operation }${ amount }${ timespan }->${ duration }${ timespan }`);
+  }, [doSetRelativeDate, timespan, amount, duration]);
 
   const setDuration = React.useCallback(duration => {
     doSetRelativeDate(`${ inputDate }=>${ timespan }${ operation }${ amount }${ timespan }->${ duration }${ timespan }`);

@@ -170,11 +170,28 @@ const BatchReports = props => {
         }
         return a;
       }, []);
-      if (fids.length) {
-        falcor.get(["folders2", "stuff", fids])
-          .then(() => stopLoading());
-      }
-  }, [falcor, falcorCache, startLoading, stopLoading]);
+    if (fids.length) {
+      falcor.get(["folders2", "stuff", fids])
+        .then(() => { stopLoading(); });
+    }
+  }, [falcor, falcorCache, stopLoading]);
+
+  React.useEffect(() => {
+    const numFolders = get(falcorCache, ["folders2", "user", "length"], 0);
+    const fids = d3range(numFolders)
+      .reduce((a, c) => {
+        const [,, fid] = get(falcorCache, ["folders2", "user", "index", c, "value"], []);
+        if (fid) {
+          a.push(fid);
+        }
+        return a;
+      }, []);
+    const stuff = fids.reduce((a, c) => {
+
+    }, []);
+    if (fids.length) {
+    }
+  }, [falcor, falcorCache])
 
   const [state, dispatch] = React.useReducer(Reducer, InitialState);
 
