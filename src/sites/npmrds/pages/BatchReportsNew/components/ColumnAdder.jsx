@@ -64,6 +64,7 @@ const getInitialState = (columns = []) => {
     endDate: defaultDate,
     dataColumns: [],
     uuid: uuidv4(),
+    isBase: num === 0,
     editing: false
   }
 }
@@ -180,12 +181,13 @@ const ColumnAdder = props => {
   const disabled = React.useMemo(() => {
     const {
       name,
+      dateSelection,
       relativeDate,
       startDate,
       endDate,
       dataColumns
     } = state;
-    return !(name && ((startDate && endDate) || relativeDate) && dataColumns.length);
+    return !(name && (dateSelection === "relative" ? relativeDate : (startDate && endDate)) && dataColumns.length);
   }, [state]);
 
   const doAddColumn = React.useCallback(e => {
@@ -197,7 +199,8 @@ const ColumnAdder = props => {
       startDate,
       endDate,
       dataColumns,
-      uuid
+      uuid,
+      isBase
     } = state;
     const column = {
       name,
@@ -207,7 +210,8 @@ const ColumnAdder = props => {
       startDate,
       endDate,
       dataColumns,
-      uuid
+      uuid,
+      isBase
     };
     addColumn(column);
   }, [addColumn, state, resetState, props.columns]);
@@ -221,7 +225,8 @@ const ColumnAdder = props => {
       startDate,
       endDate,
       dataColumns,
-      uuid
+      uuid,
+      isBase
     } = state;
     const column = {
       name,
@@ -231,7 +236,8 @@ const ColumnAdder = props => {
       startDate,
       endDate,
       dataColumns,
-      uuid
+      uuid,
+      isBase
     };
     editColumn(column);
   }, [editColumn, state, resetState, props.columns]);
@@ -318,8 +324,10 @@ const ColumnAdder = props => {
           ` }
         >
           <div className="grid grid-cols-1 gap-2">
-            <div className="font-bold border-b-2 border-current">
-              { editing ? "Edit" : "Create" } Column
+            <div className="font-bold border-current text-xl"
+              style={ { borderBottomWidth: "3px" } }
+            >
+              { editing ? "Edit" : "Create" } a Column
             </div>
 
             <div className="grid grid-cols-3">
@@ -340,7 +348,7 @@ const ColumnAdder = props => {
               <div className="col-span-2 col-start-2">
                 <RadioSelector
                   options={
-                    !columns.length ? RadioOptions.slice(1) : RadioOptions
+                    state.isBase ? RadioOptions.slice(1) : RadioOptions
                   }
                   value={ dateSelection }
                   onChange={ setDateSelection }

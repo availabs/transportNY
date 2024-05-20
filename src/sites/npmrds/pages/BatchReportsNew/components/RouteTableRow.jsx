@@ -13,7 +13,7 @@ const RouteTd = props => {
   const {
     children,
     index = null,
-    minWidth = 24,
+    minWidth = 28,
     hoverStyle = null
   } = props;
 
@@ -125,7 +125,7 @@ const RouteTableRow = ({ route, remove, update, index, columns }) => {
 
       <RouteTd hoverStyle={ { maxWidth: "85%", minWidth: "85%" } }>
         <div className="w-full flex">
-          <div className="flex-1">
+          <div className="flex-1 overflow-hidden text-ellipsis">
             { route.name }
           </div>
 
@@ -139,7 +139,7 @@ const RouteTableRow = ({ route, remove, update, index, columns }) => {
 
         </div>
         <div className="w-full py-2 shadow-lg shadow-black bg-white px-2">
-          <div className="font-bold text-lg">
+          <div className="font-bold text-lg overflow-hidden text-ellipsis">
             { route.name }
           </div>
           <div className="grid grid-cols-1 gap-1">
