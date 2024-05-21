@@ -210,7 +210,7 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
 }
 export default StuffInFolder;
 
-const DateTimeRegex = /(\d{2})[/](\d{2})[/](\d{4}) (\d{2}:\d{2}:\d{2})/;
+const DateTimeRegex = /^(\d{1,2})[/](\d{2})[/](\d{4})(?:\s(\d{2}:\d{2}:\d{2}))?$/;
 
 const REGEXes = [
   /[A-Za-z0-9_ ]+/,
@@ -426,7 +426,7 @@ const UploadInstructions = () => {
       </div>
       <div className="pb-1 border-b border-current mb-1">
         The second column of each row must be the start date and time in the format: "MM/DD/YYYY hh:mm:ss".<br />
-        { `The current date and time looks like: "${ moment().format("MM/DD/YYYY hh:mm:ss") }".` }
+        { `The current date and time looks like: "${ moment().format("M/DD/YYYY hh:mm:ss") }".` }
       </div>
       <div className="pb-1 border-b border-current mb-1">
         The third column of each row must be the end date and time in the format "MM/DD/YYYY hh:mm:ss".

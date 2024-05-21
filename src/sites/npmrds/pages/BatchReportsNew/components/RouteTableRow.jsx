@@ -14,7 +14,8 @@ const RouteTd = props => {
     children,
     index = null,
     minWidth = 28,
-    hoverStyle = null
+    hoverStyle = null,
+    isData = false
   } = props;
 
   const [hover, setHover] = React.useState(null);
@@ -57,7 +58,7 @@ const RouteTd = props => {
         pl-1 last:pr-1 py-1 ml-1 last:mr-1 relative bg-gray-600
         ${ isShaded ? "bg-opacity-25" : "bg-opacity-0" }
         ${ Children.length === 1 ? "cursor-pointer" : "" }
-         whitespace-nowrap
+         whitespace-nowrap ${ isData ? "text-center" : "" }
       ` }
       onMouseEnter={ onMouseEnter }
       onMouseLeave={ onMouseLeave }
@@ -193,7 +194,7 @@ const RouteTableRow = ({ route, remove, update, index, columns }) => {
 
       { columns.map((col, i) => {
           return (
-            <RouteTd key={ col.name }
+            <RouteTd key={ col.name } isData
               index={ i }
               minWidth={ col.dataColumns.length * 10 }
               hoverStyle={ { pointerEvents: "none" } }
