@@ -216,7 +216,7 @@ class GeneralGraphComp extends React.Component {
 				return this.props.falcor.get(
 					['tmc', tmcArray, 'meta', year, ['miles', 'bounding_box', 'congestion_level', 'directionality', 'f_system']],
 					['tmc', tmcArray, 'year', year, 'geometries'],
-				)
+				).then(res => console.log("RES:", res))
 				.then(() => {
 
 					return requestKeys.reduce((promise, { dd, alias, group, key }) => {

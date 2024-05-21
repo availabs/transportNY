@@ -11,7 +11,7 @@ const nameAccessor = r => r.name;
 const idAccessor = r => r.id;
 const valueAccessor = r => r.value;
 
-const fillFolders = (falcorCache, fids) => {
+const fillFolders = (falcor, falcorCache, fids) => {
   return fids.reduce((a, c) => {
     const folder = get(falcorCache, ["folders2", "id", c], null);
     const stuff = get(falcorCache, ["folders2", "stuff", c, "value"], []);
@@ -19,13 +19,20 @@ const fillFolders = (falcorCache, fids) => {
       .map(stuff => stuff.stuff_id);
     const folderIds = stuff.filter(stuff => stuff.stuff_type === "folder")
       .map(stuff => stuff.stuff_id);
-if (folder && folder.name === "AVAIL") {
-  console.log("fillFolders", folder, stuff, folderIds)
-}
-else if (!folder) {
-  console.log("????????????", c, folder)
-}
-    const subFolders = fillFolders(falcorCache, folderIds)
+
+    if (routeIds.length) {
+      falcor.get(["routes2", "id", routeIds, ["id", "name", "metadata", "tmc_array"]]);
+    }
+
+    if (folderIds.length) {
+      falcor.get(
+        ["folders2", "id", folderIds, ["id", "name", "type"]],
+        ["folders2", "stuff", folderIds]
+      )
+    }
+
+    const subFolders = fillFolders(falcor, falcorCache, folderIds);
+
     if (folder && (routeIds.length || subFolders.length)) {
       a.push({
         name: folder.name,
@@ -51,7 +58,7 @@ else if (!folder) {
 
 const RouteSelector = ({ addRoutes }) => {
 
-  const { falcorCache } = useFalcor();
+  const { falcor, falcorCache } = useFalcor();
 
   const [routes, setRoutes] = React.useState([]);
   React.useEffect(() => {
@@ -79,8 +86,8 @@ const RouteSelector = ({ addRoutes }) => {
         }
         return a;
       }, []);
-    setFolders(fillFolders(falcorCache, fids));
-  }, [falcorCache]);
+    setFolders(fillFolders(falcor, falcorCache, fids));
+  }, [falcor, falcorCache]);
 
   return (
     <div className="grid grid-cols-2 gap-2">
