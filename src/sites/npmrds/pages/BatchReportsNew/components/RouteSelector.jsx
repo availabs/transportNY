@@ -56,6 +56,45 @@ const fillFolders = (falcor, falcorCache, fids) => {
   }, []);
 }
 
+const FolderTypeValues = {
+  "user": 0,
+  "group": 1,
+  "AVAIL": 2
+}
+
+const setFolderValues = (folderTree, falcorCache) => {
+  return folderTree.reduce((a, c) => {
+    const stuff = get(falcorCache, ["folders2", "stuff", c.id, "value"], []);
+    const routeIds = stuff.filter(stuff => stuff.stuff_type === "route")
+      .map(stuff => stuff.stuff_id);
+    if (routeIds.length) {
+      a.push({
+        ...c,
+        value: routeIds,
+        children: [
+          ...setFolderValues(c.children, falcorCache),
+          ...routeIds.reduce((a, c) => {
+            const route = get(falcorCache, ["routes2", "id", c], null);
+            if (route) {
+              a.push({
+                name: `${route.name} (${route.id})`,
+                value: c
+              })
+            }
+            return a;
+          }, [])
+        ]
+      })
+    }
+    return a;
+  }, []).sort((a, b) => {
+    if (a.type === b.type) {
+      return a.name.localeCompare(b.name)
+    }
+    return FolderTypeValues[a.type] - FolderTypeValues[b.type];
+  });
+}
+
 const RouteSelector = ({ addRoutes }) => {
 
   const { falcor, falcorCache } = useFalcor();
@@ -76,18 +115,22 @@ const RouteSelector = ({ addRoutes }) => {
   }, [falcorCache]);
 
   const [folders, setFolders] = React.useState([]);
+  // React.useEffect(() => {
+  //   const numFolders = get(falcorCache, ["folders2", "user", "length"], 0);
+  //   const fids = d3range(numFolders)
+  //     .reduce((a, c) => {
+  //       const [,, fid] = get(falcorCache, ["folders2", "user", "index", c, "value"], []);
+  //       if (fid) {
+  //         a.push(fid);
+  //       }
+  //       return a;
+  //     }, []);
+  //   setFolders(fillFolders(falcor, falcorCache, fids));
+  // }, [falcor, falcorCache]);
   React.useEffect(() => {
-    const numFolders = get(falcorCache, ["folders2", "user", "length"], 0);
-    const fids = d3range(numFolders)
-      .reduce((a, c) => {
-        const [,, fid] = get(falcorCache, ["folders2", "user", "index", c, "value"], []);
-        if (fid) {
-          a.push(fid);
-        }
-        return a;
-      }, []);
-    setFolders(fillFolders(falcor, falcorCache, fids));
-  }, [falcor, falcorCache]);
+    const foldersTree = get(falcorCache, ["folders2", "user", "tree", "value"], []);
+    setFolders(setFolderValues(foldersTree, falcorCache));
+  }, [falcorCache]);
 
   return (
     <div className="grid grid-cols-2 gap-2">

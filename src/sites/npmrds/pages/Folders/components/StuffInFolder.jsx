@@ -147,7 +147,8 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
       <FolderPath filter={ filter }
         openedFolders={ openedFolders }
         setOpenedFolders={ setOpenedFolders }
-        deleteFolder={ deleteFolder }/>
+        deleteFolder={ deleteFolder }
+        folders={ folders }/>
 
       <div className='flex items-center'>
         <div className="flex-1 flex border border-gray-100 mt-1">
@@ -527,40 +528,40 @@ const FolderIconToolBase = ({ folder, deleteFolder, user }) => {
 }
 const FolderIconTool = withAuth(FolderIconToolBase)
 
-const FolderSelector = ({ folder, setOpenedFolders, deleteFolder }) => {
+const FolderSelector = ({ folder, setOpenedFolders, deleteFolder, folders }) => {
 
   const { falcor, falcorCache } = useFalcor();
 
-  const [folders, setFolders] = React.useState([]);
+  // const [folders, setFolders] = React.useState([]);
   const [foldersByType, setFoldersByType] = React.useState(defaultFoldersByType());
 
-  React.useEffect(() => {
-    falcor.get(["folders2", "user", "length"])
-      .then(res => {
-        const length = get(res, ["json", "folders2", "user", "length"], 0)
-        if (length) {
-          return falcor.get([
-            "folders2", "user", "index", d3range(length),
-            ["name", "icon", "color", "id",
-              "updated_at", "created_at",
-              "type", "owner", "editable"
-            ]
-          ])
-        }
-      })
-  }, [falcor]);
+  // React.useEffect(() => {
+  //   falcor.get(["folders2", "user", "length"])
+  //     .then(res => {
+  //       const length = get(res, ["json", "folders2", "user", "length"], 0)
+  //       if (length) {
+  //         return falcor.get([
+  //           "folders2", "user", "index", d3range(length),
+  //           ["name", "icon", "color", "id",
+  //             "updated_at", "created_at",
+  //             "type", "owner", "editable"
+  //           ]
+  //         ])
+  //       }
+  //     })
+  // }, [falcor]);
 
   React.useEffect(() => {
-    const length = get(falcorCache, ["folders2", "user", "length"], 0);
-    const refs = d3range(length).map(i => get(falcorCache, ["folders2", "user", "index", i, "value"]));
-    const folders = refs.map(ref => get(falcorCache, ref, null)).filter(Boolean);
-
-    folders.sort((a, b) => {
-      const aDate = new Date(a.updated_at);
-      const bDate = new Date(b.updated_at);
-      return bDate.getTime() - aDate.getTime();
-    });
-    setFolders(folders);
+    // const length = get(falcorCache, ["folders2", "user", "length"], 0);
+    // const refs = d3range(length).map(i => get(falcorCache, ["folders2", "user", "index", i, "value"]));
+    // const folders = refs.map(ref => get(falcorCache, ref, null)).filter(Boolean);
+    //
+    // folders.sort((a, b) => {
+    //   const aDate = new Date(a.updated_at);
+    //   const bDate = new Date(b.updated_at);
+    //   return bDate.getTime() - aDate.getTime();
+    // });
+    // setFolders(folders);
 
     const foldersByType = folders.reduce((a, c) => {
       if (c.type === "user") {
@@ -575,7 +576,7 @@ const FolderSelector = ({ folder, setOpenedFolders, deleteFolder }) => {
       return a;
     }, defaultFoldersByType());
     setFoldersByType(foldersByType);
-  }, [falcorCache]);
+  }, [folders]);
 
   const [show, setShow] = React.useState(false);
   const showSelector = React.useCallback(e => {
@@ -721,13 +722,14 @@ const PathItem = ({ openPath, setOpenedFolders, name }) => {
   )
 }
 
-const FolderPath = ({ openedFolders, setOpenedFolders, filter, deleteFolder }) => {
+const FolderPath = ({ openedFolders, setOpenedFolders, filter, deleteFolder, folders }) => {
   return (
     <div className="text-3xl font-medium flex relative">
       <div className="flex-1 flex items-end">
         <FolderSelector folder={ openedFolders[0] }
           setOpenedFolders={ setOpenedFolders }
-          deleteFolder={ deleteFolder }/>
+          deleteFolder={ deleteFolder }
+          folders={ folders }/>
         { openedFolders.slice(1).map((f, i) => (
             <div key={ f.id }>
               <PathItem name={ f.name }

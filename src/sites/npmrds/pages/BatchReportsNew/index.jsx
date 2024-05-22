@@ -135,7 +135,8 @@ const BatchReports = props => {
     startLoading("Loading routes and populating folders...");
     falcor.get(
       ["routes2", "user", "length"],
-      ["folders2", "user", "length"]
+      ["folders2", "user", "length"],
+      ["folders2", "user", "tree"]
     )
   }, [falcor, startLoading]);
 

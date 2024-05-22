@@ -287,6 +287,7 @@ class ReportBase extends React.Component {
         ['templates2', 'user', 'length'],
         ['templates2', 'all', 'defaultTypes'],
         ['folders2', 'user', 'length'],
+        ['folders2', 'user', 'tree'],
         ['hds', 'continuous', 'stations', 'length']
       )
       .then(res => {
@@ -888,26 +889,65 @@ const HeaderControlBox = styled.div`
   }
 `
 
-const getFolders = falcorCache => {
-
-  const length = get(falcorCache, 'folders2.user.length', 0);
-  const refs = [];
-
-  for (let i = 0; i < length; ++i) {
-    const ref = get(falcorCache, `folders2.user.index[${ i }].value`, null);
-    if (ref !== null) {
-      refs.push(ref);
-    }
-  }
-
-  const folders = refs.map(ref => {
-    const folder = { ...get(falcorCache, ref) };
-    folder.stuff = get(falcorCache, ["folders2", "stuff", folder.id, "value"])
-    return folder;
-  })
-
-  return folders;
+const FolderSortValues = {
+  "user": 0,
+  "group": 1,
+  "AVAIL": 2
 }
+
+const populateFolders = (folderTree, falcorCache) => {
+  return folderTree.map(f => {
+    return {
+      ...f,
+      children: [
+        ...populateFolders(f.children, falcorCache),
+        ...get(falcorCache, ["folders2", "stuff", f.id, "value"], [])
+          .filter(s => s.stuff_type === "route")
+          .map(s => {
+            return {
+              ...get(falcorCache, ["routes2", "id", s.stuff_id]),
+              value: s.stuff_id
+            }
+          })
+      ]
+    }
+  }).filter(f => f.children.length)
+    .sort((a, b) => {
+      if (a.type === b.type) {
+        return a.name.localeCompare(b.name);
+      }
+      return FolderSortValues[a.type] - FolderSortValues[b.type];
+    })
+}
+
+const getFolders = falcorCache => {
+  const tree = get(falcorCache, ["folders2", "user", "tree", "value"], []);
+  return populateFolders(tree, falcorCache)
+}
+
+// const getFolders = falcorCache => {
+//
+//   const tree = get(falcorCache, ["folders2", "user", "tree", "value"], []);
+//   const tops = new Set(tree.map(f => f.id));
+//
+//   const length = get(falcorCache, 'folders2.user.length', 0);
+//   const refs = [];
+//
+//   for (let i = 0; i < length; ++i) {
+//     const ref = get(falcorCache, `folders2.user.index[${ i }].value`, null);
+//     if (ref !== null) {
+//       refs.push(ref);
+//     }
+//   }
+//
+//   const folders = refs.map(ref => {
+//     const folder = { ...get(falcorCache, ref) };
+//     folder.stuff = get(falcorCache, ["folders2", "stuff", folder.id, "value"])
+//     return folder;
+//   }).filter(f => tops.has(f.id));
+//
+//   return folders;
+// }
 
 const getAvailableRoutes = falcorCache => {
 

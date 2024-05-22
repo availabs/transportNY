@@ -2,7 +2,7 @@ import React from "react"
 
 const DefaultDropDownContainer = ({ children }) => {
   return (
-    <div className="bg-white shadow-lg w-fit">
+    <div className="bg-white shadow-lg shadow-black w-fit">
       { children }
     </div>
   )
@@ -38,29 +38,31 @@ const StuffDropdown = props => {
     e.stopPropagation();
   }, []);
 
+  const [inner, setInner] = React.useState();
+  const [xDir, setXDirection] = React.useState(xDirection === "right" ? 1 : -1);
+  const [yDir, setYDirection] = React.useState(yDirection === "down" ? 1 : -1);
+
   const [show, setShow] = React.useState(false);
   const onMouseOver = React.useCallback(e => {
     setShow(true);
-  }, []);
+    if (!inner) return;
+
+    const rect = inner.getBoundingClientRect();
+    const width = window.innerWidth;
+    const height = window.innerHeight - 20;
+
+    if (rect.x > (width * 0.5)) {
+      setXDirection(-1);
+    }
+    if (rect.y > (height * 0.5)) {
+      setYDirection(-1);
+    }
+  }, [inner]);
   const onMouseLeave = React.useCallback(e => {
     setShow(false);
+    setXDirection(1);
+    setYDirection(1);
   }, []);
-
-  const [inner, setInner] = React.useState();
-  const [xDir, setXDirection] = React.useState(xDirection === "right" ? 1 : -1);
-  const [topOffset, setTopOffset] = React.useState(0);
-  React.useEffect(() => {
-    if (!inner || !show) return;
-    const rect = inner.getBoundingClientRect();
-    const height = window.innerHeight;
-    const width = window.innerWidth;
-    if ((rect.x + rect.width) > width) {
-      setXDirection(xDir => -xDir);
-    }
-    if ((rect.y + rect.height) > height) {
-      setTopOffset(height - (rect.y + rect.height))
-    }
-  }, [inner, show]);
 
   return (
     <div onClick={ stopPropagation }
@@ -70,14 +72,16 @@ const StuffDropdown = props => {
     >
       { children }
       { !items.length ? null :
-        !show ? null :
         <div ref={ setInner }
-          className="absolute"
+          className={ `absolute ${ show ? "" : "w-0 h-0 overflow-hidden" }` }
           style={ {
-            zIndex: zIndex,
-            top: `${ topOffset }px`,
+            zIndex,
+
             left: xDir === 1 ? "100%" : null,
-            right: xDir === 1 ? null : "100%"
+            right: xDir === 1 ? null : "100%",
+
+            top: yDir === 1 ? "0px" : null,
+            bottom: yDir === 1 ? null : "0px"
           } }
         >
           <DropDownContainer>

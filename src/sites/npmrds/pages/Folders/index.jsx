@@ -50,7 +50,10 @@ const Folders = ({ user }) => {
   }, [openedFolders]);
 
   React.useEffect(() => {
-    falcor.get(["folders2", "user", "length"])
+    falcor.get(
+        ["folders2", "user", "length"],
+        ["folders2", "user", "tree"]
+      )
       .then(res => {
         const length = get(res, ["json", "folders2", "user", "length"], 0)
         if (length) {
@@ -68,13 +71,18 @@ const Folders = ({ user }) => {
   React.useEffect(() => {
     const length = get(falcorCache, ["folders2", "user", "length"], 0);
     const refs = d3range(length).map(i => get(falcorCache, ["folders2", "user", "index", i, "value"]));
-    const folders = refs.map(ref => get(falcorCache, ref, null)).filter(Boolean);
+    const allFolders = refs.map(ref => get(falcorCache, ref, null)).filter(Boolean);
+    const folderTree = get(falcorCache, ["folders2", "user", "tree", "value"], []);
+    const topLevelFolders = new Set(folderTree.map(f => f.id));
 
-    folders.sort((a, b) => {
-      const aDate = new Date(a.updated_at);
-      const bDate = new Date(b.updated_at);
-      return bDate.getTime() - aDate.getTime();
-    });
+    const folders = allFolders
+      .filter(folder => topLevelFolders.has(folder.id))
+      .sort((a, b) => {
+        const aDate = new Date(a.updated_at);
+        const bDate = new Date(b.updated_at);
+        return bDate.getTime() - aDate.getTime();
+      });
+
     setFolders(folders);
   }, [falcorCache]);
 
