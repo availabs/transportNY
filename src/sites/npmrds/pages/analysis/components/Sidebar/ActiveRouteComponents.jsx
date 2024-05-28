@@ -19,10 +19,14 @@ import {
 	Draggable
 } from '@hello-pangea/dnd'// 'react-beautiful-dnd';
 
+// import {
+// 	FuseWrapper,
+// 	MultiLevelSelect
+// } from "~/sites/npmrds/components"
+
 import {
-	FuseWrapper,
 	MultiLevelSelect
-} from "~/sites/npmrds/components"
+} from "~/modules/avl-map-2/src/uicomponents"
 
 import { useFalcor } from "~/modules/avl-components/src"
 
@@ -76,6 +80,12 @@ export const InputContainer = ({ children }) => {
   )
 }
 
+const getFolderData = (falcorCache, folderTree) => {
+	return folderTree.map(folder => {
+		const routes = "";
+	})
+}
+
 const ActiveRouteComponents = ({ folders = [], ...props }) => {
 	const [state, _setState] = React.useState({ openCompId: null, open: true });
 	const setState = React.useCallback(update => {
@@ -121,32 +131,38 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 
 	const { falcorCache } = useFalcor();
 
-	const foldersWithRoutes = React.useMemo(() => {
-		return folders.filter(f =>
-			get(f, "stuff", []).reduce((a, c) => a || c.stuff_type === "route", false)
-		)
-	}, [folders]);
+// 	const foldersWithRoutes = React.useMemo(() => {
+// 		return folders.filter(f =>
+// 			get(f, "stuff", []).reduce((a, c) => a || c.stuff_type === "route", false)
+// 		)
+// 	}, [folders]);
+//
+// console.log("ActiveRouteComponents::folders", folders)
+//
+// 	const folderData = React.useMemo(() => {
+// 		return foldersWithRoutes.map(f => {
+// 			const routes = get(f, "stuff", []).filter(s => s.stuff_type === "route");
+// 			return {
+// 				label: f.name,
+// 				value: routes.length > 10 ? [] : routes.map(r => r.stuff_id),
+// 				children: [
+// 					...routes.map(r => {
+// 						const data = get(falcorCache, ["routes2", "id", r.stuff_id], {});
+// 						return {
+// 							label: data.name,
+// 							value: r.stuff_id,
+// 							Item: props => (
+// 								<DropdownItem { ...props }
+// 									hasDates={ Boolean(data?.metadata?.value?.dates?.length) }/>
+// 							)
+// 						}
+// 					})
+// 				]
+// 			}
+// 		})
+// 	}, [falcorCache, foldersWithRoutes]);
 
-	const folderData = React.useMemo(() => {
-		return foldersWithRoutes.map(f => {
-			const routes = get(f, "stuff", []).filter(s => s.stuff_type === "route");
-			return {
-				label: f.name,
-				value: routes.length > 10 ? [] : routes.map(r => r.stuff_id),
-				children: routes.map(r => {
-					const data = get(falcorCache, ["routes2", "id", r.stuff_id], {});
-					return {
-						label: data.name,
-						value: r.stuff_id,
-						Item: props => (
-							<DropdownItem { ...props }
-								hasDates={ Boolean(data?.metadata?.value?.dates?.length) }/>
-						)
-					}
-				})
-			}
-		})
-	}, [falcorCache, foldersWithRoutes]);
+console.log("FOLDERS:", folders)
 
 	const availableRoutes = React.useMemo(() => {
 		return props.availableRoutes.slice()
@@ -221,9 +237,9 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 							<MultiLevelSelect isDropdown
 								xDirection={ 0 }
 								searchable={ true }
-								displayAccessor={ d => d.label }
+								displayAccessor={ d => d.name }
 								valueAccessor={ d => d.value }
-								options={ folderData }
+								options={ folders }
 								onChange={ ids => props.add(ids) }
 								DisplayItem={ DropdownItem }
 								InputContainer={ InputContainer }

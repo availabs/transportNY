@@ -405,7 +405,7 @@ const FolderSelector = ({ Folder, folders, foldersByType, OpenedFolders, setOpen
   const openFolder = React.useCallback((e, fid) => {
     setShow(false);
     setOpenedFolders([fid]);
-  }, [setOpenedFolders])
+  }, [setOpenedFolders]);
 
   return (
     <div>
@@ -549,7 +549,10 @@ const TemplateLoader = ({ id, title }) => {
   }, [falcorCache, openedFolders]);
 
   React.useEffect(() => {
-    falcor.get(["folders2", "user", "length"])
+    falcor.get(
+        ["folders2", "user", "length"],
+        ["folders2", "user", "tree"]
+      )
       .then(res => {
         const length = get(res, ["json", "folders2", "user", "length"], 0)
         if (length) {
@@ -567,13 +570,14 @@ const TemplateLoader = ({ id, title }) => {
   React.useEffect(() => {
     const length = get(falcorCache, ["folders2", "user", "length"], 0);
     const refs = d3range(length).map(i => get(falcorCache, ["folders2", "user", "index", i, "value"]));
-    const folders = refs.map(ref => get(falcorCache, ref, null)).filter(Boolean);
+    const allFolders = refs.map(ref => get(falcorCache, ref, null)).filter(Boolean);
+    const folderTree = get(falcorCache, ["folders2", "user", "tree", "value"], []);
+    const topLevelFolders = new Set(folderTree.map(f => f.id));
 
-    folders.sort((a, b) => {
-      const aDate = new Date(a.updated_at);
-      const bDate = new Date(b.updated_at);
-      return bDate.getTime() - aDate.getTime();
-    });
+    const folders = allFolders
+      .filter(f => topLevelFolders.has(f.id))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
     setFolders(folders);
 
     const foldersByType = folders.reduce((a, c) => {
@@ -588,6 +592,7 @@ const TemplateLoader = ({ id, title }) => {
       }
       return a;
     }, getDefaultFoldersByType());
+
     setFoldersByType(foldersByType);
   }, [falcorCache]);
 

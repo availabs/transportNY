@@ -1152,6 +1152,30 @@ export const ThumbnailContainer = ({ children }) => {
   )
 }
 
+const expandFolderTree = (folderTree, action) => {
+  return folderTree.map(f => {
+    return {
+      Item: (
+        () => (
+          <ListItem key={ f.id } onClick={ e => action(e, f.id) }>
+            <div className="flex items-center">
+              <div className="mr-1">
+                <FolderIcon size={ 1.25 }
+                  icon={ get(f, "icon", "") }
+                  color={ get(f, "color", "#000") }/>
+              </div>
+              <span className="pt-1">
+                { get(f, "name", "loading...") }
+              </span>
+            </div>
+          </ListItem>
+        )
+      ),
+      children: expandFolderTree(f.children, action)
+    }
+  })
+}
+
 const FolderStuffContainer = props => {
   const {
     description,
@@ -1198,6 +1222,7 @@ const FolderStuffContainer = props => {
   React.useEffect(() => {
     falcor.get(
         ["folders2", "user", "length"],
+        ["folders2", "user", "tree"],
         ["folders2", "stuff", parent]
       )
       .then(res => {
@@ -1210,47 +1235,14 @@ const FolderStuffContainer = props => {
             ["name", "icon", "color", "id", "updated_at", "created_at", "type", "owner", "editable"]
           ])
         }
-        const folders = get(res, ["json", "folders2", "stuff", parent], [])
-          .filter(s => s.stuff_type === "folder")
-          .map(s => s.stuff_id);
-        if (folders.length) {
-          requests.push([
-            "folders2", "id", folders,
-            ["name", "icon", "color", "id", "updated_at", "created_at", "type", "owner", "editable"]
-          ])
-        }
-        if (requests.length) {
-          return falcor.get(...requests);
-        }
       })
   }, [falcor, parent]);
 
   React.useEffect(() => {
-    const length = get(falcorCache, ["folders2", "user", "length"], 0);
-    const refs = d3range(length).map(i => get(falcorCache, ["folders2", "user", "index", i, "value"]));
-    const folders = refs.map(ref => get(falcorCache, ref, null))
-      .filter(Boolean)
-      .filter(f => f.id != parent)
+    const folderTree = get(falcorCache, ["folders2", "user", "tree", "value"], [])
       .filter(f => f.type !== "AVAIL");
-
-    folders.sort((a, b) => {
-      if (a.type === b.type) {
-        const aDate = new Date(a.updated_at);
-        const bDate = new Date(b.updated_at);
-        return bDate.getTime() - aDate.getTime();
-      }
-      return (a.type === "user") ? -1 : 1;
-    });
-
-    const subFolders = get(falcorCache, ["folders2", "stuff", parent, "value"], [])
-      .filter(s => s.stuff_type === "folder")
-      .filter(s => type === "folder" ? s.stuff_id != id : true)
-      .map(f => {
-        return get(falcorCache, ["folders2", "id", f.stuff_id], null)
-      }).filter(Boolean);
-
-    setFolders([...folders, ...subFolders]);
-  }, [falcorCache, parent, type, id]);
+    setFolders(folderTree.filter(f => f.id !== parent));
+  }, [falcorCache, parent]);
 
   const deleteStuff = React.useCallback(() => {
     switch (type) {
@@ -1302,26 +1294,7 @@ const FolderStuffContainer = props => {
             </ListItem>
           )
         ),
-        children: (
-          folders.map(f => ({
-            Item: (
-              () => (
-                <ListItem key={ f.id } onClick={ e => copyToFolder(e, f.id) }>
-                  <div className="flex items-center">
-                    <div className="mr-1">
-                      <FolderIcon size={ 1.25 }
-                        icon={ get(f, "icon", "") }
-                        color={ get(f, "color", "#000") }/>
-                    </div>
-                    <span className="pt-1">
-                      { get(f, "name", "loading...") }
-                    </span>
-                  </div>
-                </ListItem>
-              )
-            )
-          }))
-        )
+        children: expandFolderTree(folders, copyToFolder)
       },
       { Item: (
           () => (
@@ -1330,26 +1303,7 @@ const FolderStuffContainer = props => {
             </ListItem>
           )
         ),
-        children: (
-          folders.map(f => ({
-            Item: (
-              () => (
-                <ListItem key={ f.id } onClick={ e => moveToFolder(e, f.id) }>
-                  <div className="flex items-center">
-                    <div className="mr-1">
-                      <FolderIcon size={ 1.25 }
-                        icon={ get(f, "icon", "") }
-                        color={ get(f, "color", "#000") }/>
-                    </div>
-                    <span className="pt-1">
-                      { get(f, "name", "loading...") }
-                    </span>
-                  </div>
-                </ListItem>
-              )
-            )
-          }))
-        )
+        children: expandFolderTree(folders, moveToFolder)
       },
       { Item: (
           () => (
