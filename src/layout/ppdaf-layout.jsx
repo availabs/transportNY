@@ -17,7 +17,7 @@ export const Logo = ({sideNav}) => {
 	const size =  get(sideNav, 'size','full') 
 	const themeOptions = {size, color}
 	// console.log('logo sideNav',sideNav, )
-	console.log('logo', color, size)
+	// console.log('logo', color, size)
 	return (
 		<>
 		<Link to="/" className={` ${theme.sidenav(themeOptions).logoWrapper} flex flex-col items-center justify-center`}>
@@ -105,7 +105,7 @@ const Layout = ({ children, menus, sideNav={},topNav={}, Title, site }) => {
 		)
 	}
 
-	console.log('topNavOptions', topNavOptions)
+	//console.log('topNavOptions', topNavOptions)
 	
 	const theme = useTheme()
 	const themeOptions = {size: get(sideNav, 'size','micro') ,color: get(sideNav, 'color','dark')}
