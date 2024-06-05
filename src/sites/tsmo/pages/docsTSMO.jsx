@@ -21,7 +21,7 @@ const Routes = [
     ...dmsPageFactory(
       siteConfig({ 
         app: "dms-site",
-        type: "docs-npmrds",
+        type: "docs-tsmo",
         useFalcor: useFalcor,
         logo: <Logo />, 
         rightMenu: <AuthMenu />,

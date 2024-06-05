@@ -100,7 +100,7 @@
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "dev": "vite",
-    "deploy": "netlify deploy --prod",
+    "deploy": "vite build && netlify deploy --prod",
     "build": "vite build",
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",

@@ -5,6 +5,8 @@ import Congestion from "~/sites/tsmo/pages/Dashboards/Congestion"
 import IncidentView from "./pages/IncidentView"
 import CorridorView from "./pages/CorridorView"
 
+import TSMODocs from "./pages/docsTSMO"
+
 import Home from './pages/Home'
 
 const Routes = [
@@ -13,7 +15,8 @@ const Routes = [
   Workzones,
   Congestion,
   IncidentView,
-  ...CorridorView
+  ...CorridorView,
+  ...TSMODocs
 ]
 
 
