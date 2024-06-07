@@ -88,13 +88,13 @@ const Incidents = props => {
   const [eventIds, setEventIds] = React.useState([]);
 
   React.useEffect(() => {
-    if (!requests.length) return;
+    if (requests.length) {
+      setLoading(1);
 
-    setLoading(1);
-
-    console.log('requests', requests)
-    falcor.get(["transcom2", "eventsbyGeom", requests])
-      .then(() => setLoading(-1));
+      console.log('requests', requests)
+      falcor.get(["transcom2", "eventsbyGeom", requests])
+        .then(() => setLoading(-1));
+    }
   }, [falcor, requests, setLoading]);
 
   React.useEffect(() => {
@@ -109,45 +109,45 @@ const Incidents = props => {
   }, [falcorCache, requests]);
 
   React.useEffect(() => {
-    if (!eventIds.length) return;
+    if (eventIds.length) {
+      setLoading(1);
 
-    setLoading(1);
-
-    falcor.chunk([
-      "transcom2", "eventsbyId", eventIds,
-      ["event_id",
-       "n",
-       "congestion_data",
-       "facility",
-       "description",
-       "start_date_time",
-       "event_duration",
-       "event_type",
-       "event_category",
-       "nysdot_general_category",
-       "nysdot_sub_category",
-       "start_date_time",
-       "geom"]
-    ]).then(() => setLoading(-1));
+      falcor.chunk([
+        "transcom2", "eventsbyId", eventIds,
+        ["event_id",
+        "n",
+        "congestion_data",
+        "facility",
+        "description",
+        "start_date_time",
+        "event_duration",
+        "event_type",
+        "event_category",
+        "nysdot_general_category",
+        "nysdot_sub_category",
+        "start_date_time",
+        "geom"]
+      ]).then(() => setLoading(-1));
+    }
   }, [falcor, eventIds, setLoading]);
 
   const [TMCs, setTMCs] = React.useState([]);
 
   React.useEffect(() => {
-    if (!eventIds.length) return;
-
-    const tmcSet = eventIds.reduce((a, c) => {
-      const d = get(falcorCache, ["transcom2", "eventsbyId", c, "congestion_data", "value", "tmcDelayData"], {});
-      for (const tmc in d) {
-        if (d[tmc]) {
-          a.add(tmc);
-        }
-      };
-      return a;
-    }, new Set());
-
-    if (tmcSet.size) {
-      setTMCs([...tmcSet]);
+    if (eventIds.length) {
+      const tmcSet = eventIds.reduce((a, c) => {
+        const d = get(falcorCache, ["transcom2", "eventsbyId", c, "congestion_data", "value", "tmcDelayData"], {});
+        for (const tmc in d) {
+          if (d[tmc]) {
+            a.add(tmc);
+          }
+        };
+        return a;
+      }, new Set());
+    
+      if (tmcSet.size) {
+        setTMCs([...tmcSet]);
+      }
     }
   }, [falcorCache, eventIds]);
 
@@ -383,7 +383,7 @@ console.log("EVENT IDs:", eventIds.length)
   }, [falcorCache,requests,month, theme.graphCategorical,fsystem])
 
   const [hoveredEvent, setHoveredEvent] = React.useState(null);
-  //console.log('output', data)
+  console.log('output', data)
 
   return (
       <DashboardLayout loading={loading}>
