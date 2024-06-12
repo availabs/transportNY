@@ -19,9 +19,7 @@
 [submodule "src/modules/dms"]
 	path = src/modules/dms
 	url = https://github.com/availabs/dms.git
-<<<<<<< HEAD
 [submodule "src/modules/avl-map-2"]
 	path = src/modules/avl-map-2
 	url = https://github.com/availabs/avl-map-2.git
-=======
->>>>>>> Incident_Search
+

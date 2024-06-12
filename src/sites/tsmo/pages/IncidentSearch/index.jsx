@@ -4,7 +4,7 @@ import IncidentsTable from './components/IncidentsTable';
 import {
   useFalcor
 } from "~/modules/avl-components/src"
-import get from "lodash.get";
+import get from "lodash/get";
 import Select from 'react-select'
 
 const Home = () => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import get from "lodash.get";
+import get from "lodash/get";
 import { format as d3format } from "d3-format"
 import { Link } from "react-router-dom"
 
