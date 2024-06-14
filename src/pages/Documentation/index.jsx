@@ -20,6 +20,7 @@ import checkAuth  from "~/layout/checkAuth"
 
 const siteConfig = {
   format: docsFormat,
+  baseUrl: "/docs_old/",
   // check: ({user}, activeConfig, navigate) =>  {
 
   //   const getReqAuth = (configs) => {
@@ -66,7 +67,7 @@ const siteConfig = {
 }
 
 export default [{
-  ...dmsPageFactory(siteConfig, "/docs_old/", withAuth),
+  ...dmsPageFactory(siteConfig, withAuth),
   name: "Home",
   mainNav: false,
   sideNav: {
