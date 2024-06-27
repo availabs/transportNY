@@ -28,7 +28,7 @@ import { Button, Input } from "~/modules/avl-map-2/src/uicomponents"
 const LoadingScreen = ({ loading, message }) => {
   return (
     <div className={ `
-        inset-0 flex items-center justify-center
+        inset-0 flex items-center justify-center text-center
         bg-opacity-75 bg-black z-50 text-6xl font-bold text-white
         ${ loading ? "fixed" : "hidden" }
       ` }
@@ -366,16 +366,16 @@ const BatchReports = props => {
   const sendToServer = React.useCallback(e => {
     if (!okToSend) return;
 
-    const TMC_LIMIT = 250;
+    const TMC_LIMIT = 50;
 
-    startLoading();
+    startLoading("Sending selections to server and generating data...");
 
     routes.sort((a, b) => b.tmcs.length - a.tmcs.length);
 
     const groups = routes.reduce((a, c) => {
         const i = a.length - 1;
         const numTmcs = a[i].reduce((a, c) => a + c.tmcs.length, 0);
-        if (numTmcs < TMC_LIMIT) {
+        if (!a[i].length || ((numTmcs + c.tmcs.length) < TMC_LIMIT)) {
           a[i].push(c);
         }
         else {
@@ -383,7 +383,9 @@ const BatchReports = props => {
         }
         return a;
       }, [[]])
-      .map(routes => ({ id: uuidv4(), routes }));
+      .map(routes => ({ id: uuidv4(), routes, tmcs: routes.reduce((a, c) => a + c.tmcs.length, 0) }));
+
+console.log("GROUPS:", groups);
 
     const result = groups.reduce((a, c) => {
       a[c.id] = [];
@@ -397,6 +399,9 @@ const BatchReports = props => {
           body: JSON.stringify({ id, routes, columns })
         }).then(res => res.json())
           .then(({ id, data }) => {
+
+console.log("RES:", id, data)
+
             if (id in result) {
               result[id] = data;
             }
