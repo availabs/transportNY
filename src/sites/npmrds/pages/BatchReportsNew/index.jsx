@@ -366,6 +366,9 @@ const BatchReports = props => {
   const sendToServer = React.useCallback(e => {
     if (!okToSend) return;
 
+console.log("STARTING REQUESTS");
+console.time("COMPLETED REQUESTS");
+
     const TMC_LIMIT = 50;
 
     startLoading("Sending selections to server and generating data...");
@@ -410,7 +413,10 @@ console.log("RES:", id, data)
     }, Promise.resolve())
       .then(() => {
         setRouteData([].concat(...Object.values(result)))
-      }).then(() => { stopLoading(); });
+      }).then(() => {
+        stopLoading();
+        console.timeEnd("COMPLETED REQUESTS");
+      });
 
     // fetch(`${ API_HOST }/batchreports`, {
     //   method: "POST",
