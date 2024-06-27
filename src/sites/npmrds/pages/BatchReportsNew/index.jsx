@@ -604,8 +604,11 @@ const BatchReports = props => {
 }
 
 const brConfig = {
+  name:'Batch Report',
   path: "/batchreportsnew",
   component: BatchReports,
+  mainNav: true,
+  icon: 'fa fa-table-list',
   auth: true
 }
 export default brConfig

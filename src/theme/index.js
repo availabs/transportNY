@@ -28,7 +28,7 @@ const ppdaf = () => {
             white: {
               contentBg: `bg-${highlight} border-r`,
               sideItemActive:``,
-              contentBgAccent: `bg-neutral-100`,
+              contentBgAccent: `bg-slate-100`,
               accentColor: `${accent}-600`,
               accentBg: ``,
               borderColor: `border-slate-200`,
@@ -494,7 +494,7 @@ const ppdaf = () => {
                 `,
                 primary: `
                     border border-transparent shadow
-                    text-sm leading-4 rounded-sm text-white bg-blue-600 hover:bg-blue-700
+                    leading-4 rounded-sm text-white bg-blue-600 hover:bg-blue-700
                     focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`,
                 danger: ''
             }

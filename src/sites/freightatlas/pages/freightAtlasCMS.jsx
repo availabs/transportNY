@@ -54,19 +54,19 @@ const Routes = [
         checkAuth,
         theme,
         pgEnv:'freight_data'
-      }), 
-      "/",
+      }),
       withAuth,
       
     ),
     authLevel: -1,
     name: "CMS",
     sideNav: {
-      color: 'dark',
+      color: 'white',
       size: 'none'
     },
     topNav: {
-      size: "none"
+      size: "none",
+      color: "white"
     }
   }
 ]

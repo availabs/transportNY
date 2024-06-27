@@ -13,18 +13,24 @@ const dataManagerCats = {
 
 export const Logo = ({sideNav}) => {
 	const theme = useTheme()
-	const themeOptions = {size: get(sideNav, 'size','micro') ,color: get(sideNav, 'color','dark')}
-	// console.log('logo sideNav',sideNav)
+	const color = get(sideNav, 'color','white')
+	const size =  get(sideNav, 'size','full') 
+	const themeOptions = {size, color}
+	// console.log('logo sideNav',sideNav, )
+	// console.log('logo', color, size)
 	return (
 		<>
-		<Link to="/" className={`${theme.sidenav(themeOptions).logoWrapper} flex flex-col items-center justify-center`}>
-			<div>
-				<img src='/nys_logo.svg' className='w-full h-12' alt='New York State Logo' />
+		<Link to="/" className={` ${theme.sidenav(themeOptions).logoWrapper} flex flex-col items-center justify-center`}>
+			<div className='flex items-center '>
+				<img src={`${color === 'dark' ? `/nys_logo.svg` : `/nys_logo_blue.svg`}`} className='w-full h-12 justify-between' alt='New York State Logo' />
+				{/*<div> TransportNY </div>*/}
 			</div>	
 		</Link>
 		</>
 	)
 }
+
+
 
 const noop = () => <></>;
 
@@ -92,12 +98,14 @@ const Layout = ({ children, menus, sideNav={},topNav={}, Title, site }) => {
 		logo: topNav?.logo || (
 			<div className='flex items-center justify-center h-12'>
 				<div to="/" className={`${['none'].includes(sideNavOptions.size)  ? '' : 'md:hidden'}` }>
-					<Logo sideNav={sideNavOptions}/>
+					<Logo sideNav={{size:'mini', color:'white'}}/>
 				</div>
 				{typeof Title === 'function' ? <Title /> : Title}
 			</div>
 		)
 	}
+
+	//console.log('topNavOptions', topNavOptions)
 	
 	const theme = useTheme()
 	const themeOptions = {size: get(sideNav, 'size','micro') ,color: get(sideNav, 'color','dark')}

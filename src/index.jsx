@@ -5,7 +5,7 @@ import App from './App';
 import { API_HOST, AUTH_HOST, PROJECT_NAME, CLIENT_HOST } from './config'
 
 import { Provider } from 'react-redux';
-import store from '~/store';
+import store from './store';
 
 import PPDAF_THEME from "./theme"
 import {
@@ -26,7 +26,7 @@ import {
   enableAuth
 } from "~/modules/ams/src"
 
-import "~/index.css";
+import "./index.css";
 
 export const falcor = falcorGraph(API_HOST)
 
