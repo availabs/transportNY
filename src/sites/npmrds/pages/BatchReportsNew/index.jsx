@@ -117,6 +117,12 @@ const Reducer = (state, action) => {
   }
 }
 
+const strictNaN = v => {
+  if (v === null) return true;
+  if (v === "") return true;
+  return isNaN(v);
+}
+
 const BatchReports = props => {
   const { falcor, falcorCache } = useFalcor();
 
@@ -329,7 +335,7 @@ const BatchReports = props => {
         };
         col.dataColumns.forEach(dc => {
           const d = get(data, [col.name, dc.key], null);
-          route[col.name][dc.key] = d ? format(d) : "No Data";
+          route[col.name][dc.key] = strictNaN(d) ? "No Data" : format(d);
           if (d && dc.key.includes("-pc")) {
             route[col.name][dc.key] = `${ route[col.name][dc.key] }%`
           }
@@ -343,8 +349,8 @@ const BatchReports = props => {
     if (!routes.length) return false;
     if (!columns.length) return false;
 
-    const timeRegex = /\d\d:\d\d(:\d\d)?/;
-    const dateRegex = /\d{4}-\d\d-\d\d/;
+    // const timeRegex = /\d\d:\d\d(:\d\d)?/;
+    // const dateRegex = /\d{4}-\d\d-\d\d/;
 
     return routes.reduce((a, c) => {
       if (!c.name.length) return false;
@@ -359,15 +365,56 @@ const BatchReports = props => {
 
   const sendToServer = React.useCallback(e => {
     if (!okToSend) return;
-    startLoading("Sending selections to server and generating data...");
-    fetch(`${ API_HOST }/batchreports`, {
-      method: "POST",
-      body: JSON.stringify({ routes, columns })
-    }).then(res => res.json())
-      .then(json => {
-        setRouteData(json.data);
-      }).then(() => { stopLoading(); })
-  }, [routes, columns, okToSend, setRouteData]);
+
+    const TMC_LIMIT = 250;
+
+    startLoading();
+
+    routes.sort((a, b) => b.tmcs.length - a.tmcs.length);
+
+    const groups = routes.reduce((a, c) => {
+        const i = a.length - 1;
+        const numTmcs = a[i].reduce((a, c) => a + c.tmcs.length, 0);
+        if (numTmcs < TMC_LIMIT) {
+          a[i].push(c);
+        }
+        else {
+          a.push([c]);
+        }
+        return a;
+      }, [[]])
+      .map(routes => ({ id: uuidv4(), routes }));
+
+    const result = groups.reduce((a, c) => {
+      a[c.id] = [];
+      return a;
+    }, {});
+
+    groups.reduce((promise, { id, routes }) => {
+      return promise.then(() => {
+        return fetch(`${ API_HOST }/batchreports`, {
+          method: "POST",
+          body: JSON.stringify({ id, routes, columns })
+        }).then(res => res.json())
+          .then(({ id, data }) => {
+            if (id in result) {
+              result[id] = data;
+            }
+          })
+      })
+    }, Promise.resolve())
+      .then(() => {
+        setRouteData([].concat(...Object.values(result)))
+      }).then(() => { stopLoading(); });
+
+    // fetch(`${ API_HOST }/batchreports`, {
+    //   method: "POST",
+    //   body: JSON.stringify({ routes, columns })
+    // }).then(res => res.json())
+    //   .then(json => {
+    //     setRouteData(json.data);
+    //   }).then(() => { stopLoading(); })
+  }, [routes, columns, okToSend, setRouteData, startLoading, stopLoading]);
 
   const okToSave = React.useMemo(() => {
     if (!okToSend) return false;
