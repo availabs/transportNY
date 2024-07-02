@@ -9,7 +9,7 @@ import Select from 'react-select'
 
 const Home = () => {
 
-  console.log("This we reached!!!");
+//  console.log("This we reached!!!");
   let defaultStartDate = new Date();
   defaultStartDate.setDate(defaultStartDate.getDate() - 3);
   let defaultEndDate = new Date();
