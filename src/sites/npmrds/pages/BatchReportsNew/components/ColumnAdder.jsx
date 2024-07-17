@@ -47,6 +47,19 @@ const RadioOptions = [
     value: "user-defined"
   }
 ]
+
+const DataSources = [
+  { label: "Freight Trucks and Passenger Vehicles",
+    value: "travel_time_all_vehicles"
+  },
+  { label: "Freight Trucks only",
+    value: "travel_time_freight_trucks"
+  },
+  { label: "Passenger Vehicles only",
+    value: "travel_time_passenger_vehicles"
+  }
+]
+
 const displayAccessor = o => o.label;
 const valueAccessor = o => o.value;
 const headerAccessor = c => c.header;
@@ -63,6 +76,7 @@ const getInitialState = (columns = []) => {
     startDate: defaultDate,
     endDate: defaultDate,
     dataColumns: [],
+    dataSource: "travel_time_all_vehicles",
     uuid: uuidv4(),
     isBase: num === 0,
     editing: false
@@ -88,6 +102,8 @@ const Reducer = (state, action) => {
       return { ...state, endDate: payload.endDate };
     case "set-data-columns":
       return { ...state, dataColumns: [...payload.dataColumns] };
+    case "set-data-source":
+      return { ...state, dataSource: payload.source }
     case "set-relative-date":
       return { ...state, ...payload };
     case "reset-state":
@@ -162,6 +178,12 @@ const ColumnAdder = props => {
       dataColumns: cols
     });
   }, []);
+  const setDataSource = React.useCallback(source => {
+    dispatch({
+      type: "set-data-source",
+      source
+    })
+  }, []);
   const resetState = React.useCallback(columns => {
     dispatch({ type: "reset-state", columns });
   }, []);
@@ -199,6 +221,7 @@ const ColumnAdder = props => {
       startDate,
       endDate,
       dataColumns,
+      dataSource,
       uuid,
       isBase
     } = state;
@@ -210,6 +233,7 @@ const ColumnAdder = props => {
       startDate,
       endDate,
       dataColumns,
+      dataSource,
       uuid,
       isBase
     };
@@ -225,6 +249,7 @@ const ColumnAdder = props => {
       startDate,
       endDate,
       dataColumns,
+      dataSource,
       uuid,
       isBase
     } = state;
@@ -236,6 +261,7 @@ const ColumnAdder = props => {
       startDate,
       endDate,
       dataColumns,
+      dataSource,
       uuid,
       isBase
     };
@@ -257,6 +283,7 @@ const ColumnAdder = props => {
     startDate,
     endDate,
     dataColumns,
+    dataSource,
     uuid,
     editing
   } = state;
@@ -368,6 +395,15 @@ const ColumnAdder = props => {
                 setEndDate={ setEndDate }
                 dateSelection={ dateSelection }/>
             }
+
+            <div className="border-b-2">Data Source</div>
+            <MultiLevelSelect removable={ false }
+              onChange={ setDataSource }
+              options={ DataSources }
+              displayAccessor={ displayAccessor }
+              valueAccessor={ valueAccessor }
+              value={ dataSource }
+              placeholder="Select a data source..."/>
 
             <div className="border-b-2">Data Selection</div>
             <MultiLevelSelect isMulti
