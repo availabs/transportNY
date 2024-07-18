@@ -95,7 +95,7 @@ const setFolderValues = (folderTree, falcorCache) => {
   });
 }
 
-const RouteSelector = ({ addRoutes }) => {
+const RouteSelector = ({ addRoutes, clearRoutes }) => {
 
   const { falcor, falcorCache } = useFalcor();
 
@@ -159,6 +159,12 @@ const RouteSelector = ({ addRoutes }) => {
           Search Folders
         </div>
       </MultiLevelSelect>
+
+      <button className="px-2 py-1 col-start-2 outline outline-2 outline-red-500 text-red-500 rounded hover:bg-red-200"
+        onClick={ clearRoutes }
+      >
+        Clear Routes
+      </button>
     </div>
   )
 }

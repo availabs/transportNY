@@ -72,6 +72,11 @@ const Reducer = (state, action) => {
         selectedRoutes: [...srs.slice(0, i), ...srs.slice(i + 1)]
       }
     }
+    case "clear-routes":
+      return {
+        ...state,
+        selectedRoutes: []
+      }
     case "update-route-data": {
       const { index, key, value } = payload;
       const uuid = state.selectedRoutes[index].uuid;
@@ -253,6 +258,11 @@ const BatchReports = props => {
     dispatch({
       type: "remove-route",
       index
+    })
+  }, []);
+  const clearRoutes = React.useCallback(() => {
+    dispatch({
+      type: "clear-routes"
     })
   }, []);
   const updateRouteData = React.useCallback((i, k, v) => {
@@ -507,6 +517,7 @@ console.log("RES:", id, data)
 
       <Sidebar
         addRoutes={ addRoutes }
+        clearRoutes={ clearRoutes }
         timeSource={ timeSource }
         setTimeSource={ setTimeSource }
         startTime={ startTime }
