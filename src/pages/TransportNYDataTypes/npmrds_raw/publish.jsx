@@ -19,7 +19,7 @@ const submitUpload = (props, navigate, pgEnv) => {
       };
 
       const res = await fetch(
-        `https://graph3.availabs.org/dama-admin/${pgEnv}/npmrds-raw/publish` || `${DAMA_HOST}/dama-admin/${pgEnv}/npmrds-raw/publish`,
+        `${DAMA_HOST}/dama-admin/${pgEnv}/npmrds-raw/publish`,
         {
           method: "POST",
           body: JSON.stringify(publishData),
