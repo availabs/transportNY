@@ -34,9 +34,9 @@ const submitUpload = (props, navigate, pgEnv) => {
       console.log(etl_context_id, source_id);
       props.setLoading(false);
       if (source_id && etl_context_id) {
-        navigate(`/source/${source_id}/uploads/${etl_context_id}`);
+        navigate(`/datasources/source/${source_id}/uploads/${etl_context_id}`);
       } else {
-        navigate(`/source/${source_id}`);
+        navigate(`/datasources/source/${source_id}`);
       }
     } catch (err) {
       props.setLoading(false);
