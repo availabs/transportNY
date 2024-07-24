@@ -8,7 +8,7 @@ import { useFalcor } from "~/modules/avl-components/src"
 // import { useAuth } from "@availabs/ams"
 import { useAuth } from "~/modules/ams/src"
 
-import FreightDocs from './FreightDocs'
+// import FreightDocs from './FreightDocs'
 
 const DAMA_ARGS = {
   baseUrl: '',
@@ -25,7 +25,7 @@ const DAMA_ARGS = {
 
 const Routes = [
   ...DataManager(DAMA_ARGS),
-  ...FreightDocs
+  // ...FreightDocs
 ]
 
 const site = {

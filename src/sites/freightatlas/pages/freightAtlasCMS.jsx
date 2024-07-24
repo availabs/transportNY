@@ -2,15 +2,14 @@ import { useFalcor } from "~/modules/avl-components/src"
 import { useAuth } from "~/modules/ams/src";
 import {Link} from 'react-router-dom'
 
-import { dmsPageFactory, registerDataType } from "~/modules/dms/src"
+import { dmsPageFactory, registerDataType, registerComponents, Selector } from "~/modules/dms/src"
 import { withAuth } from "~/modules/ams/src" 
 import checkAuth  from "~/layout/checkAuth"
 import {Logo} from '~/layout/ppdaf-layout'
 import AuthMenu from "~/pages/Auth/AuthMenu"
 
-import siteConfig from '~/modules/dms/src/patterns/page/siteConfig'
+import {siteConfig} from '~/modules/dms/src/patterns/page/siteConfig'
 import ComponentRegistry from '~/components'
-import Selector, { registerComponents } from "~/modules/dms/src/patterns/page/selector"
 import { DamaMap } from '~/pages/DataManager'
 
 // import BuildingFootprintsDownload from "./buildings_download"
