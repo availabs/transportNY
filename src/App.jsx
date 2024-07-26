@@ -24,6 +24,7 @@ import freightdata from '~/sites/freightdata'
 import npmrds from '~/sites/npmrds'
 import transit from '~/sites/transit'
 import demos from '~/sites/demos'
+import sandbox from '~/sites/sandbox'
 
 const Sites = {
   transportNY,
@@ -32,7 +33,8 @@ const Sites = {
   freightdata,
   npmrds,
   transit,
-  demos
+  demos,
+  sandbox
 }
 
 
