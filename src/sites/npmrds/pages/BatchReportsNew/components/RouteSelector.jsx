@@ -6,6 +6,7 @@ import { range as d3range } from "d3-array"
 import { useFalcor } from "~/modules/avl-components/src"
 
 import { MultiLevelSelect } from "~/modules/avl-map-2/src/uicomponents"
+import { MultiLevelSelect as MultiLevelSelectNew } from "./MultiLevelSelect"
 
 const nameAccessor = r => r.name;
 const idAccessor = r => r.id;
@@ -61,6 +62,25 @@ const FolderTypeValues = {
   "group": 1,
   "AVAIL": 2
 }
+
+const ITEMS = [
+  ...d3range(0, 20).map(i => {
+    return {
+      item: `TEST ITEM ${ i + 1 }`,
+      children: d3range(0, 10).map(ii => {
+        return {
+          item: `TEST ITEM ${ i + 1 }-${ ii + 1 }`,
+          children: d3range(0, 10).map(iii => {
+            return {
+              item: `TEST ITEM ${ i + 1 }-${ ii + 1 }-${ iii + 1 }`,
+              children: []
+            }
+          })
+        }
+      })
+    }
+  })
+]
 
 const setFolderValues = (folderTree, falcorCache) => {
   return folderTree.reduce((a, c) => {
@@ -138,7 +158,7 @@ const RouteSelector = ({ addRoutes, clearRoutes }) => {
         Route Selection
       </div>
 
-      <MultiLevelSelect isDropdown searchable
+      <MultiLevelSelectNew isDropdown isSearchable
         onChange={ addRoutes }
         options={ routes }
         displayAccessor={ nameAccessor }
@@ -147,9 +167,9 @@ const RouteSelector = ({ addRoutes, clearRoutes }) => {
         <div className="px-2 py-1 outline outline-2 rounded hover:bg-gray-300">
           Select a Route
         </div>
-      </MultiLevelSelect>
+      </MultiLevelSelectNew>
 
-      <MultiLevelSelect isDropdown searchable
+      <MultiLevelSelectNew isDropdown isSearchable
         onChange={ addRoutes }
         options={ folders }
         displayAccessor={ nameAccessor }
@@ -158,7 +178,7 @@ const RouteSelector = ({ addRoutes, clearRoutes }) => {
         <div className="px-2 py-1 outline outline-2 rounded hover:bg-gray-300">
           Search Folders
         </div>
-      </MultiLevelSelect>
+      </MultiLevelSelectNew>
 
       <button className="px-2 py-1 col-start-2 outline outline-2 outline-red-500 text-red-500 rounded hover:bg-red-200"
         onClick={ clearRoutes }

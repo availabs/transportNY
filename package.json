@@ -7,7 +7,7 @@
     "@availabs/ams": "^2.0.4",
     "@availabs/avl-falcor": "^0.0.3",
     "@glideapps/glide-data-grid-cells": "^6.0.3",
-    "@headlessui/react": "^1.7.19",
+    "@headlessui/react": "^2.1.2",
     "@hello-pangea/dnd": "^16.5.0",
     "@heroicons/react": "^2.0.17",
     "@lexical/clipboard": "^0.13.1",
