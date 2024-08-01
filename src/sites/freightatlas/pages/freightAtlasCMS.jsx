@@ -2,14 +2,23 @@ import { useFalcor } from "~/modules/avl-components/src"
 import { useAuth } from "~/modules/ams/src";
 import {Link} from 'react-router-dom'
 
+<<<<<<< HEAD
 import { dmsPageFactory, registerDataType, registerComponents, Selector } from "~/modules/dms/src"
 import { withAuth } from "~/modules/ams/src" 
+=======
+import { dmsPageFactory, registerDataType, Selector, registerComponents } from "~/modules/dms/src"
+import { withAuth } from "~/modules/ams/src"
+>>>>>>> 762a0a62e623be7fcc3bd58c698227ea880df081
 import checkAuth  from "~/layout/checkAuth"
 import {Logo} from '~/layout/ppdaf-layout'
 import AuthMenu from "~/pages/Auth/AuthMenu"
 
 import {siteConfig} from '~/modules/dms/src/patterns/page/siteConfig'
 import ComponentRegistry from '~/components'
+<<<<<<< HEAD
+=======
+// import Selector, { registerComponents } from "~/modules/dms/src/patterns/page/selector"
+>>>>>>> 762a0a62e623be7fcc3bd58c698227ea880df081
 import { DamaMap } from '~/pages/DataManager'
 
 // import BuildingFootprintsDownload from "./buildings_download"
@@ -34,18 +43,18 @@ const theme = {
 const Routes = [
   {
     ...dmsPageFactory(
-      siteConfig({ 
+      siteConfig({
         app: "transportny",
         type: "cms-freightatlas",
         useFalcor: useFalcor,
-        logo: <Logo />, 
-        rightMenu: ( 
+        logo: <Logo />,
+        rightMenu: (
           <div className='flex'>
             <Link to='/datasources' className='w-fit group font-display whitespace-nowrap
         flex font-medium tracking-widest items-center text-[14px] px-4 h-12 text-slate-700 border-slate-100
         hover:bg-white hover:text-blue-500
         focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
-        transition cursor-pointer'>Data Manager</Link> 
+        transition cursor-pointer'>Data Manager</Link>
             <AuthMenu />
           </div>
         ),
@@ -55,7 +64,7 @@ const Routes = [
         pgEnv:'freight_data'
       }),
       withAuth,
-      
+
     ),
     authLevel: -1,
     name: "CMS",

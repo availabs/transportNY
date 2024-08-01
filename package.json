@@ -9,6 +9,10 @@
     "@ag-grid-community/styles": "^32.0.1",
     "@availabs/ams": "^2.0.4",
     "@availabs/avl-falcor": "^0.0.3",
+<<<<<<< HEAD
+=======
+    "@glideapps/glide-data-grid-cells": "^6.0.3",
+>>>>>>> 762a0a62e623be7fcc3bd58c698227ea880df081
     "@headlessui/react": "^2.1.2",
     "@hello-pangea/dnd": "^16.5.0",
     "@heroicons/react": "^2.0.17",
