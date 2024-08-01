@@ -328,28 +328,30 @@ export const MultiLevelSelect = props => {
           }
         </div>
 
-        <div className="z-10 absolute"
-          style={ {
-            left: "100%",
-            display: hover && item ? "block" : "none",
-            top: `${ top }px`
-          } }
-        >
-          <DropBeside key={ get(item, 2, -1) }
-            { ...props }
-            options={ get(item, 0, []) }
-            DisplayItem={ DisplayItem }
-            value={ Value }
-            select={ select }
-            isMulti={ isMulti }
-            isDropdown={ isDropdown }
-            displayAccessor={ displayAccessor }
-            valueAccessor={ valueAccessor }
-            valueComparator={ valueComparator }
-            isSearchable={ isSearchable }
-            isRemovable={ isRemovable }
-            includes={ includes }/>
-        </div>
+        { !item || !item[0].length ? null :
+          <div className="z-10 absolute"
+            style={ {
+              left: "100%",
+              display: hover && item ? "block" : "none",
+              top: `${ top }px`
+            } }
+          >
+            <DropBeside key={ get(item, 2, -1) }
+              { ...props }
+              options={ get(item, 0, []) }
+              DisplayItem={ DisplayItem }
+              value={ Value }
+              select={ select }
+              isMulti={ isMulti }
+              isDropdown={ isDropdown }
+              displayAccessor={ displayAccessor }
+              valueAccessor={ valueAccessor }
+              valueComparator={ valueComparator }
+              isSearchable={ isSearchable }
+              isRemovable={ isRemovable }
+              includes={ includes }/>
+          </div>
+        }
 
       </div>
     </div>
