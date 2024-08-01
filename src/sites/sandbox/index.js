@@ -12,9 +12,10 @@ import { useAuth } from "~/modules/ams/src"
 
 const DAMA_ARGS = {
   baseUrl: '',
-  defaultPgEnv: 'freight_data',
+  defaultPgEnv: 'nysdot_sandbox',
   useFalcor,
   useAuth,
+  authLevel:1,
   navSettings: {
     topNav: {
       position: 'fixed',

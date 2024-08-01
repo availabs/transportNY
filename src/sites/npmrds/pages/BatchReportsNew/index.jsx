@@ -359,9 +359,6 @@ const BatchReports = props => {
     if (!routes.length) return false;
     if (!columns.length) return false;
 
-    // const timeRegex = /\d\d:\d\d(:\d\d)?/;
-    // const dateRegex = /\d{4}-\d\d-\d\d/;
-
     return routes.reduce((a, c) => {
       if (!c.name.length) return false;
       if (!c.tmcs.length) return false;
@@ -375,9 +372,6 @@ const BatchReports = props => {
 
   const sendToServer = React.useCallback(e => {
     if (!okToSend) return;
-
-console.log("STARTING REQUESTS");
-console.time("COMPLETED REQUESTS");
 
     const TMC_LIMIT = 50;
 
@@ -398,8 +392,6 @@ console.time("COMPLETED REQUESTS");
       }, [[]])
       .map(routes => ({ id: uuidv4(), routes, tmcs: routes.reduce((a, c) => a + c.tmcs.length, 0) }));
 
-console.log("GROUPS:", groups);
-
     const result = groups.reduce((a, c) => {
       a[c.id] = [];
       return a;
@@ -412,9 +404,6 @@ console.log("GROUPS:", groups);
           body: JSON.stringify({ id, routes, columns })
         }).then(res => res.json())
           .then(({ id, data }) => {
-
-console.log("RES:", id, data)
-
             if (id in result) {
               result[id] = data;
             }
@@ -425,7 +414,6 @@ console.log("RES:", id, data)
         setRouteData([].concat(...Object.values(result)))
       }).then(() => {
         stopLoading();
-        console.timeEnd("COMPLETED REQUESTS");
       });
 
     // fetch(`${ API_HOST }/batchreports`, {
@@ -441,16 +429,8 @@ console.log("RES:", id, data)
     if (!okToSend) return false;
     if (!routeData.length) return false;
 
-    return routes.reduce((a, c) => {
-      const data = routeData.find(rd => rd.uuid === c.uuid);
-      return columns.reduce((aa, cc) => {
-        return cc.dataColumns.reduce((aaa, ccc) => {
-          const d = get(data, [cc.name, ccc.key], null);
-          return aaa && Boolean(d);
-        }, aa);
-      }, a);
-    }, true);
-  }, [routes, columns, routeData, okToSend]);
+    return true;
+  }, [routeData, okToSend]);
 
   const [filename, setFilename] = React.useState(`csv_data_${ moment().format("MM_DD_YYYY") }`)
 
