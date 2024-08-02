@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-import { Listbox, Transition } from "@headlessui/react";
+import { Listbox, ListboxOption, ListboxOptions, ListboxButton, Transition } from "@headlessui/react";
 
 import PublishNpmrdsRaw from "./publish";
 
@@ -77,7 +77,7 @@ const Create = ({ source }) => {
     );
 
     if ((selectedResult || []).length > 0) {
-      removePerson(val);
+      removeSelect(val);
     } else {
       setStates((currents) => [...currents, val]);
     }
@@ -146,26 +146,26 @@ const Create = ({ source }) => {
               >
                 {({ open }) => (
                   <>
-                    <Listbox.Label className="block text-sm leading-5 font-medium text-gray-700">
-                      Npmrds
-                    </Listbox.Label>
+                    <span className="block text-sm leading-5 font-medium text-gray-700">
+                      States
+                    </span>
                     <div className="relative">
                       <span className="inline-block w-full rounded-md shadow-sm">
-                        <Listbox.Button className="cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition ease-in-out duration-150 sm:text-sm sm:leading-5">
+                        <ListboxButton className="cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition ease-in-out duration-150 sm:text-sm sm:leading-5">
                           {!(states || []).length && "select states"}
                           {(states || []).map((val) => (
                             <div
                               key={val}
-                              className="inline-flex items-center px-1 mr-1 mt-1 rounded text-white bg-gray-400"
+                              className="inline-flex items-center p-2 mr-1 mt-1 rounded text-white bg-blue-400"
                             >
                               {statesObj[`${val}`]}
                               <div
-                                className="ml-1 bg-gray-100 rounded-full cursor-pointer"
+                                className="ml-1 bg-blue-100 rounded-full cursor-pointer"
                                 onClick={() => removeSelect(val)}
                               >
                                 <svg
-                                  width="15"
-                                  height="15"
+                                  width="13"
+                                  height="13"
                                   viewBox="0 0 20 20"
                                   fill="none"
                                   xmlns="http://www.w3.org/2000/svg"
@@ -182,7 +182,7 @@ const Create = ({ source }) => {
                           ))}
                           <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                             <svg
-                              className="h-5 w-5 text-gray-400"
+                              className="h-5 w-5 text-black-400"
                               viewBox="0 0 20 20"
                               fill="none"
                               stroke="currentColor"
@@ -195,7 +195,7 @@ const Create = ({ source }) => {
                               />
                             </svg>
                           </span>
-                        </Listbox.Button>
+                        </ListboxButton>
                       </span>
 
                       <Transition
@@ -205,20 +205,20 @@ const Create = ({ source }) => {
                         leaveTo="opacity-0"
                         className="absolute mt-1 w-full rounded-md bg-white shadow-lg"
                       >
-                        <Listbox.Options
+                        <ListboxOptions
                           static
                           className="max-h-60 rounded-md py-1 text-base leading-6 shadow-xs overflow-auto focus:outline-none sm:text-sm sm:leading-5"
                         >
                           {(Object.keys(statesObj) || []).map((opt) => {
                             const selected = isSelected(opt);
                             return (
-                              <Listbox.Option key={opt} value={opt}>
+                              <ListboxOption key={opt} value={opt}>
                                 {({ active }) => (
                                   <div
                                     className={`${
                                       active
                                         ? "text-white bg-blue-600"
-                                        : "text-gray-900"
+                                        : "text-black-900"
                                     } cursor-default select-none relative py-2 pl-8 pr-4`}
                                   >
                                     <span
@@ -254,10 +254,10 @@ const Create = ({ source }) => {
                                     )}
                                   </div>
                                 )}
-                              </Listbox.Option>
+                              </ListboxOption>
                             );
                           })}
-                        </Listbox.Options>
+                        </ListboxOptions>
                       </Transition>
                     </div>
                   </>
