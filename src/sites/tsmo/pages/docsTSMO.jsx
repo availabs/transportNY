@@ -9,7 +9,7 @@ import AuthMenu from "~/pages/Auth/AuthMenu"
 
 import {siteConfig} from '~/modules/dms/src/patterns/page/siteConfig'
 
-//registerComponents(ComponentRegistry)
+// registerComponents(ComponentRegistry)
 registerDataType("selector", Selector)
 
 const Routes = [
