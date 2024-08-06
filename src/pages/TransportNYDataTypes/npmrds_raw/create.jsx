@@ -2,7 +2,13 @@ import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-import { Listbox, ListboxOption, ListboxOptions, ListboxButton, Transition } from "@headlessui/react";
+import {
+  Listbox,
+  ListboxOption,
+  ListboxOptions,
+  ListboxButton,
+  Transition,
+} from "@headlessui/react";
 
 import PublishNpmrdsRaw from "./publish";
 
@@ -267,16 +273,20 @@ const Create = ({ source }) => {
           </div>
         </div>
       </div>
-      <PublishNpmrdsRaw
-        loading={loading}
-        setLoading={setLoading}
-        source_id={source?.source_id || null}
-        name={source?.name}
-        type={source?.type}
-        startDate={startDate}
-        endDate={endDate}
-        states={states}
-      />
+      {source?.name && startDate && endDate && states.length ? (
+        <>
+          <PublishNpmrdsRaw
+            loading={loading}
+            setLoading={setLoading}
+            source_id={source?.source_id || null}
+            name={source?.name}
+            type={source?.type}
+            startDate={startDate}
+            endDate={endDate}
+            states={states}
+          />
+        </>
+      ) : null}
     </div>
   );
 };
