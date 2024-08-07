@@ -543,7 +543,13 @@ const TemplateLoader = ({ id, title }) => {
   const [folders, setFolders] = React.useState([]);
   const [foldersByType, setFoldersByType] = React.useState(DefaultFoldersByType);
 
-  const [openedFolders, setOpenedFolders] = React.useState([]);
+  const [openedFolders, _setOpenedFolders] = React.useState([]);
+  const setOpenedFolders = React.useCallback(f => {
+
+console.log("SET OPENED FOLDERS:", f);
+
+    _setOpenedFolders(f);
+  }, [])
   const OpenedFolders = React.useMemo(() => {
     return openedFolders.map(fid => get(falcorCache, ["folders2", "id", fid]));
   }, [falcorCache, openedFolders]);
@@ -662,7 +668,14 @@ const TemplateLoader = ({ id, title }) => {
 
   React.useEffect(() => {
     if (folders.length && !openedFolders.length) {
-      setOpenedFolders([folders.filter(f => f.type === "user")?.[0]?.id]);
+
+      const userFolders = folders.filter(f => f.type === "user");
+      if (userFolders.length) {
+        setOpenedFolders([userFolders[0].id]);
+      }
+      else {
+        setOpenedFolders([folders[0].id]);
+      }
     }
   }, [folders, openedFolders]);
 

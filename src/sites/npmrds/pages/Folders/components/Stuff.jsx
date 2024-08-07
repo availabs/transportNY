@@ -1,5 +1,7 @@
 import React from "react"
 
+import TrackVisibility from 'react-on-screen';
+
 import get from "lodash/get"
 import { range as d3range } from "d3-array"
 import { Link } from "react-router-dom"
@@ -84,7 +86,7 @@ const Folder = ({ id, openedFolders, setOpenedFolders, forFolder, ...props }) =>
     </div>
   )
 }
-const Route = ({ id, forFolder = false, parent, children, ...props }) => {
+const Route = ({ id, forFolder = false, parent, children, isVisible, ...props }) => {
   const { falcor, falcorCache } = useFalcor();
 
   const [templates, setTemplates] = React.useState([]);
@@ -124,8 +126,9 @@ const Route = ({ id, forFolder = false, parent, children, ...props }) => {
   }, [falcorCache, parent]);
 
   React.useEffect(() => {
+    if (!isVisible) return;
     falcor.get(["routes2", "id", id, ["name", "description", "updated_at", "id", "metadata"]]);
-  }, [falcor, id]);
+  }, [falcor, id, isVisible]);
 
   const [route, setRoute] = React.useState({});
   React.useEffect(() => {
@@ -716,10 +719,10 @@ const RouteSelectModal = ({ folders, template, action, ...props }) => {
 
 const Stuff = ({ type, ...props }) => {
   return (
-    type === "folder" ? <Folder { ...props }/> :
-    type === "route" ? <Route { ...props }/> :
-    type === "report" ? <Report { ...props }/> :
-    type === "template" ? <Template { ...props }/> : null
+    type === "folder" ? <TrackVisibility once><Folder { ...props }/></TrackVisibility> :
+    type === "route" ? <TrackVisibility once><Route { ...props }/></TrackVisibility> :
+    type === "report" ? <TrackVisibility once><Report { ...props }/></TrackVisibility> :
+    type === "template" ? <TrackVisibility once><Template { ...props }/></TrackVisibility> : null
   )
 }
 

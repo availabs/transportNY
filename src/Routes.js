@@ -43,7 +43,7 @@ const DAMA_ARGS = {
 
 const Routes = [
   ...Auth,
-  ...DataManager(DAMA_ARGS),
+  //...DataManager(DAMA_ARGS),
   ...Documentation,
   GraphTest,
   NoMatch
