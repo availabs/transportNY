@@ -15,6 +15,7 @@ const submitUpload = (props, navigate, pgEnv) => {
         startDate: props?.startDate,
         endDate: props?.endDate,
         states: props?.states,
+        user_id: props?.user_id,
         pgEnv,
       };
 
@@ -49,7 +50,6 @@ const submitUpload = (props, navigate, pgEnv) => {
 export default function PublishNpmrdsRaw(props) {
   const navigate = useNavigate();
   const { loading } = props;
-  console.log("props", props);
   return (
     <>
       <button

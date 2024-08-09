@@ -67,7 +67,7 @@ const statesObj = {
   WI: "Wisconsin",
   WY: "Wyoming",
 };
-const Create = ({ source }) => {
+const Create = ({ source, user }) => {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [loading, setLoading] = useState(false);
@@ -284,6 +284,7 @@ const Create = ({ source }) => {
             startDate={startDate}
             endDate={endDate}
             states={states}
+            user_id={user?.id}
           />
         </>
       ) : null}
