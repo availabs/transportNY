@@ -21,6 +21,9 @@ export default function NpmrdsRawOverview({
     "Version",
     "Start Date",
     "End Date",
+    "Total Percent",
+    "Interstate Percent",
+    "Non Interstate Percent",
     "Tmcs",
   ];
 
@@ -69,23 +72,42 @@ export default function NpmrdsRawOverview({
                         {item?.view_id}
                       </td>
                       <td
-                        key={`${group}.${item?.metadata?.npmrds_version}`}
+                        key={`${group}.npmrds_version.${index}`}
                         className="py-2 px-4 border-b"
                       >
                         {item?.metadata?.npmrds_version}
                       </td>
                       <td
-                        key={`${group}.${item?.metadata?.start_date}`}
+                        key={`${group}.start_date.${index}`}
                         className="py-2 px-4 border-b"
                       >
                         {item?.metadata?.start_date}
                       </td>
                       <td
-                        key={`${group}.${item?.metadata?.end_date}`}
+                        key={`${group}.end_date.${index}`}
                         className="py-2 px-4 border-b"
                       >
                         {item?.metadata?.end_date}
                       </td>
+                      <td
+                        key={`${group}.total.${index}`}
+                        className="py-2 px-4 border-b"
+                      >
+                        {item?.statistics?.total && Math.round(item?.statistics?.total * 100) / 100}
+                      </td>
+                      <td
+                        key={`${group}.interstate_percentage.${index}`}
+                        className="py-2 px-4 border-b"
+                      >
+                        {item?.statistics?.interstate_percentage && Math.round(item?.statistics?.interstate_percentage * 100) / 100}
+                      </td>
+                      <td
+                        key={`${group}.non_interstate_percentage.${index}`}
+                        className="py-2 px-4 border-b"
+                      >
+                        {item?.statistics?.non_interstate_percentage && Math.round(item?.statistics?.non_interstate_percentage * 100) / 100}
+                      </td>
+                      
                       <td
                         key={`${group}.${item?.metadata?.no_of_tmc}`}
                         className="py-2 px-4 border-b"
