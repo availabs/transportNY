@@ -222,46 +222,51 @@ class GeneralGraphComp extends React.Component {
 					return requestKeys.reduce((promise, { dd, alias, group, key }) => {
 						return promise.then(() => {
 							return this.props.falcor.get(
+
 								['routes','data', key]
+
+								// ['routes', 'data', key]
+								// ['routes', 'npmrds', 'view', 3639, 'data', key]
+
 							)
 							.then(res => {
 								if (group === "indices") {
 									INDICES.forEach(index => {
-										route.data[index.key] = get(res, `json.routes.data.${ key }`, [])
+										route.data[index.key] = get(res, `json.routes.npmrds.view.${Number(3639)}.data.${ key }`, [])
 											.map(d => ({ tmc: d.tmc, resolution: d.resolution, value: d[index.key] }))
 											.filter(({ value }) => value !== undefined)
 									})
 								}
 								else if (group === "indices-byDateRange") {
 									INDICES_BY_DATE_RANGE.forEach(index => {
-										route.data[index.key] = get(res, `json.routes.data.${ key }`, [])
+										route.data[index.key] = get(res, `json.routes.npmrds.view.${Number(3639)}.data.${ key }`, [])
 											.map(d => ({ tmc: d.tmc, value: d[index.key] }))
 											.filter(({ value }) => value !== undefined)
 									})
 								}
 								else if (group === "tmcAttribute") {
 									TMC_ATTRIBUTES.forEach(att => {
-										route.data[att.key] = get(res, `json.routes.data.${ key }`, [])
+										route.data[att.key] = get(res, `json.routes.npmrds.view.${Number(3639)}.data.${ key }`, [])
 											.map(d => ({ tmc: d.tmc, value: d[att.alias || att.key] }))
 											.filter(({ value }) => value !== undefined)
 									})
 								}
 								else if (group === "hoursOfDelay") {
-									route.data["hoursOfDelay"] = get(res, `json.routes.data.${ key }`, [])
+									route.data["hoursOfDelay"] = get(res, `json.routes.npmrds.view.${Number(3639)}.data.${ key }`, [])
 										.map(d => ({ ...d, value: d["hoursOfDelay"] }));
-									route.data["avgHoursOfDelay"] = get(res, `json.routes.data.${ key }`, [])
+									route.data["avgHoursOfDelay"] = get(res, `json.routes.npmrds.view.${Number(3639)}.data.${ key }`, [])
 										.map(d => ({ ...d, value: d["avgHoursOfDelay"] }));
 								}
 								else if (group === "co2Emissions") {
-									route.data["co2Emissions"] = get(res, `json.routes.data.${ key }`, [])
+									route.data["co2Emissions"] = get(res, `json.routes.npmrds.view.${Number(3639)}.data.${ key }`, [])
 										.map(d => ({ ...d, value: d["co2Emissions"] }));
-									route.data["avgCo2Emissions"] = get(res, `json.routes.data.${ key }`, [])
+									route.data["avgCo2Emissions"] = get(res, `json.routes.npmrds.view.${Number(3639)}.data.${ key }`, [])
 										.map(d => ({ ...d, value: d["avgCo2Emissions"] }));
 								}
 								else {
-									route.data[dd] = get(res, `json.routes.data.${ key }`, []);
+									route.data[dd] = get(res, `json.routes.npmrds.view.${Number(3639)}.data.${ key }`, []);
 									if (alias) {
-										route.data[alias] = get(res, `json.routes.data.${ key }`, []);
+										route.data[alias] = get(res, `json.routes.npmrds.view.${Number(3639)}.data.${ key }`, []);
 									}
 								}
 							})
