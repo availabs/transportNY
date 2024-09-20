@@ -16,7 +16,7 @@ const submitUpload = (props, navigate, pgEnv) => {
         endDate: props?.endDate,
         states: props?.states,
         user_id: props?.user_id,
-        pgEnv,
+        pgEnv: pgEnv || props?.pgEnv,
       };
 
       const res = await fetch(
@@ -49,12 +49,12 @@ const submitUpload = (props, navigate, pgEnv) => {
 
 export default function PublishNpmrdsRaw(props) {
   const navigate = useNavigate();
-  const { loading } = props;
+  const { loading, pgEnv } = props;
   return (
     <>
       <button
         className={`cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded`}
-        onClick={() => submitUpload(props, navigate, "npmrds")}
+        onClick={() => submitUpload(props, navigate, pgEnv)}
       >
         {" "}
         {loading ? (
