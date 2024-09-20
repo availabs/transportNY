@@ -222,8 +222,12 @@ class GeneralGraphComp extends React.Component {
 					return requestKeys.reduce((promise, { dd, alias, group, key }) => {
 						return promise.then(() => {
 							return this.props.falcor.get(
+
+								['routes','data', key]
+
 								// ['routes', 'data', key]
-								['routes', 'npmrds', 'view', 3639, 'data', key]
+								// ['routes', 'npmrds', 'view', 3639, 'data', key]
+
 							)
 							.then(res => {
 								if (group === "indices") {
