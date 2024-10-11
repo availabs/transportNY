@@ -14,17 +14,9 @@ import { useAuth } from "~/modules/ams/src"
 
 import transportNYDataTypes from '~/pages/TransportNYDataTypes'
 
-// const authMenuConfig = {
-  
-//   topNav: {
-//     position: 'fixed',
-//     size: 'compact'
-//   },
-// }
-
 const DAMA_ARGS = {
   baseUrl: '/datasources',
-  defaultPgEnv:   'npmrds2',
+  defaultPgEnv: 'npmrds2',
   dataTypes: transportNYDataTypes,
   useFalcor,
   useAuth,

@@ -1,4 +1,4 @@
-import MapPage from "../gis_dataset/pages/Map";
+import MapPage from "~/pages/DataManager/DataTypes/gis_dataset/pages/Map";
 
 const NpmrdsMetaConfig = {
   map: {
