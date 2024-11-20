@@ -269,6 +269,7 @@ const Incidents = props => {
           <div className='w-full font-medium text-gray-400 border-b px-2 pb-3 border-gray-100 text-xs mb-1 '>Total Workzone Delay Cost ( vs Prev Month/day )</div>
           <HeroStatComp 
             data={data} 
+            
             stat={'v_delay'} 
             display={vehicleDelay2cost}
           />
@@ -312,7 +313,8 @@ const Incidents = props => {
             events={data.events}
             hoveredEvent={ hoveredEvent }
           />
-        </div>
+        </div>displayPrefix='$'
+            
 
       </DashboardLayout>
 

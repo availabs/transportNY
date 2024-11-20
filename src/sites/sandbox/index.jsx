@@ -1,7 +1,7 @@
+import DataManager from "~/pages/DataManager"
 import { useFalcor } from "~/modules/avl-components/src"
 import { useAuth } from "~/modules/ams/src";
 import {Link} from 'react-router-dom'
-
 
 import { dmsPageFactory, registerDataType, Selector, registerComponents } from "~/modules/dms/src"
 import { withAuth } from "~/modules/ams/src"
@@ -34,16 +34,32 @@ const theme = {
   }
 }
 
+
+const DAMA_ARGS = {
+  baseUrl: '/datasources',
+  defaultPgEnv: 'nysdot_sandbox',
+  useFalcor,
+  useAuth,
+  authLevel:1,
+  navSettings: {
+    topNav: {
+      position: 'fixed',
+      size: 'compact',
+    },
+  }
+}
+
+
+
 const Routes = [
   {
     ...dmsPageFactory(
       siteConfig({
         app: "transportny",
-        type: "cms-fdi",
+        type: "cms-sandbox",
         useFalcor: useFalcor,
         logo: <Logo />,
-        authLevel: 1
-,        rightMenu: (
+        rightMenu: (
           <div className='flex'>
             <Link to='/datasources' className='w-fit group font-display whitespace-nowrap
         flex font-medium tracking-widest items-center text-[14px] px-4 h-12 text-slate-700 border-slate-100
@@ -54,6 +70,7 @@ const Routes = [
           </div>
         ),
         baseUrl: "",
+        authLevel: 1,
         checkAuth,
         themes: {default:theme},
         pgEnv:'freight_data'
@@ -71,8 +88,14 @@ const Routes = [
       size: "none",
       color: "white"
     }
-  }
+  },
+  ...DataManager(DAMA_ARGS),
+  // ...FreightDocs
 ]
 
+const site = {
+	title: "TransportNY",
+	Routes
+}
 
-export default Routes
+export default site

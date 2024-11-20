@@ -122,7 +122,7 @@ const Columns = [
   { accessor: 'delay_cost',
     Header: "Cost",
     id: 'delay_cost',
-    Cell: (d) => <span className='text-sm'>{siFormat(d.value)}</span>
+    Cell: (d) => <span className='text-sm'>${siFormat(d.value)}</span>
   },
   { accessor: d => duration2minutes(d.event_duration),
     Header: "Duration",

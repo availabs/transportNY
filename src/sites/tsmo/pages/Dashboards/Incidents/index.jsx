@@ -430,6 +430,7 @@ console.log("EVENT IDs:", eventIds.length)
           </div>
           <HeroStatComp
             data={data}
+            displayPrefix='$'
             stat={'v_delay'}
             display={siFormat}
           />
@@ -441,6 +442,7 @@ console.log("EVENT IDs:", eventIds.length)
           <HeroStatComp
             data={data}
             stat={'top_20_v_delay'}
+            displayPrefix='$'
             display={siFormat}
             perUnit={false}
           />

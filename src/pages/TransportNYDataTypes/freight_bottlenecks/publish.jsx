@@ -16,7 +16,6 @@ const npmrdsPublish = async (props, navigate, pgEnv) => {
     geometryViewId: props?.selectedGeomViewId,
     performanceMeasureViewId: props?.selectedpm3ViewId,
     geometrySourceId: props?.selectedGeomViewId,
-    performanceMeasureViewId: props?.selectedpm3ViewId,
     year: props?.year
   };
 

@@ -54,7 +54,7 @@ const Routes = [
         ),
         baseUrl: "",
         checkAuth,
-        theme,
+        themes: {default:theme},
         pgEnv:'freight_data'
       }),
       withAuth,
