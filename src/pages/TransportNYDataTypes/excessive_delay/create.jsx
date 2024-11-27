@@ -2,6 +2,9 @@ import React, { Fragment, useEffect, useContext, useState, useMemo } from 'react
 import { get } from 'lodash';
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import DatePicker from "react-datepicker";
+import moment from "moment";
+import "react-datepicker/dist/react-datepicker.css";
 
 import { getAttributes } from '~/pages/DataManager/Source/attributes';
 
@@ -68,9 +71,8 @@ export const Select = ({ selectedOption, options, setSelecteOptions, visibleFiel
 const Create = ({ source }) => {
     const [loading, setLoading] = useState(false);
     const [selectedGeomSource, setselectedGeomSource] = useState(null);
-    const [selectedpm3Source, setSelectedpm3Source] = useState(null);
-    const [selectedGeomView, setSelectedGeomView] = useState(null);
-    const [selectedpm3View, setSelectedpm3View] = useState(null);
+    const [startTime, setstartTime] = useState(null);
+    const [endTime, setendTime] = useState(null);
     const { pgEnv, falcor, falcorCache, user } = useContext(DamaContext);
 
     useEffect(() => {
@@ -81,7 +83,7 @@ const Create = ({ source }) => {
             await falcor.get([
                 "dama", pgEnv, "sources", "byIndex",
                 { from: 0, to: get(sourceLen.json, geomLengthPath, 0) - 1 },
-                "attributes", ['source_id', 'metadata', 'categories', 'name']
+                "attributes", ['source_id', 'metadata', 'categories', 'name', 'type']
             ]);
         }
         fetchData();
@@ -90,34 +92,10 @@ const Create = ({ source }) => {
     const geomSources = useMemo(() => {
         return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
             .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
-            .filter(s => s.categories &&
-                s.categories.some(categoryGroup =>
-                    categoryGroup.includes("TMC META")
-                ))
+            .filter(s => s.type && (s.type === "NPMRDS" || s.type === "npmrds"))
     }, [falcorCache, pgEnv]);
 
-    const pm3Sources = useMemo(() => {
-        return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
-            .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
-            .filter(s => s.categories &&
-                s.categories.some(categoryGroup =>
-                    categoryGroup.includes("MAP21")
-                ))
-    }, [falcorCache, pgEnv]);
-
-    useEffect(() => {
-        async function fetchData() {
-            const pm3LengthPath = ["dama", pgEnv, "sources", "byId", selectedpm3Source?.source_id, "views", "length"];
-            const pm3ViewsLen = await falcor.get(pm3LengthPath);
-
-            await falcor.get([
-                "dama", pgEnv, "sources", "byId", selectedpm3Source?.source_id, "views", "byIndex",
-                { from: 0, to: get(pm3ViewsLen.json, pm3LengthPath, 0) - 1 },
-                "attributes", ['view_id', 'version', 'metadata']
-            ]);
-        }
-        fetchData();
-    }, [falcor, pgEnv, selectedpm3Source]);
+    console.log("geomSources: ", geomSources); 
 
     useEffect(() => {
         async function fetchData() {
@@ -145,61 +123,26 @@ const Create = ({ source }) => {
                         return out
                     }, {})
             ))
-            .filter(f => f.metadata?.is_clickhouse_table === 0);
+            .filter(f => f.metadata?.is_clickhouse_table === 1);
     }, [falcorCache, selectedGeomSource, pgEnv]);
 
-    const pm3Views = useMemo(() => {
-        return selectedpm3Source?.source_id && Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byId", selectedpm3Source?.source_id, "views", "byIndex"], {}))
-            .map(v =>
-                Object.entries(get(falcorCache, v?.value, { "attributes": {} })["attributes"])
-                    .reduce((out, attr) => {
-                        const [k, v] = attr;
-                        typeof v.value !== 'undefined' ?
-                            out[k] = v?.value :
-                            out[k] = v
-                        return out
-                    }, {})
-            );
-    }, [falcorCache, selectedpm3Source, pgEnv]);
-
+    console.log("geomViews", geomViews);
+    
     useEffect(() => {
         if (!selectedGeomSource) {
             setselectedGeomSource((geomSources.length && geomSources[0]));
         }
     }, [geomSources]);
 
-    useEffect(() => {
-        if (!selectedpm3Source) {
-            setSelectedpm3Source((pm3Sources.length && pm3Sources[0]));
-        }
-    }, [pm3Sources]);
-
     return (
         <div className="w-full p-5 m-5">
             <div className="flex flex-row mt-4 mb-6">
-                <div className="basis-1/2">
+            <div className="basis-1/3"></div>
+                <div className="basis-1/3">
                     <div className="flex items-center justify-left mt-4">
                         <div className="w-full max-w-xs mx-auto">
                             <div className="block text-sm leading-5 font-medium text-gray-700">
-                                Map21 source:
-                            </div>
-                            <div className="relative">
-                                <Select
-                                    selectedOption={selectedpm3Source}
-                                    options={pm3Sources || []}
-                                    setSelecteOptions={setSelectedpm3Source}
-                                    visibleField={"name"}
-                                    defaultText={"Select Map21 source..."}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="basis-1/2">
-                    <div className="flex items-center justify-left mt-4">
-                        <div className="w-full max-w-xs mx-auto">
-                            <div className="block text-sm leading-5 font-medium text-gray-700">
-                                TMC Meta source:
+                                NPMRDS source:
                             </div>
                             <div className="relative">
                                 <Select
@@ -213,52 +156,61 @@ const Create = ({ source }) => {
                         </div>
                     </div>
                 </div>
+                <div className="basis-1/3"></div>
             </div>
+
             {
-                selectedpm3Source && selectedpm3Source ?
-                    <>
-                        <div className="flex flex-row mt-4 mb-6">
-                            <div className="basis-1/2">
-                                <div className="flex items-center justify-left mt-4">
-                                    <div className="w-full max-w-xs mx-auto">
-                                        <div className="block text-sm leading-5 font-medium text-gray-700">
-                                            Map21 view:
-                                        </div>
-                                        <div className="relative">
-                                            <Select
-                                                selectedOption={selectedpm3View}
-                                                options={pm3Views}
-                                                setSelecteOptions={setSelectedpm3View}
-                                                visibleField={"version"}
-                                                defaultText={"Select Map21 view..."}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                selectedGeomSource ? <div className="flex flex-row mt-4 mb-6">
+                <div className="basis-1/2">
+                    <div className="flex items-center justify-left mt-4">
+                        <div className="w-full max-w-xs mx-auto">
+                            <div className="block text-sm leading-5 font-medium text-gray-700">
+                                Start Time:
                             </div>
-                            <div className="basis-1/2">
-                                <div className="flex items-center justify-left mt-4">
-                                    <div className="w-full max-w-xs mx-auto">
-                                        <div className="block text-sm leading-5 font-medium text-gray-700">
-                                            TMC Meta view:
-                                        </div>
-                                        <div className="relative">
-                                            <Select
-                                                selectedOption={selectedGeomView}
-                                                options={geomViews}
-                                                setSelecteOptions={setSelectedGeomView}
-                                                visibleField={"version"}
-                                                defaultText={"Select Tmc meta view..."}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                            <div className="relative">
+                            <DatePicker
+                                className={"w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm"}
+                                dateFormat="MM/yyyy"
+                                required
+                                showIcon
+                                toggleCalendarOnIconClick
+                                selected={startTime}
+                                onChange={(date) => setstartTime(date)}
+                                maxDate={endTime}
+                                isClearable
+                                showMonthYearPicker
+                                />
                             </div>
                         </div>
-                        </> : null
+                    </div>
+                </div>
+                <div className="basis-1/2">
+                    <div className="flex items-center justify-left mt-4">
+                        <div className="w-full max-w-xs mx-auto">
+                            <div className="block text-sm leading-5 font-medium text-gray-700">
+                                End Time:
+                            </div>
+                            <div className="relative">
+                            <DatePicker
+                                className={"w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm"}
+                                dateFormat="MM/yyyy"
+                                required
+                                showIcon
+                                toggleCalendarOnIconClick
+                                selected={endTime}
+                                onChange={(date) => setendTime(date)}
+                                minDate={startTime}
+                                isClearable
+                                showMonthYearPicker
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>:null
             }
 
-            {source?.name && selectedGeomSource && selectedpm3Source && selectedGeomView && selectedpm3View ? (
+            {source?.name && selectedGeomSource && startTime && endTime ? (
                 <>
                     <Publish
                         pgEnv={pgEnv}
@@ -269,9 +221,8 @@ const Create = ({ source }) => {
                         setLoading={setLoading}
                         source_id={source?.source_id || null}
                         selectedGeomSourceId={selectedGeomSource?.source_id}
-                        selectedpm3SourceId={selectedpm3Source?.source_id}
-                        selectedGeomViewId={selectedGeomView?.view_id}
-                        selectedpm3ViewId={selectedpm3View?.view_id}
+                        startTime={moment(startTime).format('MM-YYYY')}
+                        endTime={moment(endTime).format('MM-YYYY')}
                     />
                 </>
             ) : null}

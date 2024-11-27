@@ -7,6 +7,7 @@ import npmrds_raw from "./npmrds_raw";
 import npmrds from "./npmrds";
 import npmrds_meta from "./npmrds_meta";
 import freight_bottlenecks from "./freight_bottlenecks";
+import excessive_delay from "./excessive_delay";
 
 
 const transportNYDataTypes = {
@@ -14,7 +15,8 @@ const transportNYDataTypes = {
   npmrds_raw,
   npmrds,
   npmrds_meta,
-  freight_bottlenecks
+  freight_bottlenecks,
+  excessive_delay
 }
 
 
