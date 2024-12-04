@@ -95,8 +95,6 @@ const Create = ({ source }) => {
             .filter(s => s.type && (s.type === "NPMRDS" || s.type === "npmrds"))
     }, [falcorCache, pgEnv]);
 
-    console.log("geomSources: ", geomSources); 
-
     useEffect(() => {
         async function fetchData() {
             const geomLengthPath = ["dama", pgEnv, "sources", "byId", selectedGeomSource?.source_id, "views", "length"];
@@ -111,7 +109,7 @@ const Create = ({ source }) => {
         fetchData();
     }, [falcor, pgEnv, selectedGeomSource]);
 
-    const geomViews = useMemo(() => {
+    const geomView = useMemo(() => {
         return selectedGeomSource?.source_id && (Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byId", selectedGeomSource?.source_id, "views", "byIndex"], {}))
             .map(v =>
                 Object.entries(get(falcorCache, v?.value, { "attributes": {} })["attributes"])
@@ -123,21 +121,33 @@ const Create = ({ source }) => {
                         return out
                     }, {})
             ))
-            .filter(f => f.metadata?.is_clickhouse_table === 1);
+            .filter(f => f.metadata?.start_date && f?.metadata?.end_date)
+            .find(f => f.metadata?.is_clickhouse_table === 1);
     }, [falcorCache, selectedGeomSource, pgEnv]);
 
-    console.log("geomViews", geomViews);
-    
     useEffect(() => {
         if (!selectedGeomSource) {
             setselectedGeomSource((geomSources.length && geomSources[0]));
         }
     }, [geomSources]);
 
+    const minTime = useMemo(() => {
+        return moment(geomView?.metadata?.start_date).toDate();
+    }, [geomView]);
+
+    const maxTime = useMemo(() => {
+        return moment(geomView?.metadata?.end_date).toDate();
+    }, [geomView]);
+
+    useEffect(() => {
+        setstartTime(moment(geomView?.metadata?.start_date).toDate() || null);
+        setendTime(moment(geomView?.metadata?.end_date).toDate() || null);
+    }, [geomView]);
+
     return (
         <div className="w-full p-5 m-5">
             <div className="flex flex-row mt-4 mb-6">
-            <div className="basis-1/3"></div>
+                <div className="basis-1/3"></div>
                 <div className="basis-1/3">
                     <div className="flex items-center justify-left mt-4">
                         <div className="w-full max-w-xs mx-auto">
@@ -160,57 +170,62 @@ const Create = ({ source }) => {
             </div>
 
             {
-                selectedGeomSource ? <div className="flex flex-row mt-4 mb-6">
-                <div className="basis-1/2">
-                    <div className="flex items-center justify-left mt-4">
-                        <div className="w-full max-w-xs mx-auto">
-                            <div className="block text-sm leading-5 font-medium text-gray-700">
-                                Start Time:
-                            </div>
-                            <div className="relative">
-                            <DatePicker
-                                className={"w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm"}
-                                dateFormat="MM/yyyy"
-                                required
-                                showIcon
-                                toggleCalendarOnIconClick
-                                selected={startTime}
-                                onChange={(date) => setstartTime(date)}
-                                maxDate={endTime}
-                                isClearable
-                                showMonthYearPicker
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="basis-1/2">
-                    <div className="flex items-center justify-left mt-4">
-                        <div className="w-full max-w-xs mx-auto">
-                            <div className="block text-sm leading-5 font-medium text-gray-700">
-                                End Time:
-                            </div>
-                            <div className="relative">
-                            <DatePicker
-                                className={"w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm"}
-                                dateFormat="MM/yyyy"
-                                required
-                                showIcon
-                                toggleCalendarOnIconClick
-                                selected={endTime}
-                                onChange={(date) => setendTime(date)}
-                                minDate={startTime}
-                                isClearable
-                                showMonthYearPicker
-                                />
+                selectedGeomSource && geomView ? <div className="flex flex-row mt-4 mb-6">
+                    <div className="basis-1/2">
+                        <div className="flex items-center justify-left mt-4">
+                            <div className="w-full max-w-xs mx-auto">
+                                <div className="block text-sm leading-5 font-medium text-gray-700">
+                                    Start Time:
+                                </div>
+                                <div className="relative">
+                                    <DatePicker
+                                        className={"w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm"}
+                                        dateFormat="MM/yyyy"
+                                        required
+                                        showIcon
+                                        toggleCalendarOnIconClick
+                                        selected={startTime}
+                                        onChange={(date) => setstartTime(date)}
+                                        minDate={minTime}
+                                        maxDate={maxTime}
+                                        isClearable
+                                        showMonthYearPicker
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>:null
+                    <div className="basis-1/2">
+                        <div className="flex items-center justify-left mt-4">
+                            <div className="w-full max-w-xs mx-auto">
+                                <div className="block text-sm leading-5 font-medium text-gray-700">
+                                    End Time:
+                                </div>
+                                <div className="relative">
+                                    <DatePicker
+                                        className={"w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm"}
+                                        dateFormat="MM/yyyy"
+                                        required
+                                        showIcon
+                                        toggleCalendarOnIconClick
+                                        selected={endTime}
+                                        onChange={(date) => setendTime(date)}
+                                        minDate={minTime}
+                                        maxDate={maxTime}
+                                        isClearable
+                                        showMonthYearPicker
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> : <>
+                    <span>
+                        Npmrds source is not used for excessive delay calculation
+                    </span></>
             }
 
-            {source?.name && selectedGeomSource && startTime && endTime ? (
+            {source?.name && selectedGeomSource && geomView && startTime && endTime ? (
                 <>
                     <Publish
                         pgEnv={pgEnv}

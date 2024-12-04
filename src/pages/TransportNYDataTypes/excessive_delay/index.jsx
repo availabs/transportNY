@@ -1,6 +1,5 @@
-import MapPage from "~/pages/DataManager/DataTypes/gis_dataset/pages/Map";
 import Create from './create';
-import Table from '../npmrds_meta/table';
+import ManagePage from './manage';
 
 const ExcessiveDelayConfig = {
     add_version: {
@@ -12,16 +11,11 @@ const ExcessiveDelayConfig = {
         name: 'Create',
         component: Create
     },
-    // map: {
-    //     name: "Map",
-    //     path: "/map",
-    //     component: MapPage,
-    // },
-    // table: {
-    //     name: "Table",
-    //     path: "/table",
-    //     component: Table,
-    // },
+    manage: {
+        name: "Manage",
+        path: "/manage",
+        component: ManagePage,
+    }
 }
 
 export default ExcessiveDelayConfig;
