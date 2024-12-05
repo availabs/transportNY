@@ -33,30 +33,44 @@ function getMonthlyDateRanges(startDate, endDate) {
 }
 
 function checkAndMergeDateRanges(currentStartDate, currentEndDate, startTime, endTime) {
-    const currentStart = new Date(currentStartDate);
-    const currentEnd = new Date(currentEndDate);
-    const newStart = new Date(startTime);
-    const newEnd = new Date(endTime);
-  
-    if (isNaN(currentStart) || isNaN(currentEnd) || isNaN(newStart) || isNaN(newEnd)) {
-      return {
-        msgString: "One or more dates are invalid.",
-        isValidDateRange: false
-      };
+    const currentStart = moment(currentStartDate);
+    const currentEnd = moment(currentEndDate).endOf('month');
+    const newStart = moment(startTime);
+    const newEnd = moment(endTime).endOf('month');
+
+    // Validate date inputs
+    if (!currentStart.isValid() || !currentEnd.isValid() || !newStart.isValid() || !newEnd.isValid()) {
+        return {
+            msgString: "One or more dates are invalid.",
+            isValidDateRange: false
+        };
     }
 
-    if ((newStart < currentStart && newEnd < currentStart) || (newStart > currentEnd && newEnd > currentEnd)) {
-      return {
-        msgString: `The new date range (${newStart.toISOString()} to ${newEnd.toISOString()}) is valid and continuous.`,
-        isValidDateRange: true
-      };
+    // Ensure newStart < newEnd
+    if (!newStart.isBefore(newEnd)) {
+        return {
+            msgString: "Start date must be before the end date.",
+            isValidDateRange: false
+        };
     }
 
+    // Check if the new range touches the current range at either end
+    const touchesBefore = newEnd.isSame(currentStart.subtract(1, 'day'));
+    const touchesAfter = newStart.isSame(currentEnd.add(1, 'day'));
+
+    if (touchesBefore || touchesAfter) {
+        return {
+            msgString: `The new date range (${newStart.format('YYYY-MM-DD')} to ${newEnd.format('YYYY-MM-DD')}) touches the current range.`,
+            isValidDateRange: true
+        };
+    }
+
+    // Invalid cases
     return {
-      msgString: "The new date range is not valid. It overlaps or touches the current range.",
-      isValidDateRange: false
+        msgString: "The new date range is not valid. It neither touches nor is strictly continuous with the current range.",
+        isValidDateRange: false
     };
-  }
+}
 
 const SourceAttributes = {
     source_id: "source_id",
@@ -210,11 +224,11 @@ export default function NpmrdsManage({
 
     // -----------------------------------------------------------------------------------------------------------------------
 
-    const { msgString, isValidDateRage } = useMemo(() => {
+    const { msgString, isValidDateRange } = useMemo(() => {
         return { ...(checkAndMergeDateRanges(startDate, endDate, startTime, endTime) || {}) };
     }, [startDate, endDate, startTime, endTime]);
 
-console.log("msgString, isValidDateRage", msgString, isValidDateRage);
+    console.log("msgString, isValidDateRage", msgString, isValidDateRange);
 
     const headers = [
         "Start Date",
@@ -222,35 +236,31 @@ console.log("msgString, isValidDateRage", msgString, isValidDateRage);
         "",
     ];
 
-    // const updateNpmrds = async () => {
-    //     const publishData = {
-    //         source_id: source?.source_id || null,
-    //         view_id: activeView?.view_id,
-    //         user_id: ctxUser?.user_id,
-    //         npmrds_raw_view_ids: selectedViews.map((svs) => svs.value),
-    //         name: source?.name,
-    //         type: "npmrds",
-    //         ...findMinMaxDates(dateRanges),
-    //         pgEnv,
-    //     };
-    //     setLoading(true);
-    //     try {
-    //         const res = await fetch(`${DAMA_HOST}/dama-admin/${pgEnv}/npmrds/add`, {
-    //             method: "POST",
-    //             body: JSON.stringify(publishData),
-    //             headers: {
-    //                 "Content-Type": "application/json",
-    //             },
-    //         });
-    //         const publishFinalEvent = await res.json();
-    //         const { source_id } = publishFinalEvent;
+    const update = async () => {
+        const publishData = {
+            source_id: source?.source_id || null,
+            view_id: activeView?.view_id,
+            user_id: ctxUser?.user_id,
+            pgEnv,
+        };
+        setLoading(true);
+        try {
+            const res = await fetch(`${DAMA_HOST}/dama-admin/${pgEnv}/excessive_delay/add`, {
+                method: "POST",
+                body: JSON.stringify(publishData),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            const publishFinalEvent = await res.json();
+            const { source_id } = publishFinalEvent;
 
-    //         setLoading(false);
-    //         navigate(`/datasources/source/${source_id}`);
-    //     } catch (err) {
-    //         setLoading(false);
-    //     }
-    // };
+            setLoading(false);
+            navigate(`/datasources/source/${source_id}`);
+        } catch (err) {
+            setLoading(false);
+        }
+    };
 
     const remove = async (view_id, startDate, endDate) => {
         const publishData = {
@@ -286,7 +296,7 @@ console.log("msgString, isValidDateRage", msgString, isValidDateRage);
 
     const monthlyDateRange = getMonthlyDateRanges(startDate, endDate);
 
-    console.log("monthlyDateRange", monthlyDateRange);
+    // console.log("monthlyDateRange", monthlyDateRange);
 
     return (
         <div className="w-full p-5">
@@ -412,6 +422,20 @@ console.log("msgString, isValidDateRage", msgString, isValidDateRage);
                                 Add Intervals
                             </DialogTitle>
 
+                            {!isValidDateRange ? <>
+                                <div className="flex items-center p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-white dark:text-red-400 dark:border-red-800" role="alert">
+                                    <div>
+                                        <span className="font-medium">
+                                            {msgString}
+                                        </span>
+                                    </div>
+                                </div></> : <>
+                                <div className="flex items-center p-4 mb-4 text-sm text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-white dark:text-green-400 dark:border-green-800" role="alert">
+                                    <div>
+                                        <span className="font-medium">{msgString}</span>
+                                    </div>
+                                </div>
+                            </>}
                             <div className="flex flex-row mt-4 mb-6">
                                 <div className="basis-1/3"></div>
                                 <div className="basis-1/3">
@@ -502,6 +526,7 @@ console.log("msgString, isValidDateRage", msgString, isValidDateRage);
                                 <button
                                     className="ml-3 inline-flex justify-center px-4 py-2 text-sm text-green-900 bg-green-100 border border-transparent rounded-md hover:bg-green-200 duration-300"
                                     type="button"
+                                    onClick={update}
                                 >
                                     {loading ? (
                                         <div style={{ display: "flex" }}>
