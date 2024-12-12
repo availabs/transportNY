@@ -445,7 +445,7 @@ export default function NpmrdsManage({
                                 Add Intervals
                             </DialogTitle>
 
-                            {!isValid ? <>
+                            {!isValid && geomSource && geomView ? <>
                                 <div className="flex items-center p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-white dark:text-red-400 dark:border-red-800" role="alert">
                                     <div>
                                         <span className="font-medium">
