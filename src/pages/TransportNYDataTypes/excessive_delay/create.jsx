@@ -236,8 +236,8 @@ const Create = ({ source }) => {
                         setLoading={setLoading}
                         source_id={source?.source_id || null}
                         selectedGeomSourceId={selectedGeomSource?.source_id}
-                        startTime={moment(startTime).format('MM-YYYY')}
-                        endTime={moment(endTime).format('MM-YYYY')}
+                        start_date={moment(startTime).startOf('month').format('YYYY-MM-DD')}
+                        end_date={moment(endTime).endOf('month').format('YYYY-MM-DD')}
                     />
                 </>
             ) : null}

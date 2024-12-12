@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useMemo, useContext } from "react";
+import React, { useState, useEffect, useMemo, useContext, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Dialog,
     DialogPanel,
     DialogTitle,
+    Input
 } from "@headlessui/react";
 import { get } from "lodash";
 import DatePicker from "react-datepicker";
@@ -12,7 +13,6 @@ import moment from "moment";
 import { DamaContext } from "~/pages/DataManager/store";
 import { DAMA_HOST } from "~/config";
 import { useFalcor, ScalableLoading } from "~/modules/avl-components/src";
-import { Select } from './create';
 
 function getMonthlyDateRanges(startDate, endDate) {
     const ranges = [];
@@ -32,43 +32,99 @@ function getMonthlyDateRanges(startDate, endDate) {
     return ranges;
 }
 
-function checkAndMergeDateRanges(currentStartDate, currentEndDate, startTime, endTime) {
-    const currentStart = moment(currentStartDate);
-    const currentEnd = moment(currentEndDate).endOf('month');
-    const newStart = moment(startTime);
-    const newEnd = moment(endTime).endOf('month');
+function checkAndMergeDateRanges(
+    currentStartDate,
+    currentEndDate,
+    startDate,
+    endDate
+) {
+    const momentNewStart = moment(startDate);
+    const momentNewEnd = moment(endDate);
 
-    // Validate date inputs
-    if (!currentStart.isValid() || !currentEnd.isValid() || !newStart.isValid() || !newEnd.isValid()) {
+    // Special case: If the current range is not defined (both null), approve the new range
+    if (!currentStartDate && !currentEndDate) {
         return {
-            msgString: "One or more dates are invalid.",
-            isValidDateRange: false
+            msgString: `New range approved: from ${momentNewStart.format(
+                "YYYY-MM-DD"
+            )} to ${momentNewEnd.format("YYYY-MM-DD")}`,
+            isValid: true,
+            mergedRange: {
+                start_date: momentNewStart.format("YYYY-MM-DD"),
+                end_date: momentNewEnd.format("YYYY-MM-DD"),
+            },
         };
     }
 
-    // Ensure newStart < newEnd
-    if (!newStart.isBefore(newEnd)) {
+    // Validation 1: Ensure endDate is greater than startDate
+    if (!momentNewEnd.isAfter(momentNewStart)) {
         return {
-            msgString: "Start date must be before the end date.",
-            isValidDateRange: false
+            msgString: "New end date must be greater than the new start date",
+            isValid: false,
         };
     }
 
-    // Check if the new range touches the current range at either end
-    const touchesBefore = newEnd.isSame(currentStart.subtract(1, 'day'));
-    const touchesAfter = newStart.isSame(currentEnd.add(1, 'day'));
-
-    if (touchesBefore || touchesAfter) {
+    // Validation 2: Ensure dates are valid month ranges
+    if (
+        !momentNewStart.isSame(momentNewStart.startOf("month")) ||
+        !momentNewEnd.isSame(momentNewEnd.endOf("month"))
+    ) {
         return {
-            msgString: `The new date range (${newStart.format('YYYY-MM-DD')} to ${newEnd.format('YYYY-MM-DD')}) touches the current range.`,
-            isValidDateRange: true
+            msgString: "Dates must be full month ranges (start: 1st, end: last day)",
+            isValid: false,
         };
     }
 
-    // Invalid cases
+    const momentCurrentStart = moment(currentStartDate);
+    const momentCurrentEnd = moment(currentEndDate);
+
+    // Validation 3: Ensure the current end date is greater than the current start date
+    if (!momentCurrentEnd.isAfter(momentCurrentStart)) {
+        return {
+            msgString: "Current end date must be greater than the current start date",
+            isValid: false,
+        };
+    }
+
+    // Validation 4: Check if the new range overlaps with the current range
+    if (
+        momentNewStart.isBetween(momentCurrentStart, momentCurrentEnd, null, "[]") ||
+        momentNewEnd.isBetween(momentCurrentStart, momentCurrentEnd, null, "[]") ||
+        momentCurrentStart.isBetween(momentNewStart, momentNewEnd, null, "[]") ||
+        momentCurrentEnd.isBetween(momentNewStart, momentNewEnd, null, "[]")
+    ) {
+        return {
+            msgString: "New date range overlaps with the current range",
+            isValid: false,
+        };
+    }
+
+    // Validation 5: Check if the new range is contiguous with the current range
+    const isContiguousAtStart = momentNewEnd.isSame(
+        momentCurrentStart.clone().subtract(1, "month").endOf("month")
+    );
+    const isContiguousAtEnd = momentNewStart.isSame(
+        momentCurrentEnd.clone().add(1, "month").startOf("month")
+    );
+
+    if (!isContiguousAtStart && !isContiguousAtEnd) {
+        return {
+            msgString: "New date range is not contiguous with the current range",
+            isValid: false,
+        };
+    }
+
+    // If all validations pass, merge the ranges
+    const mergedStartDate = isContiguousAtStart
+        ? momentNewStart.format("YYYY-MM-DD")
+        : momentCurrentStart.format("YYYY-MM-DD");
+    const mergedEndDate = isContiguousAtEnd
+        ? momentNewEnd.format("YYYY-MM-DD")
+        : momentCurrentEnd.format("YYYY-MM-DD");
+
     return {
-        msgString: "The new date range is not valid. It neither touches nor is strictly continuous with the current range.",
-        isValidDateRange: false
+        msgString: `Successfully merged range: from ${mergedStartDate} to ${mergedEndDate}`,
+        isValid: true,
+        mergedRange: { start_date: mergedStartDate, end_date: mergedEndDate },
     };
 }
 
@@ -83,32 +139,6 @@ const SourceAttributes = {
     description: "description",
     statistics: "statistics",
     metadata: "metadata",
-};
-
-const ViewAttributes = {
-    view_id: "view_id",
-    source_id: "source_id",
-    data_type: "data_type",
-    interval_version: "interval_version",
-    geography_version: "geography_version",
-    version: "version",
-    source_url: "source_url",
-    publisher: "publisher",
-    table_schema: "table_schema",
-    table_name: "table_name",
-    data_table: "data_table",
-    download_url: "download_url",
-    tiles_url: "tiles_url",
-    start_date: "start_date",
-    end_date: "end_date",
-    last_updated: "last_updated",
-    statistics: "statistics",
-    metadata: "metadata",
-    user_id: "user_id",
-    etl_context_id: "etl_context_id",
-    view_dependencies: "view_dependencies",
-    _created_timestamp: "_created_timestamp",
-    _modified_timestamp: "_modified_timestamp",
 };
 
 const getAttributes = (data) =>
@@ -129,7 +159,6 @@ export default function NpmrdsManage({
 
     const [showModal, setShowModal] = React.useState(false);
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
-    const [selectedGeomSource, setselectedGeomSource] = useState(null);
     const [removeStartDate, setRemoveStartDate] = React.useState(null);
     const [removeEndDate, setRemoveEndDate] = React.useState(null);
     const [loading, setLoading] = React.useState(false);
@@ -158,37 +187,38 @@ export default function NpmrdsManage({
         return views.find((v) => Number(v.view_id) === Number(activeViewId));
     }, [activeViewId, views]);
 
+    const { npmrds_production_source_id, npmrds_production_view_id } = useMemo(() => {
+        return activeView?.metadata || {};
+    }, [activeView]);
+
     const { startDate, endDate } = useMemo(() => ({
         startDate: activeView?.metadata?.start_date,
         endDate: activeView?.metadata?.end_date
     }), [activeView]);
 
     // -----------------------------------------------------------------------------------------------------------------------
-    const geomSources = useMemo(() => {
+    const geomSource = useMemo(() => {
         return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
             .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
-            .filter(s => s.type && (s.type === "NPMRDS" || s.type === "npmrds"))
-    }, [falcorCache, pgEnv]);
-
-    console.log();
-
+            .find(f => Number(f?.source_id) === Number(npmrds_production_source_id))
+    }, [falcorCache, pgEnv, npmrds_production_source_id]);
 
     useEffect(() => {
         async function fetchData() {
-            const geomLengthPath = ["dama", pgEnv, "sources", "byId", selectedGeomSource?.source_id, "views", "length"];
+            const geomLengthPath = ["dama", pgEnv, "sources", "byId", npmrds_production_source_id, "views", "length"];
             const geomViewsLen = await falcor.get(geomLengthPath);
 
             await falcor.get([
-                "dama", pgEnv, "sources", "byId", selectedGeomSource?.source_id, "views", "byIndex",
+                "dama", pgEnv, "sources", "byId", npmrds_production_source_id, "views", "byIndex",
                 { from: 0, to: get(geomViewsLen.json, geomLengthPath, 0) - 1 },
                 "attributes", ['view_id', 'version', 'metadata']
             ]);
         }
         fetchData();
-    }, [falcor, pgEnv, selectedGeomSource]);
+    }, [falcor, pgEnv, npmrds_production_source_id]);
 
     const geomView = useMemo(() => {
-        return selectedGeomSource?.source_id && (Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byId", selectedGeomSource?.source_id, "views", "byIndex"], {}))
+        return npmrds_production_source_id && (Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byId", npmrds_production_source_id, "views", "byIndex"], {}))
             .map(v =>
                 Object.entries(get(falcorCache, v?.value, { "attributes": {} })["attributes"])
                     .reduce((out, attr) => {
@@ -200,35 +230,26 @@ export default function NpmrdsManage({
                     }, {})
             ))
             .filter(f => f.metadata?.start_date && f?.metadata?.end_date)
-            .find(f => f.metadata?.is_clickhouse_table === 1);
-    }, [falcorCache, selectedGeomSource, pgEnv]);
-
-    useEffect(() => {
-        if (!selectedGeomSource) {
-            setselectedGeomSource((geomSources.length && geomSources[0]));
-        }
-    }, [geomSources]);
+            .find(f => Number(f?.view_id) === Number(npmrds_production_view_id));
+    }, [falcorCache, pgEnv, npmrds_production_view_id]);
 
     const minTime = useMemo(() => {
         return moment(geomView?.metadata?.start_date).toDate();
-    }, [geomView]);
+    }, [geomView?.metadata?.start_date]);
 
     const maxTime = useMemo(() => {
         return moment(geomView?.metadata?.end_date).toDate();
-    }, [geomView]);
+    }, [geomView?.metadata?.end_date]);
 
     useEffect(() => {
-        setstartTime(moment(startDate).toDate() || null);
-        setendTime(moment(endDate).toDate() || null);
-    }, [startDate, endDate]);
+        setstartTime(startDate ? moment(startDate).toDate() : geomView?.metadata?.start_date ? moment(geomView?.metadata?.start_date).toDate() : null);
+        setendTime(endDate ? moment(endDate).toDate() : geomView?.metadata?.end_date ? moment(geomView?.metadata?.end_date).toDate() : null);
+    }, [startDate, endDate, geomView?.metadata?.start_date, geomView?.metadata?.end_date]);
 
     // -----------------------------------------------------------------------------------------------------------------------
-
-    const { msgString, isValidDateRange } = useMemo(() => {
-        return { ...(checkAndMergeDateRanges(startDate, endDate, startTime, endTime) || {}) };
+    const { msgString, isValid, mergedRange } = useMemo(() => {
+        return { ...(checkAndMergeDateRanges(startDate, endDate, moment(startTime).startOf("month").format("YYYY-MM-DD"), moment(endTime).endOf("month").format("YYYY-MM-DD")) || {}) };
     }, [startDate, endDate, startTime, endTime]);
-
-    console.log("msgString, isValidDateRage", msgString, isValidDateRange);
 
     const headers = [
         "Start Date",
@@ -242,6 +263,10 @@ export default function NpmrdsManage({
             view_id: activeView?.view_id,
             user_id: ctxUser?.user_id,
             pgEnv,
+            start_date: mergedRange?.start_date,
+            end_date: mergedRange?.end_date,
+            selectedGeomSourceId: geomSource?.source_id,
+            selectedGeomViewId: geomView?.view_id,
         };
         setLoading(true);
         try {
@@ -293,10 +318,8 @@ export default function NpmrdsManage({
             setLoading(false);
         }
     };
-
+    
     const monthlyDateRange = getMonthlyDateRanges(startDate, endDate);
-
-    // console.log("monthlyDateRange", monthlyDateRange);
 
     return (
         <div className="w-full p-5">
@@ -422,7 +445,7 @@ export default function NpmrdsManage({
                                 Add Intervals
                             </DialogTitle>
 
-                            {!isValidDateRange ? <>
+                            {!isValid ? <>
                                 <div className="flex items-center p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-white dark:text-red-400 dark:border-red-800" role="alert">
                                     <div>
                                         <span className="font-medium">
@@ -445,12 +468,12 @@ export default function NpmrdsManage({
                                                 NPMRDS source:
                                             </div>
                                             <div className="relative">
-                                                <Select
-                                                    selectedOption={selectedGeomSource}
-                                                    options={geomSources || []}
-                                                    setSelecteOptions={setselectedGeomSource}
-                                                    visibleField={"name"}
-                                                    defaultText={"Select Tmc meta source..."}
+
+                                                <Input
+                                                    className={
+                                                        'cursor-pointer rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm'}
+                                                    value={geomSource ? geomSource?.name : 'Fetching source...'}
+                                                    onChange={() => { }}
                                                 />
                                             </div>
                                         </div>
@@ -460,7 +483,7 @@ export default function NpmrdsManage({
                             </div>
 
                             {
-                                selectedGeomSource && geomView ? <div className="flex flex-row mt-4 mb-6">
+                                geomSource && geomView ? <div className="flex flex-row mt-4 mb-6">
                                     <div className="basis-1/2 mr-4">
                                         <div className="flex items-center justify-left mt-4">
                                             <div className="w-full max-w-xs mx-auto">
@@ -474,7 +497,7 @@ export default function NpmrdsManage({
                                                         required
                                                         showIcon
                                                         toggleCalendarOnIconClick
-                                                        selected={startTime}
+                                                        selected={startTime || minTime}
                                                         onChange={(date) => setstartTime(date)}
                                                         minDate={minTime}
                                                         maxDate={maxTime}
@@ -498,7 +521,7 @@ export default function NpmrdsManage({
                                                         required
                                                         showIcon
                                                         toggleCalendarOnIconClick
-                                                        selected={endTime}
+                                                        selected={endTime || maxTime}
                                                         onChange={(date) => setendTime(date)}
                                                         minDate={minTime}
                                                         maxDate={maxTime}
@@ -522,8 +545,7 @@ export default function NpmrdsManage({
                                 >
                                     Close
                                 </button>
-
-                                <button
+                                {isValid ? <button
                                     className="ml-3 inline-flex justify-center px-4 py-2 text-sm text-green-900 bg-green-100 border border-transparent rounded-md hover:bg-green-200 duration-300"
                                     type="button"
                                     onClick={update}
@@ -536,7 +558,8 @@ export default function NpmrdsManage({
                                     ) : (
                                         "Save Changes"
                                     )}
-                                </button>
+                                </button> : null}
+
 
                             </div>
                         </div>
