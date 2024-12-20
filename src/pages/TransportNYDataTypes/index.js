@@ -8,6 +8,8 @@ import npmrds from "./npmrds";
 import npmrds_meta from "./npmrds_meta";
 import freight_bottlenecks from "./freight_bottlenecks";
 import excessive_delay from "./excessive_delay";
+import transcom_congestion from "./transcom_congestion";
+import production_transfer from "./production_transfer";
 
 
 const transportNYDataTypes = {
@@ -16,7 +18,9 @@ const transportNYDataTypes = {
   npmrds,
   npmrds_meta,
   freight_bottlenecks,
-  excessive_delay
+  excessive_delay,
+  transcom_congestion,
+  production_transfer
 }
 
 
