@@ -15,7 +15,7 @@ const npmrdsPublish = async (props, navigate, pgEnv) => {
         pgEnv: pgEnv || props?.pgEnv,
         schema: props?.schema,
         table: props?.table,
-        connection_info: props?.formData,
+        connection_info: props?.formData
     };
 
     try {

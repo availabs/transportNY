@@ -103,7 +103,7 @@ const TablePage = ({
         }
 
         return md
-            .filter((d) => ["integer", "string", "number"].includes(d.type))
+            .filter((d) => ["integer", "string", "number", "array"].includes(d.type))
             .map((d) => d.name);
     }, [source]);
 
