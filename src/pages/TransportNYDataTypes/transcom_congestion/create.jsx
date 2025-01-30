@@ -152,7 +152,7 @@ const Create = ({ source }) => {
                     <div className="flex items-center justify-left mt-4">
                         <div className="w-full max-w-xs mx-auto">
                             <div className="block text-sm leading-5 font-medium text-gray-700">
-                                Map21 source:
+                                Production source:
                             </div>
                             <div className="relative">
                                 <Select
@@ -170,7 +170,7 @@ const Create = ({ source }) => {
                     <div className="flex items-center justify-left mt-4">
                         <div className="w-full max-w-xs mx-auto">
                             <div className="block text-sm leading-5 font-medium text-gray-700">
-                                Npmrds source:
+                                Npmrds Meta source:
                             </div>
                             <div className="relative">
                                 <Select
