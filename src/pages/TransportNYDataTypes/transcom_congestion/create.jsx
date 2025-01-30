@@ -9,7 +9,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { getAttributes } from '~/pages/DataManager/Source/attributes';
 
 import { DamaContext } from "~/pages/DataManager/store";
-// import Publish from "./publish";
+import Publish from "./publish";
 
 export const Select = ({ selectedOption, options, setSelecteOptions, visibleField, defaultText }) => {
     return (
@@ -70,8 +70,9 @@ export const Select = ({ selectedOption, options, setSelecteOptions, visibleFiel
 
 const Create = ({ source }) => {
     const [loading, setLoading] = useState(false);
-    const [selectedTranscomSource, setselectedTranscomSource] = useState(null);
-    const [selectedConflationSource, setselectedConflationSource] = useState(null);
+    const [selectedGeomSource, setselectedGeomSource] = useState(null);
+    const [selectedMap21Source, setselectedMap21Source] = useState(null);
+    const [selectedNpmrdsProductionSource, setselectedNpmrdsProductionSource] = useState(null);
     const [startTime, setstartTime] = useState(null);
     const [endTime, setendTime] = useState(null);
     const { pgEnv, falcor, falcorCache, user } = useContext(DamaContext);
@@ -90,68 +91,94 @@ const Create = ({ source }) => {
         fetchData();
     }, [falcor, pgEnv]);
 
-    const [transcomSources, conflationSources] = useMemo(() => {
+    const [map21Sources, geomSources, npmrdsProductionSources] = useMemo(() => {
         const sources = Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
             .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
             .filter(s => s.categories);
 
+            console.log(sources);
+            
         const filterByCategory = (sources, category) =>
             sources.filter(s => s.categories.some(cat => cat.includes(category)));
 
         return [
-            filterByCategory(sources, "Transcom") || filterByCategory(sources, "TRANSCOM"),
-            filterByCategory(sources, "Conflation") || filterByCategory(sources, "CONFLATION")
+            filterByCategory(sources, "MAP21"),
+            filterByCategory(sources, "TMC META"),
+            filterByCategory(sources, "npmrds_production") || filterByCategory(sources, "NPMRDS_PRODUCTION")
         ];
     }, [falcorCache, pgEnv]);
 
     useEffect(() => {
-        if (!selectedTranscomSource) {
-            setselectedTranscomSource((transcomSources.length && transcomSources[0]));
+        if (!selectedGeomSource) {
+            setselectedGeomSource((geomSources.length && geomSources[0]));
         }
-    }, [transcomSources]);
+    }, [geomSources]);
 
     useEffect(() => {
-        if (!selectedConflationSource) {
-            setselectedConflationSource((conflationSources.length && conflationSources[0]));
+        if (!selectedMap21Source) {
+            setselectedMap21Source((map21Sources.length && map21Sources[0]));
         }
-    }, [conflationSources]);
+    }, [map21Sources]);
+
+    useEffect(() => {
+        if (!selectedNpmrdsProductionSource) {
+            setselectedNpmrdsProductionSource((npmrdsProductionSources.length && npmrdsProductionSources[0]));
+        }
+    }, [npmrdsProductionSources]);
 
     return (
         <div className="w-full p-5 m-5">
             <div className="flex flex-row mt-4 mb-6">
 
-                <div className="basis-1/2">
+                <div className="basis-1/3">
                     <div className="flex items-center justify-left mt-4">
                         <div className="w-full max-w-xs mx-auto">
                             <div className="block text-sm leading-5 font-medium text-gray-700">
-                                Transcom source:
+                                Map21 source:
                             </div>
                             <div className="relative">
                                 <Select
-                                    selectedOption={selectedTranscomSource}
-                                    options={transcomSources || []}
-                                    setSelecteOptions={setselectedTranscomSource}
+                                    selectedOption={selectedMap21Source}
+                                    options={map21Sources || []}
+                                    setSelecteOptions={setselectedMap21Source}
                                     visibleField={"name"}
-                                    defaultText={"Select Transcom source..."}
+                                    defaultText={"Select Map21 source..."}
                                 />
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div className="basis-1/2">
+                <div className="basis-1/3">
                     <div className="flex items-center justify-left mt-4">
                         <div className="w-full max-w-xs mx-auto">
                             <div className="block text-sm leading-5 font-medium text-gray-700">
-                                Conflation source:
+                                Production source:
                             </div>
                             <div className="relative">
                                 <Select
-                                    selectedOption={selectedConflationSource}
-                                    options={conflationSources || []}
-                                    setSelecteOptions={setselectedConflationSource}
+                                    selectedOption={selectedNpmrdsProductionSource}
+                                    options={npmrdsProductionSources || []}
+                                    setSelecteOptions={setselectedNpmrdsProductionSource}
                                     visibleField={"name"}
-                                    defaultText={"Select Conflation source..."}
+                                    defaultText={"Select Npmrds source..."}
+                                />
+                            </div>
+                        </div>
+                    </div></div>
+
+                <div className="basis-1/3">
+                    <div className="flex items-center justify-left mt-4">
+                        <div className="w-full max-w-xs mx-auto">
+                            <div className="block text-sm leading-5 font-medium text-gray-700">
+                                Npmrds Meta source:
+                            </div>
+                            <div className="relative">
+                                <Select
+                                    selectedOption={selectedGeomSource}
+                                    options={geomSources || []}
+                                    setSelecteOptions={setselectedGeomSource}
+                                    visibleField={"name"}
+                                    defaultText={"Select Npmrds source..."}
                                 />
                             </div>
                         </div>
@@ -160,57 +187,53 @@ const Create = ({ source }) => {
             </div>
 
             <div className="flex flex-row mt-4 mb-6">
-                    <div className="basis-1/2">
-                        <div className="flex items-center justify-left mt-4">
-                            <div className="w-full max-w-xs mx-auto">
-                                <div className="block text-sm leading-5 font-medium text-gray-700">
-                                    Start Time:
-                                </div>
-                                <div className="relative">
-                                    <DatePicker
-                                        className={"w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm"}
-                                        dateFormat="MM/yyyy"
-                                        required
-                                        showIcon
-                                        toggleCalendarOnIconClick
-                                        selected={startTime}
-                                        onChange={(date) => setstartTime(date)}
-                                        // minDate={minTime}
-                                        // maxDate={maxTime}
-                                        isClearable
-                                        showMonthYearPicker
-                                    />
-                                </div>
+                <div className="basis-1/2">
+                    <div className="flex items-center justify-left mt-4">
+                        <div className="w-full max-w-xs mx-auto">
+                            <div className="block text-sm leading-5 font-medium text-gray-700">
+                                Start Time:
+                            </div>
+                            <div className="relative">
+                                <DatePicker
+                                    className={"w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm"}
+                                    dateFormat="MM/yyyy"
+                                    required
+                                    showIcon
+                                    toggleCalendarOnIconClick
+                                    selected={startTime}
+                                    onChange={(date) => setstartTime(date)}
+                                    isClearable
+                                    showMonthYearPicker
+                                />
                             </div>
                         </div>
                     </div>
-                    <div className="basis-1/2">
-                        <div className="flex items-center justify-left mt-4">
-                            <div className="w-full max-w-xs mx-auto">
-                                <div className="block text-sm leading-5 font-medium text-gray-700">
-                                    End Time:
-                                </div>
-                                <div className="relative">
-                                    <DatePicker
-                                        className={"w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm"}
-                                        dateFormat="MM/yyyy"
-                                        required
-                                        showIcon
-                                        toggleCalendarOnIconClick
-                                        selected={endTime}
-                                        onChange={(date) => setendTime(date)}
-                                        // minDate={minTime}
-                                        // maxDate={maxTime}
-                                        isClearable
-                                        showMonthYearPicker
-                                    />
-                                </div>
+                </div>
+                <div className="basis-1/2">
+                    <div className="flex items-center justify-left mt-4">
+                        <div className="w-full max-w-xs mx-auto">
+                            <div className="block text-sm leading-5 font-medium text-gray-700">
+                                End Time:
+                            </div>
+                            <div className="relative">
+                                <DatePicker
+                                    className={"w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm"}
+                                    dateFormat="MM/yyyy"
+                                    required
+                                    showIcon
+                                    toggleCalendarOnIconClick
+                                    selected={endTime}
+                                    onChange={(date) => setendTime(date)}
+                                    isClearable
+                                    showMonthYearPicker
+                                />
                             </div>
                         </div>
                     </div>
-                </div> 
-            {/* 
-            {source?.name && selectedGeomSource && geomView && startTime && endTime ? (
+                </div>
+            </div>
+
+            {source?.name && selectedGeomSource && selectedMap21Source && selectedNpmrdsProductionSource && startTime && endTime ? (
                 <>
                     <Publish
                         pgEnv={pgEnv}
@@ -220,12 +243,14 @@ const Create = ({ source }) => {
                         name={source?.name}
                         setLoading={setLoading}
                         source_id={source?.source_id || null}
-                        selectedGeomSourceId={selectedGeomSource?.source_id}
+                        geom_source_id={selectedGeomSource?.source_id}
+                        npmrds_production_source_id={selectedNpmrdsProductionSource?.source_id}
+                        map21Source_id={selectedMap21Source?.source_id}
                         start_date={moment(startTime).startOf('month').format('YYYY-MM-DD')}
                         end_date={moment(endTime).endOf('month').format('YYYY-MM-DD')}
                     />
                 </>
-            ) : null} */}
+            ) : null}
         </div>
     );
 };
