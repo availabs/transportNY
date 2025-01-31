@@ -1,13 +1,13 @@
 import { useFalcor } from "~/modules/avl-components/src"
 import { useAuth } from "~/modules/ams/src";
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 
 import { dmsPageFactory, registerDataType, Selector, registerComponents, pageConfig } from "~/modules/dms/src"
 import { withAuth } from "~/modules/ams/src"
 
-import checkAuth  from "~/layout/checkAuth"
-import {Logo} from '~/layout/ppdaf-layout'
+import checkAuth from "~/layout/checkAuth"
+import { Logo } from '~/layout/ppdaf-layout'
 import AuthMenu from "~/pages/Auth/AuthMenu"
 
 import ComponentRegistry from '~/components'
@@ -36,13 +36,13 @@ const theme = {
 const Routes = [
   {
     ...dmsPageFactory(
-      pageConfig({
+      pageConfig[0]({
         app: "transportny",
         type: "cms-fdi",
         useFalcor: useFalcor,
         logo: <Logo />,
         authLevel: 1
-,        rightMenu: (
+        , rightMenu: (
           <div className='flex'>
             <Link to='/datasources' className='w-fit group font-display whitespace-nowrap
         flex font-medium tracking-widest items-center text-[14px] px-4 h-12 text-slate-700 border-slate-100
@@ -54,8 +54,8 @@ const Routes = [
         ),
         baseUrl: "",
         checkAuth,
-        themes: {default:theme},
-        pgEnv:'freight_data'
+        themes: { default: theme },
+        pgEnv: 'freight_data'
       }),
       withAuth,
 

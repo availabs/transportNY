@@ -1,16 +1,15 @@
 import { useFalcor } from "~/modules/avl-components/src"
 import { useAuth } from "~/modules/ams/src";
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 
-import { dmsPageFactory, registerDataType, Selector, registerComponents } from "~/modules/dms/src"
+import { dmsPageFactory, registerDataType, Selector, registerComponents, pageConfig } from "~/modules/dms/src"
 import { withAuth } from "~/modules/ams/src"
 
-import checkAuth  from "~/layout/checkAuth"
-import {Logo} from '~/layout/ppdaf-layout'
+import checkAuth from "~/layout/checkAuth"
+import { Logo } from '~/layout/ppdaf-layout'
 import AuthMenu from "~/pages/Auth/AuthMenu"
 
-import {siteConfig} from '~/modules/dms/src/patterns/page/siteConfig'
 import ComponentRegistry from '~/components'
 
 import { DamaMap } from '~/pages/DataManager'
@@ -37,7 +36,7 @@ const theme = {
 const Routes = [
   {
     ...dmsPageFactory(
-      siteConfig({
+      pageConfig[0]({
         app: "transportny",
         type: "cms-freightatlas",
         useFalcor: useFalcor,
@@ -54,8 +53,8 @@ const Routes = [
         ),
         baseUrl: "",
         checkAuth,
-        themes: {default:theme},
-        pgEnv:'freight_data'
+        themes: { default: theme },
+        pgEnv: 'freight_data'
       }),
       withAuth,
 
