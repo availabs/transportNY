@@ -51,7 +51,7 @@ const App = (props) => {
 
   const WrappedRoutes =  useMemo(() => {
     const Routes = [...site.Routes, ...DefaultRoutes]
-    console.log('routes',SUBDOMAIN, Routes, )
+    //console.log('routes',SUBDOMAIN, Routes, )
     return LayoutWrapper(Routes, Layout)
   }, [site])
 

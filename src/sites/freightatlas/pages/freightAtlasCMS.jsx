@@ -27,10 +27,14 @@ registerDataType("selector", Selector)
 
 const theme = {
   page: {
-    wrapper1: 'w-full flex-1 flex flex-col  ', // first div inside Layout
+    container: 'bg-slate-100',
+    wrapper1: 'w-full h-full flex-1 flex flex-col', // first div inside Layout
     wrapper2: 'w-full h-full flex-1 flex flex-row', // inside page header, wraps sidebar
-    wrapper3: 'flex flex-1 w-full flex-col border shadow bg-white relative text-md font-light leading-7 min-h-[calc(100vh_-_51px)]', // content wrapepr
-  }
+    wrapper3: 'flex flex-1 w-full flex-col border shadow bg-white relative text-md font-light  min-h-[calc(100vh_-_132px)] overflow-hidden', // content wrapepr
+    //wrapper3: 'flex flex-1 w-full  flex-col border shadow bg-white relative text-md font-light leading-7 p-4 min-h-[calc(100vh_-_102px)]' , // content wrapepr
+    iconWrapper : 'z-20 absolute right-[10px] top-[15px]',
+    icon: 'text-slate-400 hover:text-blue-500'
+  },
 }
 
 const Routes = [
