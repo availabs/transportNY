@@ -14,10 +14,17 @@ import {
   YEARS, VERSION
 } from "./ConflationStyles"
 
+import {
+	NpmrdsSources,
+	NpmrdsLayers
+} from "./NpmrdsStyles"
+
 import InfoBox from "./RouteCreationInfoBox"
 // import WayCache from "./WayCache"
 
 const ConflationLayerIds = ConflationLayers.map(l => l.id);
+const NpmrdsLayerIds = NpmrdsLayers.map(l => l.id);
+const AllLayerIds = [...ConflationLayerIds, ...NpmrdsLayerIds];
 
 const COLORS = ["#1a9641", "#ffffbf", "#d7191c"];
 
@@ -28,7 +35,7 @@ const GEO_LEVEL_ORDER = {
   UA: 3
 }
 
-const HoverComp = ({ data }) => {
+const HoverComp = ({ data, ...rest }) => {
   const tmcs = [...new Set(data)];
   return (
     <div className="bg-gray-100 rounded z-10 px-4 py-1">
@@ -49,17 +56,33 @@ class RouteCreationLayer extends LayerContainer {
     markers: [],
     ways: [],
     tmcs: [],
-    creationMode: "tmc-clicks",
-    highlighted: []
+    highlighted: [],
+    creationMode: "tmc-clicks"
   }
 
   setCreationMode(creationMode) {
     if (creationMode === "tmc-clicks") {
+      this.filters = {
+        ...this.filters,
+        "network": {
+          ...this.filters.network,
+          value: "tmc",
+          active: true
+        }
+      };
       this.state.markers.forEach(m => m.remove());
-      this.updateState({ creationMode, markers: [] });
+      this.updateState({ creationMode, markers: [], ways: [], tmcs: [], highlighted: [] });
     }
     else {
-      this.updateState({ creationMode, markers: [], tmcs: [] });
+      this.filters = {
+        ...this.filters,
+        "network": {
+          ...this.filters.network,
+          value: "con",
+          active: false
+        }
+      };
+      this.updateState({ creationMode, markers: [], ways: [], tmcs: [], highlighted: [] });
     }
   }
 
@@ -83,7 +106,7 @@ class RouteCreationLayer extends LayerContainer {
       if ((mode === "markers") && (layer === "mapboxMap")) {
         this.addMarker(lngLat);
       }
-      else if ((mode === "tmc-clicks") && ConflationLayerIds.includes(layer)) {
+      else if ((mode === "tmc-clicks") && AllLayerIds.includes(layer)) {
         const tmcs = features.reduce((a, c) => {
           const tmc = get(c, ["properties", "tmc"], null);
           if (tmc && !a.includes(tmc)) {
@@ -94,7 +117,7 @@ class RouteCreationLayer extends LayerContainer {
         this.toggleTmcs(tmcs);
       }
     },
-    layers: ["mapboxMap", ...ConflationLayerIds]
+    layers: ["mapboxMap", ...AllLayerIds]
   }
 
   infoBoxes = [
@@ -109,6 +132,20 @@ class RouteCreationLayer extends LayerContainer {
       type: "single",
       domain: YEARS,
       value: YEARS[0]
+    },
+    network: {
+      name: "Network",
+      type: "select",
+      value: "tmc",
+      multi: false,
+      searchable: false,
+      accessor: d => d.name,
+      valueAccessor: d => d.value,
+      domain: [
+        { name: "TMC", value: "tmc" },
+        { name: "Conflation", value: "con" },
+      ],
+      active: true
     }
   }
 
@@ -121,14 +158,16 @@ class RouteCreationLayer extends LayerContainer {
   ]
 
   sources = [
-    ...ConflationSources
+    ...ConflationSources,
+    ...NpmrdsSources
   ]
   layers = [
-    ...ConflationLayers
+    ...ConflationLayers,
+    ...NpmrdsLayers
   ]
 
   onHover = {
-    layers: [...ConflationLayerIds],
+    layers: [...AllLayerIds],
     property: "tmc",
     HoverComp,
     pinnable: false,
@@ -401,39 +440,44 @@ class RouteCreationLayer extends LayerContainer {
     }
   }
 
-  onFilterChange(filterName, newValue, prevValue) {
-    if ((filterName === "geography") && window.localStorage) {
-      const value = JSON.stringify(newValue);
-      window.localStorage.setItem("route-creation-geo", value);
-    }
-  }
-  loadFromLocalStorage() {
-    if (window.localStorage) {
-      const value = window.localStorage.getItem("route-creation-geo");
-      if (value) {
-        return JSON.parse(value);
-      }
-    }
-    return [];
-  }
+  // onFilterChange(filterName, newValue, prevValue) {
+  //   if ((filterName === "geography") && window.localStorage) {
+  //     const value = JSON.stringify(newValue);
+  //     window.localStorage.setItem("route-creation-geo", value);
+  //   }
+  // }
+  // loadFromLocalStorage() {
+  //   if (window.localStorage) {
+  //     const value = window.localStorage.getItem("route-creation-geo");
+  //     if (value) {
+  //       return JSON.parse(value);
+  //     }
+  //   }
+  //   return [];
+  // }
 
   render(mapboxMap) {
+
     const ways = get(this, ["state", "ways"], []);
     const tmcs = get(this, ["state", "tmcs"], []);
 
     const year = this.getYear();
 
-    this.layers.forEach(({ id, filter }) => {
-      const visibility = id.includes(year) ? "visible" : "none";
-      mapboxMap.setLayoutProperty(id, "visibility", visibility);
+    const network = get(this, ["filters", "network", "value"], "con");
 
+console.log("RENDERING:", ways, tmcs, network)
+
+    this.layers.forEach(({ id, filter }) => {
+      const visibility = id.includes(year) && id.includes(network) ? "visible" : "none";
+      mapboxMap.setLayoutProperty(id, "visibility", visibility);
       if (visibility === "visible") {
-        mapboxMap.setFilter(id, [
-          "any",
-          filter,
-          ["in", ["get", "id"], ["literal", ways]],
-          ["in", ["get", "tmc"], ["literal", tmcs]]
-        ])
+      //   mapboxMap.setFilter(id, [
+      //     "any",
+      //     filter,
+      //     ["in", ["get", "id"], ["literal", ways]],
+      //     ["in", ["get", "tmc"], ["literal", tmcs]]
+      //   ].filter(Boolean));
+      //
         const LineColor = [
           "case",
           ["any",

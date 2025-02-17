@@ -12,7 +12,7 @@ const ConflationSources = YEARS.map(year => ({
   }
 }))
 
-const LineColor = [
+export const LineColor = [
   "case",
   ["boolean", ["feature-state", "hover"], false],
   "#000000",
@@ -85,15 +85,15 @@ const  networkLevels = {
         //   1
         // ],
         'line-offset': [
-        "interpolate",
-          ["exponential", 1.5],
-          ["zoom"],
-          11,
-          0.1,
-          14,
-          1.2,
-          18,
-          8
+          "interpolate",
+            ["exponential", 1.5],
+            ["zoom"],
+            11,
+            0.1,
+            14,
+            1.2,
+            18,
+            8
         ],
         'line-width': [
           "interpolate",
@@ -202,7 +202,7 @@ const  networkLevels = {
             1,
             18,
             16
-        ],
+        ]
       }
     }
   },

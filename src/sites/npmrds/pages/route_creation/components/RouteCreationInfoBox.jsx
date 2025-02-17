@@ -111,13 +111,18 @@ const InfoBox = props => {
   }, [tmcSearch]);
   const searchForTmc = React.useCallback(e => {
     falcor.get(["tmc", tmcSearch, "meta", year, "bounding_box"]);
+    setTmcBoundingBox("searching");
   }, [falcor, tmcSearch, year]);
   React.useEffect(() => {
-    const bb = get(falcorCache, ["tmc", tmcSearch, "meta", year, "bounding_box", "value"], null);
-    setTmcBoundingBox(bb);
-  }, [falcorCache, tmcSearch, year]);
+    if (tmcBoundingBox === "searching") {
+      const bb = get(falcorCache, ["tmc", tmcSearch, "meta", year, "bounding_box", "value"], null);
+      if (Array.isArray(bb)) {
+        setTmcBoundingBox([[...bb[0]], [...bb[1]]]);
+      }
+    }
+  }, [falcorCache, tmcSearch, year, tmcBoundingBox]);
   React.useEffect(() => {
-    if (tmcBoundingBox) {
+    if (Array.isArray(tmcBoundingBox)) {
       props.mapboxMap.fitBounds(tmcBoundingBox, { padding: { top: 200, bottom: 200, left: 300, right: 300 } });
     }
   }, [props.mapboxMap, tmcBoundingBox]);
