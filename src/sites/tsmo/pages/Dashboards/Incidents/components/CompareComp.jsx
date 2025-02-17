@@ -26,7 +26,7 @@ export const CompareComp = ({ prev, curr, currPer=1, prevPer=1, perUnit='day', t
   )
 }
 
-export const HeroStatComp = ({data,stat,display=fraction, perUnit='day'}) => ( 
+export const HeroStatComp = ({data,stat,display=fraction, displayPrefix='', perUnit='day'}) => ( 
   <div className='text-gray-800 text-center '>
     {Object.keys(data.prevMonthByCat).map(cat => {
       if(get(data, `currentMonthbyCat[${cat}].count`,0) < 5) return ''
@@ -39,7 +39,7 @@ export const HeroStatComp = ({data,stat,display=fraction, perUnit='day'}) => (
               <div className='w-10 h-10 shadow' style={{backgroundColor: data.colorsForTypes[cat]}} />
                 <div className='flex-1'>
                   <div className='text-lg'>
-                    {display(get(data, `currentMonthbyCat[${cat}][${stat}]`,0))}
+                    {displayPrefix} {display(get(data, `currentMonthbyCat[${cat}][${stat}]`,0))}
                   </div>
                   <div className='text-xs text-gray-500 '>
                     {display(get(data, `currentMonthbyCat[${cat}][${stat}]`,0),perUnit ? data.currentMonthDays.length : 1)}  {perUnit ? `/ ${perUnit}` : ''}

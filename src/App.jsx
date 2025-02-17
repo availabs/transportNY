@@ -19,7 +19,7 @@ import DefaultRoutes from '~/Routes';
 import transportNY from '~/sites/transportny'
 import tsmo from '~/sites/tsmo'
 import freightatlas from '~/sites/freightatlas'
-import freightdata from '~/sites/freightdata'
+import fdi from '~/sites/fdi'
 
 import npmrds from '~/sites/npmrds'
 import transit from '~/sites/transit'
@@ -30,7 +30,7 @@ const Sites = {
   transportNY,
   tsmo,
   freightatlas,
-  freightdata,
+  fdi,
   npmrds,
   transit,
   demos,
@@ -51,6 +51,7 @@ const App = (props) => {
 
   const WrappedRoutes =  useMemo(() => {
     const Routes = [...site.Routes, ...DefaultRoutes]
+    //console.log('routes',SUBDOMAIN, Routes, )
     return LayoutWrapper(Routes, Layout)
   }, [site])
 

@@ -10,6 +10,7 @@ import {
   Transition,
 } from "@headlessui/react";
 
+import { DamaContext } from "~/pages/DataManager/store";
 import PublishNpmrdsRaw from "./publish";
 
 const statesObj = {
@@ -73,6 +74,7 @@ const Create = ({ source }) => {
   const [loading, setLoading] = useState(false);
   const [states, setStates] = useState([]);
 
+  const { pgEnv, user } = React.useContext(DamaContext);
   function isSelected(val) {
     return (states || []).find((el) => el === val) ? true : false;
   }
@@ -284,6 +286,8 @@ const Create = ({ source }) => {
             startDate={startDate}
             endDate={endDate}
             states={states}
+            user_id={user?.id}
+            pgEnv={pgEnv}
           />
         </>
       ) : null}

@@ -1,13 +1,13 @@
+import DataManager from "~/pages/DataManager"
 import { useFalcor } from "~/modules/avl-components/src"
 import { useAuth } from "~/modules/ams/src";
-import { Link } from 'react-router-dom'
-
+import {Link} from 'react-router-dom'
 
 import { dmsPageFactory, registerDataType, Selector, registerComponents, pageConfig } from "~/modules/dms/src"
 import { withAuth } from "~/modules/ams/src"
 
-import checkAuth from "~/layout/checkAuth"
-import { Logo } from '~/layout/ppdaf-layout'
+import checkAuth  from "~/layout/checkAuth"
+import {Logo} from '~/layout/ppdaf-layout'
 import AuthMenu from "~/pages/Auth/AuthMenu"
 
 import ComponentRegistry from '~/components'
@@ -27,22 +27,35 @@ registerDataType("selector", Selector)
 
 const theme = {
   page: {
-    container: 'bg-slate-100',
-    wrapper1: 'w-full h-full flex-1 flex flex-col', // first div inside Layout
+    wrapper1: 'w-full flex-1 flex flex-col  ', // first div inside Layout
     wrapper2: 'w-full h-full flex-1 flex flex-row', // inside page header, wraps sidebar
-    wrapper3: 'flex flex-1 w-full flex-col border shadow bg-white relative text-md font-light  min-h-[calc(100vh_-_132px)] overflow-hidden', // content wrapepr
-    //wrapper3: 'flex flex-1 w-full  flex-col border shadow bg-white relative text-md font-light leading-7 p-4 min-h-[calc(100vh_-_102px)]' , // content wrapepr
-    iconWrapper : 'z-20 absolute right-[10px] top-[15px]',
-    icon: 'text-slate-400 hover:text-blue-500'
-  },
+    wrapper3: 'flex flex-1 w-full flex-col border shadow bg-white relative text-md font-light leading-7 min-h-[calc(100vh_-_51px)]', // content wrapepr
+  }
 }
+
+
+const DAMA_ARGS = {
+  baseUrl: '/datasources',
+  defaultPgEnv: 'nysdot_sandbox',
+  useFalcor,
+  useAuth,
+  authLevel:1,
+  navSettings: {
+    topNav: {
+      position: 'fixed',
+      size: 'compact',
+    },
+  }
+}
+
+
 
 const Routes = [
   {
     ...dmsPageFactory(
       pageConfig[0]({
         app: "transportny",
-        type: "cms-freightatlas",
+        type: "cms-sandbox",
         useFalcor: useFalcor,
         logo: <Logo />,
         rightMenu: (
@@ -56,14 +69,15 @@ const Routes = [
           </div>
         ),
         baseUrl: "",
+        authLevel: 1,
         checkAuth,
-        themes: { default: theme },
-        pgEnv: 'freight_data'
+        themes: {default:theme},
+        pgEnv:'freight_data'
       }),
       withAuth,
 
     ),
-    authLevel: -1,
+    authLevel: 1,
     name: "CMS",
     sideNav: {
       color: 'white',
@@ -73,8 +87,14 @@ const Routes = [
       size: "none",
       color: "white"
     }
-  }
+  },
+  ...DataManager(DAMA_ARGS),
+  // ...FreightDocs
 ]
 
+const site = {
+	title: "TransportNY",
+	Routes
+}
 
-export default Routes
+export default site

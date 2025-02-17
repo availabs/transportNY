@@ -1,7 +1,7 @@
 // import FreightMap from "./pages/FreightMap"
 // import FreightAtlas from "./pages/Atlas"
 // import CollectionAtlas from "./pages/CollectionAtlas"
-import FreightAtlasCMS from "./pages/freightAtlasCMS.jsx"
+import FreightCMS from "./FreightCMS.jsx"
 
 
 // import Auth from "~/pages/Auth/Auth1.0.14"
@@ -12,13 +12,6 @@ import { useAuth } from "~/modules/ams/src"
 
 import transportNYDataTypes from '~/pages/TransportNYDataTypes'
 
-// const authMenuConfig = {
-  
-//   topNav: {
-//     position: 'fixed',
-//     size: 'compact'
-//   },
-// }
 
 const DAMA_ARGS = {
   baseUrl: '/datasources',
@@ -26,6 +19,7 @@ const DAMA_ARGS = {
   dataTypes: transportNYDataTypes,
   useFalcor,
   useAuth,
+  authLevel:1,
   navSettings: {
     topNav: {
       position: 'fixed',
@@ -40,7 +34,7 @@ const DAMA_ARGS = {
 
  
 const Routes = [
-  ...FreightAtlasCMS,
+  ...FreightCMS,
   ...DataManager(DAMA_ARGS),  
   // ...FreightMap,
   // ...FreightAtlas,
@@ -48,8 +42,8 @@ const Routes = [
 ]
 
 const SiteConfig = {
-	title: "Freight Atlas",
-	Routes
+  title: "Freight Atlas",
+  Routes
 }
 
 export default SiteConfig
