@@ -2657,6 +2657,8 @@ const DATA_REGEX = /{data}/g;
 const getRouteCompName = (name, settings) => {
   if (!settings.compTitle) return name;
 
+console.log("GET ROUTE COMP NAME:", name, JSON.stringify(settings, null, 3))
+
   return settings.compTitle.replace(NAME_REGEX, name)
     .replace(YEAR_REGEX, getYearString(settings))
     .replace(MONTH_REGEX, getMonthString(settings))
@@ -2668,7 +2670,7 @@ const getGraphCompTitle = (graphState, route_comps) => {
 }
 
 const getYearString = settings => {
-	if (settings.year !== 'advanced') return settings.year.toString();
+	if ((settings.year !== 'advanced') && !settings.useRelativeDateControls) return settings.year.toString();
 
 	const start = settings.startDate.toString().slice(0, 4),
 		end = settings.endDate.toString().slice(0, 4);
@@ -2694,7 +2696,9 @@ const MONTHS = {
 const getMonthString = settings => {
 
 	if (settings.month === 'all') return `Jan-Dec, ${ settings.year }`;
-	if (settings.month !== 'advanced') return `${ MONTHS[settings.month].slice(0, 3) }, ${ settings.year }`;
+	if ((settings.month !== 'advanced') && !useRelativeDateControls) {
+    return `${ MONTHS[settings.month].slice(0, 3) }, ${ settings.year }`;
+  }
 
   const startDate = settings.startDate.toString();
   const endDate = settings.endDate.toString();

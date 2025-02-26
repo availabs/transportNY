@@ -216,7 +216,7 @@ class GeneralGraphComp extends React.Component {
 				return this.props.falcor.get(
 					['tmc', tmcArray, 'meta', year, ['miles', 'bounding_box', 'congestion_level', 'directionality', 'f_system']],
 					['tmc', tmcArray, 'year', year, 'geometries'],
-				).then(res => console.log("RES:", res))
+				)//.then(res => console.log("RES:", res))
 				.then(() => {
 
 					return requestKeys.reduce((promise, { dd, alias, group, key }) => {
@@ -232,7 +232,7 @@ class GeneralGraphComp extends React.Component {
 							.then(res => {
 								if (group === "indices") {
 									INDICES.forEach(index => {
-										
+
 										route.data[index.key] = get(res, `json.routes.data.${ key }`, []) //get(res, `json.routes.npmrds.view.${Number(3639)}.data.${ key }`, [])
 											.map(d => ({ tmc: d.tmc, resolution: d.resolution, value: d[index.key] }))
 											.filter(({ value }) => value !== undefined)

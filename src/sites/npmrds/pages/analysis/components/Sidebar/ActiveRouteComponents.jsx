@@ -162,7 +162,7 @@ const ActiveRouteComponents = ({ folders = [], ...props }) => {
 // 		})
 // 	}, [falcorCache, foldersWithRoutes]);
 
-console.log("FOLDERS:", folders)
+// console.log("FOLDERS:", folders)
 
 	const availableRoutes = React.useMemo(() => {
 		return props.availableRoutes.slice()
