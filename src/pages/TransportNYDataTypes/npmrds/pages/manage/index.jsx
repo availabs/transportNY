@@ -274,7 +274,7 @@ export default function NpmrdsManage({
 
   const availableViewOptions = useMemo(() => {
     return availableViews.map((av) => ({
-      label: `${av?.metadata?.name} From ${av?.metadata?.start_date} to ${av?.metadata?.end_date}`,
+      label: `${av?.metadata?.name || av?.metadata?.dama_source_name} From ${av?.metadata?.start_date} to ${av?.metadata?.end_date}`,
       value: av?.view_id,
       metadata: av?.metadata,
     }));
@@ -309,7 +309,8 @@ export default function NpmrdsManage({
     const publishData = {
       source_id: source?.source_id || null,
       view_id: activeView?.view_id,
-      user_id: ctxUser?.user_id,
+      user_id: ctxUser?.id,
+      email: ctxUser?.email,
       npmrds_raw_view_ids: selectedViews.map((svs) => svs.value),
       name: source?.name,
       type: "npmrds",
@@ -334,12 +335,13 @@ export default function NpmrdsManage({
       setLoading(false);
     }
   };
-
+  console.log({ctxUser})
   const removeNpmrds = async (viewId, stateGroup) => {
     const publishData = {
       source_id: source?.source_id || null,
       view_id: activeView?.view_id,
-      user_id: ctxUser?.user_id,
+      user_id: ctxUser?.id,
+      email: ctxUser?.email,
       npmrds_raw_removed_view_ids: [viewId],
       name: source?.name,
       type: "npmrds",
