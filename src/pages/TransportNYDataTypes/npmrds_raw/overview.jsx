@@ -109,7 +109,7 @@ export default function NpmrdsRawOverview({
                         {item?.statistics?.non_interstate_percentage && Math.round(item?.statistics?.non_interstate_percentage * 100) / 100}
                       </td>
                       <td
-                        key={`${group}.extended_interstate_percentage.${index}`}
+                        key={`${group}.expanded_tmc_percentage.${index}`}
                         className="py-2 px-4 border-b"
                       >
                         {item?.statistics?.extended_tmc_percentage && Math.round(item?.statistics?.extended_tmc_percentage * 100) / 100}
