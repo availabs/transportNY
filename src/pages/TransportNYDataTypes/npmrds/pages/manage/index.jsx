@@ -335,7 +335,7 @@ export default function NpmrdsManage({
       setLoading(false);
     }
   };
-  console.log({ctxUser})
+
   const removeNpmrds = async (viewId, stateGroup) => {
     const publishData = {
       source_id: source?.source_id || null,
