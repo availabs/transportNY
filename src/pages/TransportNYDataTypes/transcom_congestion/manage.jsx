@@ -19,6 +19,12 @@ function checkAndMergeDateRanges(
     startDate,
     endDate
 ) {
+    if (!currentStartDate || !currentEndDate || !startDate || !endDate) {
+        return {
+            msgString: "Invalid Dates",
+            isValid: false,
+        };
+    }
     const momentNewStart = moment(startDate);
     const momentNewEnd = moment(endDate);
 
@@ -122,13 +128,6 @@ const SourceAttributes = {
     metadata: "metadata",
 };
 
-const getAttributes = (data) =>
-    Object.entries(data || {}).reduce((out, [k, v]) => {
-        out[k] = v.value !== undefined ? v.value : v;
-        return out;
-    }, {});
-
-
 export default function Manage({
     source,
     views,
@@ -137,6 +136,8 @@ export default function Manage({
     const { user: ctxUser, pgEnv } = useContext(DamaContext);
     const { falcor, falcorCache } = useFalcor();
     const navigate = useNavigate();
+    
+    console.log(ctxUser);
     
     const [showModal, setShowModal] = React.useState(false);
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
@@ -165,6 +166,10 @@ export default function Manage({
         fetchData();
     }, [falcor]);
 
+    console.log(source,
+        views,
+        activeViewId);
+    
     const activeView = useMemo(() => {
         return views.find((v) => Number(v.view_id) === Number(activeViewId));
     }, [activeViewId, views]);
@@ -219,12 +224,12 @@ export default function Manage({
     useEffect(() => {
         setstartTime(startDate ? moment(startDate).toDate() : geomView?.metadata?.start_date ? moment(geomView?.metadata?.start_date).toDate() : null);
         setendTime(endDate ? moment(endDate).toDate() : geomView?.metadata?.end_date ? moment(geomView?.metadata?.end_date).toDate() : null);
-    }, [startDate, endDate, geomView?.metadata?.start_date, geomView?.metadata?.end_date]);
+    }, []);
 
     // -----------------------------------------------------------------------------------------------------------------------
     const { msgString, isValid, mergedRange } = useMemo(() => {
         return { ...(checkAndMergeDateRanges(startDate, endDate, moment(startTime).startOf("month").format("YYYY-MM-DD"), moment(endTime).endOf("month").format("YYYY-MM-DD")) || {}) };
-    }, [startDate, endDate, startTime, endTime]);
+    }, [startTime, endTime]);
 
     const headers = [
         "batch",
@@ -237,12 +242,12 @@ export default function Manage({
         const publishData = {
             source_id: source?.source_id || null,
             view_id: activeView?.view_id,
-            user_id: ctxUser?.user_id,
+            user_id: ctxUser?.id,
+            email: ctxUser?.email,
             pgEnv,
             start_date: mergedRange?.start_date,
             end_date: mergedRange?.end_date,
         };
-        console.log(publishData);
 
         setLoading(true);
         try {
