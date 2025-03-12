@@ -10,6 +10,7 @@ import freight_bottlenecks from "./freight_bottlenecks";
 import excessive_delay from "./excessive_delay";
 import transcom_congestion from "./transcom_congestion";
 import production_transfer from "./production_transfer";
+import transcom from "./transcom";
 
 
 const transportNYDataTypes = {
@@ -20,6 +21,7 @@ const transportNYDataTypes = {
   freight_bottlenecks,
   excessive_delay,
   transcom_congestion,
+  transcom,
   production_transfer
 }
 
