@@ -24,6 +24,7 @@ export default function NpmrdsRawOverview({
     "Total Percent",
     "Interstate Percent",
     "Non Interstate Percent",
+    "Extended TMC Percent",
     "Tmcs",
   ];
 
@@ -107,7 +108,12 @@ export default function NpmrdsRawOverview({
                       >
                         {item?.statistics?.non_interstate_percentage && Math.round(item?.statistics?.non_interstate_percentage * 100) / 100}
                       </td>
-                      
+                      <td
+                        key={`${group}.extended_tmc_percentage.${index}`}
+                        className="py-2 px-4 border-b"
+                      >
+                        {item?.statistics?.extended_tmc_percentage && Math.round(item?.statistics?.extended_tmc_percentage * 100) / 100}
+                      </td>
                       <td
                         key={`${group}.${item?.metadata?.no_of_tmc}`}
                         className="py-2 px-4 border-b"

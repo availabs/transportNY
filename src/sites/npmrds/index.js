@@ -13,6 +13,7 @@ import { useFalcor } from "~/modules/avl-components/src"
 import { useAuth } from "~/modules/ams/src"
 
 import transportNYDataTypes from '~/pages/TransportNYDataTypes'
+import IncidentView from "./pages/IncidentView"
 
 const DAMA_ARGS = {
   baseUrl: '/datasources',
@@ -45,6 +46,7 @@ const Routes = [
   ...NpmrdsDocs,
   BatchReports,
   BatchReportsNew,
+  IncidentView,
   ...DataManager(DAMA_ARGS)
 ]
 
