@@ -82,12 +82,12 @@ const ITEMS = [
   })
 ]
 
-const setFolderValues = (folderTree, falcorCache) => {
-  return folderTree.reduce((a, c) => {
+const setFolderValues = (foldersTree, falcorCache) => {
+  return foldersTree.reduce((a, c) => {
     const stuff = get(falcorCache, ["folders2", "stuff", c.id, "value"], []);
     const routeIds = stuff.filter(stuff => stuff.stuff_type === "route")
       .map(stuff => stuff.stuff_id);
-    if (routeIds.length) {
+    // if (routeIds.length) {
       a.push({
         ...c,
         value: routeIds,
@@ -105,7 +105,7 @@ const setFolderValues = (folderTree, falcorCache) => {
           }, [])
         ]
       })
-    }
+    // }
     return a;
   }, []).sort((a, b) => {
     if (a.type === b.type) {
@@ -149,6 +149,7 @@ const RouteSelector = ({ addRoutes, clearRoutes }) => {
   // }, [falcor, falcorCache]);
   React.useEffect(() => {
     const foldersTree = get(falcorCache, ["folders2", "user", "tree", "value"], []);
+console.log("FOLDERS TREE:", foldersTree);
     setFolders(setFolderValues(foldersTree, falcorCache));
   }, [falcorCache]);
 

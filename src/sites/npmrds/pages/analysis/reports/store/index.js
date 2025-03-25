@@ -2657,7 +2657,7 @@ const DATA_REGEX = /{data}/g;
 const getRouteCompName = (name, settings) => {
   if (!settings.compTitle) return name;
 
-console.log("GET ROUTE COMP NAME:", name, JSON.stringify(settings, null, 3))
+// console.log("GET ROUTE COMP NAME:", name, JSON.stringify(settings, null, 3))
 
   return settings.compTitle.replace(NAME_REGEX, name)
     .replace(YEAR_REGEX, getYearString(settings))
