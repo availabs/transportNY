@@ -4,22 +4,24 @@ import { useNavigate } from "react-router-dom";
 import { ScalableLoading } from "~/modules/avl-components/src";
 import { DAMA_HOST } from "~/config";
 
-const transcomPublish = async (props, navigate, pgEnv) => {
+const schedulePublish = async (props, navigate, pgEnv) => {
     props.setLoading(true);
 
     const publishData = {
-        source_id: props?.source_id || null,
+        source_id: props?.source_id,
+        view_id: props?.view_id,
         user_id: props?.user_id,
         name: props?.name,
-        type: props?.type || "transcom",
+        type: props?.type,
         pgEnv: pgEnv || props?.pgEnv,
-        start_date: props?.start_date,
-        end_date: props?.end_date
+        cron: props?.cron
     };
+    
+    console.log(publishData);
     
     try {
         const res = await fetch(
-            `${DAMA_HOST}/dama-admin/${pgEnv}/transcom/publish`,
+            `${DAMA_HOST}/dama-admin/${pgEnv}/${props.type}/schedule`,
             {
                 method: "POST",
                 body: JSON.stringify(publishData),
@@ -29,12 +31,8 @@ const transcomPublish = async (props, navigate, pgEnv) => {
             }
         );
         const publishFinalEvent = await res.json();
-        const { source_id } = publishFinalEvent;
-
+        const { isScheduled, dama_task_queue_name } = publishFinalEvent;
         props.setLoading(false);
-        if (source_id) {
-            navigate(`/datasources/source/${source_id}`);
-        }
     } catch (err) {
         props.setLoading(false);
     }
@@ -45,7 +43,7 @@ export default function Publish(props) {
     const { loading, setLoading, pgEnv, ...restProps } = props;
 
     const handlePublishClick = useCallback(() => {
-        transcomPublish({ ...restProps, setLoading }, navigate, pgEnv);
+        schedulePublish({ ...restProps, setLoading }, navigate, pgEnv);
     }, [restProps, navigate, setLoading]);
 
     return (
