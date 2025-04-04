@@ -166,7 +166,7 @@ const Create = ({ source }) => {
             </div>
 
             {type ? <div className="flex flex-row mt-4 mb-6">
-                <div className="basis-1/6" />
+                <div className={(['transcom'].indexOf(type) >= 0) ? "basis-1/6" : "basis-1/2"} />
                 <div className="basis-1/3" >
                     <div className="flex items-center justify-left mt-4">
                         <div className="w-full max-w-xs mx-auto">

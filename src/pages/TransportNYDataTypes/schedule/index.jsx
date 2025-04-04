@@ -5,10 +5,6 @@ const ScheduleConfig = {
     sourceCreate: {
         name: 'Create',
         component: Create
-    },
-    list: {
-        name: 'Create',
-        component: List
     }
 }
 
