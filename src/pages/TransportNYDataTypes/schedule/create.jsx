@@ -77,7 +77,6 @@ const Create = ({ source }) => {
     const [selectedView, setSelectView] = useState(null);
     const [selectedSource, setSelectSource] = useState(null);
 
-
     useEffect(() => {
         async function fetchData() {
             const geomLengthPath = ["dama", pgEnv, "sources", "length"];
@@ -99,35 +98,33 @@ const Create = ({ source }) => {
     }, [falcorCache, pgEnv, type]);
 
     useEffect(() => {
-            async function fetchData() {
-                const geomLengthPath = ["dama", pgEnv, "sources", "byId", selectedSource?.source_id, "views", "length"];
-                const geomViewsLen = await falcor.get(geomLengthPath);
-    
-                await falcor.get([
-                    "dama", pgEnv, "sources", "byId", selectedSource?.source_id, "views", "byIndex",
-                    { from: 0, to: get(geomViewsLen.json, geomLengthPath, 0) - 1 },
-                    "attributes", ['view_id', 'version', 'metadata']
-                ]);
-            }
-            fetchData();
-        }, [falcor, pgEnv, selectedSource]);
+        async function fetchData() {
+            const geomLengthPath = ["dama", pgEnv, "sources", "byId", selectedSource?.source_id, "views", "length"];
+            const geomViewsLen = await falcor.get(geomLengthPath);
+
+            await falcor.get([
+                "dama", pgEnv, "sources", "byId", selectedSource?.source_id, "views", "byIndex",
+                { from: 0, to: get(geomViewsLen.json, geomLengthPath, 0) - 1 },
+                "attributes", ['view_id', 'version', 'metadata']
+            ]);
+        }
+        fetchData();
+    }, [falcor, pgEnv, selectedSource]);
 
     const typeViews = useMemo(() => {
-            return selectedSource?.source_id && (Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byId", selectedSource?.source_id, "views", "byIndex"], {}))
-                .map(v =>
-                    Object.entries(get(falcorCache, v?.value, { "attributes": {} })["attributes"])
-                        .reduce((out, attr) => {
-                            const [k, v] = attr
-                            typeof v.value !== 'undefined' ?
-                                out[k] = v?.value :
-                                out[k] = v
-                            return out
-                        }, {})
-                ));
-        }, [falcorCache, selectedSource, pgEnv]);
+        return selectedSource?.source_id && (Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byId", selectedSource?.source_id, "views", "byIndex"], {}))
+            .map(v =>
+                Object.entries(get(falcorCache, v?.value, { "attributes": {} })["attributes"])
+                    .reduce((out, attr) => {
+                        const [k, v] = attr
+                        typeof v.value !== 'undefined' ?
+                            out[k] = v?.value :
+                            out[k] = v
+                        return out
+                    }, {})
+            ));
+    }, [falcorCache, selectedSource, pgEnv]);
 
-        console.log(typeViews);
-        
     useEffect(() => {
         if (typeSources && typeSources.length) {
             setSelectSource(typeSources[0]);
@@ -200,7 +197,7 @@ const Create = ({ source }) => {
                                 />
                             </div>
                         </div>
-                    </div>: null }
+                    </div> : null}
                 </div>
                 <div className="basis-1/6" />
             </div> : null}
