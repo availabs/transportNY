@@ -130,10 +130,6 @@ export default function Manage({
 }) {
     const { user: ctxUser, pgEnv } = useContext(DamaContext);
     const navigate = useNavigate();
-
-    console.log(source,
-        views,
-        activeViewId);
     
     const [loading, setLoading] = React.useState(false);
     const [startTime, setstartTime] = useState(null);
@@ -154,9 +150,9 @@ export default function Manage({
         setstartTime(startDate ? moment(startDate).toDate() : activeView?.metadata?.start_date ? moment(geomView?.metadata?.start_date).toDate() : null);
         setendTime(endDate ? moment(endDate).toDate() : activeView?.metadata?.end_date ? moment(geomView?.metadata?.end_date).toDate() : null);
     }, []);
-
     // -----------------------------------------------------------------------------------------------------------------------
-    const { msgString, isValid, mergedRange } = useMemo(() => {
+    
+    const { msgString, isValid } = useMemo(() => {
         return { ...(checkAndMergeDateRanges(moment(startDate).startOf('day').toDate(), moment(endDate).endOf('day').toDate(), moment(startTime).startOf("day").toDate(), moment(endTime).endOf("day").toDate()) || {}) };
     }, [startTime, endTime]);
 
@@ -170,8 +166,6 @@ export default function Manage({
             start_date: moment(startTime).startOf("day").toDate(),
             end_date: moment(endTime).endOf("day").toDate(),
         };
-
-        console.log(publishData);
         
         setLoading(true);
         try {
