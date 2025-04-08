@@ -198,7 +198,7 @@ export default function Manage({
             <div className="w-full p-5 m-5">
                 <div className="flex flex-row mt-4 mb-6">
                     <div className="basis-1/4"></div>
-                    {!isValid ? <>
+                    {/* {!isValid ? <>
                         <div className="flex items-center p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-white dark:text-red-400 dark:border-red-800" role="alert">
                             <div>
                                 <span className="font-medium">
@@ -211,7 +211,7 @@ export default function Manage({
                                 <span className="font-medium">{msgString}</span>
                             </div>
                         </div>
-                    </>}
+                    </>} */}
                     <div className="basis-1/4"></div>
                 </div>
                 <div className="flex flex-row mt-4 mb-6">
@@ -260,7 +260,8 @@ export default function Manage({
                 </div>
             </div>
 
-            {isValid ? <button
+            {/* {isValid ?  */}
+            <button
                 className="ml-3 inline-flex justify-center px-4 py-2 text-sm text-green-900 bg-green-100 border border-transparent rounded-md hover:bg-green-200 duration-300"
                 type="button"
                 onClick={update}
@@ -273,7 +274,8 @@ export default function Manage({
                 ) : (
                     "Save Changes"
                 )}
-            </button> : null}
+            </button>
+             {/* : null} */}
         </div>
     );
 }
