@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useMemo, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { get } from "lodash";
 import DatePicker from "react-datepicker";
 import moment from "moment";
 
 import { DamaContext } from "~/pages/DataManager/store";
 import { DAMA_HOST } from "~/config";
-import { useFalcor, ScalableLoading } from "~/modules/avl-components/src";
+import { ScalableLoading } from "~/modules/avl-components/src";
 
 function checkAndMergeDateRanges(
     currentStartDate,
@@ -251,6 +250,7 @@ export default function Manage({
                                         toggleCalendarOnIconClick
                                         selected={endTime}
                                         onChange={(date) => setendTime(date)}
+                                        maxDate={new Date(new Date().setDate(new Date().getDate() - 1))}
                                         isClearable
                                     />
                                 </div>

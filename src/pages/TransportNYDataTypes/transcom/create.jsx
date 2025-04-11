@@ -110,6 +110,7 @@ const Create = ({ source }) => {
                                     toggleCalendarOnIconClick
                                     selected={endTime}
                                     onChange={(date) => setendTime(date)}
+                                    maxDate={new Date(new Date().setDate(new Date().getDate() - 1))}
                                     isClearable
                                 />
                             </div>
