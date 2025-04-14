@@ -79,8 +79,6 @@ const TablePage = ({
         [activeView]
     );
 
-    console.log("activeView", activeView);
-
     React.useEffect(() => {
         falcor
             .get(["dama", pgEnv, "viewsbyId", activeViewId, "data", "length"])
@@ -94,8 +92,6 @@ const TablePage = ({
         );
     }, [pgEnv, activeViewId, falcorCache]);
 
-    console.log("dataLength: ", dataLength);
-
     const attributes = React.useMemo(() => {
         let md = get(source, ["metadata", "columns"], get(source, "metadata", []));
         if (!Array.isArray(md)) {
@@ -106,9 +102,6 @@ const TablePage = ({
             .filter((d) => ["integer", "string", "number", "array"].includes(d.type))
             .map((d) => d.name);
     }, [source]);
-
-    console.log("attributes: ", attributes);
-
 
     React.useEffect(() => {
         if (dataLength > 0) {
@@ -157,7 +150,6 @@ const TablePage = ({
 
     const [sortBy, sortOrder] = React.useMemo(() => {
         const col = columns.filter(d => d.sortBy)?.[0]
-        console.log('the col', col)
         return [col?.accessor || '', col?.sortBy || 'asc']
     }, [columns])
 
