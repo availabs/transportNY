@@ -11,6 +11,7 @@ import excessive_delay from "./excessive_delay";
 import transcom_congestion from "./transcom_congestion";
 import production_transfer from "./production_transfer";
 
+import osm_upload from "./osm"
 
 const transportNYDataTypes = {
   // freight_atlas_shapefile
@@ -20,7 +21,9 @@ const transportNYDataTypes = {
   freight_bottlenecks,
   excessive_delay,
   transcom_congestion,
-  production_transfer
+  production_transfer,
+
+  osm_upload
 }
 
 
