@@ -4,8 +4,7 @@ import GeneralGraphComp from "./GeneralGraphComp"
 import GraphContainer from "./GraphContainer"
 import MessageBox from "./components/MessageBox"
 
-import deepequal from "deep-equal"
-import get from "lodash/get"
+import { get, isEqual } from "lodash-es"
 import { format } from "d3-format"
 import { sum } from "d3-array"
 
@@ -78,8 +77,8 @@ class HdsGraphComp extends GeneralGraphComp {
 	}
 
 	componentDidUpdate(oldProps) {
-		if (!deepequal(oldProps.state, this.props.state) ||
-				!deepequal(oldProps.station_comps, this.props.station_comps)) {
+		if (!isEqual(oldProps.state, this.props.state) ||
+				!isEqual(oldProps.station_comps, this.props.station_comps)) {
 			this.fetchFalcorDeps();
 		}
 	}
