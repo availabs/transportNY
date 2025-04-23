@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment";
+
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from "@headlessui/react";
+import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 
 const AdvancedCronEditor = ({ cron = "* * * * *", onCronChange }) => {
   const [cronString, setCronString] = useState(cron);
@@ -140,10 +143,67 @@ const AdvancedCronEditor = ({ cron = "* * * * *", onCronChange }) => {
   );
 };
 
+export const Select = ({ selectedOption, options, setSelecteOptions, defaultText }) => {
+  return (
+    <div className="top-16 min-w-[100px]">
+      <Listbox value={selectedOption} onChange={setSelecteOptions}>
+        <div className="relative mt-1">
+          <ListboxButton className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm">
+            <span className="block truncate">
+              {selectedOption || defaultText}
+            </span>
+            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+              <ChevronUpDownIcon
+                className="h-5 w-5 text-gray-400"
+                aria-hidden="true"
+              />
+            </span>
+          </ListboxButton>
+          <Transition
+            as={Fragment}
+            leave="transition ease-in duration-100"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <ListboxOptions className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 z-40 focus:outline-none sm:text-sm">
+              {options?.map((opt, optIndex) => (
+                <ListboxOption
+                  key={optIndex}
+                  className={({ focus }) => `relative cursor-default select-none py-2 pl-10 pr-4 ${focus ? "bg-cyan-100 text-cyan-900" : "text-gray-900"
+                    }`
+
+                  }
+                  value={opt}
+                >
+                  {({ selected }) => (
+                    <>
+                      <span
+                        className={`block truncate ${selected ? "font-medium" : "font-normal"
+                          }`}
+                      >
+                        {opt}
+                      </span>
+                      {selected ? (
+                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-cyan-600">
+                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                        </span>
+                      ) : null}
+                    </>
+                  )}
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </Transition>
+        </div>
+      </Listbox>
+    </div>
+  );
+};
 function Cron({ cron, onCronChange }) {
   const [frequency, setFrequency] = useState("day");
   const [selectedTime, setSelectedTime] = useState(new Date());
 
+  const frequencyOptions = ["day", "week", "month", "year"];
   // Function to generate a cron expression
   const generateCronExpression = (freq, time) => {
     const [hour, minute] = time.split(":");
@@ -169,16 +229,11 @@ function Cron({ cron, onCronChange }) {
   return (
     <div className="p-4 rounded-md flex items-center gap-5">
       <span className="text-lg whitespace-nowrap">In every</span>
-      <select
-        value={frequency}
-        onChange={(e) => setFrequency(e.target.value)}
-        className="p-2 border rounded-md bg-white"
-      >
-        <option value="day">Day</option>
-        <option value="week">Week</option>
-        <option value="month">Month</option>
-        <option value="year">Year</option>
-      </select>
+      <Select
+        selectedOption={frequency}
+        options={frequencyOptions || []}
+        setSelecteOptions={setFrequency}
+        defaultText={`Select frequency.`} />
       <span className="text-lg">at</span>
       <DatePicker
         className="w-[75px] cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm"
@@ -186,7 +241,7 @@ function Cron({ cron, onCronChange }) {
         onChange={(date) => setSelectedTime(date)}
         showTimeSelect
         showTimeSelectOnly
-        timeIntervals={15} 
+        timeIntervals={15}
         timeCaption="Time"
         dateFormat="HH:mm"
         showIcon

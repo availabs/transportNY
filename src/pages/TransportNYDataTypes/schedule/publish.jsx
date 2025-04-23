@@ -17,8 +17,6 @@ const schedulePublish = async (props, navigate, pgEnv) => {
         cron: props?.cron
     };
     
-    console.log(publishData);
-    
     try {
         const res = await fetch(
             `${DAMA_HOST}/dama-admin/${pgEnv}/${props.type}/schedule`,
@@ -32,6 +30,10 @@ const schedulePublish = async (props, navigate, pgEnv) => {
         );
         const publishFinalEvent = await res.json();
         const { isScheduled, dama_task_queue_name } = publishFinalEvent;
+
+        if (isScheduled) {
+            navigate(`/datasources/schedules`);
+        }
         props.setLoading(false);
     } catch (err) {
         props.setLoading(false);

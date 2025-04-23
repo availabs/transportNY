@@ -137,8 +137,6 @@ export default function Manage({
     const { falcor, falcorCache } = useFalcor();
     const navigate = useNavigate();
     
-    console.log(ctxUser);
-    
     const [showModal, setShowModal] = React.useState(false);
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
@@ -165,10 +163,6 @@ export default function Manage({
 
         fetchData();
     }, [falcor]);
-
-    console.log(source,
-        views,
-        activeViewId);
     
     const activeView = useMemo(() => {
         return views.find((v) => Number(v.view_id) === Number(activeViewId));

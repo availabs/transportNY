@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { groupBy, orderBy } from "lodash";
+import moment from 'moment'
 
 export default function NpmrdsRawOverview({
   views,
@@ -18,6 +19,7 @@ export default function NpmrdsRawOverview({
   const headers = [
     "State",
     "View Id",
+    "Date Added",
     "Version",
     "Start Date",
     "End Date",
@@ -71,6 +73,12 @@ export default function NpmrdsRawOverview({
                         className="py-2 px-4 border-b"
                       >
                         {item?.view_id}
+                      </td>
+                      <td
+                        key={`${group}.${item?.['_created_timestamp']}`}
+                        className="py-2 px-4 border-b"
+                      >
+                        {item?.['_created_timestamp'] && moment(item?.['_created_timestamp']).format("YYYY-MM-DD")}
                       </td>
                       <td
                         key={`${group}.npmrds_version.${index}`}

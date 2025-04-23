@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useMemo, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { get } from "lodash";
 import DatePicker from "react-datepicker";
 import moment from "moment";
 
 import { DamaContext } from "~/pages/DataManager/store";
 import { DAMA_HOST } from "~/config";
-import { useFalcor, ScalableLoading } from "~/modules/avl-components/src";
+import { ScalableLoading } from "~/modules/avl-components/src";
 
 function checkAndMergeDateRanges(
     currentStartDate,
@@ -130,10 +129,6 @@ export default function Manage({
 }) {
     const { user: ctxUser, pgEnv } = useContext(DamaContext);
     const navigate = useNavigate();
-
-    console.log(source,
-        views,
-        activeViewId);
     
     const [loading, setLoading] = React.useState(false);
     const [startTime, setstartTime] = useState(null);
@@ -154,9 +149,9 @@ export default function Manage({
         setstartTime(startDate ? moment(startDate).toDate() : activeView?.metadata?.start_date ? moment(geomView?.metadata?.start_date).toDate() : null);
         setendTime(endDate ? moment(endDate).toDate() : activeView?.metadata?.end_date ? moment(geomView?.metadata?.end_date).toDate() : null);
     }, []);
-
     // -----------------------------------------------------------------------------------------------------------------------
-    const { msgString, isValid, mergedRange } = useMemo(() => {
+    
+    const { msgString, isValid } = useMemo(() => {
         return { ...(checkAndMergeDateRanges(moment(startDate).startOf('day').toDate(), moment(endDate).endOf('day').toDate(), moment(startTime).startOf("day").toDate(), moment(endTime).endOf("day").toDate()) || {}) };
     }, [startTime, endTime]);
 
@@ -170,8 +165,6 @@ export default function Manage({
             start_date: moment(startTime).startOf("day").toDate(),
             end_date: moment(endTime).endOf("day").toDate(),
         };
-
-        console.log(publishData);
         
         setLoading(true);
         try {
@@ -204,7 +197,7 @@ export default function Manage({
             <div className="w-full p-5 m-5">
                 <div className="flex flex-row mt-4 mb-6">
                     <div className="basis-1/4"></div>
-                    {!isValid ? <>
+                    {/* {!isValid ? <>
                         <div className="flex items-center p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-white dark:text-red-400 dark:border-red-800" role="alert">
                             <div>
                                 <span className="font-medium">
@@ -217,7 +210,7 @@ export default function Manage({
                                 <span className="font-medium">{msgString}</span>
                             </div>
                         </div>
-                    </>}
+                    </>} */}
                     <div className="basis-1/4"></div>
                 </div>
                 <div className="flex flex-row mt-4 mb-6">
@@ -257,6 +250,7 @@ export default function Manage({
                                         toggleCalendarOnIconClick
                                         selected={endTime}
                                         onChange={(date) => setendTime(date)}
+                                        maxDate={new Date(new Date().setDate(new Date().getDate() - 1))}
                                         isClearable
                                     />
                                 </div>
@@ -266,7 +260,8 @@ export default function Manage({
                 </div>
             </div>
 
-            {isValid ? <button
+            {/* {isValid ?  */}
+            <button
                 className="ml-3 inline-flex justify-center px-4 py-2 text-sm text-green-900 bg-green-100 border border-transparent rounded-md hover:bg-green-200 duration-300"
                 type="button"
                 onClick={update}
@@ -279,7 +274,8 @@ export default function Manage({
                 ) : (
                     "Save Changes"
                 )}
-            </button> : null}
+            </button>
+             {/* : null} */}
         </div>
     );
 }
