@@ -14,7 +14,8 @@ const transcomPublish = async (props, navigate, pgEnv) => {
         type: props?.type || "transcom",
         pgEnv: pgEnv || props?.pgEnv,
         start_date: props?.start_date,
-        end_date: props?.end_date
+        end_date: props?.end_date,
+        npmrds_meta_source_id: props?.npmrds_meta_source_id
     };
     
     try {
