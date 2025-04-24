@@ -1,4 +1,5 @@
-import React, { Fragment, useContext, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useContext, useState } from 'react';
+import { get } from 'lodash';
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import DatePicker from "react-datepicker";
@@ -6,6 +7,7 @@ import moment from "moment";
 import "react-datepicker/dist/react-datepicker.css";
 
 import { DamaContext } from "~/pages/DataManager/store";
+import { getAttributes } from '~/pages/DataManager/Source/attributes';
 import Publish from "./publish";
 
 export const Select = ({ selectedOption, options, setSelecteOptions, visibleField, defaultText }) => {
@@ -69,10 +71,64 @@ const Create = ({ source }) => {
     const [loading, setLoading] = useState(false);
     const [startTime, setstartTime] = useState(null);
     const [endTime, setendTime] = useState(null);
+    const [selectedNpmrdsMetaSource, setselectedNpmrdsMetaSource] = useState(null);
     const { pgEnv, falcor, falcorCache, user } = useContext(DamaContext);
+
+    useEffect(() => {
+        async function fetchData() {
+            const geomLengthPath = ["dama", pgEnv, "sources", "length"];
+            const sourceLen = await falcor.get(geomLengthPath);
+
+            await falcor.get([
+                "dama", pgEnv, "sources", "byIndex",
+                { from: 0, to: get(sourceLen.json, geomLengthPath, 0) - 1 },
+                "attributes", ['source_id', 'metadata', 'categories', 'name']
+            ]);
+        }
+        fetchData();
+    }, [falcor, pgEnv]);
+
+    const npmrdsmetaSources = useMemo(() => {
+        return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
+            .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
+            .filter(s => s.categories &&
+                s.categories.some(categoryGroup =>
+                    categoryGroup.includes("TMC META")
+                ))
+    }, [falcorCache, pgEnv]);
+
+     useEffect(() => {
+            if (!selectedNpmrdsMetaSource) {
+                setselectedNpmrdsMetaSource((npmrdsmetaSources.length && npmrdsmetaSources[0]));
+            }
+        }, [npmrdsmetaSources]);
 
     return (
         <div className="w-full p-5 m-5">
+            <div className="flex flex-row mt-4 mb-6">
+                <div className="basis-1/3"></div>
+                <div className="basis-1/3">
+                    <div className="flex items-center justify-left mt-4">
+                        <div className="w-full max-w-xs mx-auto">
+                            <div className="block text-sm leading-5 font-medium text-gray-700">
+                                Geometry Source:
+                            </div>
+                            <div className="relative w-full max-w-sm">
+                                <Select
+                                    selectedOption={selectedNpmrdsMetaSource}
+                                    options={npmrdsmetaSources || []}
+                                    setSelecteOptions={setselectedNpmrdsMetaSource}
+                                    visibleField={"name"}
+                                    defaultText={"Select Tmc meta source..."}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="basis-1/3">
+
+                </div>
+            </div>
             <div className="flex flex-row mt-4 mb-6">
                 <div className="basis-1/2">
                     <div className="flex items-center justify-left mt-4">
@@ -119,7 +175,7 @@ const Create = ({ source }) => {
                 </div>
             </div>
 
-            {source?.name && startTime && endTime ? (
+            {source?.name && startTime && endTime && selectedNpmrdsMetaSource?.source_id ? (
                 <>
                     <Publish
                         pgEnv={pgEnv}
@@ -131,6 +187,7 @@ const Create = ({ source }) => {
                         source_id={source?.source_id || null}
                         start_date={moment(startTime).startOf('day').toDate()}
                         end_date={moment(endTime).endOf('day').toDate()}
+                        npmrds_meta_source_id={selectedNpmrdsMetaSource?.source_id}
                     />
                 </>
             ) : null}
