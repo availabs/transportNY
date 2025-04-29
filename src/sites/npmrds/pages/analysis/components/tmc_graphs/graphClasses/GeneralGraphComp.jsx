@@ -274,7 +274,7 @@ class GeneralGraphComp extends React.Component {
 										route.data[alias] =  get(res, getDataPath, []) //get(res, `json.routes.npmrds.view.${Number(3639)}.data.${ key }`, []);
 									}
 								}
-								console.log('routedata',route.data )
+								//console.log('routedata',route.data )
 							})
 						})
 					}, Promise.resolve())
