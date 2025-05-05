@@ -95,8 +95,6 @@ const Create = ({ source }) => {
         const sources = Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
             .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
             .filter(s => s.categories);
-
-            console.log(sources);
             
         const filterByCategory = (sources, category) =>
             sources.filter(s => s.categories.some(cat => cat.includes(category)));
@@ -178,7 +176,7 @@ const Create = ({ source }) => {
                                     options={geomSources || []}
                                     setSelecteOptions={setselectedGeomSource}
                                     visibleField={"name"}
-                                    defaultText={"Select Npmrds source..."}
+                                    defaultText={"Select Npmrds Meta source..."}
                                 />
                             </div>
                         </div>

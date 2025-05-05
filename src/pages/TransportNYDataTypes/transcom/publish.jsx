@@ -15,9 +15,11 @@ const transcomPublish = async (props, navigate, pgEnv) => {
         pgEnv: pgEnv || props?.pgEnv,
         start_date: props?.start_date,
         end_date: props?.end_date,
-        npmrds_meta_source_id: props?.npmrds_meta_source_id
+        geom_source_id: props?.geom_source_id,
+        npmrds_production_source_id: props?.npmrds_production_source_id,
+        map21Source_id: props?.map21Source_id
     };
-    
+
     try {
         const res = await fetch(
             `${DAMA_HOST}/dama-admin/${pgEnv}/transcom/publish`,
