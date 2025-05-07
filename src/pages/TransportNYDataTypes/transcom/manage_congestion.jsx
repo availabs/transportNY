@@ -29,11 +29,6 @@ export default function ManageCongestion({
         return views.find((v) => Number(v.view_id) === Number(activeViewId));
     }, [activeViewId, views]);
 
-    const { startDate, endDate } = useMemo(() => ({
-        startDate: source?.metadata?.start_date,
-        endDate: source?.metadata?.end_date
-    }), [source]);
-
     const update = async () => {
         const publishData = {
             source_id: source?.source_id || null,
@@ -48,7 +43,7 @@ export default function ManageCongestion({
         console.log(publishData);
         setLoading(true);
         try {
-            const res = await fetch(`${DAMA_HOST}/dama-admin/${pgEnv}/transcom/add`, {
+            const res = await fetch(`${DAMA_HOST}/dama-admin/${pgEnv}/transcom/congestion/add`, {
                 method: "POST",
                 body: JSON.stringify(publishData),
                 headers: {
@@ -223,11 +218,3 @@ export default function ManageCongestion({
         </div>
     );
 }
-
-// source_id: source?.source_id || null,
-//             view_id: activeView?.view_id,
-//             user_id: ctxUser?.id,
-//             email: ctxUser?.email,
-//             pgEnv,
-//             start_date: mergedRange?.start_date,
-//             end_date: mergedRange?.end_date,
