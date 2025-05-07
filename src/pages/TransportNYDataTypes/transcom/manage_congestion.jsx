@@ -40,7 +40,6 @@ export default function ManageCongestion({
             end_date: moment(processingEndDate).endOf("day").toDate(),
         };
 
-        console.log(publishData);
         setLoading(true);
         try {
             const res = await fetch(`${DAMA_HOST}/dama-admin/${pgEnv}/transcom/congestion/add`, {
@@ -82,7 +81,7 @@ export default function ManageCongestion({
                 </div>
             </div>
             <div className="w-full pr-5 mr-5">
-                {intervals.length ? (
+                {(intervals || []).length ? (
                     <div className="overflow-x-auto px-5 py-3">
                         <table className="min-w-full bg-white">
                             <thead>
