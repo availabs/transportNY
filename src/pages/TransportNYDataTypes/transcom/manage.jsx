@@ -13,12 +13,21 @@ function checkAndMergeDateRanges(
     startDate,
     endDate
 ) {
-    if (!currentStartDate || !currentEndDate || !startDate || !endDate) {
+
+    if (!startDate || !endDate) {
         return {
             msgString: "Invalid Dates",
             isValid: false,
         };
     }
+    if ((!currentStartDate && !currentEndDate)) {
+        return {
+            msgString: `Successfully merged range: from ${moment(startDate).format("YYYY-MM-DD")} to ${moment(endDate).format("YYYY-MM-DD")}`,
+            isValid: true,
+            mergedRange: { start_date: startDate, end_date: endDate }
+        };
+    }
+
     const momentNewStart = moment(startDate);
     const momentNewEnd = moment(endDate);
 
@@ -109,19 +118,6 @@ function checkAndMergeDateRanges(
     };
 }
 
-const SourceAttributes = {
-    source_id: "source_id",
-    name: "name",
-    display_name: "display_name",
-    type: "type",
-    update_interval: "update_interval",
-    category: "category",
-    categories: "categories",
-    description: "description",
-    statistics: "statistics",
-    metadata: "metadata",
-};
-
 export default function Manage({
     source,
     views,
@@ -129,7 +125,7 @@ export default function Manage({
 }) {
     const { user: ctxUser, pgEnv } = useContext(DamaContext);
     const navigate = useNavigate();
-    
+
     const [loading, setLoading] = React.useState(false);
     const [startTime, setstartTime] = useState(null);
     const [endTime, setendTime] = useState(null);
@@ -143,16 +139,18 @@ export default function Manage({
         endDate: source?.metadata?.end_date
     }), [source]);
 
-
     // -----------------------------------------------------------------------------------------------------------------------
     useEffect(() => {
-        setstartTime(startDate ? moment(startDate).toDate() : activeView?.metadata?.start_date ? moment(geomView?.metadata?.start_date).toDate() : null);
-        setendTime(endDate ? moment(endDate).toDate() : activeView?.metadata?.end_date ? moment(geomView?.metadata?.end_date).toDate() : null);
+        setstartTime(startDate ? moment(startDate).toDate() : activeView?.metadata?.start_date ? moment(activeView?.metadata?.start_date).toDate() : null);
+        setendTime(endDate ? moment(endDate).toDate() : activeView?.metadata?.end_date ? moment(activeView?.metadata?.end_date).toDate() : null);
     }, []);
     // -----------------------------------------------------------------------------------------------------------------------
-    
+
     const { msgString, isValid } = useMemo(() => {
-        return { ...(checkAndMergeDateRanges(moment(startDate).startOf('day').toDate(), moment(endDate).endOf('day').toDate(), moment(startTime).startOf("day").toDate(), moment(endTime).endOf("day").toDate()) || {}) };
+        return { ...(checkAndMergeDateRanges(startDate ? moment(startDate).startOf('day').toDate() : undefined, 
+            endDate ? moment(endDate).endOf('day').toDate() : undefined, 
+            startTime ? moment(startTime).startOf("day").toDate(): undefined, 
+            endTime? moment(endTime).endOf("day").toDate() : undefined) || {}) };
     }, [startTime, endTime]);
 
     const update = async () => {
@@ -165,7 +163,7 @@ export default function Manage({
             start_date: moment(startTime).startOf("day").toDate(),
             end_date: moment(endTime).endOf("day").toDate(),
         };
-        
+
         setLoading(true);
         try {
             const res = await fetch(`${DAMA_HOST}/dama-admin/${pgEnv}/transcom/add`, {
@@ -197,7 +195,7 @@ export default function Manage({
             <div className="w-full p-5 m-5">
                 <div className="flex flex-row mt-4 mb-6">
                     <div className="basis-1/4"></div>
-                    {/* {!isValid ? <>
+                    {!isValid ? <>
                         <div className="flex items-center p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-white dark:text-red-400 dark:border-red-800" role="alert">
                             <div>
                                 <span className="font-medium">
@@ -210,7 +208,7 @@ export default function Manage({
                                 <span className="font-medium">{msgString}</span>
                             </div>
                         </div>
-                    </>} */}
+                    </>}
                     <div className="basis-1/4"></div>
                 </div>
                 <div className="flex flex-row mt-4 mb-6">
@@ -260,22 +258,22 @@ export default function Manage({
                 </div>
             </div>
 
-            {/* {isValid ?  */}
-            <button
-                className="ml-3 inline-flex justify-center px-4 py-2 text-sm text-green-900 bg-green-100 border border-transparent rounded-md hover:bg-green-200 duration-300"
-                type="button"
-                onClick={update}
-            >
-                {loading ? (
-                    <div style={{ display: "flex" }}>
-                        <div className="mr-2">Saving...</div>
-                        <ScalableLoading scale={0.25} color={"#fefefe"} />
-                    </div>
-                ) : (
-                    "Save Changes"
-                )}
-            </button>
-             {/* : null} */}
+            {isValid ?
+                <button
+                    className="ml-3 inline-flex justify-center px-4 py-2 text-sm text-green-900 bg-green-100 border border-transparent rounded-md hover:bg-green-200 duration-300"
+                    type="button"
+                    onClick={update}
+                >
+                    {loading ? (
+                        <div style={{ display: "flex" }}>
+                            <div className="mr-2">Saving...</div>
+                            <ScalableLoading scale={0.25} color={"#fefefe"} />
+                        </div>
+                    ) : (
+                        "Save Changes"
+                    )}
+                </button>
+                : null}
         </div>
     );
 }
