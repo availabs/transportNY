@@ -14,9 +14,10 @@ import SelectSpeedLimitSource from "./components/selectSpeedLimitSource";
 //we append the following:: 's784_v1323_${damaSourceName}_tmc_meta_geometry'
 //s784_v1323__tmc_meta_geometry is 29 chars
 //63-29=34 chars remaining
-//lets build in 1 char to accomodate 4 digit source_id, and another char to accomodate 5 digit view_id
-//32 chars remaining! One more, to accomodate an off-by-one brain error.
-export const MAX_NPMRDS_SOURCE_NAME_LENGTH = 32;
+//lets build in 1 char each to accomodate 4 digit source_id & 5 digit view_id
+//One more, to accomodate an off-by-one brain error.
+//31!
+export const MAX_NPMRDS_SOURCE_NAME_LENGTH = 31;
 const BlankComponent = () => <></>;
 export default function NpmrdsCreate({
   source = {},
