@@ -277,13 +277,13 @@ const Create = ({ source }) => {
           </div>
         </div>
       </div>
-      {source?.name.length >= MAX_NPMRDS_SOURCE_NAME_LENGTH && (
+      {source?.name.length > MAX_NPMRDS_SOURCE_NAME_LENGTH && (
         <p className="text-red-500">
-          The source name is too long. Please enter a name with less than 32
-          characters.
+          The source name is too long. Please enter a name with {MAX_NPMRDS_SOURCE_NAME_LENGTH + " "}
+          characters or less.
         </p>
       )}
-      {source?.name && source?.name.length < MAX_NPMRDS_SOURCE_NAME_LENGTH && 
+      {source?.name && source?.name.length <= MAX_NPMRDS_SOURCE_NAME_LENGTH && 
         startDate && endDate && states.length ? (
         <>
           <PublishNpmrdsRaw

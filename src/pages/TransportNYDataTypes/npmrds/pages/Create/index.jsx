@@ -15,9 +15,8 @@ import SelectSpeedLimitSource from "./components/selectSpeedLimitSource";
 //s784_v1323__tmc_meta_geometry is 29 chars
 //63-29=34 chars remaining
 //lets build in 1 char each to accomodate 4 digit source_id & 5 digit view_id
-//One more, to accomodate an off-by-one brain error.
-//31!
-export const MAX_NPMRDS_SOURCE_NAME_LENGTH = 31;
+//and some more extra, max name length is 30
+export const MAX_NPMRDS_SOURCE_NAME_LENGTH = 30;
 const BlankComponent = () => <></>;
 export default function NpmrdsCreate({
   source = {},
@@ -56,10 +55,10 @@ export default function NpmrdsCreate({
 
   return (
     <div className="w-full my-4">
-      {damaSourceName.length >= MAX_NPMRDS_SOURCE_NAME_LENGTH && (
+      {damaSourceName.length > MAX_NPMRDS_SOURCE_NAME_LENGTH && (
         <p className="text-red-500">
-          The source name is too long. Please enter a name with less than 32
-          characters.
+          The source name is too long. Please enter a name with {MAX_NPMRDS_SOURCE_NAME_LENGTH + " "}
+          characters or less.
         </p>
       )}
       <div className="md:flex md:items-center gap-4">
