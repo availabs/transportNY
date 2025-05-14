@@ -65,8 +65,8 @@ export default function ManageCongestion({
         ""
     ];
     const intervals = useMemo(() => {
-        return source?.metadata?.congestion;
-    }, [source]);
+        return activeView?.metadata?.congestion;
+    }, [activeView]);
     
     return (
         <div className="w-full p-5">

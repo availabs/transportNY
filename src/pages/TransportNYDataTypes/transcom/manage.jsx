@@ -135,9 +135,9 @@ export default function Manage({
     }, [activeViewId, views]);
 
     const { startDate, endDate } = useMemo(() => ({
-        startDate: source?.metadata?.start_date,
-        endDate: source?.metadata?.end_date
-    }), [source]);
+        startDate: activeView?.metadata?.start_date,
+        endDate: activeView?.metadata?.end_date
+    }), [activeView]);
 
     // -----------------------------------------------------------------------------------------------------------------------
     useEffect(() => {
