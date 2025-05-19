@@ -1,6 +1,6 @@
 import React from "react"
 
-import { useNavigate, useParams, Link } from "react-router-dom"
+import { useNavigate, useParams, Link } from "react-router"
 
 import get from "lodash/get"
 import moment from "moment"

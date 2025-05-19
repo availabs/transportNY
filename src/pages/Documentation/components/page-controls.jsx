@@ -3,7 +3,7 @@ import { Dialog, Transition } from '@headlessui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import cloneDeep from 'lodash/cloneDeep'
 
-import { useSubmit, useLocation } from "react-router-dom";
+import { useSubmit, useLocation } from "react-router";
 import {json2DmsForm, getUrlSlug, toSnakeCase} from './nav'
 
 

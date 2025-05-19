@@ -4,7 +4,7 @@ import {
 } from "~/modules/avl-components/src";
 import get from 'lodash/get'
 import { format as d3format } from "d3-format"
-import { Link } from "react-router-dom"
+import { Link } from "react-router"
 
 import { timeConvert } from '~/sites/tsmo/pages/Dashboards/Incidents/components/utils'
 //import {getTMCs, getCorridors} from 'sites/tsmo/pages/Dashboards/Congestion/components/data_processing'

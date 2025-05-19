@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react'
-import { NavLink, Link, useSubmit, useNavigate, useParams} from "react-router-dom";
+import { NavLink, Link, useSubmit, useNavigate, useParams} from "react-router";
 import Nav from './nav'
 import { PageControls } from './page-controls'
 

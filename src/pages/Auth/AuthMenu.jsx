@@ -2,7 +2,7 @@ import React from "react"
 import {useTheme, Dropdown } from '~/modules/avl-components/src'
 // import { withAuth } from "@availabs/ams"
 import { withAuth } from "~/modules/ams/src"
-import {Link} from 'react-router-dom'
+import {Link} from 'react-router'
 // import {NavItem, NavMenu, NavMenuItem, NavMenuSeparator, withAuth} from 'components/avl-components/src'
 // import user from "@availabs/ams/dist/reducers/user";
 

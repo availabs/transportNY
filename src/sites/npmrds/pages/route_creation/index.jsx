@@ -1,7 +1,7 @@
 import React from "react"
 
 import get from "lodash/get"
-import { useParams } from "react-router-dom"
+import { useParams } from "react-router"
 
 import { AvlMap } from "~/modules/avl-map/src"
 import config from "~/config.json"

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useLocation, Navigate } from "react-router-dom";
+import { useNavigate, useLocation, Navigate } from "react-router";
 import { withAuth } from '~/modules/ams/src'
 import get from 'lodash/get'
 import cloneDeep from 'lodash/cloneDeep'

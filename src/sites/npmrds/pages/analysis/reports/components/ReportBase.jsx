@@ -7,7 +7,7 @@ import {
   useLocation,
   useNavigate,
   useParams,
-} from "react-router-dom";
+} from "react-router";
 
 import styled from "styled-components"
 import get from "lodash/get"

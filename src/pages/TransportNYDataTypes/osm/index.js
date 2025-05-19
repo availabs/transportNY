@@ -1,5 +1,5 @@
 import CreateComponent from "./CreateComponent";
-import MapPage from  "../../DataManager/DataTypes/gis_dataset/pages/Map";
+//import MapPage from  "../../DataManager/DataTypes/pages/Map";
 
 const OSM_Config = {
   sourceCreate: {

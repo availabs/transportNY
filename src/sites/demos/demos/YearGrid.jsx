@@ -2,7 +2,7 @@ import React from "react"
 
 import TrackVisibility from 'react-on-screen';
 
-import { useParams } from "react-router-dom"
+import { useParams } from "react-router"
 
 import get from "lodash/get"
 import { groups as d3groups } from "d3-array"

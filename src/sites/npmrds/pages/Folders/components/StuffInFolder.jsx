@@ -11,7 +11,7 @@ import {
 } from "~/modules/avl-components/src"
 
 import { FolderStuff, getStuffSorter } from "./Stuff"
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import FolderModal from "./FolderModal"
 import ActionBar from "./ActionBar"
 import FolderIcon from "./FolderIcon"

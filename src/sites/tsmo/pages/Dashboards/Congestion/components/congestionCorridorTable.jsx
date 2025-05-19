@@ -2,7 +2,7 @@ import React from "react"
 
 import get from "lodash/get";
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { format as d3format } from "d3-format"
 

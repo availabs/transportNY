@@ -1,7 +1,7 @@
 import React from "react"
 import get from "lodash/get"
 import { AvlMap } from "~/modules/avl-map/src"
-import { useParams } from "react-router-dom"
+import { useParams } from "react-router"
 import config from "~/config.json"
 // import { RisLayerFactory } from "./layers/RISLayer"
 import { MacroLayerFactory } from "./layers/MacroView/index"

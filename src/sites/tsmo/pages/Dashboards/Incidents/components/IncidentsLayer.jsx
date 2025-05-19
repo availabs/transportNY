@@ -9,7 +9,7 @@ import * as d3scale from "d3-scale";
 import { ckmeans } from "simple-statistics";
 import { format as d3format } from "d3-format"
 
-import { Link } from "react-router-dom"
+import { Link } from "react-router"
 
 import { LayerContainer } from "~/modules/avl-map/src";
 /* ---- To Do -----

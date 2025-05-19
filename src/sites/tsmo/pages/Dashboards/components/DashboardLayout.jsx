@@ -1,7 +1,7 @@
 import React, { /*createContext*/ }  from "react"
 import { useSelector, useDispatch } from 'react-redux';
 import { setRegion, setMonth, setFsystem } from './dashboardSlice'
-import { useNavigate,useLocation } from 'react-router-dom'
+import { useNavigate,useLocation } from 'react-router'
 import get from 'lodash/get'
 
 import {

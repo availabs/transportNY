@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo} from 'react';
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router";
 import Layout from '~/layout/ppdaf-layout'
 import LayoutWrapper from '~/layout/LayoutWrapper'
 import get from 'lodash/get'

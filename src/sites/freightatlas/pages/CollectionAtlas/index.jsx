@@ -1,5 +1,5 @@
 import React from "react"
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link } from "react-router";
 import get from "lodash/get"
 
 import { AvlMap as AvlMap2, ThemeProvider } from "~/modules/avl-map-2/src"

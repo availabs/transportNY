@@ -1,6 +1,6 @@
 import React from "react";
 import { useTheme, TopNav, SideNav, FlyoutMenu } from "~/modules/avl-components/src/";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import AuthMenu from "~/pages/Auth/AuthMenu"
 import {getDomain, getSubdomain} from "~/utils"
 import get from 'lodash/get'

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useFalcor } from '~/modules/avl-components/src'
 
 import get from 'lodash/get'
-// import { useParams } from 'react-router-dom'
+// import { useParams } from 'react-router'
 
 import {SourceAttributes, ViewAttributes, getAttributes} from '~/pages/DataManager/Source/attributes'
 

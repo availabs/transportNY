@@ -1,7 +1,7 @@
 import React from "react"
 import get from "lodash/get"
 import { Disclosure } from '@headlessui/react'
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 
 import { MultiLevelSelect } from "~/modules/avl-map-2/src"
 

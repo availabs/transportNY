@@ -1,6 +1,6 @@
 import { useFalcor } from "~/modules/avl-components/src"
 import { useAuth } from "~/modules/ams/src";
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 
 import { dmsPageFactory, registerDataType, Selector, registerComponents, pageConfig } from "~/modules/dms/src"

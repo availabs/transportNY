@@ -1,6 +1,6 @@
 import React from "react";
 import get from "lodash/get";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useFalcor } from "~/modules/avl-components/src";
 
 const f_system_meta = {

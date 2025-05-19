@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import moment from "moment";
 import {
     Dialog,

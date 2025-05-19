@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router";
 import "react-datepicker/dist/react-datepicker.css";
 import get from "lodash/get";
 import { DAMA_HOST } from "~/config";
