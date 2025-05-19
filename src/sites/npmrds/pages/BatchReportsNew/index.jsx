@@ -399,7 +399,7 @@ const BatchReports = props => {
 
     groups.reduce((promise, { id, routes }) => {
       return promise.then(() => {
-        return fetch(`${ API_HOST }/batchreports`, {
+        return fetch(`${ API_HOST }/batchreports/npmrds2/982`, {
           method: "POST",
           body: JSON.stringify({ id, routes, columns })
         }).then(res => res.json())

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { ScalableLoading } from "~/modules/avl-components/src";
 import { DAMA_HOST } from "~/config";
+import { MAX_NPMRDS_SOURCE_NAME_LENGTH } from "../"
 
 const npmrdsPublish = async (props, navigate, pgEnv) => {
   props.setLoading(true);
@@ -50,8 +51,8 @@ export default function PublishNpmrds(props) {
   const handlePublishClick = useCallback(() => {
     npmrdsPublish({ ...restProps, setLoading }, navigate, pgEnv);
   }, [restProps, navigate, setLoading]);
-
-  const isButtonDisabled = (!props.source_id && !props.name) || !props.selectedViewId;
+  const isNameTooLong = props?.name?.length >= MAX_NPMRDS_SOURCE_NAME_LENGTH;
+  const isButtonDisabled = (!props.source_id && !props.name) || !props.selectedViewId || isNameTooLong;
   const buttonClass = isButtonDisabled
     ? "cursor-not-allowed bg-gray-400 text-white font-bold py-2 px-4 rounded"
     : "cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded";
@@ -61,7 +62,7 @@ export default function PublishNpmrds(props) {
       {(props.source_id || props.name) && !props.selectedViewId && "A TMC Speed Limit Source and View must be selected."}
       <button
         className={buttonClass}
-        disabled={(!props.source_id && !props.name) || !props.selectedViewId}
+        disabled={isButtonDisabled}
         onClick={handlePublishClick}
       >
         {loading ? (

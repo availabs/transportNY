@@ -71,7 +71,9 @@ const Create = ({ source }) => {
     const [loading, setLoading] = useState(false);
     const [startTime, setstartTime] = useState(null);
     const [endTime, setendTime] = useState(null);
-    const [selectedNpmrdsMetaSource, setselectedNpmrdsMetaSource] = useState(null);
+    const [selectedGeomSource, setselectedGeomSource] = useState(null);
+    const [selectedMap21Source, setselectedMap21Source] = useState(null);
+    const [selectedNpmrdsProductionSource, setselectedNpmrdsProductionSource] = useState(null);
     const { pgEnv, falcor, falcorCache, user } = useContext(DamaContext);
 
     useEffect(() => {
@@ -82,51 +84,101 @@ const Create = ({ source }) => {
             await falcor.get([
                 "dama", pgEnv, "sources", "byIndex",
                 { from: 0, to: get(sourceLen.json, geomLengthPath, 0) - 1 },
-                "attributes", ['source_id', 'metadata', 'categories', 'name']
+                "attributes", ['source_id', 'metadata', 'categories', 'name', 'type']
             ]);
         }
         fetchData();
     }, [falcor, pgEnv]);
 
-    const npmrdsmetaSources = useMemo(() => {
-        return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
+    const [map21Sources, geomSources, npmrdsProductionSources] = useMemo(() => {
+        const sources = Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
             .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
-            .filter(s => s.categories &&
-                s.categories.some(categoryGroup =>
-                    categoryGroup.includes("TMC META")
-                ))
+            .filter(s => s.categories);
+
+        const filterByCategory = (sources, category) =>
+            sources.filter(s => s.categories.some(cat => cat.includes(category)));
+
+        return [
+            filterByCategory(sources, "MAP21"),
+            filterByCategory(sources, "TMC META"),
+            filterByCategory(sources, "npmrds_production") || filterByCategory(sources, "NPMRDS_PRODUCTION")
+        ];
     }, [falcorCache, pgEnv]);
 
-     useEffect(() => {
-            if (!selectedNpmrdsMetaSource) {
-                setselectedNpmrdsMetaSource((npmrdsmetaSources.length && npmrdsmetaSources[0]));
-            }
-        }, [npmrdsmetaSources]);
+    useEffect(() => {
+        if (!selectedGeomSource) {
+            setselectedGeomSource((geomSources.length && geomSources[0]));
+        }
+    }, [geomSources]);
+
+    useEffect(() => {
+        if (!selectedMap21Source) {
+            setselectedMap21Source((map21Sources.length && map21Sources[0]));
+        }
+    }, [map21Sources]);
+
+    useEffect(() => {
+        if (!selectedNpmrdsProductionSource) {
+            setselectedNpmrdsProductionSource((npmrdsProductionSources.length && npmrdsProductionSources[0]));
+        }
+    }, [npmrdsProductionSources]);
 
     return (
         <div className="w-full p-5 m-5">
             <div className="flex flex-row mt-4 mb-6">
-                <div className="basis-1/3"></div>
                 <div className="basis-1/3">
                     <div className="flex items-center justify-left mt-4">
                         <div className="w-full max-w-xs mx-auto">
                             <div className="block text-sm leading-5 font-medium text-gray-700">
-                                Geometry Source:
+                                Map21 source:
                             </div>
-                            <div className="relative w-full max-w-sm">
+                            <div className="relative">
                                 <Select
-                                    selectedOption={selectedNpmrdsMetaSource}
-                                    options={npmrdsmetaSources || []}
-                                    setSelecteOptions={setselectedNpmrdsMetaSource}
+                                    selectedOption={selectedMap21Source}
+                                    options={map21Sources || []}
+                                    setSelecteOptions={setselectedMap21Source}
                                     visibleField={"name"}
-                                    defaultText={"Select Tmc meta source..."}
+                                    defaultText={"Select Map21 source..."}
                                 />
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className="basis-1/3">
+                    <div className="flex items-center justify-left mt-4">
+                        <div className="w-full max-w-xs mx-auto">
+                            <div className="block text-sm leading-5 font-medium text-gray-700">
+                                Production source:
+                            </div>
+                            <div className="relative">
+                                <Select
+                                    selectedOption={selectedNpmrdsProductionSource}
+                                    options={npmrdsProductionSources || []}
+                                    setSelecteOptions={setselectedNpmrdsProductionSource}
+                                    visibleField={"name"}
+                                    defaultText={"Select Npmrds source..."}
+                                />
+                            </div>
+                        </div>
+                    </div></div>
 
+                <div className="basis-1/3">
+                    <div className="flex items-center justify-left mt-4">
+                        <div className="w-full max-w-xs mx-auto">
+                            <div className="block text-sm leading-5 font-medium text-gray-700">
+                                Npmrds Meta source:
+                            </div>
+                            <div className="relative">
+                                <Select
+                                    selectedOption={selectedGeomSource}
+                                    options={geomSources || []}
+                                    setSelecteOptions={setselectedGeomSource}
+                                    visibleField={"name"}
+                                    defaultText={"Select Npmrds Meta source..."}
+                                />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div className="flex flex-row mt-4 mb-6">
@@ -145,6 +197,7 @@ const Create = ({ source }) => {
                                     toggleCalendarOnIconClick
                                     selected={startTime}
                                     onChange={(date) => setstartTime(date)}
+                                    maxDate={endTime ? new Date(endTime) : new Date()}
                                     isClearable
                                 />
                             </div>
@@ -167,6 +220,7 @@ const Create = ({ source }) => {
                                     selected={endTime}
                                     onChange={(date) => setendTime(date)}
                                     maxDate={new Date(new Date().setDate(new Date().getDate() - 1))}
+                                    minDate={new Date(startTime)}
                                     isClearable
                                 />
                             </div>
@@ -175,7 +229,12 @@ const Create = ({ source }) => {
                 </div>
             </div>
 
-            {source?.name && startTime && endTime && selectedNpmrdsMetaSource?.source_id ? (
+            {source?.name &&
+                startTime &&
+                endTime &&
+                selectedGeomSource?.source_id &&
+                selectedMap21Source?.source_id &&
+                selectedNpmrdsProductionSource?.source_id ? (
                 <>
                     <Publish
                         pgEnv={pgEnv}
@@ -187,7 +246,9 @@ const Create = ({ source }) => {
                         source_id={source?.source_id || null}
                         start_date={moment(startTime).startOf('day').toDate()}
                         end_date={moment(endTime).endOf('day').toDate()}
-                        npmrds_meta_source_id={selectedNpmrdsMetaSource?.source_id}
+                        geom_source_id={selectedGeomSource?.source_id}
+                        npmrds_production_source_id={selectedNpmrdsProductionSource?.source_id}
+                        map21Source_id={selectedMap21Source?.source_id}
                     />
                 </>
             ) : null}

@@ -13,6 +13,8 @@ import {
 import { DamaContext } from "~/pages/DataManager/store";
 import PublishNpmrdsRaw from "./publish";
 
+import { MAX_NPMRDS_SOURCE_NAME_LENGTH } from "../npmrds/pages/Create";
+
 const statesObj = {
   AL: "Alabama",
   AK: "Alaska",
@@ -275,7 +277,14 @@ const Create = ({ source }) => {
           </div>
         </div>
       </div>
-      {source?.name && startDate && endDate && states.length ? (
+      {source?.name.length > MAX_NPMRDS_SOURCE_NAME_LENGTH && (
+        <p className="text-red-500">
+          The source name is too long. Please enter a name with {MAX_NPMRDS_SOURCE_NAME_LENGTH + " "}
+          characters or less.
+        </p>
+      )}
+      {source?.name && source?.name.length <= MAX_NPMRDS_SOURCE_NAME_LENGTH && 
+        startDate && endDate && states.length ? (
         <>
           <PublishNpmrdsRaw
             loading={loading}
