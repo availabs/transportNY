@@ -147,14 +147,14 @@ const Create = ({ source }) => {
               <div className="flex pl-1">
                 <input
                   type="number"
-                  min={1}
+                  min={.1}
                   max={100}
                   className={
                     "flex-0 w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md"
                   }
-                  step={1}
+                  step={.1}
                   onChange={(e) => {
-                    setPercentTmc(parseInt(e.target.value));
+                    setPercentTmc(parseFloat(e.target.value));
                   }}
                   value={percentTmc}
                 />
