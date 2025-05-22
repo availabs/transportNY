@@ -19,14 +19,15 @@ import {
 } from "~/pages/DataManager/Source/attributes";
 const Create = ({ source }) => {
   const [npmrdsSourceId, setNpmrdsSourceId] = useState("");
-  const [year, setYear] = useState(2023); 
+  const [percentTmc, setPercentTmc] = useState(100);
+  const [year, setYear] = useState(2023);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [loading, setLoading] = useState(false);
   const [states, setStates] = useState([]);
 
   const { pgEnv, user, falcor, falcorCache } = React.useContext(DamaContext);
-  console.log("dama user", user)
+  console.log("dama user", user);
   function isSelected(val) {
     return (states || []).find((el) => el === val) ? true : false;
   }
@@ -85,11 +86,14 @@ const Create = ({ source }) => {
   }, [falcorCache, pgEnv]);
   console.log(source);
   return (
-    <div className="w-full p-5 m-5">
+    <div className="w-full m-5">
       <div className="flex items-center justify-center p-2">
         <div className="w-full max-w-xs mx-auto">
-          <div className="flex items-center justify-center">
-            <div className="w-full max-w-xl mx-auto">
+          <div className="flex flex-col pt-2">
+            <div className="flex px-2 text-sm text-gray-600 capitalize">
+              NPMRDS Production Source
+            </div>
+            <div className="flex pl-1">
               <select
                 className={
                   "flex-0 w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md"
@@ -99,9 +103,7 @@ const Create = ({ source }) => {
                 }}
                 value={npmrdsSourceId}
               >
-                <option value="">
-                  --
-                </option>
+                <option value="">--</option>
                 {sources.map((source) => (
                   <option
                     value={source.source_id}
@@ -118,20 +120,45 @@ const Create = ({ source }) => {
       <div className="flex items-center justify-center p-2">
         <div className="w-full max-w-xs mx-auto">
           <div className="flex items-center justify-center">
-            <div className="w-full max-w-xl mx-auto">
-              <input
-                className={
-                  "flex-0 w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md"
-                }
-                type="number"
-                max={2025}
-                min={2017}
-                step={1}
-                onChange={(e) => {
-                  setYear(e.target.value);
-                }}
-                value={year}
-              />
+            <div className="w-[50%]">
+              <div className="flex px-2 pb-1 text-sm text-gray-600 capitalize">
+                Year
+              </div>
+              <div className="flex pl-1">
+                <input
+                  className={
+                    "flex-0 w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md"
+                  }
+                  type="number"
+                  max={2025}
+                  min={2017}
+                  step={1}
+                  onChange={(e) => {
+                    setYear(e.target.value);
+                  }}
+                  value={year}
+                />
+              </div>
+            </div>
+            <div className="w-[50%]">
+              <div className="flex px-2 pb-1 text-sm text-gray-600 capitalize">
+                % of tmc
+              </div>
+              <div className="flex pl-1">
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  className={
+                    "flex-0 w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md"
+                  }
+                  step={1}
+                  onChange={(e) => {
+                    setPercentTmc(parseInt(e.target.value));
+                  }}
+                  value={percentTmc}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -149,6 +176,7 @@ const Create = ({ source }) => {
             user_id={user?.id}
             email={user?.email}
             pgEnv={pgEnv}
+            percentTmc={percentTmc}
           />
         </>
       ) : null}

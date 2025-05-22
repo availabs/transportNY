@@ -15,6 +15,7 @@ const submitUpload = (props, navigate, pgEnv) => {
         },
         source_id: props?.source_id,
         npmrdsSourceId: props?.npmrdsSourceId || null,
+        percentTmc: props?.percentTmc || 100,
         name: props?.name,
         type: props?.type,
         year: props.year,
@@ -38,7 +39,6 @@ const submitUpload = (props, navigate, pgEnv) => {
 
       console.log(etl_context_id, source_id);
       props.setLoading(false);
-      //RYAN TODO -- actual source/view create in server-side pm3/lottr route
       if (source_id && etl_context_id) {
         navigate(`/datasources/source/${source_id}/uploads/${etl_context_id}`);
       } else {
