@@ -25,7 +25,7 @@ const submitUpload = (props, navigate, pgEnv) => {
       };
       console.log("publishData",publishData)
       const res = await fetch(
-        `${DAMA_HOST}/dama-admin/${pgEnv}/pm3/publish`,
+        `${DAMA_HOST}/dama-admin/${pgEnv}/map21/publish`,
         {
           method: "POST",
           body: JSON.stringify(publishData),

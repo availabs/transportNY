@@ -107,7 +107,7 @@ const Create = ({ source }) => {
                 {sources.map((source) => (
                   <option
                     value={source.source_id}
-                    key={`pm3_source_select_${source.source_id}`}
+                    key={`map21_source_select_${source.source_id}`}
                   >
                     {source.name} -- {source.source_id}
                   </option>

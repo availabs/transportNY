@@ -23,7 +23,7 @@ export const AnalysisPage =  (props) => {
       }
       console.log("analysisData",analysisData)
       const res = await fetch(
-        `${DAMA_HOST}/dama-admin/${pgEnv}/pm3/analysis`,
+        `${DAMA_HOST}/dama-admin/${pgEnv}/map21/analysis`,
         {
           method: "POST",
           body: JSON.stringify(analysisData),
