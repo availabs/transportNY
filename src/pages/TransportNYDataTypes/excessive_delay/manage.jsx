@@ -187,7 +187,7 @@ export default function NpmrdsManage({
         return views.find((v) => Number(v.view_id) === Number(activeViewId));
     }, [activeViewId, views]);
 
-    const { npmrds_production_source_id, npmrds_production_view_id } = useMemo(() => {
+    const { npmrds_production_source_id, npmrds_production_view_id, transcom_source_id } = useMemo(() => {
         return activeView?.metadata || {};
     }, [activeView]);
 
@@ -267,6 +267,7 @@ export default function NpmrdsManage({
             end_date: mergedRange?.end_date,
             selectedGeomSourceId: geomSource?.source_id,
             selectedGeomViewId: geomView?.view_id,
+            transcom_source_id
         };
         setLoading(true);
         try {

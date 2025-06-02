@@ -71,6 +71,7 @@ export const Select = ({ selectedOption, options, setSelecteOptions, visibleFiel
 const Create = ({ source }) => {
     const [loading, setLoading] = useState(false);
     const [selectedGeomSource, setselectedGeomSource] = useState(null);
+    const [selectedTrasncomSource, setselectedTrasncomSource] = useState(null);
     const [startTime, setstartTime] = useState(null);
     const [endTime, setendTime] = useState(null);
     const { pgEnv, falcor, falcorCache, user } = useContext(DamaContext);
@@ -93,6 +94,12 @@ const Create = ({ source }) => {
         return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
             .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
             .filter(s => s.type && (s.type === "NPMRDS" || s.type === "npmrds"))
+    }, [falcorCache, pgEnv]);
+
+    const transcomSources = useMemo(() => {
+        return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
+            .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
+            .filter(s => s.type && (s.type === "TRANSCOM" || s.type === "transcom"))
     }, [falcorCache, pgEnv]);
 
     useEffect(() => {
@@ -131,6 +138,12 @@ const Create = ({ source }) => {
         }
     }, [geomSources]);
 
+    useEffect(() => {
+        if (!selectedTrasncomSource) {
+            setselectedTrasncomSource((transcomSources.length && transcomSources[0]));
+        }
+    }, [transcomSources]);
+
     const minTime = useMemo(() => {
         return moment(geomView?.metadata?.start_date).toDate();
     }, [geomView]);
@@ -147,7 +160,7 @@ const Create = ({ source }) => {
     return (
         <div className="w-full p-5 m-5">
             <div className="flex flex-row mt-4 mb-6">
-                <div className="basis-1/3"></div>
+                <div className="basis-1/4"></div>
                 <div className="basis-1/3">
                     <div className="flex items-center justify-left mt-4">
                         <div className="w-full max-w-xs mx-auto">
@@ -166,7 +179,25 @@ const Create = ({ source }) => {
                         </div>
                     </div>
                 </div>
-                <div className="basis-1/3"></div>
+                <div className="basis-1/3">
+                    <div className="flex items-center justify-left mt-4">
+                        <div className="w-full max-w-xs mx-auto">
+                            <div className="block text-sm leading-5 font-medium text-gray-700">
+                                TRANSCOM source:
+                            </div>
+                            <div className="relative">
+                                <Select
+                                    selectedOption={selectedTrasncomSource}
+                                    options={transcomSources || []}
+                                    setSelecteOptions={setselectedTrasncomSource}
+                                    visibleField={"name"}
+                                    defaultText={"Select Trasncom source..."}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="basis-1/4"></div>
             </div>
 
             {
@@ -236,6 +267,7 @@ const Create = ({ source }) => {
                         setLoading={setLoading}
                         source_id={source?.source_id || null}
                         selectedGeomSourceId={selectedGeomSource?.source_id}
+                        selectedTranscomSourceId={selectedTrasncomSource?.source_id}
                         start_date={moment(startTime).startOf('month').format('YYYY-MM-DD')}
                         end_date={moment(endTime).endOf('month').format('YYYY-MM-DD')}
                     />
