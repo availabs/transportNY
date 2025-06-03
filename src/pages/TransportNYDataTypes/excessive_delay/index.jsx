@@ -3,11 +3,6 @@ import ManagePage from './manage';
 import Table from '../npmrds_meta/table';
 
 const ExcessiveDelayConfig = {
-    // add_version: {
-    //     name: "Add Version",
-    //     path: "/add_version",
-    //     component: Create,
-    // },
     sourceCreate: {
         name: 'Create',
         component: Create

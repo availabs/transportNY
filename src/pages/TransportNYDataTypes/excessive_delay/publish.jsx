@@ -14,6 +14,7 @@ const npmrdsPublish = async (props, navigate, pgEnv) => {
     type: props?.type || "excessive_delay",
     pgEnv: pgEnv || props?.pgEnv,
     selectedGeomSourceId: props?.selectedGeomSourceId,
+    selectedTranscomSourceId: props?.selectedTranscomSourceId,
     start_date: props?.start_date,
     end_date: props?.end_date
   };
