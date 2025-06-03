@@ -101,7 +101,7 @@ const Create = ({ source }) => {
         return [
             filterByCategory(sources, "MAP21"),
             filterByCategory(sources, "TMC META"),
-            filterByCategory(sources, "npmrds_production") || filterByCategory(sources, "NPMRDS_PRODUCTION")
+            filterByCategory(sources, "npmrds_production") || filterByCategory(sources, "NPMRDS_PRODUCTION") || filterByCategory(sources, "NPMRDS")
         ];
     }, [falcorCache, pgEnv]);
 
