@@ -130,9 +130,12 @@ export default function NpmrdsManage({
 
   const [showModal, setShowModal] = React.useState(false);
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+  const [showReRunModal, setShowReRunModal] = React.useState(false);
   const [selectedViews, setSelectedViews] = React.useState([]);
+  const [metaViews, setMetaViews] = React.useState([]);
   const [removeViewId, setRemoveViewId] = React.useState(null);
   const [removeStateKey, setRemoveStateKey] = React.useState(null);
+  const [rerunViewId, setRerunViewId] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
 
   useEffect(() => {
@@ -280,6 +283,36 @@ export default function NpmrdsManage({
     }));
   }, [availableViews]);
 
+  //get info about tmc_meta
+  //source.npmrds_meta_layer_view_id[year]
+  useEffect(() => {
+    const getMetaViews = async () => {
+      const metaViewIds = Object.values(source.metadata.npmrds_meta_layer_view_id)
+      const metaViewPath = ["dama", pgEnv, "views", "byId", metaViewIds, "attributes", Object.values(ViewAttributes)];
+
+      const metaViewResp = await falcor.get(metaViewPath)
+      const metaViews = get(metaViewResp, ["json", "dama", pgEnv, "views", "byId"])
+
+      const metadataLengthPath = ["dama", pgEnv, "viewsbyId", metaViewIds, "data", "length"];
+      const lengthResp = await falcor.get(metadataLengthPath);
+      const metadataLength = get(lengthResp, ["json", "dama", pgEnv, "viewsbyId"]);
+
+      const metaYearLength = metaViewIds.map((mViewId) => {
+        return {
+          meta_view_id: mViewId,
+          num_tmc: metadataLength[mViewId].data.length,
+          year: metaViews[mViewId].attributes.metadata.year
+        };
+      });
+
+      setMetaViews(metaYearLength)
+    }
+
+    if(source?.metadata?.npmrds_meta_layer_view_id && Object.values(source?.metadata?.npmrds_meta_layer_view_id).length) {
+      getMetaViews();
+    }
+  }, [source, falcor, pgEnv]);
+
   const dateRanges = useMemo(() => {
     return ([...selectedViews, activeView] || [])
       .filter(
@@ -298,11 +331,18 @@ export default function NpmrdsManage({
   const headers = [
     "State",
     "Raw Data View Id",
+    "Meta View Id",
     "Version",
     "Start Date",
     "End Date",
-    "Tmcs",
-    "",
+    "Tmcs in Metadata",
+    "Tmcs in data",
+    "Total Percentage",
+    "Interstate Percent",
+    "Non Interstate Percent",
+    "Extended TMC Percent",
+    "Delete",
+    "Re-run metadata",
   ];
 
   const updateNpmrds = async () => {
@@ -335,6 +375,31 @@ export default function NpmrdsManage({
       setLoading(false);
     }
   };
+
+  const rerunMetadata = async (rerunViewId) => {
+    const publishData = {
+      source_id: source?.source_id || null,
+      view_id: activeView?.view_id,
+      npmrds_raw_view_ids: [rerunViewId.raw_view_id],
+      user_id: ctxUser?.id,
+      email: ctxUser?.email,
+      startDate: rerunViewId.start_date,
+      endDate: rerunViewId.end_date,
+      year: rerunViewId.start_date.substring(0,4),
+      pgEnv,
+    };
+
+    const res = await fetch(
+      `${DAMA_HOST}/dama-admin/${pgEnv}/npmrds/metadata`,
+      {
+        method: "POST",
+        body: JSON.stringify(publishData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  }
 
   const removeNpmrds = async (viewId, stateGroup) => {
     const publishData = {
@@ -446,6 +511,12 @@ export default function NpmrdsManage({
                         {item?.view_id}
                       </td>
                       <td
+                        key={`${group}.${item?.view_id}_meta_view_id`}
+                        className="py-2 px-4 border-b"
+                      >
+                        {metaViews.find(mView => parseInt(mView.year) === parseInt(item.metadata.start_date.substring(0, 4))).meta_view_id}
+                      </td>
+                      <td
                         key={`${group}.${item?.metadata?.npmrds_version}`}
                         className="py-2 px-4 border-b"
                       >
@@ -464,10 +535,40 @@ export default function NpmrdsManage({
                         {item?.metadata?.end_date}
                       </td>
                       <td
+                        key={`${group}.${item?.metadata?.no_of_tmc_metadata}`}
+                        className="py-2 px-4 border-b"
+                      >
+                        {metaViews.find(mView => parseInt(mView.year) === parseInt(item.metadata.start_date.substring(0, 4)))?.num_tmc}
+                      </td>
+                      <td
                         key={`${group}.${item?.metadata?.no_of_tmc}`}
                         className="py-2 px-4 border-b"
                       >
                         {item?.metadata?.no_of_tmc}
+                      </td>
+                      <td
+                        key={`${group}.${item?.statistics?.total}`}
+                        className="py-2 px-4 border-b"
+                      >
+                        {Math.round(item?.statistics?.total * 100) / 100}
+                      </td>
+                      <td
+                        key={`${group}.${item?.statistics?.interstate_percentage}`}
+                        className="py-2 px-4 border-b"
+                      >
+                        {Math.round(item?.statistics?.interstate_percentage * 100) / 100}
+                      </td>
+                      <td
+                        key={`${group}.${item?.statistics?.non_interstate_percentage}`}
+                        className="py-2 px-4 border-b"
+                      >
+                        {Math.round(item?.statistics?.non_interstate_percentage * 100) / 100}
+                      </td>
+                      <td
+                        key={`${group}.${item?.statistics?.extended_tmc_percentage}`}
+                        className="py-2 px-4 border-b"
+                      >
+                        {Math.round(item?.statistics?.extended_tmc_percentage * 100) / 100}
                       </td>
                       {index === 0 ||
                       index === groupbyState[group].length - 1 ? (
@@ -502,6 +603,27 @@ export default function NpmrdsManage({
                           ></td>
                         </>
                       )}
+                      <td
+                        key={`${group}.${index}`}
+                        className="py-2 px-4 border-b"
+                      >
+                        <button
+                          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-blue-500 text-white shadow-md shadow-blue-900/10 hover:shadow-lg hover:shadow-blue-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+                          type="button"
+                          onClick={() => {
+                            console.log("RERRUN -- ITEM::", item)
+                            setRerunViewId({raw_view_id: item?.view_id, start_date: item.metadata.start_date, end_date:item.metadata.end_date, year: item.metadata.start_date.substring(0, 4)  });
+                            setShowReRunModal(true);
+                          }}
+                        >
+                          <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+                            <i
+                              className="fad fa-rotate"
+                              aria-hidden="true"
+                            ></i>
+                          </span>
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </React.Fragment>
@@ -656,6 +778,59 @@ export default function NpmrdsManage({
                   ) : (
                     "Yes"
                   )}
+                </button>
+              </div>
+            </div>
+          </DialogPanel>
+        </div>
+      </Dialog>
+
+      <Dialog
+        as="div"
+        className="relative z-50"
+        open={showReRunModal}
+        onClose={() => setShowReRunModal(false)}
+      >
+        <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
+          <span
+            className="inline-block h-screen align-middle"
+            aria-hidden="true"
+          >
+            &#8203;
+          </span>
+          <DialogPanel>
+            <div className="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
+              <DialogTitle
+                as="h3"
+                className="text-lg font-medium leading-6 text-gray-900"
+              >
+                Re-run Metadata Processing Npmrds
+              </DialogTitle>
+
+              <div className="relative p-6 flex-auto">
+                <div className="p-4 m-2 text-sm" role="alert">
+                  <span className="font-medium">
+                    Are you sure you want to re-run metadata for dates <b>{rerunViewId?.start_date} thru {rerunViewId?.end_date} </b> ( raw view id { rerunViewId?.raw_view_id } ) ?
+                  </span>
+                </div>
+              </div>
+              <div className="mt-4">
+                <button
+                  type="button"
+                  className="inline-flex justify-center px-4 py-2 text-sm text-red-900 bg-red-100 border border-transparent rounded-md hover:bg-red-200 duration-300"
+                  onClick={() => setShowReRunModal(false)}
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className="ml-3 inline-flex justify-center px-4 py-2 text-sm text-green-900 bg-green-100 border border-transparent rounded-md hover:bg-green-200 duration-300"
+                  onClick={async () => {
+                    rerunMetadata(rerunViewId);
+                    setShowReRunModal(false);
+                  }}
+                >
+                  Re-Run
                 </button>
               </div>
             </div>
