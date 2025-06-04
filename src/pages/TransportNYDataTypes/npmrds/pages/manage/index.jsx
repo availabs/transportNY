@@ -297,7 +297,7 @@ export default function NpmrdsManage({
 
   const headers = [
     "State",
-    "View Id",
+    "Raw Data View Id",
     "Version",
     "Start Date",
     "End Date",
