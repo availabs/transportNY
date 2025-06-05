@@ -16,6 +16,8 @@ const npmrdsPublish = async (props, navigate, pgEnv) => {
     pgEnv: pgEnv || props?.pgEnv,
     tmcSpeedViewId: props?.selectedViewId,
     tmcSpeedSourceId: props?.selectedSourceId,
+    mpoBoundariesViewId: props?.selectedMpoBoundariesViewId || null,
+    mpoBoundariesSourceId: props?.selectedMpoBoundariesSourceId || null,
   };
 
   try {
@@ -58,22 +60,35 @@ export default function PublishNpmrds(props) {
     : "cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded";
 
   return (
-    <div className="flex flex-col w-[20%]">
-      {(props.source_id || props.name) && !props.selectedViewId && "A TMC Speed Limit Source and View must be selected."}
-      <button
-        className={buttonClass}
-        disabled={isButtonDisabled}
-        onClick={handlePublishClick}
-      >
-        {loading ? (
-          <div style={{ display: "flex" }}>
-            <div className="mr-2">Publishing</div>
-            <ScalableLoading scale={0.25} color={"#fefefe"} />
-          </div>
-        ) : (
-          "New Publish"
-        )}
-      </button>
+    <div className="flex flex-col">
+      <div className="flex flex-col gap-2">
+        <div>
+          {(props.source_id || props.name) &&
+            !props.selectedViewId &&
+            "A TMC Speed Limit Source and View must be selected."}
+        </div>
+        <div>
+          {(props.source_id || props.name) &&
+            !props.selectedMpoBoundariesViewId &&
+            "An MPO Boundaries Source and View must be selected."}
+        </div>
+      </div>
+      <div >
+        <button
+          className={buttonClass}
+          disabled={isButtonDisabled}
+          onClick={handlePublishClick}
+        >
+          {loading ? (
+            <div className="w-[40%] flex">
+              <div className="mr-2">Publishing</div>
+              <ScalableLoading scale={0.25} color={"#fefefe"} />
+            </div>
+          ) : (
+            "New Publish"
+          )}
+        </button>
+      </div>
     </div>
   );
 }

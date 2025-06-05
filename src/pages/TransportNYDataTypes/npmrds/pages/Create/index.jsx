@@ -9,6 +9,7 @@ import { DAMA_HOST } from "~/config";
 import { reducer } from "./components/reducer";
 import PublishNpmrds from "./components/publish";
 import SelectSpeedLimitSource from "./components/selectSpeedLimitSource";
+import SelectMpoBoundariesSource from "./components/selectMpoBoundariesSource";
 
 //max data table name length is 63
 //we append the following:: 's784_v1323_${damaSourceName}_tmc_meta_geometry'
@@ -39,6 +40,8 @@ export default function NpmrdsCreate({
     sourceType: type,
     selectedViewId: '',
     selectedSourceId: '',
+    selectedMpoBoundariesViewId: '',
+    selectedMpoBoundariesSourceId: '',
   });
 
   useEffect(() => {
@@ -57,12 +60,24 @@ export default function NpmrdsCreate({
     <div className="w-full my-4">
       {damaSourceName.length > MAX_NPMRDS_SOURCE_NAME_LENGTH && (
         <p className="text-red-500">
-          The source name is too long. Please enter a name with {MAX_NPMRDS_SOURCE_NAME_LENGTH + " "}
+          The source name is too long. Please enter a name with{" "}
+          {MAX_NPMRDS_SOURCE_NAME_LENGTH + " "}
           characters or less.
         </p>
       )}
       <div className="md:flex md:items-center gap-4">
-        <SelectSpeedLimitSource dispatch={dispatch} selectedViewId={state.selectedViewId} selectedSourceId={state.selectedSourceId}/>
+        <div className="flex flex-col gap-4">
+          <SelectSpeedLimitSource
+            dispatch={dispatch}
+            selectedViewId={state.selectedViewId}
+            selectedSourceId={state.selectedSourceId}
+          />
+          <SelectMpoBoundariesSource
+            dispatch={dispatch}
+            selectedMpoBoundariesViewId={state.selectedMpoBoundariesViewId}
+            selectedMpoBoundariesSourceId={state.selectedMpoBoundariesSourceId}
+          />
+        </div>
         <PublishNpmrds
           loading={loading}
           setLoading={setLoading}
@@ -72,6 +87,8 @@ export default function NpmrdsCreate({
           type={source?.type}
           selectedViewId={state.selectedViewId}
           selectedSourceId={state.selectedSourceId}
+          selectedMpoBoundariesViewId={state.selectedMpoBoundariesViewId}
+          selectedMpoBoundariesSourceId={state.selectedMpoBoundariesSourceId}
           pgEnv={pgEnv}
         />
       </div>
