@@ -293,14 +293,18 @@ export default function NpmrdsManage({
       const metaViewResp = await falcor.get(metaViewPath)
       const metaViews = get(metaViewResp, ["json", "dama", pgEnv, "views", "byId"])
 
-      const metadataLengthPath = ["dama", pgEnv, "viewsbyId", metaViewIds, "data", "length"];
-      const lengthResp = await falcor.get(metadataLengthPath);
-      const metadataLength = get(lengthResp, ["json", "dama", pgEnv, "viewsbyId"]);
-      console.log("metaViews", metaViews)
+      let metadataLength;
+      try {
+        const metadataLengthPath = ["dama", pgEnv, "viewsbyId", metaViewIds, "data", "length"];
+        const lengthResp = await falcor.get(metadataLengthPath);
+        metadataLength = get(lengthResp, ["json", "dama", pgEnv, "viewsbyId"]);
+      } catch (e) {
+        console.error("error fetching metadata table length" ,e)
+      }
       const metaYearLength = metaViewIds.map((mViewId) => {
         return {
           meta_view_id: mViewId,
-          num_tmc: metadataLength[mViewId].data.length,
+          num_tmc: metadataLength?.[mViewId]?.data?.length,
           year: metaViews[mViewId].attributes.metadata.year
         };
       });
@@ -514,7 +518,7 @@ export default function NpmrdsManage({
                         key={`${group}.${item?.view_id}_meta_view_id`}
                         className="py-2 px-4 border-b"
                       >
-                        {metaViews.length  && (metaViews?.find(mView => parseInt(mView.year) === parseInt(item?.metadata?.start_date.substring(0, 4)))?.meta_view_id)}
+                        {metaViews.length && (metaViews?.find(mView => parseInt(mView.year) === parseInt(item?.metadata?.start_date.substring(0, 4)))?.meta_view_id)}
                       </td>
                       <td
                         key={`${group}.${item?.metadata?.npmrds_version}`}
