@@ -514,7 +514,7 @@ export default function NpmrdsManage({
                         key={`${group}.${item?.view_id}_meta_view_id`}
                         className="py-2 px-4 border-b"
                       >
-                        {item && item.metadata && item.metadata.start_date ? (metaViews?.find(mView => parseInt(mView.year) === parseInt(item?.metadata?.start_date.substring(0, 4)))?.meta_view_id) : ''}
+                        {metaViews.length  && (metaViews?.find(mView => parseInt(mView.year) === parseInt(item?.metadata?.start_date.substring(0, 4)))?.meta_view_id)}
                       </td>
                       <td
                         key={`${group}.${item?.metadata?.npmrds_version}`}
@@ -538,7 +538,7 @@ export default function NpmrdsManage({
                         key={`${group}.${item?.metadata?.no_of_tmc_metadata}`}
                         className="py-2 px-4 border-b"
                       >
-                        {metaViews.find(mView => parseInt(mView.year) === parseInt(item.metadata.start_date.substring(0, 4)))?.num_tmc}
+                        {metaViews.length  && metaViews.find(mView => parseInt(mView.year) === parseInt(item.metadata.start_date.substring(0, 4)))?.num_tmc}
                       </td>
                       <td
                         key={`${group}.${item?.metadata?.no_of_tmc}`}
