@@ -296,7 +296,7 @@ export default function NpmrdsManage({
       const metadataLengthPath = ["dama", pgEnv, "viewsbyId", metaViewIds, "data", "length"];
       const lengthResp = await falcor.get(metadataLengthPath);
       const metadataLength = get(lengthResp, ["json", "dama", pgEnv, "viewsbyId"]);
-
+      console.log("metaViews", metaViews)
       const metaYearLength = metaViewIds.map((mViewId) => {
         return {
           meta_view_id: mViewId,
@@ -514,7 +514,7 @@ export default function NpmrdsManage({
                         key={`${group}.${item?.view_id}_meta_view_id`}
                         className="py-2 px-4 border-b"
                       >
-                        {metaViews.find(mView => parseInt(mView.year) === parseInt(item.metadata.start_date.substring(0, 4))).meta_view_id}
+                        {item && item.metadata && item.metadata.start_date ? (metaViews?.find(mView => parseInt(mView.year) === parseInt(item?.metadata?.start_date.substring(0, 4)))?.meta_view_id) : ''}
                       </td>
                       <td
                         key={`${group}.${item?.metadata?.npmrds_version}`}
