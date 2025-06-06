@@ -651,7 +651,7 @@ export default function NpmrdsManage({
                   {groupbyState[group].map((item, index) => { 
                     const metaView = metaViews.length ? metaViews?.find(mView => parseInt(mView.year) === parseInt(item?.metadata?.start_date.substring(0, 4))) : {};
                     const openEvents = metaViews.length && openMetadataCtxs ? openMetadataCtxs.filter(ctx => ctx.raw_view_id === item.view_id) : [];
-                    const hasOpenMetadataEvent = openEvents.length > 0 || !ctxsWithEvent;
+                    const hasOpenMetadataEvent = openEvents.length > 0;
                     return (
                       <tr key={index}>
                         {index === 0 && (
