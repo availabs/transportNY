@@ -510,38 +510,39 @@ export default function NpmrdsManage({
     }
   }, [openMetadataCtxs, falcorCache]);
 
+  const contextLength = get(falcorCache, lengthPath);
+  const doPolling = async () => {
+    const fetchContextsPath = [
+      "dama",
+      pgEnv,
+      "latest",
+      "events",
+      "for",
+      "source",
+      [source?.source_id],
+      { from: 0, to: contextLength - 1 },
+      [
+        "etl_status",
+        "etl_context_id",
+        "created_at",
+        "terminated_at",
+        "source_id",
+        "parent_context_id",
+        "type",
+        "payload",
+        "user",
+      ],
+    ];
+    falcor.invalidate(["dama", pgEnv, "etlContexts", "byEtlContextId"]);
+    falcor.invalidate(fetchContextsPath);
+    await falcor.get(fetchContextsPath);
+  };
+
   //TODO this could be used to show that an `add` is in process as well
   useEffect(() => {
-    const contextLength = get(falcorCache, lengthPath);
-    const doPolling = async () => {
-      const fetchContextsPath = [
-        "dama",
-        pgEnv,
-        "latest",
-        "events",
-        "for",
-        "source",
-        [source?.source_id],
-        { from: 0, to: contextLength - 1 },
-        [
-          "etl_status",
-          "etl_context_id",
-          "created_at",
-          "terminated_at",
-          "source_id",
-          "parent_context_id",
-          "type",
-          "payload",
-          "user",
-        ],
-      ];
-      falcor.invalidate(["dama", pgEnv, "etlContexts", "byEtlContextId"]);
-      falcor.invalidate(fetchContextsPath);
-      await falcor.get(fetchContextsPath);
-    };
     // -- start polling
     if (polling && !pollingInterval) {
-      let id = setInterval(doPolling, 3000);
+      let id = setInterval(doPolling, 10000);
       setPollingInterval(id);
     }
     // -- stop polling
@@ -986,8 +987,8 @@ export default function NpmrdsManage({
                   className="ml-3 inline-flex justify-center px-4 py-2 text-sm text-green-900 bg-green-100 border border-transparent rounded-md hover:bg-green-200 duration-300"
                   onClick={async () => {
                     rerunMetadata(rerunViewId);
-                    //falcor.invalidate(["dama", pgEnv, "etlContexts", "byEtlContextId"]);
                     setPolling(true);
+                    doPolling();
                     setShowReRunModal(false);
                   }}
                 >
