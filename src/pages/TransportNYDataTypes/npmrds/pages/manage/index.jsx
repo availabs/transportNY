@@ -13,6 +13,9 @@ import { DAMA_HOST } from "~/config";
 import { useFalcor, ScalableLoading } from "~/modules/avl-components/src";
 import MultiSelect from "../manage/components/multiselect";
 
+//RYAN TODO -- this should prob just be "open"? IDK
+const OPEN_CTX_STATUSES = ["OPEN"];
+
 const checkDateRanges = (dateRanges) => {
   if (dateRanges.length === 1) {
     return { msgString: null, isValidDateRage: true };
@@ -137,6 +140,7 @@ export default function NpmrdsManage({
   const [removeStateKey, setRemoveStateKey] = React.useState(null);
   const [rerunViewId, setRerunViewId] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
+  const [metadataRunning, setMetadataRunning] = React.useState({})
 
   useEffect(() => {
     const fetchData = async () => {
@@ -403,7 +407,106 @@ export default function NpmrdsManage({
         },
       }
     );
+    await res.json();
   }
+
+  useEffect(() => {
+    async function getCtxs() {
+      const lengthPath = [
+        "dama",
+        pgEnv,
+        "latest",
+        "events",
+        "for",
+        "source",
+        [source?.source_id],
+        "length",
+      ];
+
+      const resp = await falcor.get(lengthPath);
+
+      await falcor.get([
+        "dama",
+        pgEnv,
+        "latest",
+        "events",
+        "for",
+        "source",
+        [source?.source_id],
+        { from: 0, to: get(resp.json, lengthPath, 0) - 1 },
+        [
+          "etl_status",
+          "etl_context_id",
+          "created_at",
+          "terminated_at",
+          "source_id",
+          "parent_context_id",
+          "type",
+          "payload",
+          "user",
+        ],
+      ]);
+    }
+    getCtxs();
+  }, [falcor, pgEnv, source?.source_id]);
+
+  const ctxs = useMemo(() => {
+    let ref = get(falcorCache, [
+      "dama",
+      pgEnv,
+      "latest",
+      "events",
+      "for",
+      "source",
+      [source?.source_id],
+    ]);
+    console.log({ref})
+    return ref;
+  }, [falcorCache, source?.source_id]);
+  console.log({ctxs})
+
+  useEffect(() => {
+    const getEvents = async () => {
+      const ctxIds = Object.values(ctxs)
+        .map((ctx) => ctx.etl_context_id)
+        .filter((ctxId) => !!ctxId);
+
+      ctxIds.forEach(async (ctxId) => {
+        const newResp = await falcor.get(["dama",pgEnv,"etlContexts","byEtlContextId",ctxId]);
+        console.log("newResp", newResp)
+      })
+
+    }
+
+    getEvents()
+  }, [ctxs]);
+
+  //TODO -- need to test this with various event types
+  //Might/should be OK, because we look specifically for `metadata` events
+  const openMetadataCtx = useMemo(() => {
+    const ref = get(falcorCache, [
+      "dama",
+      pgEnv,
+      "etlContexts",
+      "byEtlContextId",
+    ]);
+
+    const openMetadataCtxs = Object.values(ref)
+      .map((item) => item?.value)
+      .filter((ctx) => OPEN_CTX_STATUSES.includes(ctx.meta.etl_status))
+      .filter((ctx) =>
+        ctx.events.some((ctxEvent) => ctxEvent.type.includes("metadata"))
+      )
+      .map((ctx) => ({
+        ...ctx,
+        raw_view_id: ctx?.events?.[0]?.payload.npmrds_raw_view_ids?.[0],
+      }));
+
+    return openMetadataCtxs;
+  }, [falcorCache, source?.source_id]);
+
+  //TODO ADD POLLING
+  //TODO this could be used to show that an `add` is in process as well
 
   const removeNpmrds = async (viewId, stateGroup) => {
     const publishData = {
@@ -498,138 +601,143 @@ export default function NpmrdsManage({
             <tbody>
               {Object.keys(groupbyState).map((group) => (
                 <React.Fragment key={group}>
-                  {groupbyState[group].map((item, index) => (
-                    <tr key={index}>
-                      {index === 0 && (
-                        <td
-                          rowSpan={groupbyState[group].length}
-                          className="py-2 px-4 border-b font-bold"
-                        >
-                          {group}
-                        </td>
-                      )}
-                      <td
-                        key={`${group}.${item?.view_id}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {item?.view_id}
-                      </td>
-                      <td
-                        key={`${group}.${item?.view_id}_meta_view_id`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {metaViews.length && (metaViews?.find(mView => parseInt(mView.year) === parseInt(item?.metadata?.start_date.substring(0, 4)))?.meta_view_id)}
-                      </td>
-                      <td
-                        key={`${group}.${item?.metadata?.npmrds_version}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {item?.metadata?.npmrds_version}
-                      </td>
-                      <td
-                        key={`${group}.${item?.metadata?.start_date}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {item?.metadata?.start_date}
-                      </td>
-                      <td
-                        key={`${group}.${item?.metadata?.end_date}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {item?.metadata?.end_date}
-                      </td>
-                      <td
-                        key={`${group}.${item?.metadata?.no_of_tmc_metadata}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {metaViews.length  && metaViews.find(mView => parseInt(mView.year) === parseInt(item.metadata.start_date.substring(0, 4)))?.num_tmc}
-                      </td>
-                      <td
-                        key={`${group}.${item?.metadata?.no_of_tmc}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {item?.metadata?.no_of_tmc}
-                      </td>
-                      <td
-                        key={`${group}.${item?.statistics?.total}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {Math.round(item?.statistics?.total * 100) / 100}
-                      </td>
-                      <td
-                        key={`${group}.${item?.statistics?.interstate_percentage}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {Math.round(item?.statistics?.interstate_percentage * 100) / 100}
-                      </td>
-                      <td
-                        key={`${group}.${item?.statistics?.non_interstate_percentage}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {Math.round(item?.statistics?.non_interstate_percentage * 100) / 100}
-                      </td>
-                      <td
-                        key={`${group}.${item?.statistics?.extended_tmc_percentage}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {Math.round(item?.statistics?.extended_tmc_percentage * 100) / 100}
-                      </td>
-                      {index === 0 ||
-                      index === groupbyState[group].length - 1 ? (
-                        <>
+                  {groupbyState[group].map((item, index) => { 
+                    const metaView = metaViews.length ? metaViews?.find(mView => parseInt(mView.year) === parseInt(item?.metadata?.start_date.substring(0, 4))) : {};
+                    const openEvents = metaViews.length ? openMetadataCtx.filter(ctx => ctx.raw_view_id === item.view_id) : [];
+                    const hasOpenMetadataEvent = openEvents.length > 0;
+                    return (
+                      <tr key={index}>
+                        {index === 0 && (
                           <td
-                            key={`${group}.${index}`}
-                            className="py-2 px-4 border-b"
+                            rowSpan={groupbyState[group].length}
+                            className="py-2 px-4 border-b font-bold"
                           >
-                            <button
-                              className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-red-500 text-white shadow-md shadow-red-900/10 hover:shadow-lg hover:shadow-red-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
-                              type="button"
-                              onClick={() => {
-                                setRemoveViewId(item?.view_id);
-                                setRemoveStateKey(group);
-                                setShowDeleteModal(true);
-                              }}
-                            >
-                              <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
-                                <i
-                                  className="fad fa-trash"
-                                  aria-hidden="true"
-                                ></i>
-                              </span>
-                            </button>
+                            {group}
                           </td>
-                        </>
-                      ) : (
-                        <>
-                          <td
-                            key={`${group}.${index}`}
-                            className="py-2 px-4 border-b"
-                          ></td>
-                        </>
-                      )}
-                      <td
-                        key={`${group}.${index}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        <button
-                          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-blue-500 text-white shadow-md shadow-blue-900/10 hover:shadow-lg hover:shadow-blue-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
-                          type="button"
-                          onClick={() => {
-                            console.log("RERRUN -- ITEM::", item)
-                            setRerunViewId({raw_view_id: item?.view_id, start_date: item.metadata.start_date, end_date:item.metadata.end_date, year: item.metadata.start_date.substring(0, 4)  });
-                            setShowReRunModal(true);
-                          }}
+                        )}
+                        <td
+                          key={`${group}.${item?.view_id}`}
+                          className="py-2 px-4 border-b"
                         >
-                          <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
-                            <i
-                              className="fad fa-rotate"
-                              aria-hidden="true"
-                            ></i>
-                          </span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                          {item?.view_id}
+                        </td>
+                        <td
+                          key={`${group}.${item?.view_id}_meta_view_id`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {metaViews.length && (metaView?.meta_view_id)}
+                        </td>
+                        <td
+                          key={`${group}.${item?.metadata?.npmrds_version}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {item?.metadata?.npmrds_version}
+                        </td>
+                        <td
+                          key={`${group}.${item?.metadata?.start_date}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {item?.metadata?.start_date}
+                        </td>
+                        <td
+                          key={`${group}.${item?.metadata?.end_date}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {item?.metadata?.end_date}
+                        </td>
+                        <td
+                          key={`${group}.${item?.metadata?.no_of_tmc_metadata}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {metaViews.length  && metaViews.find(mView => parseInt(mView.year) === parseInt(item.metadata.start_date.substring(0, 4)))?.num_tmc}
+                        </td>
+                        <td
+                          key={`${group}.${item?.metadata?.no_of_tmc}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {item?.metadata?.no_of_tmc}
+                        </td>
+                        <td
+                          key={`${group}.${item?.statistics?.total}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {Math.round(item?.statistics?.total * 100) / 100}
+                        </td>
+                        <td
+                          key={`${group}.${item?.statistics?.interstate_percentage}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {Math.round(item?.statistics?.interstate_percentage * 100) / 100}
+                        </td>
+                        <td
+                          key={`${group}.${item?.statistics?.non_interstate_percentage}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {Math.round(item?.statistics?.non_interstate_percentage * 100) / 100}
+                        </td>
+                        <td
+                          key={`${group}.${item?.statistics?.extended_tmc_percentage}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {Math.round(item?.statistics?.extended_tmc_percentage * 100) / 100}
+                        </td>
+                        {index === 0 ||
+                        index === groupbyState[group].length - 1 ? (
+                          <>
+                            <td
+                              key={`${group}.${index}`}
+                              className="py-2 px-4 border-b"
+                            >
+                              <button
+                                className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-red-500 text-white shadow-md shadow-red-900/10 hover:shadow-lg hover:shadow-red-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+                                type="button"
+                                onClick={() => {
+                                  setRemoveViewId(item?.view_id);
+                                  setRemoveStateKey(group);
+                                  setShowDeleteModal(true);
+                                }}
+                              >
+                                <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+                                  <i
+                                    className="fad fa-trash"
+                                    aria-hidden="true"
+                                  ></i>
+                                </span>
+                              </button>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td
+                              key={`${group}.${index}`}
+                              className="py-2 px-4 border-b"
+                            ></td>
+                          </>
+                        )}
+                        <td
+                          key={`${group}.${index}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          <button
+                            className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-blue-500 text-white shadow-md shadow-blue-900/10 hover:shadow-lg hover:shadow-blue-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+                            type="button"
+                            disabled={hasOpenMetadataEvent}
+                            onClick={() => {
+                              console.log("RERRUN -- ITEM::", item)
+                              setRerunViewId({raw_view_id: item?.view_id, start_date: item.metadata.start_date, end_date:item.metadata.end_date, year: item.metadata.start_date.substring(0, 4)  });
+                              setShowReRunModal(true);
+                            }}
+                          >
+                            <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+                              <i
+                                className={hasOpenMetadataEvent ? "fa-solid fa-spin fa-spinner" : "fad fa-rotate"}
+                                aria-hidden="true"
+                              ></i>
+                            </span>
+                          </button>
+                        </td>
+                      </tr>)
+                  })}
                 </React.Fragment>
               ))}
             </tbody>
