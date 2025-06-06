@@ -13,7 +13,6 @@ import { DAMA_HOST } from "~/config";
 import { useFalcor, ScalableLoading } from "~/modules/avl-components/src";
 import MultiSelect from "../manage/components/multiselect";
 
-//RYAN TODO -- this should prob just be "open"? IDK
 const OPEN_CTX_STATUSES = ["OPEN"];
 
 const checkDateRanges = (dateRanges) => {
@@ -140,7 +139,9 @@ export default function NpmrdsManage({
   const [removeStateKey, setRemoveStateKey] = React.useState(null);
   const [rerunViewId, setRerunViewId] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
-  const [metadataRunning, setMetadataRunning] = React.useState({})
+  const [polling, setPolling ] = React.useState(false);
+  const [pollingInterval, setPollingInterval] = React.useState(false);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -409,22 +410,19 @@ export default function NpmrdsManage({
     );
     await res.json();
   }
-
+  const lengthPath = [
+    "dama",
+    pgEnv,
+    "latest",
+    "events",
+    "for",
+    "source",
+    [source?.source_id],
+    "length",
+  ];
   useEffect(() => {
     async function getCtxs() {
-      const lengthPath = [
-        "dama",
-        pgEnv,
-        "latest",
-        "events",
-        "for",
-        "source",
-        [source?.source_id],
-        "length",
-      ];
-
       const resp = await falcor.get(lengthPath);
-
       await falcor.get([
         "dama",
         pgEnv,
@@ -450,20 +448,19 @@ export default function NpmrdsManage({
     getCtxs();
   }, [falcor, pgEnv, source?.source_id]);
 
-  const ctxs = useMemo(() => {
-    let ref = get(falcorCache, [
-      "dama",
-      pgEnv,
-      "latest",
-      "events",
-      "for",
-      "source",
-      [source?.source_id],
-    ]);
-    console.log({ref})
-    return ref;
-  }, [falcorCache, source?.source_id]);
-  console.log({ctxs})
+  const ctxs = useMemo(
+    () =>
+      get(falcorCache, [
+        "dama",
+        pgEnv,
+        "latest",
+        "events",
+        "for",
+        "source",
+        [source?.source_id],
+      ]),
+    [falcorCache, source?.source_id]
+  );
 
   useEffect(() => {
     const getEvents = async () => {
@@ -472,41 +469,91 @@ export default function NpmrdsManage({
         .filter((ctxId) => !!ctxId);
 
       ctxIds.forEach(async (ctxId) => {
-        const newResp = await falcor.get(["dama",pgEnv,"etlContexts","byEtlContextId",ctxId]);
-        console.log("newResp", newResp)
-      })
-
+        await falcor.get([
+          "dama",
+          pgEnv,
+          "etlContexts",
+          "byEtlContextId",
+          ctxId,
+        ]);
+      });
+    };
+    if (ctxs) {
+      getEvents();
     }
-
-    getEvents()
   }, [ctxs]);
 
-  //TODO -- need to test this with various event types
-  //Might/should be OK, because we look specifically for `metadata` events
-  const openMetadataCtx = useMemo(() => {
-    const ref = get(falcorCache, [
-      "dama",
-      pgEnv,
-      "etlContexts",
-      "byEtlContextId",
-    ]);
+  const ctxsWithEvent = useMemo(
+    () => get(falcorCache, ["dama", pgEnv, "etlContexts", "byEtlContextId"]),
+    [falcorCache, pgEnv]
+  );
 
-    const openMetadataCtxs = Object.values(ref)
-      .map((item) => item?.value)
-      .filter((ctx) => OPEN_CTX_STATUSES.includes(ctx.meta.etl_status))
-      .filter((ctx) =>
-        ctx.events.some((ctxEvent) => ctxEvent.type.includes("metadata"))
-      )
-      .map((ctx) => ({
-        ...ctx,
-        raw_view_id: ctx?.events?.[0]?.payload.npmrds_raw_view_ids?.[0],
-      }));
+  const openMetadataCtxs = useMemo(() => {
+    if (ctxsWithEvent) {
+      return Object.values(ctxsWithEvent)
+        .map((item) => item?.value)
+        .filter((ctx) => OPEN_CTX_STATUSES.includes(ctx.meta.etl_status))
+        .filter((ctx) =>
+          ctx.events.some((ctxEvent) => ctxEvent.type.includes("metadata"))
+        )
+        .map((ctx) => ({
+          ...ctx,
+          raw_view_id: ctx?.events?.[0]?.payload.npmrds_raw_view_ids?.[0],
+        }));
+    }
+  }, [falcorCache, falcor, source?.source_id]);
+  useEffect(() => {
+    if ((openMetadataCtxs && openMetadataCtxs.length > 0) || (polling && !ctxsWithEvent)) {
+      setPolling(true);
+    } else {
+      setPolling(false);
+    }
+  }, [openMetadataCtxs, falcorCache]);
 
-    return openMetadataCtxs;
-  }, [falcorCache, source?.source_id]);
-
-  //TODO ADD POLLING
   //TODO this could be used to show that an `add` is in process as well
+  useEffect(() => {
+    const contextLength = get(falcorCache, lengthPath);
+    const doPolling = async () => {
+      const fetchContextsPath = [
+        "dama",
+        pgEnv,
+        "latest",
+        "events",
+        "for",
+        "source",
+        [source?.source_id],
+        { from: 0, to: contextLength - 1 },
+        [
+          "etl_status",
+          "etl_context_id",
+          "created_at",
+          "terminated_at",
+          "source_id",
+          "parent_context_id",
+          "type",
+          "payload",
+          "user",
+        ],
+      ];
+      falcor.invalidate(["dama", pgEnv, "etlContexts", "byEtlContextId"]);
+      falcor.invalidate(fetchContextsPath);
+      await falcor.get(fetchContextsPath);
+    };
+    // -- start polling
+    if (polling && !pollingInterval) {
+      let id = setInterval(doPolling, 3000);
+      setPollingInterval(id);
+    }
+    // -- stop polling
+    else if (pollingInterval && !polling) {
+      clearInterval(pollingInterval);
+      // run polling one last time in case it never finished
+      doPolling();
+      setPolling(false);
+      setPollingInterval(null);
+
+    }
+  }, [polling, pollingInterval]);  
 
   const removeNpmrds = async (viewId, stateGroup) => {
     const publishData = {
@@ -603,8 +650,8 @@ export default function NpmrdsManage({
                 <React.Fragment key={group}>
                   {groupbyState[group].map((item, index) => { 
                     const metaView = metaViews.length ? metaViews?.find(mView => parseInt(mView.year) === parseInt(item?.metadata?.start_date.substring(0, 4))) : {};
-                    const openEvents = metaViews.length ? openMetadataCtx.filter(ctx => ctx.raw_view_id === item.view_id) : [];
-                    const hasOpenMetadataEvent = openEvents.length > 0;
+                    const openEvents = metaViews.length && openMetadataCtxs ? openMetadataCtxs.filter(ctx => ctx.raw_view_id === item.view_id) : [];
+                    const hasOpenMetadataEvent = openEvents.length > 0 || !ctxsWithEvent;
                     return (
                       <tr key={index}>
                         {index === 0 && (
@@ -721,7 +768,7 @@ export default function NpmrdsManage({
                           <button
                             className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-blue-500 text-white shadow-md shadow-blue-900/10 hover:shadow-lg hover:shadow-blue-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                             type="button"
-                            disabled={hasOpenMetadataEvent}
+                            disabled={polling}
                             onClick={() => {
                               console.log("RERRUN -- ITEM::", item)
                               setRerunViewId({raw_view_id: item?.view_id, start_date: item.metadata.start_date, end_date:item.metadata.end_date, year: item.metadata.start_date.substring(0, 4)  });
@@ -939,6 +986,8 @@ export default function NpmrdsManage({
                   className="ml-3 inline-flex justify-center px-4 py-2 text-sm text-green-900 bg-green-100 border border-transparent rounded-md hover:bg-green-200 duration-300"
                   onClick={async () => {
                     rerunMetadata(rerunViewId);
+                    //falcor.invalidate(["dama", pgEnv, "etlContexts", "byEtlContextId"]);
+                    setPolling(true);
                     setShowReRunModal(false);
                   }}
                 >
