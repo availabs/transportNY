@@ -10,8 +10,7 @@ import moment from "moment";
 
 import { DamaContext } from "~/pages/DataManager/store";
 import { DAMA_HOST } from "~/config";
-import { useFalcor, ScalableLoading } from "~/modules/avl-components/src";
-import MultiSelect from "../manage/components/multiselect";
+import { useFalcor, ScalableLoading, Select } from "~/modules/avl-components/src";
 
 const OPEN_CTX_STATUSES = ["OPEN"];
 
@@ -133,7 +132,7 @@ export default function NpmrdsManage({
   const [showModal, setShowModal] = React.useState(false);
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
   const [showReRunModal, setShowReRunModal] = React.useState(false);
-  const [selectedViews, setSelectedViews] = React.useState([]);
+  const [selectedView, setSelectedView] = React.useState([]);
   const [metaViews, setMetaViews] = React.useState([]);
   const [removeViewId, setRemoveViewId] = React.useState(null);
   const [removeStateKey, setRemoveStateKey] = React.useState(null);
@@ -280,13 +279,26 @@ export default function NpmrdsManage({
     );
   }, [dependentViews]);
 
-  const availableViewOptions = useMemo(() => {
-    return availableViews.map((av) => ({
-      label: `${av?.metadata?.name || av?.metadata?.dama_source_name} From ${av?.metadata?.start_date} to ${av?.metadata?.end_date}`,
-      value: av?.view_id,
-      metadata: av?.metadata,
-    }));
-  }, [availableViews]);
+  const availableViewOptions = useMemo(
+    () =>
+      availableViews.map((availableView) => (
+        <option
+          className="max-h-60 rounded-md py-1 text-base leading-6 shadow-xs overflow-auto focus:outline-none sm:text-sm sm:leading-5"
+          value={{
+            value: availableView?.view_id,
+            metadata: availableView?.metadata,
+          }}
+        >
+          {`${
+            availableView?.metadata?.name ||
+            availableView?.metadata?.dama_source_name
+          } From ${availableView?.metadata?.start_date} to ${
+            availableView?.metadata?.end_date
+          }`}
+        </option>
+      )),
+    [availableViews]
+  );
 
   //get info about tmc_meta
   //source.npmrds_meta_layer_view_id[year]
@@ -323,15 +335,22 @@ export default function NpmrdsManage({
   }, [source, falcor, pgEnv]);
 
   const dateRanges = useMemo(() => {
-    return ([...selectedViews, activeView] || [])
+    return ([selectedView, activeView] || [])
+      .map(dateView => {
+        if(!!dateView?.props) {
+          return dateView?.props?.value;
+        } else {
+          return dateView;
+        }
+      })
       .filter(
-        (v) => v && v.metadata && v.metadata.start_date && v.metadata.end_date
+        (v) => (v && v.metadata && v.metadata.start_date && v.metadata.end_date)
       )
       .map((dr) => ({
         start_date: dr?.metadata?.start_date,
         end_date: dr?.metadata?.end_date,
       }));
-  }, [selectedViews, activeView]);
+  }, [selectedView, activeView]);
 
   const { msgString, isValidDateRage } = useMemo(() => {
     return { ...(checkDateRanges(dateRanges) || {}) };
@@ -360,12 +379,13 @@ export default function NpmrdsManage({
       view_id: activeView?.view_id,
       user_id: ctxUser?.id,
       email: ctxUser?.email,
-      npmrds_raw_view_ids: selectedViews.map((svs) => svs.value),
+      npmrds_raw_view_ids: [selectedView?.props?.value?.value],
       name: source?.name,
       type: "npmrds",
       ...findMinMaxDates(dateRanges),
       pgEnv,
     };
+    console.log("update, publishData::", publishData)
     setLoading(true);
     try {
       const res = await fetch(`${DAMA_HOST}/dama-admin/${pgEnv}/npmrds/add`, {
@@ -836,10 +856,12 @@ export default function NpmrdsManage({
                       </div>
                     </>
                   ) : null}
-                  <MultiSelect
+                  <Select
                     options={availableViewOptions}
-                    onChange={setSelectedViews}
-                    value={selectedViews}
+                    onChange={setSelectedView}
+                    value={selectedView}
+                    themeOptions={{color: 'white'}}
+                    className = 'min-w-[479px] border border-gray-300 rounded-md'
                   />
                 </div>
               ) : (
@@ -863,7 +885,7 @@ export default function NpmrdsManage({
                 >
                   Close
                 </button>
-                {selectedViews && selectedViews.length && isValidDateRage ? (
+                {selectedView && isValidDateRage ? (
                   <button
                     className="ml-3 inline-flex justify-center px-4 py-2 text-sm text-green-900 bg-green-100 border border-transparent rounded-md hover:bg-green-200 duration-300"
                     type="button"
