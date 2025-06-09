@@ -20,36 +20,11 @@ import {
 const Create = ({ source }) => {
   const [npmrdsSourceId, setNpmrdsSourceId] = useState("");
   const [percentTmc, setPercentTmc] = useState(100);
-  const [year, setYear] = useState(2023);
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [year, setYear] = useState(2024);
   const [loading, setLoading] = useState(false);
-  const [states, setStates] = useState([]);
 
   const { pgEnv, user, falcor, falcorCache } = React.useContext(DamaContext);
   console.log("dama user", user);
-  function isSelected(val) {
-    return (states || []).find((el) => el === val) ? true : false;
-  }
-
-  function handleSelection(val) {
-    const selectedResult = (states || []).filter(
-      (selected) => selected === val
-    );
-
-    if ((selectedResult || []).length > 0) {
-      removeSelect(val);
-    } else {
-      setStates((currents) => [...currents, val]);
-    }
-  }
-
-  function removeSelect(val) {
-    const removedSelection = (states || []).filter(
-      (selected) => selected !== val
-    );
-    setStates(removedSelection);
-  }
 
   useEffect(() => {
     async function fetchData() {
@@ -84,7 +59,35 @@ const Create = ({ source }) => {
       )
       .filter((source) => source.type === "npmrds");
   }, [falcorCache, pgEnv]);
-  console.log(source);
+
+  const currentDataSource = useMemo(() => {
+    return sources.find(
+      (dataSource) => dataSource.source_id === parseInt(npmrdsSourceId)
+    );
+  }, [sources, npmrdsSourceId]);
+
+  const availableYears = useMemo(() => {
+    return currentDataSource
+      ? Object.keys(currentDataSource?.metadata?.npmrds_meta_layer_view_id).map(
+          (yearString) => parseInt(yearString)
+        )
+      : Array.from(
+          Array(9)
+            .keys()
+            .map((k) => k + 2017)
+        );
+  }, [currentDataSource]);
+
+  useEffect(() => {
+    if (!year || !availableYears.includes(year)) {
+      setYear(availableYears[0]);
+    }
+  }, [availableYears]);
+  
+  const yearInputClass = !npmrdsSourceId
+    ? `flex-0 w-full p-1 cursor-not-allowed bg-gray-200 hover:bg-gray-300 rounded-md`
+    : `flex-0 w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md`;
+  
   return (
     <div className="w-full m-5">
       <div className="flex items-center justify-center p-2">
@@ -126,12 +129,11 @@ const Create = ({ source }) => {
               </div>
               <div className="flex pl-1">
                 <input
-                  className={
-                    "flex-0 w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md"
-                  }
+                  disabled={!npmrdsSourceId}
+                  className={yearInputClass}
                   type="number"
-                  max={2025}
-                  min={2017}
+                  max={availableYears[availableYears.length-1]}
+                  min={availableYears[0]}
                   step={1}
                   onChange={(e) => {
                     setYear(e.target.value);
