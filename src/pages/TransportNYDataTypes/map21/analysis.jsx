@@ -13,9 +13,11 @@ export const AnalysisPage = (props) => {
   // console.log("AnalysisPage views::", views)
 
   const headers = [
+    "version",
     "year",
     "num_tmcs",
     "total_miles",
+    "vmt",
     "phed",
     "lottrinterstate",
     "lottrnon_interstate",
@@ -30,6 +32,7 @@ export const AnalysisPage = (props) => {
     ...view?.metadata,
     ...view?.metadata.stateAnalysis,
   }));
+
   return (
     <>
       {
@@ -55,7 +58,7 @@ export const AnalysisPage = (props) => {
                       key={`${view.view_id}.${key}`}
                       className="py-2 px-4 bg-gray-200 text-left border-b"
                     >
-                      {view[key]}
+                      {key === 'version' ? view[key] || view.view_id :view[key]}
                     </td>
                   ))}
                 </tr>
