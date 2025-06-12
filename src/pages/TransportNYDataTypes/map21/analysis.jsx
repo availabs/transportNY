@@ -32,7 +32,7 @@ export const AnalysisPage = (props) => {
     ...view?.metadata,
     ...view?.metadata.stateAnalysis,
   }));
-
+  flatViews.sort((a, b) => b.year - a.year);
   return (
     <>
       {
@@ -53,14 +53,19 @@ export const AnalysisPage = (props) => {
             <tbody>
               {flatViews.map((view) => (
                 <tr key={`${view.view_id}`}>
-                  {headers.map((key) => (
-                    <td
-                      key={`${view.view_id}.${key}`}
-                      className="py-2 px-4 bg-gray-200 text-left border-b"
-                    >
-                      {key === 'version' ? view[key] || view.view_id :view[key]}
-                    </td>
-                  ))}
+                  {headers.map((key) => {
+                    const isNum = !!parseFloat(view[key]);
+                    return (
+                      <td
+                        key={`${view.view_id}.${key}`}
+                        className="py-2 px-4 bg-gray-200 text-left border-b"
+                      >
+                        {key === "version"
+                          ? view[key] || view.view_id
+                          : isNum ? parseFloat(view[key]).toLocaleString() : view[key]}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>
