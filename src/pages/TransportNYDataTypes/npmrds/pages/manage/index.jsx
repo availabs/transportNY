@@ -412,8 +412,6 @@ export default function NpmrdsManage({
       npmrds_raw_view_ids: [rerunViewId.raw_view_id],
       user_id: ctxUser?.id,
       email: ctxUser?.email,
-      startDate: rerunViewId.start_date,
-      endDate: rerunViewId.end_date,
       year: rerunViewId.start_date.substring(0,4),
       pgEnv,
     };
