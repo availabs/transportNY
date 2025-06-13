@@ -1,7 +1,8 @@
 import { useFalcor } from "~/modules/avl-components/src"
 import { useAuth } from "~/modules/ams/src";
 
-import { dmsPageFactory, registerDataType, Selector, registerComponents, pageConfig } from "~/modules/dms/src"
+import { dmsPageFactory, registerDataType, Selector, registerComponents } from "~/modules/dms/src"
+import pageConfig from "~/modules/dms/src/patterns/page/siteConfig"
 import { withAuth } from "~/modules/ams/src"
 
 import checkAuth from "~/layout/checkAuth"

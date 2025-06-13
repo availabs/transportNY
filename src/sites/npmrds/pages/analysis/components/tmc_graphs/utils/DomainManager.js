@@ -1,4 +1,4 @@
-import deepequal from "deep-equal"
+import deepequal from "deepequal"
 
 const COMP_DOMAIN = new Map();
 
