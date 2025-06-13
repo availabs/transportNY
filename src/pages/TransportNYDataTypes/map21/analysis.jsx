@@ -25,14 +25,54 @@ export const AnalysisPage = (props) => {
     "raw_view_id",
     "meta_view_id",
     "npmrds_prod_source_id",
+    "npmrds_prod_source_name"
   ];
 
-  const flatViews = views.map((view) => ({
-    ...view,
-    ...view?.metadata,
-    ...view?.metadata.stateAnalysis,
-  }));
+  const sourceNames = useMemo(() => {
+    const sources = get(falcorCache, ["dama", pgEnv, "sources", "byId"]);
+    const sourceNames = Object.keys(sources).reduce((acc, sId) => {
+      const curSource = sources[sId];
+      acc[sId] =
+        typeof curSource?.attributes?.display_name === "string"
+          ? curSource?.attributes?.display_name
+          : curSource?.attributes?.name;
+      return acc;
+    }, {});
+
+    return sourceNames;
+  }, [falcorCache]);
+
+  const flatViews = useMemo(() => {
+    return views.map((view) => ({
+      ...view,
+      ...view?.metadata,
+      ...view?.metadata.stateAnalysis,
+      npmrds_prod_source_name: sourceNames[view?.metadata?.npmrds_prod_source_id],
+    }));
+  }, [sourceNames, views]);
+
   flatViews.sort((a, b) => b.year - a.year);
+  useEffect(() => {
+    const getSourceNames = async () => {
+      const prodSourceIds = flatViews.map(
+        (fView) => fView.npmrds_prod_source_id
+      );
+      await falcor.get([
+        "dama",
+        pgEnv,
+        "sources",
+        "byId",
+        prodSourceIds,
+        "attributes",
+        ["type", "name", "display_name"],
+      ]);
+    };
+
+    if (flatViews.length > 0) {
+      getSourceNames();
+    }
+  }, [flatViews]);
+
   return (
     <>
       {
