@@ -54,7 +54,7 @@ export const AnalysisPage = (props) => {
               {flatViews.map((view) => (
                 <tr key={`${view.view_id}`}>
                   {headers.map((key) => {
-                    const isNum = !!parseFloat(view[key]);
+                    const isNum = key !== 'year' && !!parseFloat(view[key]);
                     return (
                       <td
                         key={`${view.view_id}.${key}`}
