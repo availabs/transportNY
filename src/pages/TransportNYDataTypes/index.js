@@ -11,6 +11,7 @@ import excessive_delay from "./excessive_delay";
 import transcom_congestion from "./transcom_congestion";
 import production_transfer from "./production_transfer";
 import map21 from "./map21";
+import pm3 from "./pm3";
 import transcom from "./transcom";
 import schedule from "./schedule";
 
@@ -28,7 +29,7 @@ const transportNYDataTypes = {
   transcom,
   production_transfer,
   schedule,
-
+  pm3,
   osm_upload
 }
 
