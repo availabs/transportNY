@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -70,7 +70,8 @@ const statesObj = {
   WI: "Wisconsin",
   WY: "Wyoming",
 };
-const Create = ({ source }) => {
+const Create = (props) => {
+  const { source } = props;
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [loading, setLoading] = useState(false);
@@ -100,6 +101,23 @@ const Create = ({ source }) => {
     setStates(removedSelection);
   }
 
+const doesPassNameLengthCheck = !!source?.source_id || source?.name.length <= MAX_NPMRDS_SOURCE_NAME_LENGTH
+const isButtonEnabled = !!source?.name?.length && doesPassNameLengthCheck && !!startDate && !!endDate && !!states.length;
+
+//Display error message in the following scenarios:
+//1. User is missing only 1 piece of data out of 4
+//2. Source name is too long
+const errorMsg = useMemo(() => {
+  if(!source?.name && !!startDate && !!endDate && !!states.length){
+    return 'Type in a source name';
+  } else if (!doesPassNameLengthCheck) {
+    return `The source name is too long. Please enter a name with ${MAX_NPMRDS_SOURCE_NAME_LENGTH + " "} characters or less`
+  } else if (!!source?.name && doesPassNameLengthCheck && !!startDate && !!endDate && !states.length) {
+    return `Select a state`;
+  } else {
+    return ''
+  }
+}, [source, startDate, endDate, states])
   return (
     <div className="w-full p-5 m-5">
       <div className="flex flex-row mt-4">
@@ -277,29 +295,24 @@ const Create = ({ source }) => {
           </div>
         </div>
       </div>
-      {source?.name.length > MAX_NPMRDS_SOURCE_NAME_LENGTH && (
-        <p className="text-red-500">
-          The source name is too long. Please enter a name with {MAX_NPMRDS_SOURCE_NAME_LENGTH + " "}
-          characters or less.
+      {
+        <p style={{height:'24px'}} className="text-red-500">
+          { errorMsg.length > 0 && errorMsg }
         </p>
-      )}
-      {source?.name && source?.name.length <= MAX_NPMRDS_SOURCE_NAME_LENGTH && 
-        startDate && endDate && states.length ? (
-        <>
-          <PublishNpmrdsRaw
-            loading={loading}
-            setLoading={setLoading}
-            source_id={source?.source_id || null}
-            name={source?.name}
-            type={source?.type}
-            startDate={startDate}
-            endDate={endDate}
-            states={states}
-            user_id={user?.id}
-            pgEnv={pgEnv}
-          />
-        </>
-      ) : null}
+      }
+      <PublishNpmrdsRaw
+        disabled={!isButtonEnabled}
+        loading={loading}
+        setLoading={setLoading}
+        source_id={source?.source_id || null}
+        name={source?.name}
+        type={source?.type}
+        startDate={startDate}
+        endDate={endDate}
+        states={states}
+        user_id={user?.id}
+        pgEnv={pgEnv}
+      />
     </div>
   );
 };
