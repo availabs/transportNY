@@ -226,14 +226,14 @@ class GeneralGraphComp extends React.Component {
 								//['routes','data', key]
 
 								// ['routes', 'data', key]
-								['routes', 'npmrds2', 'view', 812, 'data', key]
+								['routes', 'npmrds2', 'view', 982, 'data', key]
 
 							)
 							.then(res => {
-								const getDataPath = ['json', 'routes', 'npmrds2', 'view', 812, 'data', key]
+								const getDataPath = ['json', 'routes', 'npmrds2', 'view', 982, 'data', key]
 								//console.log('got data response', res, get(res, getDataPath, []))
 								
-								//const getDataPath = 'json.routes.npmrds2.data.view.812.data'
+								//const getDataPath = 'json.routes.npmrds2.data.view.982.data'
 								if (group === "indices") {
 									INDICES.forEach(index => {
 
