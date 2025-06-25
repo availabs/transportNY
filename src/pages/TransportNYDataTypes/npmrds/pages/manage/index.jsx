@@ -254,6 +254,11 @@ export default function NpmrdsManage({
     return views.find((v) => Number(v.view_id) === Number(activeViewId));
   }, [activeViewId, views]);
 
+  const activeRawViewIds = useMemo(
+    () => activeView?.metadata?.npmrds_raw_view_ids,
+    [activeView]
+  );
+
   const [availableViews, dependentViews] = useMemo(() => {
     return [
       (npmrdsRawViews || []).filter(
@@ -517,9 +522,11 @@ export default function NpmrdsManage({
         .map((ctx) => ({
           ...ctx,
           raw_view_id: ctx?.events?.[0]?.payload.npmrds_raw_view_ids?.[0],
-        }));
+        }))
+        .filter((ctx) => activeRawViewIds.includes(ctx.raw_view_id));
     }
   }, [falcorCache, falcor, source?.source_id]);
+
   useEffect(() => {
     if ((openMetadataCtxs && openMetadataCtxs.length > 0) || (polling && !ctxsWithEvent)) {
       setPolling(true);

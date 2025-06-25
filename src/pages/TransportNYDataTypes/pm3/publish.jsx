@@ -8,6 +8,10 @@ const pm3Publish = async (props, navigate, pgEnv) => {
   props.setLoading(true);
   
   const publishData = {
+    source_values: {
+      name: props?.name,
+      type:  props?.type
+    },
     source_id: props?.source_id || null,
     user_id: props?.user_id,
     email: props.email,
