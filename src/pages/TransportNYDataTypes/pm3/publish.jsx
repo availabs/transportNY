@@ -6,7 +6,11 @@ import { DAMA_HOST } from "~/config";
 
 const pm3Publish = async (props, navigate, pgEnv) => {
   props.setLoading(true);
-  
+  let year = props.year;
+  if(props.startDate && props.endDate) {
+    year = props.startDate.getFullYear()
+  }
+
   const publishData = {
     source_values: {
       name: props?.name,
@@ -18,7 +22,8 @@ const pm3Publish = async (props, navigate, pgEnv) => {
     name: props?.name,
     type: props?.type || "pm3",
     pgEnv: pgEnv || props?.pgEnv,
-    year: props.year,
+    dates:[props.startDate, props.endDate],
+    year,
     npmrdsSourceId: props.npmrdsSourceId
   };
 

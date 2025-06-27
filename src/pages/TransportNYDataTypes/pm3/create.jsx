@@ -6,6 +6,7 @@ import React, {
   useMemo,
 } from "react";
 import get from "lodash/get";
+import DatePicker from "react-datepicker";
 import { DamaContext } from "~/pages/DataManager/store";
 import { DAMA_HOST } from "~/config";
 import {
@@ -37,10 +38,12 @@ export default function NpmrdsCreate({
   const { name: damaSourceName, source_id: sourceId, type } = source;
   const { pgEnv, user: ctxUser, falcor, falcorCache } = useContext(DamaContext);
 
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [loading, setLoading] = useState(false);
   const [state, dispatch] = useReducer(reducer, {
     npmrdsSourceId: '',
-    year: 2024,
+    year: 2025,
     damaSourceId: sourceId,
     damaSourceName: damaSourceName,
     userId: user?.id ?? ctxUser.id,
@@ -49,6 +52,8 @@ export default function NpmrdsCreate({
     dataType: dataType,
     damaServerPath: `${DAMA_HOST}/dama-admin/${"npmrds"}`,
     sourceType: type,
+    startDate: '',
+    endDate: '',
   });
 
   const { npmrdsSourceId, year } = state;
@@ -60,6 +65,32 @@ export default function NpmrdsCreate({
   useEffect(() => {
     dispatch({ type: "update", payload: { sourceType: type } });
   }, [type]);
+
+  useEffect(() => {
+    dispatch({ type: "update", payload: { startDate } });
+  }, [startDate]);
+
+  useEffect(() => {
+    dispatch({ type: "update", payload: { endDate } });
+  }, [endDate]);
+
+  useEffect(() => {
+    if(year !== '') {
+      setStartDate('');
+      setEndDate('');
+    }
+  }, [year]);
+
+  useEffect(() => {
+          console.log({startDate})
+    if(startDate){
+      console.log("getyear",startDate.getFullYear());
+      dispatch({ type: "update", payload: { year: '' } })
+    }
+
+
+  }, [startDate, endDate]);
+
 
   useEffect(() => {
     async function fetchData() {
@@ -127,7 +158,7 @@ export default function NpmrdsCreate({
     return <div> Please enter a datasource name.</div>;
   }
 
-  const isButtonEnabled = (sourceId || damaSourceName) && year && npmrdsSourceId;
+  const isButtonEnabled = (sourceId || damaSourceName) && (year || (startDate && endDate)) && npmrdsSourceId;
   return (
     <div className="w-full my-4">
       <div className="flex items-center justify-center p-2">
@@ -161,6 +192,9 @@ export default function NpmrdsCreate({
         </div>
       </div>
       <div className="flex items-center justify-center p-2">
+        Select a year OR starting/ending dates
+      </div>
+      <div className="flex items-center justify-center p-2">
         <div className="w-full max-w-xs mx-auto">
           <div className="flex items-center justify-center">
             <div className="w-[50%]">
@@ -184,11 +218,53 @@ export default function NpmrdsCreate({
             </div>
           </div>
         </div>
+        <div className="basis-1/2">
+          <div className="flex items-center justify-left mt-4">
+            <div className="w-full max-w-xs mx-auto">
+              <div className="block text-sm leading-5 font-medium text-gray-700">
+                Start Date
+              </div>
+              <div className="relative">
+                <DatePicker
+                  required
+                  showIcon
+                  toggleCalendarOnIconClick
+                  selected={startDate}
+                  onChange={(date) => setStartDate(date)}
+                  maxDate={endDate}
+                  isClearable
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="basis-1/2">
+          <div className="flex items-center justify-left mt-4">
+            <div className="w-full max-w-xs mx-auto">
+              <div className="block text-sm leading-5 font-medium text-gray-700">
+                End Date
+              </div>
+              <div className="relative">
+                <DatePicker
+                  required
+                  showIcon
+                  toggleCalendarOnIconClick
+                  selected={endDate}
+                  onChange={(date) => setEndDate(date)}
+                  minDate={startDate}
+                  isClearable
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div className="md:flex md:items-center gap-4">
         <PublishPm3
           disabled={!isButtonEnabled}
           year={year}
+          startDate={startDate}
+          endDate={endDate}
           npmrdsSourceId={npmrdsSourceId}
           loading={loading}
           setLoading={setLoading}
