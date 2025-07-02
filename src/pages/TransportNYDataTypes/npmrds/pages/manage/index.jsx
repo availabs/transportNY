@@ -523,7 +523,7 @@ export default function NpmrdsManage({
           ...ctx,
           raw_view_id: ctx?.events?.[0]?.payload.npmrds_raw_view_ids?.[0],
         }))
-        .filter((ctx) => activeRawViewIds.includes(ctx.raw_view_id));
+        .filter((ctx) => activeRawViewIds?.includes(ctx.raw_view_id));
     }
   }, [falcorCache, falcor, source?.source_id]);
 
