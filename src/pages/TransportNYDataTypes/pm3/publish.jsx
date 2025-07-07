@@ -16,6 +16,7 @@ const pm3Publish = async (props, navigate, pgEnv) => {
       name: props?.name,
       type:  props?.type
     },
+    newVersion: props?.newVersion,
     source_id: props?.source_id || null,
     user_id: props?.user_id,
     email: props.email,

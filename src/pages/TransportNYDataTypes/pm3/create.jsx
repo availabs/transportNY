@@ -34,6 +34,7 @@ export default function NpmrdsCreate({
   user = {},
   dataType = "npmrds",
   CustomAttributes = BlankComponent,
+  newVersion
 }) {
   const { name: damaSourceName, source_id: sourceId, type } = source;
   const { pgEnv, user: ctxUser, falcor, falcorCache } = useContext(DamaContext);
@@ -55,7 +56,7 @@ export default function NpmrdsCreate({
     startDate: '',
     endDate: '',
   });
-
+  console.log("state::",state)
   const { npmrdsSourceId, year } = state;
 
   useEffect(() => {
@@ -274,6 +275,7 @@ export default function NpmrdsCreate({
           name={source?.name}
           type={source?.type}
           pgEnv={pgEnv}
+          newVersion={newVersion}
         />
       </div>
     </div>
