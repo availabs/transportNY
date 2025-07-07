@@ -1,4 +1,5 @@
 import CreatePage from "./create";
+import MapPage from "~/pages/DataManager/DataTypes/gis_dataset/pages/Map";
 // import AnalysisPage from "./analysis";
 import TablePage from '~/pages/DataManager/DataTypes/gis_dataset/pages/Table';
 
@@ -12,11 +13,11 @@ const Pm3Config = {
     component: TablePage,
     path:"/table"
   },
-  // analysis: {
-  //   name:"Analysis",
-  //   component: AnalysisPage,
-  //   path:"/analysis"
-  // }
+  map: {
+    name: "Map",
+    path: "/map",
+    component: MapPage,
+  }
 };
 
 export default Pm3Config;
