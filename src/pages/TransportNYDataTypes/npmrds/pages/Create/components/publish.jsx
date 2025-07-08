@@ -53,7 +53,7 @@ export default function PublishNpmrds(props) {
   const handlePublishClick = useCallback(() => {
     npmrdsPublish({ ...restProps, setLoading }, navigate, pgEnv);
   }, [restProps, navigate, setLoading]);
-  const isNameTooLong = props?.name?.length >= MAX_NPMRDS_SOURCE_NAME_LENGTH;
+  const isNameTooLong = props?.name?.length > MAX_NPMRDS_SOURCE_NAME_LENGTH;
   const isButtonDisabled = (!props.source_id && !props.name) || !props.selectedViewId || isNameTooLong;
   const buttonClass = isButtonDisabled
     ? "cursor-not-allowed bg-gray-400 text-white font-bold py-2 px-4 rounded"
