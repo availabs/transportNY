@@ -99,7 +99,8 @@
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "dev": "vite",
-    "deploy": "vite build && netlify deploy --prod",
+    "deploy": "netlify deploy --site 37adb33e-9f6a-45ca-9fe3-bda2a94542d6 --prod",
+    "deploy-prod": "netlify deploy --site 481f8c89-adbd-4766-88ce-de34745460c6 --prod",
     "build": "vite build",
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
