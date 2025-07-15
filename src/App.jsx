@@ -35,14 +35,15 @@ import npmrds from '~/sites/npmrds'
 import transit from '~/sites/transit'
 import demos from '~/sites/demos'
 import sandbox from '~/sites/sandbox'
+import themes from './dms_themes'
 
 const Sites = {
-  transportNY,
+  www: transportNY,
   tsmo,
   freightatlas,
   fdi,
   npmrds,
-  transit,
+  //transit,
   demos,
   sandbox
 }
@@ -73,7 +74,7 @@ const App = (props) => {
   console.log('SUBDOMAIN')
 
   const site = useMemo(() => {
-      let siteOutpt = SUBDOMAIN ? get(Sites, SUBDOMAIN, {Routes:[]}) : Sites['transportNY']
+      let siteOutpt = SUBDOMAIN ? get(Sites, SUBDOMAIN, {Routes:[]}) : Sites['www']
       console.log('SUBDOMAIN', siteOutpt)
       return siteOutpt
   },[SUBDOMAIN])
@@ -102,7 +103,7 @@ const App = (props) => {
         pgEnvs={[defaultPgEnv]}
         
         authWrapper={withAuth}
-        // themes={themes}
+        themes={themes}
         damaBaseUrl={damaBaseUrl}
         //API_HOST={API_HOST}
 
