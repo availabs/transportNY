@@ -71,8 +71,10 @@ const theme = {
         "default": {
             "wrapper1": "w-full h-full flex-1 flex flex-row pt-2",
             "wrapper2": "flex flex-1 w-full  flex-col  shadow-md bg-white rounded-lg relative text-md font-light leading-7 h-full min-h-[200px]",
-            "iconWrapper": "z-5 absolute right-[10px] top-[5px]",
-            "icon": "text-slate-400 hover:text-blue-500"
+            "iconWrapper": "z-[10] w-[30px] h-[30px] absolute right-[30px] top-[5px]",
+            "icon": "text-slate-400 hover:text-blue-500",
+            viewIcon: 'ViewPage',
+            editIcon: 'EditPage'
         },
   },
   topnav: {
