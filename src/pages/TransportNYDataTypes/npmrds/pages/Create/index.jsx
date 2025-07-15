@@ -12,12 +12,15 @@ import SelectSpeedLimitSource from "./components/selectSpeedLimitSource";
 import SelectMpoBoundariesSource from "./components/selectMpoBoundariesSource";
 
 //max data table name length is 63
-//we append the following:: 's784_v1323_${damaSourceName}_tmc_meta_geometry'
-//s784_v1323__tmc_meta_geometry is 29 chars
+//s816_v2053_1_testmetaprodjoin_tmc_meta_geometry_1323_wkb_geometry_idx
+//we append the following:: 's784_v1323_${damaSourceName}_tmc_meta_geometry_1323_wkb_geometry_idx' 
+//'s784_v1323_' '_tmc_meta_geometry' is 29 chars
 //63-29=34 chars remaining
-//lets build in 1 char each to accomodate 4 digit source_id & 5 digit view_id
-//and some more extra, max name length is 30
-export const MAX_NPMRDS_SOURCE_NAME_LENGTH = 30;
+//'_1323_wkb_geometry_idx' is 22 chars
+//34-22 = 12 remaining
+//Build in 4digit sourceId, 5 digit viewId
+//12 - 3 = 9 (oof)
+export const MAX_NPMRDS_SOURCE_NAME_LENGTH = 9;
 const BlankComponent = () => <></>;
 export default function NpmrdsCreate({
   source = {},

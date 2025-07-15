@@ -22,6 +22,7 @@ const submitUpload = (props, navigate, pgEnv) => {
         user_id: props?.user_id,
         email: props?.email,
         pgEnv: pgEnv || props?.pgEnv,
+        newVersion: props?.newVersion,
       };
       console.log("publishData",publishData)
       const res = await fetch(

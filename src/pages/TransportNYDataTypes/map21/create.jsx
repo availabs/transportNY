@@ -11,20 +11,19 @@ import {
 } from "@headlessui/react";
 
 import { DamaContext } from "~/pages/DataManager/store";
-import PublishNpmrdsRaw from "./publish";
+import PublishMap21 from "./publish";
 import {
   SourceAttributes,
   ViewAttributes,
   getAttributes,
 } from "~/pages/DataManager/Source/attributes";
-const Create = ({ source }) => {
+const Create = ({ source, newVersion }) => {
   const [npmrdsSourceId, setNpmrdsSourceId] = useState("");
   const [percentTmc, setPercentTmc] = useState(100);
   const [year, setYear] = useState(2024);
   const [loading, setLoading] = useState(false);
 
   const { pgEnv, user, falcor, falcorCache } = React.useContext(DamaContext);
-  console.log("dama user", user);
 
   useEffect(() => {
     async function fetchData() {
@@ -166,21 +165,20 @@ const Create = ({ source }) => {
         </div>
       </div>
       {npmrdsSourceId && year && source?.name ? (
-        <>
-          <PublishNpmrdsRaw
-            source_id={source?.source_id || null}
-            year={year}
-            npmrdsSourceId={npmrdsSourceId}
-            loading={loading}
-            setLoading={setLoading}
-            name={source?.name}
-            type={source?.type}
-            user_id={user?.id}
-            email={user?.email}
-            pgEnv={pgEnv}
-            percentTmc={percentTmc}
-          />
-        </>
+        <PublishMap21
+          source_id={source?.source_id || null}
+          year={year}
+          npmrdsSourceId={npmrdsSourceId}
+          loading={loading}
+          setLoading={setLoading}
+          name={source?.name}
+          type={source?.type}
+          user_id={user?.id}
+          email={user?.email}
+          pgEnv={pgEnv}
+          percentTmc={percentTmc}
+          newVersion={newVersion}
+        />
       ) : null}
     </div>
   );
