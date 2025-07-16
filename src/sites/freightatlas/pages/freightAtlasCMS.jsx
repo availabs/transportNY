@@ -141,11 +141,26 @@ const Routes = [
         logo: <Logo />,
         rightMenu: (
           <div className='flex'>
-            <Link to='/datasources' className='w-fit group font-display whitespace-nowrap
-        flex font-medium tracking-widest items-center text-[14px] px-4 h-12 text-slate-700 border-slate-100
-        hover:bg-white hover:text-blue-500
-        focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
-        transition cursor-pointer'>Data Manager</Link>
+            <Link
+              to='/datasources'
+              className='w-fit group font-display whitespace-nowrap
+                flex font-medium tracking-widest items-center text-[14px] px-4 h-12 text-slate-700 border-slate-100
+                hover:bg-white hover:text-blue-500
+                focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
+                transition cursor-pointer'
+            >
+              Data Manager
+            </Link>
+            <Link
+              to='https://npmrds.transportny.org/docs'
+              className='w-fit group font-display whitespace-nowrap
+                flex font-medium tracking-widest items-center text-[14px] px-4 h-12 text-slate-700 border-slate-100
+                hover:bg-white hover:text-blue-500
+                focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
+                transition cursor-pointer'
+            >
+              Docs
+            </Link>
             <AuthMenu />
           </div>
         ),
