@@ -77,6 +77,9 @@ const theme = {
             editIcon: 'EditPage'
         },
   },
+    section: {
+      editTopLineIcons: 'flex w-full pt-12 bg-white'
+    },
   topnav: {
       fixed: 'mt-12',
       topnavWrapper: `w-full h-[50px] flex items-center pr-1`,
