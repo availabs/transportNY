@@ -1,4 +1,4 @@
-import deepequal from "deepequal"
+import isEqual from "lodash-es"
 
 const COMP_DOMAIN = new Map();
 
@@ -54,7 +54,7 @@ export const needsUpdate = () => {
 		}, [Infinity, -Infinity]);
 		DOMAIN_MAP.set(key, domain);
 		needsUpdate = value.reduce((a, [, , d]) => {
-			return a || !deepequal(domain, d);
+			return a || !isEqual(domain, d);
 		}, needsUpdate);
 	})
 	return needsUpdate;
