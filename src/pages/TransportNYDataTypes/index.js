@@ -14,6 +14,7 @@ import map21 from "./map21";
 import pm3 from "./pm3";
 import transcom from "./transcom";
 import schedule from "./schedule";
+import analytics from "./analytics";
 
 import osm_upload from "./osm"
 
@@ -30,6 +31,7 @@ const transportNYDataTypes = {
   production_transfer,
   schedule,
   pm3,
+  analytics,
   osm_upload
 }
 
