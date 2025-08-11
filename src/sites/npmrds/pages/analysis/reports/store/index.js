@@ -67,6 +67,8 @@ const YEARS_WITH_DATA = [
 const UPDATE_STATE = "UPDATE_STATE";
 const RESET_STATE = "RESET_STATE";
 
+export const NPMRDS_VIEW_ID = 982;
+
 export const LOCAL_STORAGE_REPORT_KEY = "UNSAVED_NPMRDS_REPORT"
 
 let ROUTE_COMP_ID = -1;
@@ -84,34 +86,58 @@ const getAllYears = dateExtent =>
   )
 
 export const getDataDateExtent = () =>
-	dispatch =>
-		falcorGraph.get(["npmrdsDataDateExtent"])
+	dispatch => {
+		// falcorGraph.get(["npmrdsDataDateExtent"])
+
+    const options = JSON.stringify({
+      groupBy: [],
+      orderBy: {},
+      filter: {},
+      exclude: {},
+      normalFilter: [],
+      meta: {}
+    });
+
+    return falcorGraph.get([
+      "uda", "npmrds2", "viewsById", NPMRDS_VIEW_ID,
+      "options", options, "dataByIndex", 0,
+      ["MAX(date) as latest_date", "MIN(date) AS earliest_date"]
+    ])
 			.then(res => {
-				const dateExtent = get(res, 'json.npmrdsDataDateExtent', DATE_EXTENT)
-								.map(d => d.slice(0, 10)),
+        console.log("DATE EXTENT RES:", res)
 
-					minYear = +dateExtent[0].slice(0, 4,),
-					minMonth = +dateExtent[0].slice(5, 7),
-					minDate = +dateExtent[0].slice(8),
+        const datePath = [
+          "json", "uda", "npmrds2", "viewsById", NPMRDS_VIEW_ID,
+          "options", options, "dataByIndex", 0
+        ]
+        const maxDatePath = [...datePath, "MAX(date) as latest_date"];
+        const minDatePath = [...datePath, "MIN(date) AS earliest_date"];
 
-					maxYear = +dateExtent[1].slice(0, 4),
-					maxMonth = +dateExtent[1].slice(5, 7),
-					maxDate = +dateExtent[1].slice(8),
+        const minDate = get(res, minDatePath);
+        const maxDate = get(res, maxDatePath);
 
-					yearsWithData = range(
-						(minMonth == 1) && (minDate == 1) ? minYear : minYear + 1,
-						(maxMonth == 12) && (maxDate == 31) ? maxYear + 1 : maxYear
-					);
+        const dateExtent = [minDate, maxDate];
+
+        const [minYear, minMonth, minDay] = minDate.split("-").map(Number);
+        const [maxYear, maxMonth, maxDay] = maxDate.split("-").map(Number);
+
+				const yearsWithData = range(
+					(minMonth == 1) && (minDay == 1) ? minYear : minYear + 1,
+					(maxMonth == 12) && (maxDay == 31) ? maxYear + 1 : maxYear
+				);
+
+// console.log("getDataDateExtent:", dateExtent, yearsWithData, getAllYears(dateExtent))
 
 				dispatch({
 					type: UPDATE_STATE,
 					state: {
 						dateExtent,
-						yearsWithData,
-            allYearsWithData: getAllYears(dateExtent)
+						yearsWithData, // THIS IS YEARS WITH FULL DATA
+            allYearsWithData: getAllYears(dateExtent) // THIS IS ALL YEARS WITH DATA
 					}
 				})
 			})
+}
 
 const getRouteData = (routeIds, report) => {
 	return falcorGraph.get(["routes2", "id", routeIds, ["name", "metadata"]])
@@ -1612,7 +1638,9 @@ const INITIAL_STATE = {
     compId: null,
     startDate: null,
     endDate: null
-  }
+  },
+
+  NPMRDS_VIEW_ID
 }
 
 export default (state=INITIAL_STATE, action) => {
@@ -2614,6 +2642,8 @@ const getRoutesForRouteComp = (routeComp, routeDataMap = null, preserveColors = 
     { endDate } = routeComp.settings,
     year = +endDate.toString().slice(0, 4),
     routes = [];
+
+// console.log("CACHE:", cache);
 
   let tmcArray = get(cache, ["routes2", "id", routeComp.routeId, year, "tmc_array", "value"], fromData);
 

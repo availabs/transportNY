@@ -60,7 +60,7 @@ export const getRequestKey = (...args) => {
 	const {
 		tmcArray,
 		startDate, // format: YYYYMMDD
-		endDate, // format: YYYYMMDD
+		endDate, // format: YYYYMMDD, inclusive
 		startTime, // as epoch
 		endTime, // as epoch, exclusive
 		weekdays,
@@ -115,7 +115,8 @@ class GeneralGraphComp extends React.Component {
 			// tmcGraph: get(state, ["graph", "tmc"], {}),
 			// routesGraph: get(state, ["graph", "routes"], {}),
 			// hdsGraph: get(state, ["graph", "hds"], {}),
-			allYearsWithData: get(state, ["report", "allYearsWithData"], [])
+			allYearsWithData: get(state, ["report", "allYearsWithData"], []),
+			NPMRDS_VIEW_ID: get(state, ["report", "NPMRDS_VIEW_ID"], [])
 		})
 		const mapDispatchToProps = {
 
@@ -206,6 +207,8 @@ class GeneralGraphComp extends React.Component {
 
 		this.setState(prev => ({ loading: prev.loading + 1 }));
 
+		const VIEW_ID = this.props.NPMRDS_VIEW_ID;
+
 		return routes.reduce((promise, route) => {
 			const { tmcArray } = route,
 				year = this.getMaxYear(route),
@@ -226,14 +229,14 @@ class GeneralGraphComp extends React.Component {
 								//['routes','data', key]
 
 								// ['routes', 'data', key]
-								['routes', 'npmrds2', 'view', 812, 'data', key]
+								['routes', 'npmrds2', 'view', VIEW_ID, 'data', key]
 
 							)
 							.then(res => {
-								const getDataPath = ['json', 'routes', 'npmrds2', 'view', 812, 'data', key]
+								const getDataPath = ['json', 'routes', 'npmrds2', 'view', VIEW_ID, 'data', key]
 								//console.log('got data response', res, get(res, getDataPath, []))
 								
-								//const getDataPath = 'json.routes.npmrds2.data.view.812.data'
+								//const getDataPath = 'json.routes.npmrds2.data.view.VIEW_ID.data'
 								if (group === "indices") {
 									INDICES.forEach(index => {
 
