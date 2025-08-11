@@ -25,7 +25,7 @@ import transportNYDataTypes from '~/pages/TransportNYDataTypes'
 
 const DAMA_ARGS = {
   baseUrl: '/datasources',
-  defaultPgEnv: 'freight_data',
+  defaultPgEnv: 'npmrds2',
   dataTypes: transportNYDataTypes,
   useFalcor,
   useAuth,
@@ -43,7 +43,7 @@ const DAMA_ARGS = {
 
 const Routes = [
   ...Auth,
-  //...DataManager(DAMA_ARGS),
+  ...DataManager(DAMA_ARGS),
   ...Documentation,
   GraphTest,
   NoMatch

@@ -6,7 +6,7 @@ import { DAMA_HOST } from "~/config";
 
 const submitUpload = (props, navigate, pgEnv) => {
   props.setLoading(true);
-  const runPublishNpmrdsRaw = async () => {
+  const runPublishMap21 = async () => {
     try {
       const publishData = {
         source_values: {
@@ -22,6 +22,7 @@ const submitUpload = (props, navigate, pgEnv) => {
         user_id: props?.user_id,
         email: props?.email,
         pgEnv: pgEnv || props?.pgEnv,
+        newVersion: props?.newVersion,
       };
       console.log("publishData",publishData)
       const res = await fetch(
@@ -49,10 +50,10 @@ const submitUpload = (props, navigate, pgEnv) => {
       console.log("error : ", err);
     }
   };
-  runPublishNpmrdsRaw();
+  runPublishMap21();
 };
 
-export default function PublishNpmrdsRaw(props) {
+export default function PublishMap21(props) {
   const navigate = useNavigate();
   const { loading, pgEnv } = props;
   return (

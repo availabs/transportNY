@@ -10,8 +10,9 @@ import moment from "moment";
 
 import { DamaContext } from "~/pages/DataManager/store";
 import { DAMA_HOST } from "~/config";
-import { useFalcor, ScalableLoading } from "~/modules/avl-components/src";
-import MultiSelect from "../manage/components/multiselect";
+import { useFalcor, ScalableLoading, Select } from "~/modules/avl-components/src";
+
+const OPEN_CTX_STATUSES = ["OPEN"];
 
 const checkDateRanges = (dateRanges) => {
   if (dateRanges.length === 1) {
@@ -130,10 +131,16 @@ export default function NpmrdsManage({
 
   const [showModal, setShowModal] = React.useState(false);
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
-  const [selectedViews, setSelectedViews] = React.useState([]);
+  const [showReRunModal, setShowReRunModal] = React.useState(false);
+  const [selectedView, setSelectedView] = React.useState([]);
+  const [metaViews, setMetaViews] = React.useState([]);
   const [removeViewId, setRemoveViewId] = React.useState(null);
   const [removeStateKey, setRemoveStateKey] = React.useState(null);
+  const [rerunViewId, setRerunViewId] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
+  const [polling, setPolling ] = React.useState(false);
+  const [pollingInterval, setPollingInterval] = React.useState(false);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -247,6 +254,11 @@ export default function NpmrdsManage({
     return views.find((v) => Number(v.view_id) === Number(activeViewId));
   }, [activeViewId, views]);
 
+  const activeRawViewIds = useMemo(
+    () => activeView?.metadata?.npmrds_raw_view_ids,
+    [activeView]
+  );
+
   const [availableViews, dependentViews] = useMemo(() => {
     return [
       (npmrdsRawViews || []).filter(
@@ -272,24 +284,78 @@ export default function NpmrdsManage({
     );
   }, [dependentViews]);
 
-  const availableViewOptions = useMemo(() => {
-    return availableViews.map((av) => ({
-      label: `${av?.metadata?.name || av?.metadata?.dama_source_name} From ${av?.metadata?.start_date} to ${av?.metadata?.end_date}`,
-      value: av?.view_id,
-      metadata: av?.metadata,
-    }));
-  }, [availableViews]);
+  const availableViewOptions = useMemo(
+    () =>
+      availableViews.map((availableView) => (
+        <option
+          className="max-h-60 rounded-md py-1 text-base leading-6 shadow-xs overflow-auto focus:outline-none sm:text-sm sm:leading-5"
+          value={{
+            value: availableView?.view_id,
+            metadata: availableView?.metadata,
+          }}
+        >
+          {`${
+            availableView?.metadata?.name ||
+            availableView?.metadata?.dama_source_name
+          } From ${availableView?.metadata?.start_date} to ${
+            availableView?.metadata?.end_date
+          }`}
+        </option>
+      )),
+    [availableViews]
+  );
+
+  //get info about tmc_meta
+  //source.npmrds_meta_layer_view_id[year]
+  useEffect(() => {
+    const getMetaViews = async () => {
+      const metaViewIds = Object.values(source.metadata.npmrds_meta_layer_view_id)
+      const metaViewPath = ["dama", pgEnv, "views", "byId", metaViewIds, "attributes", Object.values(ViewAttributes)];
+
+      const metaViewResp = await falcor.get(metaViewPath)
+      const metaViews = get(metaViewResp, ["json", "dama", pgEnv, "views", "byId"])
+
+      let metadataLength;
+      try {
+        const metadataLengthPath = ["dama", pgEnv, "viewsbyId", metaViewIds, "data", "length"];
+        const lengthResp = await falcor.get(metadataLengthPath);
+        metadataLength = get(lengthResp, ["json", "dama", pgEnv, "viewsbyId"]);
+      } catch (e) {
+        console.error("error fetching metadata table length" ,e)
+      }
+      const metaYearLength = metaViewIds.map((mViewId) => {
+        return {
+          meta_view_id: mViewId,
+          num_tmc: metadataLength?.[mViewId]?.data?.length,
+          year: metaViews[mViewId].attributes.metadata.year
+        };
+      });
+
+      setMetaViews(metaYearLength)
+    }
+
+    if(source?.metadata?.npmrds_meta_layer_view_id && Object.values(source?.metadata?.npmrds_meta_layer_view_id).length) {
+      getMetaViews();
+    }
+  }, [source, falcor, pgEnv]);
 
   const dateRanges = useMemo(() => {
-    return ([...selectedViews, activeView] || [])
+    return ([selectedView, activeView] || [])
+      .map(dateView => {
+        if(!!dateView?.props) {
+          return dateView?.props?.value;
+        } else {
+          return dateView;
+        }
+      })
       .filter(
-        (v) => v && v.metadata && v.metadata.start_date && v.metadata.end_date
+        (v) => (v && v.metadata && v.metadata.start_date && v.metadata.end_date)
       )
       .map((dr) => ({
         start_date: dr?.metadata?.start_date,
         end_date: dr?.metadata?.end_date,
       }));
-  }, [selectedViews, activeView]);
+  }, [selectedView, activeView]);
 
   const { msgString, isValidDateRage } = useMemo(() => {
     return { ...(checkDateRanges(dateRanges) || {}) };
@@ -297,12 +363,19 @@ export default function NpmrdsManage({
 
   const headers = [
     "State",
-    "View Id",
+    "Raw Data View Id",
+    "Meta View Id",
     "Version",
     "Start Date",
     "End Date",
-    "Tmcs",
-    "",
+    "Tmcs in Metadata",
+    "Tmcs in data",
+    "Total Percentage",
+    "Interstate Percent",
+    "Non Interstate Percent",
+    "Extended TMC Percent",
+    "Delete",
+    "Re-run metadata",
   ];
 
   const updateNpmrds = async () => {
@@ -311,12 +384,13 @@ export default function NpmrdsManage({
       view_id: activeView?.view_id,
       user_id: ctxUser?.id,
       email: ctxUser?.email,
-      npmrds_raw_view_ids: selectedViews.map((svs) => svs.value),
+      npmrds_raw_view_ids: [selectedView?.props?.value?.value],
       name: source?.name,
       type: "npmrds",
       ...findMinMaxDates(dateRanges),
       pgEnv,
     };
+    console.log("update, publishData::", publishData)
     setLoading(true);
     try {
       const res = await fetch(`${DAMA_HOST}/dama-admin/${pgEnv}/npmrds/add`, {
@@ -335,6 +409,177 @@ export default function NpmrdsManage({
       setLoading(false);
     }
   };
+
+  const rerunMetadata = async (rerunViewId) => {
+    const publishData = {
+      source_id: source?.source_id || null,
+      view_id: activeView?.view_id,
+      npmrds_raw_view_ids: [rerunViewId.raw_view_id],
+      user_id: ctxUser?.id,
+      email: ctxUser?.email,
+      year: rerunViewId.start_date.substring(0,4),
+      pgEnv,
+    };
+
+    const res = await fetch(
+      `${DAMA_HOST}/dama-admin/${pgEnv}/npmrds/metadata`,
+      {
+        method: "POST",
+        body: JSON.stringify(publishData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    await res.json();
+  }
+  const lengthPath = [
+    "dama",
+    pgEnv,
+    "latest",
+    "events",
+    "for",
+    "source",
+    [source?.source_id],
+    "length",
+  ];
+  useEffect(() => {
+    async function getCtxs() {
+      const resp = await falcor.get(lengthPath);
+      await falcor.get([
+        "dama",
+        pgEnv,
+        "latest",
+        "events",
+        "for",
+        "source",
+        [source?.source_id],
+        { from: 0, to: get(resp.json, lengthPath, 0) - 1 },
+        [
+          "etl_status",
+          "etl_context_id",
+          "created_at",
+          "terminated_at",
+          "source_id",
+          "parent_context_id",
+          "type",
+          "payload",
+          "user",
+        ],
+      ]);
+    }
+    getCtxs();
+  }, [falcor, pgEnv, source?.source_id]);
+
+  const ctxs = useMemo(
+    () =>
+      get(falcorCache, [
+        "dama",
+        pgEnv,
+        "latest",
+        "events",
+        "for",
+        "source",
+        [source?.source_id],
+      ]),
+    [falcorCache, source?.source_id]
+  );
+
+  useEffect(() => {
+    const getEvents = async () => {
+      const ctxIds = Object.values(ctxs)
+        .map((ctx) => ctx.etl_context_id)
+        .filter((ctxId) => !!ctxId);
+
+      ctxIds.forEach(async (ctxId) => {
+        await falcor.get([
+          "dama",
+          pgEnv,
+          "etlContexts",
+          "byEtlContextId",
+          ctxId,
+        ]);
+      });
+    };
+    if (ctxs) {
+      getEvents();
+    }
+  }, [ctxs]);
+
+  const ctxsWithEvent = useMemo(
+    () => get(falcorCache, ["dama", pgEnv, "etlContexts", "byEtlContextId"]),
+    [falcorCache, pgEnv]
+  );
+
+  const openMetadataCtxs = useMemo(() => {
+    if (ctxsWithEvent) {
+      return Object.values(ctxsWithEvent)
+        .map((item) => item?.value)
+        .filter((ctx) => OPEN_CTX_STATUSES.includes(ctx.meta.etl_status))
+        .filter((ctx) =>
+          ctx.events.some((ctxEvent) => ctxEvent.type.includes("metadata"))
+        )
+        .map((ctx) => ({
+          ...ctx,
+          raw_view_id: ctx?.events?.[0]?.payload.npmrds_raw_view_ids?.[0],
+        }))
+        .filter((ctx) => activeRawViewIds?.includes(ctx.raw_view_id));
+    }
+  }, [falcorCache, falcor, source?.source_id]);
+
+  useEffect(() => {
+    if ((openMetadataCtxs && openMetadataCtxs.length > 0) || (polling && !ctxsWithEvent)) {
+      setPolling(true);
+    } else {
+      setPolling(false);
+    }
+  }, [openMetadataCtxs, falcorCache]);
+
+  const contextLength = get(falcorCache, lengthPath);
+  const doPolling = async () => {
+    const fetchContextsPath = [
+      "dama",
+      pgEnv,
+      "latest",
+      "events",
+      "for",
+      "source",
+      [source?.source_id],
+      { from: 0, to: contextLength - 1 },
+      [
+        "etl_status",
+        "etl_context_id",
+        "created_at",
+        "terminated_at",
+        "source_id",
+        "parent_context_id",
+        "type",
+        "payload",
+        "user",
+      ],
+    ];
+    falcor.invalidate(["dama", pgEnv, "etlContexts", "byEtlContextId"]);
+    falcor.invalidate(fetchContextsPath);
+    await falcor.get(fetchContextsPath);
+  };
+
+  //TODO this could be used to show that an `add` is in process as well
+  useEffect(() => {
+    // -- start polling
+    if (polling && !pollingInterval) {
+      let id = setInterval(doPolling, 10000);
+      setPollingInterval(id);
+    }
+    // -- stop polling
+    else if (pollingInterval && !polling) {
+      clearInterval(pollingInterval);
+      // run polling one last time in case it never finished
+      doPolling();
+      setPolling(false);
+      setPollingInterval(null);
+
+    }
+  }, [polling, pollingInterval]);  
 
   const removeNpmrds = async (viewId, stateGroup) => {
     const publishData = {
@@ -429,81 +674,143 @@ export default function NpmrdsManage({
             <tbody>
               {Object.keys(groupbyState).map((group) => (
                 <React.Fragment key={group}>
-                  {groupbyState[group].map((item, index) => (
-                    <tr key={index}>
-                      {index === 0 && (
-                        <td
-                          rowSpan={groupbyState[group].length}
-                          className="py-2 px-4 border-b font-bold"
-                        >
-                          {group}
-                        </td>
-                      )}
-                      <td
-                        key={`${group}.${item?.view_id}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {item?.view_id}
-                      </td>
-                      <td
-                        key={`${group}.${item?.metadata?.npmrds_version}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {item?.metadata?.npmrds_version}
-                      </td>
-                      <td
-                        key={`${group}.${item?.metadata?.start_date}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {item?.metadata?.start_date}
-                      </td>
-                      <td
-                        key={`${group}.${item?.metadata?.end_date}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {item?.metadata?.end_date}
-                      </td>
-                      <td
-                        key={`${group}.${item?.metadata?.no_of_tmc}`}
-                        className="py-2 px-4 border-b"
-                      >
-                        {item?.metadata?.no_of_tmc}
-                      </td>
-                      {index === 0 ||
-                      index === groupbyState[group].length - 1 ? (
-                        <>
+                  {groupbyState[group].map((item, index) => { 
+                    const metaView = metaViews.length ? metaViews?.find(mView => parseInt(mView.year) === parseInt(item?.metadata?.start_date.substring(0, 4))) : {};
+                    const openEvents = metaViews.length && openMetadataCtxs ? openMetadataCtxs.filter(ctx => ctx.raw_view_id === item.view_id) : [];
+                    const hasOpenMetadataEvent = openEvents.length > 0;
+                    return (
+                      <tr key={index}>
+                        {index === 0 && (
                           <td
-                            key={`${group}.${index}`}
-                            className="py-2 px-4 border-b"
+                            rowSpan={groupbyState[group].length}
+                            className="py-2 px-4 border-b font-bold"
                           >
-                            <button
-                              className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-red-500 text-white shadow-md shadow-red-900/10 hover:shadow-lg hover:shadow-red-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
-                              type="button"
-                              onClick={() => {
-                                setRemoveViewId(item?.view_id);
-                                setRemoveStateKey(group);
-                                setShowDeleteModal(true);
-                              }}
-                            >
-                              <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
-                                <i
-                                  className="fad fa-trash"
-                                  aria-hidden="true"
-                                ></i>
-                              </span>
-                            </button>
+                            {group}
                           </td>
-                        </>
-                      ) : (
-                        <>
-                          <td
-                            key={`${group}.${index}`}
-                            className="py-2 px-4 border-b"
-                          ></td>
-                        </>
-                      )}
-                    </tr>
-                  ))}
+                        )}
+                        <td
+                          key={`${group}.${item?.view_id}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {item?.view_id}
+                        </td>
+                        <td
+                          key={`${group}.${item?.view_id}_meta_view_id`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {metaViews.length && (metaView?.meta_view_id)}
+                        </td>
+                        <td
+                          key={`${group}.${item?.metadata?.npmrds_version}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {item?.metadata?.npmrds_version}
+                        </td>
+                        <td
+                          key={`${group}.${item?.metadata?.start_date}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {item?.metadata?.start_date}
+                        </td>
+                        <td
+                          key={`${group}.${item?.metadata?.end_date}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {item?.metadata?.end_date}
+                        </td>
+                        <td
+                          key={`${group}.${item?.metadata?.no_of_tmc_metadata}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {metaViews.length  && metaViews.find(mView => parseInt(mView.year) === parseInt(item.metadata.start_date.substring(0, 4)))?.num_tmc}
+                        </td>
+                        <td
+                          key={`${group}.${item?.metadata?.no_of_tmc}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {item?.metadata?.no_of_tmc}
+                        </td>
+                        <td
+                          key={`${group}.${item?.statistics?.total}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {Math.round(item?.statistics?.total * 100) / 100}
+                        </td>
+                        <td
+                          key={`${group}.${item?.statistics?.interstate_percentage}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {Math.round(item?.statistics?.interstate_percentage * 100) / 100}
+                        </td>
+                        <td
+                          key={`${group}.${item?.statistics?.non_interstate_percentage}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {Math.round(item?.statistics?.non_interstate_percentage * 100) / 100}
+                        </td>
+                        <td
+                          key={`${group}.${item?.statistics?.extended_tmc_percentage}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          {Math.round(item?.statistics?.extended_tmc_percentage * 100) / 100}
+                        </td>
+                        {index === 0 ||
+                        index === groupbyState[group].length - 1 ? (
+                          <>
+                            <td
+                              key={`${group}.${index}`}
+                              className="py-2 px-4 border-b"
+                            >
+                              <button
+                                className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-red-500 text-white shadow-md shadow-red-900/10 hover:shadow-lg hover:shadow-red-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+                                type="button"
+                                onClick={() => {
+                                  setRemoveViewId(item?.view_id);
+                                  setRemoveStateKey(group);
+                                  setShowDeleteModal(true);
+                                }}
+                              >
+                                <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+                                  <i
+                                    className="fad fa-trash"
+                                    aria-hidden="true"
+                                  ></i>
+                                </span>
+                              </button>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td
+                              key={`${group}.${index}`}
+                              className="py-2 px-4 border-b"
+                            ></td>
+                          </>
+                        )}
+                        <td
+                          key={`${group}.${index}`}
+                          className="py-2 px-4 border-b"
+                        >
+                          <button
+                            className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-blue-500 text-white shadow-md shadow-blue-900/10 hover:shadow-lg hover:shadow-blue-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+                            type="button"
+                            disabled={polling}
+                            onClick={() => {
+                              console.log("RERRUN -- ITEM::", item)
+                              setRerunViewId({raw_view_id: item?.view_id, start_date: item.metadata.start_date, end_date:item.metadata.end_date, year: item.metadata.start_date.substring(0, 4)  });
+                              setShowReRunModal(true);
+                            }}
+                          >
+                            <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+                              <i
+                                className={hasOpenMetadataEvent ? "fa-solid fa-spin fa-spinner" : "fad fa-rotate"}
+                                aria-hidden="true"
+                              ></i>
+                            </span>
+                          </button>
+                        </td>
+                      </tr>)
+                  })}
                 </React.Fragment>
               ))}
             </tbody>
@@ -554,10 +861,12 @@ export default function NpmrdsManage({
                       </div>
                     </>
                   ) : null}
-                  <MultiSelect
+                  <Select
                     options={availableViewOptions}
-                    onChange={setSelectedViews}
-                    value={selectedViews}
+                    onChange={setSelectedView}
+                    value={selectedView}
+                    themeOptions={{color: 'white'}}
+                    className = 'min-w-[479px] border border-gray-300 rounded-md'
                   />
                 </div>
               ) : (
@@ -581,7 +890,7 @@ export default function NpmrdsManage({
                 >
                   Close
                 </button>
-                {selectedViews && selectedViews.length && isValidDateRage ? (
+                {selectedView && isValidDateRage ? (
                   <button
                     className="ml-3 inline-flex justify-center px-4 py-2 text-sm text-green-900 bg-green-100 border border-transparent rounded-md hover:bg-green-200 duration-300"
                     type="button"
@@ -656,6 +965,61 @@ export default function NpmrdsManage({
                   ) : (
                     "Yes"
                   )}
+                </button>
+              </div>
+            </div>
+          </DialogPanel>
+        </div>
+      </Dialog>
+
+      <Dialog
+        as="div"
+        className="relative z-50"
+        open={showReRunModal}
+        onClose={() => setShowReRunModal(false)}
+      >
+        <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
+          <span
+            className="inline-block h-screen align-middle"
+            aria-hidden="true"
+          >
+            &#8203;
+          </span>
+          <DialogPanel>
+            <div className="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
+              <DialogTitle
+                as="h3"
+                className="text-lg font-medium leading-6 text-gray-900"
+              >
+                Re-run Metadata Processing Npmrds
+              </DialogTitle>
+
+              <div className="relative p-6 flex-auto">
+                <div className="p-4 m-2 text-sm" role="alert">
+                  <span className="font-medium">
+                    Are you sure you want to re-run metadata for dates <b>{rerunViewId?.start_date} thru {rerunViewId?.end_date} </b> ( raw view id { rerunViewId?.raw_view_id } ) ?
+                  </span>
+                </div>
+              </div>
+              <div className="mt-4">
+                <button
+                  type="button"
+                  className="inline-flex justify-center px-4 py-2 text-sm text-red-900 bg-red-100 border border-transparent rounded-md hover:bg-red-200 duration-300"
+                  onClick={() => setShowReRunModal(false)}
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className="ml-3 inline-flex justify-center px-4 py-2 text-sm text-green-900 bg-green-100 border border-transparent rounded-md hover:bg-green-200 duration-300"
+                  onClick={async () => {
+                    rerunMetadata(rerunViewId);
+                    setPolling(true);
+                    doPolling();
+                    setShowReRunModal(false);
+                  }}
+                >
+                  Re-Run
                 </button>
               </div>
             </div>

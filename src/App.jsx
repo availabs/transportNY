@@ -11,8 +11,18 @@ import { getSubdomain }  from '~/utils'
 // } from "@availabs/ams"
 
 import {
-  Messages
+  Messages,
+  withAuth, 
+  useAuth
 } from "~/modules/ams/src"
+
+import {
+  DmsSite,
+  registerDataType,
+  Selector,
+  adminConfig,
+  registerComponents
+} from "~/modules/dms/src/"
 
 import DefaultRoutes from '~/Routes';
 
@@ -25,17 +35,34 @@ import npmrds from '~/sites/npmrds'
 import transit from '~/sites/transit'
 import demos from '~/sites/demos'
 import sandbox from '~/sites/sandbox'
+import themes from './dms_themes'
 
 const Sites = {
-  transportNY,
+  www: transportNY,
   tsmo,
   freightatlas,
   fdi,
   npmrds,
-  transit,
+  //transit,
   demos,
   sandbox
 }
+//import AdditionalComponents from "./additional_components";
+import { DamaMap, Map } from "./pages/DataManager/"
+
+
+
+registerComponents({
+  "Map: Dama Map": DamaMap,
+  "Map": Map
+})
+
+registerDataType("selector", Selector)
+
+const defaultPgEnv = 'npmrds2';
+const adminBaseUrl = '/list'
+const damaBaseUrl = '/datasources'
+
 
 
 // console.log('just run', transportNY)
@@ -44,9 +71,12 @@ const Sites = {
 
 const App = (props) => {
   const SUBDOMAIN = getSubdomain(window.location.host)
+  console.log('SUBDOMAIN')
 
   const site = useMemo(() => {
-      return get(Sites, SUBDOMAIN, Sites['transportNY'])
+      let siteOutpt = SUBDOMAIN ? get(Sites, SUBDOMAIN, {Routes:[]}) : Sites['www']
+      console.log('SUBDOMAIN', siteOutpt)
+      return siteOutpt
   },[SUBDOMAIN])
 
   const WrappedRoutes =  useMemo(() => {
@@ -57,8 +87,27 @@ const App = (props) => {
 
   return (
     <>
-      <RouterProvider
+      {/*<RouterProvider
         router={createBrowserRouter(WrappedRoutes)}
+      />*/}
+      <DmsSite
+        dmsConfig = {
+          adminConfig[0]({
+              app: 'npmrdsv5',
+              type: 'dev2',
+              baseUrl: adminBaseUrl
+             // API_HOST
+          })
+        }
+        adminPath={adminBaseUrl}
+        pgEnvs={[defaultPgEnv]}
+        
+        authWrapper={withAuth}
+        themes={themes}
+        damaBaseUrl={damaBaseUrl}
+        //API_HOST={API_HOST}
+
+        routes={WrappedRoutes} 
       />
       <Messages />
     </>

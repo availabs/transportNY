@@ -1,32 +1,4 @@
-import { useFalcor } from "~/modules/avl-components/src"
-import { useAuth } from "~/modules/ams/src";
-import { Link } from 'react-router'
-
-
-import { dmsPageFactory, registerDataType, Selector, registerComponents } from "~/modules/dms/src"
-import pageConfig from "~/modules/dms/src/patterns/page/siteConfig"
-import { withAuth } from "~/modules/ams/src"
-
-import checkAuth from "~/layout/checkAuth"
-import { Logo } from '~/layout/ppdaf-layout'
-import AuthMenu from "~/pages/Auth/AuthMenu"
-
-import ComponentRegistry from '~/components'
-
-import { DamaMap } from '~/pages/DataManager'
-
-// import BuildingFootprintsDownload from "./buildings_download"
-
-registerComponents({
-  "Map: Dama Map": DamaMap,
-})
-//registerComponents(ComponentRegistry)
-registerDataType("selector", Selector)
-
-//console.log('components', DamaMap)
-
-
-const theme = {
+export const defaultTheme = {
   navOptions: {
     "sideNav": {
         "size": "none",
@@ -71,14 +43,9 @@ const theme = {
         "default": {
             "wrapper1": "w-full h-full flex-1 flex flex-row pt-2",
             "wrapper2": "flex flex-1 w-full  flex-col  shadow-md bg-white rounded-lg relative text-md font-light leading-7 h-full min-h-[200px]",
-            "iconWrapper": "z-[10] w-[30px] h-[30px] absolute right-[30px] top-[5px]",
-            "icon": "text-slate-400 hover:text-blue-500",
-            viewIcon: 'ViewPage',
-            editIcon: 'EditPage'
+            "iconWrapper": "z-5 absolute right-[10px] top-[5px]",
+            "icon": "text-slate-400 hover:text-blue-500"
         },
-  },
-  section: {
-    editTopLineIcons: 'flex w-full pt-12 bg-white'
   },
   topnav: {
       fixed: 'mt-12',
@@ -133,60 +100,3 @@ const theme = {
       
   }
 }
-
-const Routes = [
-  {
-    ...dmsPageFactory(
-      pageConfig[0]({
-        app: "transportny",
-        type: "cms-freightatlas",
-        useFalcor: useFalcor,
-        logo: <Logo />,
-        rightMenu: (
-          <div className='flex'>
-            <Link
-              to='/datasources'
-              className='w-fit group font-display whitespace-nowrap
-                flex font-medium tracking-widest items-center text-[14px] px-4 h-12 text-slate-700 border-slate-100
-                hover:bg-white hover:text-blue-500
-                focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
-                transition cursor-pointer'
-            >
-              Data Manager
-            </Link>
-            <Link
-              to='https://npmrds.transportny.org/docs'
-              className='w-fit group font-display whitespace-nowrap
-                flex font-medium tracking-widest items-center text-[14px] px-4 h-12 text-slate-700 border-slate-100
-                hover:bg-white hover:text-blue-500
-                focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
-                transition cursor-pointer'
-            >
-              Docs
-            </Link>
-            <AuthMenu />
-          </div>
-        ),
-        baseUrl: "",
-        checkAuth,
-        themes: { default: theme },
-        pgEnv: 'freight_data'
-      }),
-      withAuth,
-
-    ),
-    authLevel: -1,
-    name: "CMS",
-    sideNav: {
-      color: 'white',
-      size: 'none'
-    },
-    topNav: {
-      size: "none",
-      color: "white"
-    }
-  }
-]
-
-
-export default Routes

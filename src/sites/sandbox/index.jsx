@@ -3,7 +3,8 @@ import { useFalcor } from "~/modules/avl-components/src"
 import { useAuth } from "~/modules/ams/src";
 import {Link} from 'react-router'
 
-import { dmsPageFactory, registerDataType, Selector, registerComponents, pageConfig } from "~/modules/dms/src"
+import { dmsPageFactory, registerDataType, Selector, registerComponents } from "~/modules/dms/src"
+import pageConfig from "~/modules/dms/src/patterns/page/siteConfig"
 import { withAuth } from "~/modules/ams/src"
 
 import checkAuth  from "~/layout/checkAuth"
@@ -12,12 +13,13 @@ import AuthMenu from "~/pages/Auth/AuthMenu"
 
 import ComponentRegistry from '~/components'
 
-import { DamaMap } from '~/pages/DataManager'
+import { DamaMap, Map } from '~/pages/DataManager'
 
 // import BuildingFootprintsDownload from "./buildings_download"
 
 registerComponents({
   "Map: Dama Map": DamaMap,
+  Map
 })
 //registerComponents(ComponentRegistry)
 registerDataType("selector", Selector)
@@ -26,6 +28,26 @@ registerDataType("selector", Selector)
 
 
 const theme = {
+  navOptions: {
+    logo: <Logo />,//'',//<Link to='/' className='h-12 flex px-4 items-center'><div className='rounded-full h-8 w-8 bg-blue-500 border-2 border-blue-300 hover:bg-blue-600' /></Link>, //<Link to='/' className='h-12 flex px-4 items-center'>LOGO</Link>,
+    sideNav: {
+      size: 'compact',
+      search: 'none',
+      logo: 'none',
+      position: 'fixed',
+      dropdown: 'none',
+      nav: 'main'
+    },
+    topNav: {
+      size: 'compact',
+      dropdown: 'right',
+      search: 'right',
+      logo: 'left',
+      position: 'fixed',
+      
+      nav: 'none' 
+    }
+  },
   page: {
     wrapper1: 'w-full flex-1 flex flex-col  ', // first div inside Layout
     wrapper2: 'w-full h-full flex-1 flex flex-row', // inside page header, wraps sidebar
@@ -36,7 +58,7 @@ const theme = {
 
 const DAMA_ARGS = {
   baseUrl: '/datasources',
-  defaultPgEnv: 'nysdot_sandbox',
+  defaultPgEnv: 'npmrds2',
   useFalcor,
   useAuth,
   authLevel:1,
@@ -54,8 +76,8 @@ const Routes = [
   {
     ...dmsPageFactory(
       pageConfig[0]({
-        app: "transportny",
-        type: "cms-sandbox",
+        app: "npmrdsv5",
+        type: "test_123",
         useFalcor: useFalcor,
         logo: <Logo />,
         rightMenu: (
@@ -72,7 +94,8 @@ const Routes = [
         authLevel: 1,
         checkAuth,
         themes: {default:theme},
-        pgEnv:'freight_data'
+        pgEnv:'npmrds2',
+        damaBaseUrl: '/datasources'
       }),
       withAuth,
 

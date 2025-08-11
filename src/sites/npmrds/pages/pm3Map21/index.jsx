@@ -104,7 +104,7 @@ const PM3 = () => {
     const path = ["pm3", "versionedCalculations", "geoLevelVersionsMetadata"];
     falcor.get(path, ["geo", 36, "geoLevels"])
       .then(res => {
-        // console.log('resp', res)
+        console.log('resp', res)
         const geoLevels = get(res, ["json", "geo", 36, "geoLevels"], [])
           .filter(d => d.geolevel !== "REGION");
         const groups = d3groups(geoLevels, d => d.geolevel);

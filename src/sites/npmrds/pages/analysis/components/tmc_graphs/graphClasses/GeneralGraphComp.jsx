@@ -225,18 +225,11 @@ class GeneralGraphComp extends React.Component {
 					return requestKeys.reduce((promise, { dd, alias, group, key }) => {
 						return promise.then(() => {
 							return this.props.falcor.get(
-
-								//['routes','data', key]
-
-								// ['routes', 'data', key]
-								['routes', 'npmrds2', 'view', VIEW_ID, 'data', key]
-
+								['routes', 'npmrds2', 'view', 982, 'data', key]
 							)
 							.then(res => {
-								const getDataPath = ['json', 'routes', 'npmrds2', 'view', VIEW_ID, 'data', key]
-								//console.log('got data response', res, get(res, getDataPath, []))
-								
-								//const getDataPath = 'json.routes.npmrds2.data.view.VIEW_ID.data'
+								const getDataPath = ['json', 'routes', 'npmrds2', 'view', 982, 'data', key];
+
 								if (group === "indices") {
 									INDICES.forEach(index => {
 

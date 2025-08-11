@@ -20,7 +20,7 @@ export default function NpmrdsRawOverview({
     "State",
     "View Id",
     "Date Added",
-    "Version",
+    "NPMRDS Version",
     "Start Date",
     "End Date",
     "Total Percent",

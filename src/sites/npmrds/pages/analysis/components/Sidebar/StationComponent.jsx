@@ -8,7 +8,7 @@ import StationControls from "./components/StationControls"
 import { PEAKS } from "../../reports/store/utils/general.utils"
 import DateObject from "../tmc_graphs/utils/DateObject"
 
-import deepequal from "deep-equal"
+import { isEqual } from "lodash-es"
 
 class StationComponent extends React.Component {
   state = {

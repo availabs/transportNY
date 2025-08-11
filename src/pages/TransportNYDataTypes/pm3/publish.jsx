@@ -3,26 +3,35 @@ import { useNavigate } from "react-router";
 
 import { ScalableLoading } from "~/modules/avl-components/src";
 import { DAMA_HOST } from "~/config";
-import { MAX_NPMRDS_SOURCE_NAME_LENGTH } from "../"
 
-const npmrdsPublish = async (props, navigate, pgEnv) => {
+const pm3Publish = async (props, navigate, pgEnv) => {
   props.setLoading(true);
-  
+  let year = props.year;
+  if(props.startDate && props.endDate) {
+    year = props.startDate.getFullYear()
+  }
+
   const publishData = {
+    source_values: {
+      name: props?.name,
+      type:  props?.type
+    },
+    newVersion: props?.newVersion,
     source_id: props?.source_id || null,
     user_id: props?.user_id,
+    email: props.email,
     name: props?.name,
-    type: props?.type || "npmrds",
+    type: props?.type || "pm3",
     pgEnv: pgEnv || props?.pgEnv,
-    tmcSpeedViewId: props?.selectedViewId,
-    tmcSpeedSourceId: props?.selectedSourceId,
-    mpoBoundariesViewId: props?.selectedMpoBoundariesViewId || null,
-    mpoBoundariesSourceId: props?.selectedMpoBoundariesSourceId || null,
+    dates:[props.startDate, props.endDate],
+    year,
+    npmrdsSourceId: props.npmrdsSourceId
   };
 
   try {
+    console.log("attempting to make pm3 source", publishData)
     const res = await fetch(
-      `${DAMA_HOST}/dama-admin/${pgEnv}/npmrds/publish`,
+      `${DAMA_HOST}/dama-admin/${pgEnv}/pm3/publish`,
       {
         method: "POST",
         body: JSON.stringify(publishData),
@@ -46,37 +55,23 @@ const npmrdsPublish = async (props, navigate, pgEnv) => {
   }
 };
 
-export default function PublishNpmrds(props) {
+export default function PublishPm3(props) {
   const navigate = useNavigate();
   const { loading, setLoading, pgEnv, ...restProps } = props;
   
   const handlePublishClick = useCallback(() => {
-    npmrdsPublish({ ...restProps, setLoading }, navigate, pgEnv);
+    pm3Publish({ ...restProps, setLoading }, navigate, pgEnv);
   }, [restProps, navigate, setLoading]);
-  const isNameTooLong = props?.name?.length > MAX_NPMRDS_SOURCE_NAME_LENGTH;
-  const isButtonDisabled = (!props.source_id && !props.name) || !props.selectedViewId || isNameTooLong;
-  const buttonClass = isButtonDisabled
-    ? "cursor-not-allowed bg-gray-400 text-white font-bold py-2 px-4 rounded"
-    : "cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded";
+  const buttonClass = props.disabled
+      ? "cursor-not-allowed bg-gray-400 text-white font-bold py-2 px-4 rounded"
+      : "cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded";
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-col gap-2">
-        <div>
-          {(props.source_id || props.name) &&
-            !props.selectedViewId &&
-            "A TMC Speed Limit Source and View must be selected."}
-        </div>
-        <div>
-          {(props.source_id || props.name) &&
-            !props.selectedMpoBoundariesViewId &&
-            "An MPO Boundaries Source and View must be selected."}
-        </div>
-      </div>
       <div >
         <button
           className={buttonClass}
-          disabled={isButtonDisabled}
+          disabled={props.disabled}
           onClick={handlePublishClick}
         >
           {loading ? (

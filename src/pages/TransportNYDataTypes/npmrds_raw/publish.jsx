@@ -50,10 +50,15 @@ const submitUpload = (props, navigate, pgEnv) => {
 export default function PublishNpmrdsRaw(props) {
   const navigate = useNavigate();
   const { loading, pgEnv } = props;
+
+  const buttonClass = props.disabled
+      ? "cursor-not-allowed bg-gray-400 text-white font-bold py-2 px-4 rounded"
+      : "cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded";
   return (
     <>
       <button
-        className={`cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded`}
+        disabled={props.disabled}
+        className={buttonClass}
         onClick={() => submitUpload(props, navigate, pgEnv)}
       >
         {" "}
