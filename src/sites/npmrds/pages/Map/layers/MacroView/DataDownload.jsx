@@ -144,7 +144,7 @@ class DataDownloader extends React.Component {
       type: "FeatureCollection",
       features: selection.map(id => {
         const geom = get(falcorCache, [...this.props.layer.getGeomRequest(id), "value"], "FAILED")
-        console.log('download geomtype', geom?.type)
+        // console.log('download geomtype', geom?.type)
 
         return {
         type: "Feature",
@@ -201,7 +201,7 @@ class DataDownloader extends React.Component {
       metaVars = get(this.state, ["metaVars", n], []),
 
       length = measures.length + metaVars.length;
-      let fcache = this.props.falcor.getCache()
+      let fcache = this.props.falcor.getCache();
 
     return selection.map(id =>
       [id,
@@ -218,13 +218,18 @@ class DataDownloader extends React.Component {
           const v = getValue();
           return isNaN(v) ? "" : v;
         }),
-        ...metaVars.map(mv => get(fcache, [n, id, "meta", y, mv], "")),
+        ...metaVars.map(mv => {
+          // if (mv === 'county') {
+          //   console.log(get(fcache, [n, id, "meta", y, mv], ""))
+          // }
+          return get(fcache, [n, id, "meta", y, mv], "");
+        }),
       y, cy].slice(0, cy === "none" ? 2 + length : 3 + length).join(",")
     );
   }
   downloadCsv() {
 
-console.log("downloadCsv", this.props.layer.fetchRequestsForGeography())
+// console.log("downloadCsv", this.props.layer.fetchRequestsForGeography())
 
     this.setState({ loading: true, show: false });
      this.props.falcor.get(...this.props.layer.fetchRequestsForGeography())
@@ -238,13 +243,14 @@ console.log("downloadCsv", this.props.layer.fetchRequestsForGeography())
           .then(() => {
             const rows = this.createCsv(),
               header = [this.props.network, ...this.state.measures, ...get(this.state, ["metaVars", n], []), "year"];
+
             if (this.props.compareYear !== "none") {
               header.push("compare year");
             }
             // console.log('download csv rows', rows)
             rows.unshift(header.join(","))
-            const blob = new Blob([rows.join("\n")], { type: "text/csv" });
-            saveAs(blob, this.makeFileName() + '.csv');
+            // const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+            // saveAs(blob, this.makeFileName() + '.csv');
           })
           .then(() => this.setState({ loading: false }));
       })
