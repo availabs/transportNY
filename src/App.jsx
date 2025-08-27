@@ -28,6 +28,7 @@ import DefaultRoutes from '~/Routes';
 
 import transportNY from '~/sites/transportny'
 import tsmo from '~/sites/tsmo'
+import tsmonew from '~/sites/tsmo_new'
 import freightatlas from '~/sites/freightatlas'
 import fdi from '~/sites/fdi'
 
@@ -39,6 +40,7 @@ import themes from './dms_themes'
 
 const Sites = {
   www: transportNY,
+  tsmo2: tsmonew,
   tsmo,
   freightatlas,
   fdi,
