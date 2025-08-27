@@ -63,7 +63,7 @@ const IncidentViewNew = (props) => {
 
 const config = {
   name: "Incident View",
-  path: '/new/incidents/:event_id',
+  path: '/incidents/:event_id',
   auth: false,
   exact: true,
   mainNav: false,

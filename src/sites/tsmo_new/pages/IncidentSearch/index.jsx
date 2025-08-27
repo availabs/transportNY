@@ -89,7 +89,7 @@ const Home = () => {
     let descriptionData;
     if (description != "")
       descriptionData = await falcor.get(["transcom2", "getEventsByDescription", [description]]);
-    
+
     const descriptionEventIds = (get(descriptionData, ["json", "transcom2", "getEventsByDescription", [description]])) || [];
     const eventsIds = (description != "" ? eventIds.filter(a => descriptionEventIds.includes(a)) : eventIds);
 
@@ -360,7 +360,7 @@ const config = {
   name: 'Home',
   title: 'Incident Search',
   icon: 'fa-duotone fa-search',
-  path: "/new/incidents/search",
+  path: "/incidents/search",
   exact: true,
   auth: false,
   mainNav: true,

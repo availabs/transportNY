@@ -463,7 +463,7 @@ const Scale = ({ scale }) => {
 
 const config = [
   { name:'Month Grid',
-    path: "/new/corridor/:tmclinear/:date",
+    path: "/corridor/:tmclinear/:date",
     showInBlocks: false,
     exact: true,
     auth: false,
@@ -475,7 +475,7 @@ const config = [
     component: MonthGrid
   },
   { name:'Month Grid',
-    path: "/new/corridor",
+    path: "/corridor",
     exact: true,
     auth: false,
     mainNav: false,

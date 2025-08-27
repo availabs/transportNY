@@ -313,7 +313,7 @@ const Incidents = props => {
 
 const WorkzonesConfig = {
   name: 'Work Zones',
-  path: "/new/workzones",
+  path: "/workzones",
   exact: true,
   auth: false,
   mainNav: true,

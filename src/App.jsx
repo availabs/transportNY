@@ -12,7 +12,7 @@ import { getSubdomain }  from '~/utils'
 
 import {
   Messages,
-  withAuth, 
+  withAuth,
   useAuth
 } from "~/modules/ams/src"
 
@@ -40,8 +40,8 @@ import themes from './dms_themes'
 
 const Sites = {
   www: transportNY,
-  tsmo2: tsmonew,
-  tsmo,
+  tsmo: tsmonew,
+  tsmo_old: tsmo,
   freightatlas,
   fdi,
   npmrds,
@@ -103,13 +103,13 @@ const App = (props) => {
         }
         adminPath={adminBaseUrl}
         pgEnvs={[defaultPgEnv]}
-        
+
         authWrapper={withAuth}
         themes={themes}
         damaBaseUrl={damaBaseUrl}
         //API_HOST={API_HOST}
 
-        routes={WrappedRoutes} 
+        routes={WrappedRoutes}
       />
       <Messages />
     </>

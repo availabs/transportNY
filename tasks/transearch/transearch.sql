@@ -42,6 +42,7 @@ select
 	round(sum(case when stcc = '50 2' then total_tonnage else 0 end), 1) as stcc_5002_tonnage, 
 	round(sum(case when stcc = '8' then total_tonnage else 0 end), 1) as stcc_8_tonnage, 
 	round(sum(case when stcc = '9' then total_tonnage else 0 end), 1) as stcc_9_tonnage,
+	round(sum(total_tonnage)) as total_tonnage,
 	round(sum(case when stcc = '1' then total_value else 0 end), 1) as stcc_1_value,
 	round(sum(case when stcc = '10' then total_value else 0 end), 1) as stcc_10_value,
 	round(sum(case when stcc = '11' then total_value else 0 end), 1) as stcc_11_value,
@@ -80,7 +81,8 @@ select
 	round(sum(case when stcc = '50 2' then total_value else 0 end), 1) as stcc_5002_value,
 	round(sum(case when stcc = '8' then total_value else 0 end), 1) as stcc_8_value,
 	round(sum(case when stcc = '9' then total_value else 0 end), 1) as stcc_9_value,
-	st_reverse(wkb_geometry)
+	round(sum(total_value)) as total_value,
+	st_reverse(wkb_geometry) as wkb_geometry
 FROM gis_datasets.s189_v193_transearch_routes_2021_new_commodity_sw
 group by 1,2,3,wkb_geometry 
 union
@@ -126,6 +128,7 @@ SELECT
 	round(sum(case when stcc = '50 2' then total_tonnage else 0 end), 1) as stcc_5002_tonnage, 
 	round(sum(case when stcc = '8' then total_tonnage else 0 end), 1) as stcc_8_tonnage, 
 	round(sum(case when stcc = '9' then total_tonnage else 0 end), 1) as stcc_9_tonnage,
+	round(sum(total_tonnage)) as total_tonnage,
 	round(sum(case when stcc = '1' then total_value else 0 end), 1) as stcc_1_value,
 	round(sum(case when stcc = '10' then total_value else 0 end), 1) as stcc_10_value,
 	round(sum(case when stcc = '11' then total_value else 0 end), 1) as stcc_11_value,
@@ -164,8 +167,9 @@ SELECT
 	round(sum(case when stcc = '50 2' then total_value else 0 end), 1) as stcc_5002_value,
 	round(sum(case when stcc = '8' then total_value else 0 end), 1) as stcc_8_value,
 	round(sum(case when stcc = '9' then total_value else 0 end), 1) as stcc_9_value,
-	wkb_geometry
+	round(sum(total_value)) as total_value,
+	wkb_geometry as wkb_geometry
 	FROM gis_datasets.s188_v192_transearch_routes_2021_new_commodity_ne
 	group by 1,2,3,wkb_geometry
 ) 
-select  row_number() over () as id  from roadnetwork;
+select  row_number() over () as id,*  from roadnetwork;

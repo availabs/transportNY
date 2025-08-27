@@ -361,7 +361,7 @@ const config = {
   name: "Congestion",
   title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
   icon: "fa-duotone fa-traffic-light-slow fa-fw",
-  path: '/new/congestion',
+  path: '/congestion',
   exact: true,
   mainNav: true,
   auth: false,

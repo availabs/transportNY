@@ -481,7 +481,7 @@ const IncidentsPageConfig =
   name: 'Incidents',
   title: 'Transportation Systems Management and Operations (TSMO) System Performance Dashboards',
   icon: 'fa-duotone fa-truck-tow',
-  path: "/new/incidents",
+  path: "/incidents",
   exact: true,
   auth: false,
   mainNav: true,
