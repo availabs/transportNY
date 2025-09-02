@@ -55,6 +55,7 @@ const compare1d = (arr1, arr2) => {
 }
 const TSMO_VIEW_ID = 1947;
 const TMC_META_VIEW_ID = 984;
+const NPMRDS_VIEW_ID = 982;
 const IncidentGrid = ({
 	event_id,
 	year,
@@ -68,7 +69,7 @@ const IncidentGrid = ({
 	const [activeGrid, setActiveGrid] = React.useState('Event Speeds')
 	const [requestKeys, setRequestKeys] = React.useState([]);
 
-
+// ["routes", "npmrds2", "view", NPMRDS_VIEW_ID ,"data", requestKeys]
 
 	React.useEffect(() => {
 		if (congestionData && congestionData.dates) {
@@ -80,7 +81,7 @@ const IncidentGrid = ({
 		if (requestKeys.length && tmcs.length && year) {
 			falcor
 				.get(
-					["routes", "data", requestKeys],
+					["routes", "npmrds2", "view", NPMRDS_VIEW_ID ,"data", requestKeys],
 					["pm3", "measuresByTmc", tmcs, Math.max(year - 1, 2016), "freeflow_tt"]
 				)
 		}
@@ -92,16 +93,11 @@ const IncidentGrid = ({
 			["pm3", "measuresByTmc", tmc, Math.max(year - 1, 2016), "freeflow_tt"],
 			{}
 		);
-
+		
 		if (fftt) {
 			return fftt;
 		}
 
-		// const { length, avg_speedlimit } = get(
-		// 	falcorCache,
-		// 	["tmc", tmc, "meta", year],
-		// 	{}
-		// );
 
 		const { length, avg_speedlimit } = get(
 			falcorCache,
@@ -109,15 +105,13 @@ const IncidentGrid = ({
 			{}
 		);
 
-		console.log("length, avg_speedlimit: ", length, avg_speedlimit);
-		
 		return (length / avg_speedlimit) * 3600;
 	};
 
 	const expandData = (tmcs, year, requestKeys, falcorCache) => {
 
 		return requestKeys.reduce((a, rk) => {
-			const data = [...get(falcorCache, ["routes", "data", rk, "value"], [])];
+			const data = [...get(falcorCache, ["routes", "npmrds2", "view", NPMRDS_VIEW_ID ,"data", rk, "value"], [])];
 
 			const tmcMap = d3rollup(
 				data,
@@ -183,8 +177,6 @@ const IncidentGrid = ({
 		});
 
 		const expandedData = expandData(tmcs, year, requestKeys, falcorCache);
-		console.log("expandedData: ", expandedData);
-		
 
 		let timeRange = [Math.max(startTime - 24, 0), Math.min(endTime + 24, 288)];
 		

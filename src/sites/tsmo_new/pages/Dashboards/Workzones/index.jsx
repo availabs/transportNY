@@ -302,7 +302,7 @@ const Incidents = props => {
           events={data.events}
           hoveredEvent={hoveredEvent}
         />
-      </div>displayPrefix='$'
+      </div>
 
 
     </DashboardLayout>
