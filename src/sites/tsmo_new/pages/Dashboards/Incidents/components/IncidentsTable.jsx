@@ -62,13 +62,13 @@ console.log("IncidentsTable::events", events);
         facility: ev.facility,
         event_duration: ev.event_duration,
         vehicle_delay: get(ev, 'congestion_data.value.vehicleDelay', 0),
-        delay_cost: calcDelayCost(get(ev, 'congestion_data.value', null), falcorCache)
+        delay_cost: ev.cost || calcDelayCost(get(ev, 'congestion_data.value', null), falcorCache)
       }
       return newEvent
     })//.sort((a, b) => b.delay_cost - a.delay_cost).slice(0, 20);
   }, [falcorCache, events]);
 
-// console.log("EVENTS:", events, Events)
+console.log("EVENTS:", Events, events)
 
   return (
     <Table

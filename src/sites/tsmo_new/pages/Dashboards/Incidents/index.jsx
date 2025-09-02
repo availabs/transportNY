@@ -121,6 +121,7 @@ const Incidents = props => {
         "transcom3", TSMO_VIEW_ID, "eventsbyId", eventIds,
         ["event_id",
           "n",
+          "cost",
           "congestion_data",
           "facility",
           "description",
@@ -216,6 +217,7 @@ const Incidents = props => {
       .map(c => get(falcorCache, ["transcom3", TSMO_VIEW_ID, "eventsbyId", c], {}))
       .sort((a, b) => get(b, 'congestion_data.value.vehicleDelay', 0) - get(a, 'congestion_data.value.vehicleDelay', 0))
       .reduce((a, e, i) => {
+
         if (e && (!fSystems.length || fSystems.includes(e.n))) {
           if (!a[e.nysdot_sub_category]) {
             a[e.nysdot_sub_category] = { count: 0, duration: 0, v_delay: 0, top_20_v_delay: 0 }
@@ -225,21 +227,18 @@ const Incidents = props => {
             currentMonthDays.push(date)
           }
 
-          let cost = 0;
-          const tmcDD = get(e, ["congestion_data", "value", "tmcDelayData"], {});
-          for (const tmc in tmcDD) {
-            const tmcMeta = get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc", tmc, "meta", y1], {})
-            const c = calcCost(tmcDD[tmc], tmcMeta);
-            cost += c;
-          }
+          let cost = Number(get(e, "cost", 0));
+          // const tmcDD = get(e, ["congestion_data", "value", "tmcDelayData"], {});
+          // for (const tmc in tmcDD) {
+          //   const tmcMeta = get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc", tmc, "meta", y1], {});
+          //   const c = calcCost(tmcDD[tmc], tmcMeta);
+          //   cost += c;
+          // }
 
-          // a[e.nysdot_sub_category].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
           a[e.nysdot_sub_category].v_delay += cost
 
           if (i < 20) {
-            // a[e.nysdot_sub_category].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
             a[e.nysdot_sub_category].top_20_v_delay += cost;
-            // a['Total'].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
             a['Total'].top_20_v_delay += cost;
           }
           a[e.nysdot_sub_category].duration += duration2minutes(e.event_duration);
@@ -267,25 +266,22 @@ const Incidents = props => {
             prevMonthDays.push(date)
           }
 
-          let cost = 0;
-          const tmcDD = get(e, ["congestion_data", "value", "tmcDelayData"], {});
-          for (const tmc in tmcDD) {
-            const tmcMeta = get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc", tmc, "meta", y2], {})
-            const c = calcCost(tmcDD[tmc], tmcMeta);
-            cost += c;
-          }
+          let cost = get(e, "cost", 0);
+          // const tmcDD = get(e, ["congestion_data", "value", "tmcDelayData"], {});
+          // for (const tmc in tmcDD) {
+          //   const tmcMeta = get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc", tmc, "meta", y1], {});
+          //   const c = calcCost(tmcDD[tmc], tmcMeta);
+          //   cost += c;
+          // }
 
           if (i < 20) {
-            // a[e.nysdot_sub_category].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
-            // a['Total'].top_20_v_delay += get(e,'congestion_data.value.vehicleDelay',0)
             a[e.nysdot_sub_category].top_20_v_delay += cost
             a['Total'].top_20_v_delay += cost
           }
-          // a[e.nysdot_sub_category].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
+
           a[e.nysdot_sub_category].v_delay += cost
           a[e.nysdot_sub_category].duration += duration2minutes(e.event_duration);
           a[e.nysdot_sub_category].count += 1;
-          // a['Total'].v_delay += get(e,'congestion_data.value.vehicleDelay',0)
           a['Total'].v_delay += cost
           a['Total'].duration += duration2minutes(e.event_duration);
           a['Total'].count += 1;
@@ -308,8 +304,6 @@ const Incidents = props => {
     }, { index: month })
 
     let durationData = events.reduce((out, e) => {
-      // let e = get(falcorCache, ["transcom2", "events", eventId],  null)
-
       let duration = duration2minutes(e.event_duration)
       let cats = Object.keys(out)
       let event_cat = e.nysdot_sub_category
@@ -348,9 +342,8 @@ const Incidents = props => {
     const colorsForTypes = keys.reduce((a, c, i) => {
       a[c] = theme.graphCategorical[i % nc];
       return a;
-    }, {})
+    }, {});
 
-    // console.log('colorsForTypes', colorsForTypes)
     return {
       events: events
         .sort((a, b) => get(b, 'congestion_data.value.vehicleDelay', 0) - get(a, 'congestion_data.value.vehicleDelay', 0))

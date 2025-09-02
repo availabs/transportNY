@@ -18,7 +18,8 @@ import {
 
 import { DelayFormat } from "./utils";
 
-
+const TSMO_VIEW_ID = 1947;
+const TMC_META_VIEW_ID = 984;
 const ColorRange = getColorRange(7, "RdYlGn");
 
 const BaseLayerFilters = ConflationLayers.reduce((a, { id, filter }) => {
@@ -35,12 +36,11 @@ class ConflationLayer extends LayerContainer {
 
   fetchData(falcor) {
     const { year, tmcs = [] } = this.props;
-    console.log('Conflation Layer:', this.props);
     if (!(year && tmcs.length)) {
       return Promise.resolve();
     }
     return falcor.get([
-      "tmc", tmcs, "meta", year, ["aadt", "bounding_box", "length", "roadname", "direction","tmclinear","road_order","county_code", "firstname"]
+      "transcom3", TMC_META_VIEW_ID, "tmc", tmcs, "meta", year, ["aadt", "wkb_geometry", "altrtename", /*"bounding_box",*/ "length", "road", "direction","tmclinear","road_order","county_code"]
     ]);
 
   }
@@ -60,7 +60,7 @@ class ConflationLayer extends LayerContainer {
         .filter(tmc => Boolean(tmcData[tmc]) && tmcs.includes(tmc)),
       tmcMetaData = tmcs.reduce((a, c) => {
         a[c] = [year].reduce((aa, cc) => {
-          const d = get(falcorCache, ["tmc", c, "meta", cc], null);
+          const d = get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc", c, "meta", cc], null);
           if (d) {
             aa[cc] = d;
           }
@@ -148,7 +148,7 @@ class ConflationLayer extends LayerContainer {
     const falcorCache = this.falcor.getCache();
 
     const bounds = tmcs.reduce((a, c) => {
-      const bbox = get(falcorCache, ["tmc", c, "meta", this.props.year, "bounding_box", "value"], null);
+      const bbox = get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc", c, "meta", this.props.year, "wkb_geometry", "value"], null);
       if (bbox) {
         return a.extend(bbox);
       }
@@ -208,12 +208,12 @@ class ConflationLayer extends LayerContainer {
             [
               "Road Name",
               `${get(fCache, [
-                "tmc",
+                "transcom3", TMC_META_VIEW_ID, "tmc",
                 tmc,
                 "meta",
                 year,
-                "roadname",
-              ])} ${get(fCache, ["tmc", tmc, "meta", year, "direction"])}`,
+                "road",
+              ])} ${get(fCache, ["transcom3", TMC_META_VIEW_ID, "tmc", tmc, "meta", year, "direction"])}`,
             ],
             [
               "V. Delay",

@@ -28,10 +28,10 @@ export const congestionController = (Component) => (props) => {
   const { event_id } = props;
 
   React.useEffect(() => {
-    console.log('congestionController falcor', event_id)
     if (event_id) {
       falcor.get([
-        "transcom3", TSMO_VIEW_ID,
+        "transcom3", 
+        TSMO_VIEW_ID,
         "eventsbyId",
         event_id,
         [
@@ -52,8 +52,8 @@ export const congestionController = (Component) => (props) => {
   }, [event_id, falcorCache]);
 
   const tmcs = React.useMemo(() => Object.keys(get(congestionData, 'rawTmcDelayData', {}))
-    , [congestionData])
-
+    , [congestionData]);
+    
   const year = React.useMemo(() => {
     const start_date = get(
       falcorCache,
@@ -65,10 +65,10 @@ export const congestionController = (Component) => (props) => {
 
 
   React.useEffect(() => {
-    if (tmcs.length === 0)
+    if (tmcs.length !== 0)
       falcor.get(
         [
-          "transcom3", TMC_META_VIEW_ID, "tmc", tmcs, "meta", year, ["length", "roadname", "tmclinear", "road_order", "county_code", "firstname", "direction", "avg_speedlimit"]
+          "transcom3", TMC_META_VIEW_ID, "tmc", tmcs, "meta", year, ["length", "road", "tmclinear", "road_order", "county_code", "direction", "avg_speedlimit"]
         ]
       );
   }, [falcor, tmcs, year]);
@@ -87,13 +87,9 @@ export const congestionController = (Component) => (props) => {
     }, {});
     setTmcMetaData(data);
   }, [falcorCache, tmcs, year]);
-
-
+  
   const corridors = React.useMemo(() => getCorridors(tmcMetaData, year, tmcs, get(congestionData, 'rawTmcDelayData', {}))
-    , [tmcMetaData, year, tmcs, congestionData])
-
-
-  //console.log('congestionController', Component, corridors)
+    , [tmcMetaData, year, tmcs, congestionData]);
 
   return (
     <Component
@@ -146,18 +142,6 @@ const CongestionInfo = ({
     e.stopPropagation();
   }, []);
 
-  // const npmrdsHref = React.useMemo(() => {
-  //   const origin = window.location.origin;
-  //   const { dates = [], startTime: startEpoch, endTime: endEpoch } = congestionData;
-  //
-  //   if (!dates.length) return null;
-  //
-  //   const startDate = dates[0];
-  //   const endDate = dates[dates.length - 1];
-  //   const startTime = epochToTimeString(startEpoch);
-  //   const endTime = epochToTimeString(endEpoch);
-  //   return `${ origin.replace("tsmo", "npmrds") }/template/edit/${ INCIDENT_TEMPLATE_ID }/tmcs/${ tmcs.join("_") }/dates/${ startDate }T${ startTime }|${ endDate }T${ endTime }`
-  // }, [tmcs, congestionData]);
 
   const makeNpmrdsHref = React.useCallback(tmcMap => {
     const origin = window.location.origin;

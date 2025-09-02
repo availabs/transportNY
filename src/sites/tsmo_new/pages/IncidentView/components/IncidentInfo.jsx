@@ -25,6 +25,7 @@ const rawDataKeys = [
  "direction",
  "county",
  "city",
+ "cost",
  "city_article",
  "primary_city",
  "secondary_city",

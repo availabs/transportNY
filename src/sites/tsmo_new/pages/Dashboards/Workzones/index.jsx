@@ -104,6 +104,7 @@ const Incidents = props => {
             "transcom3", TSMO_VIEW_ID, "eventsbyId", eventIds,
             ["event_id",
               "n",
+              "cost",
               "congestion_data",
               "facility",
               "description",
