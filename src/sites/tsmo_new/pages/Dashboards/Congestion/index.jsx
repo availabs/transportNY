@@ -54,6 +54,7 @@ const useComponentDidMount = () => {
 
 const calculateCosts = (tmcDelayData, tmcMetaData) => {
   const [year, month] = get(Object.values(tmcDelayData), '[0].index', '2022-05').split('-')
+
   const costs = {
     total: 0,
     accident: 0,
@@ -70,6 +71,7 @@ const calculateCosts = (tmcDelayData, tmcMetaData) => {
   return costs
 }
 
+const EXCESSIVE_DELAY_VIEW_ID = 2633;
 const RecurrentDelay = props => {
   //const theme = useTheme()
   const MOUNTED = useComponentDidMount();
@@ -96,14 +98,13 @@ const RecurrentDelay = props => {
 
     falcor
       .get(
-        ["delay",
+        ["delay2",
+          EXCESSIVE_DELAY_VIEW_ID,
           { from: (year - 1), to: year }, { from: 1, to: 12 },
           region, F_SYSTEM_MAP[fsystem],
           ["delay"]
         ],
-        // ["excessive", "delay", "top", "fsystems",topFsystemsKey]
       )
-      // .then(res => console.log("RES:", res))
       .then(() => setLoading(-1));
 
 
@@ -111,15 +112,13 @@ const RecurrentDelay = props => {
 
   const TMCs = React.useMemo(() => {
     const tmcMap = F_SYSTEM_MAP[fsystem].reduce((a, c) => {
-      const data = get(falcorCache, ["delay", year, month, region, c, "delay", "value"], []);
+      const data = get(falcorCache, ["delay2",
+          EXCESSIVE_DELAY_VIEW_ID, year, month, region, c, "delay", "value"], []);
       const tmcs = data.filter(d => d.total).map(d => d.tmc);
       return tmcs.reduce((aa, cc) => { aa[cc] = true; return aa; }, a);
     }, {});
     return Object.keys(tmcMap);
   }, [falcorCache, year, month, region, fsystem]);
-
-  console.log("TMCs: ", TMCs);
-
 
   React.useEffect(() => {
     if (TMCs.length) {
@@ -135,8 +134,12 @@ const RecurrentDelay = props => {
       pm: [pm === 12 ? py : year, pm],
       py: [py, month]
     }
+
     const currDelayData = F_SYSTEM_MAP[fsystem].reduce((a, c) => {
-      const d = get(falcorCache, ["delay", ...dates.curr, region, c, "delay", "value"], []);
+      const d = get(falcorCache, ["delay2",
+          EXCESSIVE_DELAY_VIEW_ID, ...dates.curr, region, c, "delay", "value"], []);
+          // console.log("dddddddd: ", d);
+          
       return d.reduce((aa, { tmc, ...rest }) => {
         if (!aa[tmc]) {
           aa[tmc] = {
@@ -156,14 +159,20 @@ const RecurrentDelay = props => {
         return aa;
       }, a)
     }, {});
+    
     const currTmcMetaData = TMCs.reduce((a, tmc) => {
       a[tmc] = get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc", tmc, "meta", dates.curr[0]], {});
       return a;
     }, {});
+
     const currMonth = calculateCosts(currDelayData, currTmcMetaData);
 
+    console.log("currMonth: ", currMonth);
+    
+
     const pmDelayData = F_SYSTEM_MAP[fsystem].reduce((a, c) => {
-      const d = get(falcorCache, ["delay", ...dates.pm, region, c, "delay", "value"], []);
+      const d = get(falcorCache, ["delay2",
+          EXCESSIVE_DELAY_VIEW_ID, ...dates.pm, region, c, "delay", "value"], []);
       return d.reduce((aa, { tmc, ...rest }) => {
         if (!aa[tmc]) {
           aa[tmc] = {
@@ -190,7 +199,8 @@ const RecurrentDelay = props => {
     const prevMonth = calculateCosts(pmDelayData, pmTmcMetaData);
 
     const pyDelayData = F_SYSTEM_MAP[fsystem].reduce((a, c) => {
-      const d = get(falcorCache, ["delay", ...dates.py, region, c, "delay", "value"], []);
+      const d = get(falcorCache, ["delay2",
+          EXCESSIVE_DELAY_VIEW_ID, ...dates.py, region, c, "delay", "value"], []);
       return d.reduce((aa, { tmc, ...rest }) => {
         if (!aa[tmc]) {
           aa[tmc] = {
@@ -224,16 +234,16 @@ const RecurrentDelay = props => {
     }
 
   }, [falcorCache, TMCs, year, month, region, fsystem])
-
+  
   const [fullDelayData, setFullDelayData] = React.useState({});
 
   React.useEffect(() => {
     const data = get(
       falcorCache,
-      ["delay"],
+      [`delay2`, `${EXCESSIVE_DELAY_VIEW_ID}`],
       {}
     );
-    // console.log('getting data', falcorCache, data)
+
     if (Object.keys(data).length) {
       setFullDelayData(data)
     }
@@ -250,7 +260,8 @@ const RecurrentDelay = props => {
         const index = `${y}-${`0${m}`.slice(-2)}`
         const [total, non_recurrent, construction, accident] = get(F_SYSTEM_MAP, [fsystem], [])
           .reduce((a, c) => {
-            const d = get(falcorCache, ["delay", y, m, region, c], null);
+            const d = get(falcorCache, ["delay2",
+          EXCESSIVE_DELAY_VIEW_ID, y, m, region, c], null);
             if (d) {
               //rawData.push(d.delay.value)
               a[0] += d.delay.value.reduce((a, c) => a + c.total, 0);
@@ -281,6 +292,8 @@ const RecurrentDelay = props => {
 
   const [hoveredTMCs, setHoveredTMCs] = React.useState([]);
 
+  console.log("fullDelayData: ", fullDelayData);
+  
   return (
     <DashboardLayout
       loading={loading}>

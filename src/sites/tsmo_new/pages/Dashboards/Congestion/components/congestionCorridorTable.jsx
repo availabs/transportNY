@@ -54,7 +54,7 @@ const TableColumns = [
       return (<div>
         <Link to={`/corridor/${d.row.original.corridor}/${d.row.original.year}-${d.row.original.month}`}>
           <div>
-            {get(d, 'row.original.roadname', '')}
+            {get(d, 'row.original.road', '')}
             <span className='font-bold text-sm'>
             &nbsp;{get(d, 'row.original.direction','')}
             </span>
@@ -82,6 +82,8 @@ const TableColumns = [
   }
 ]
 
+const TSMO_VIEW_ID = 1947;
+const TMC_META_VIEW_ID = 984;
 const CongestionSegmentTable = ({ rawDelayData, setHoveredTMCs }) => {
   const {region, month: tableDate, fsystem } = useSelector(state => state.dashboard)
   const [year, month] = tableDate.split("-").map(Number),
@@ -102,13 +104,12 @@ const CongestionSegmentTable = ({ rawDelayData, setHoveredTMCs }) => {
   const tmcs = React.useMemo(() => getTMCs(rawDelayData,year,month,region,f_systems,prevYearMonth),
     [rawDelayData,year,month,region,f_systems,prevYearMonth]);
 
-  //console.log('total', tmcs)
 
   React.useEffect(() => {
     if (Object.keys(tmcs).length) {
       falcor.chunk(
         [
-        "tmc", Object.keys(tmcs), "meta", Years, ["length", "roadname", "tmclinear","road_order","county_code", "firstname", "direction"]
+        "transcom3", TMC_META_VIEW_ID, "tmc", Object.keys(tmcs), "meta", Years, ["length", "road", "tmclinear","road_order","county_code", "altrtename", "direction"]
         ]
       );
     }
@@ -120,7 +121,7 @@ const CongestionSegmentTable = ({ rawDelayData, setHoveredTMCs }) => {
 
     const data = Object.keys(tmcs).reduce((a, c) => {
       a[c] = Years.reduce((aa, cc) => {
-        const d = get(falcorCache, ["tmc", c, "meta", cc], null);
+        const d = get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc", c, "meta", cc], null);
         if (d) {
           aa[cc] = d;
         }
@@ -130,7 +131,6 @@ const CongestionSegmentTable = ({ rawDelayData, setHoveredTMCs }) => {
     }, {});
     setTmcMetaData(data);
   }, [falcorCache, tmcs, Years]);
-
 
   const corridors = React.useMemo(() =>
     getCorridors(tmcMetaData,year,tmcs)

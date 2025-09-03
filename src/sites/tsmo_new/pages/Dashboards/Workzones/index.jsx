@@ -104,6 +104,7 @@ const Incidents = props => {
             "transcom3", TSMO_VIEW_ID, "eventsbyId", eventIds,
             ["event_id",
               "n",
+              "cost",
               "congestion_data",
               "facility",
               "description",
@@ -301,7 +302,7 @@ const Incidents = props => {
           events={data.events}
           hoveredEvent={hoveredEvent}
         />
-      </div>displayPrefix='$'
+      </div>
 
 
     </DashboardLayout>

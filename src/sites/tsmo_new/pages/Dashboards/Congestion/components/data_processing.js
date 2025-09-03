@@ -99,7 +99,28 @@ export const getCorridors = (tmcMetaData,year,tmcs) => {
 }
 
 export const calcCost = (delay, { aadt, aadt_combi, aadt_singl }) => {
-  if (!delay || !aadt) return 0;
-  return (aadt - aadt_combi - aadt_singl) / aadt * delay * 1.66 * 17 +
-          (aadt_combi + aadt_singl) / aadt * delay * 33
+  // if (!delay || !aadt) return 0;
+  // return (aadt - aadt_combi - aadt_singl) / aadt * delay * 1.66 * 17 +
+  //         (aadt_combi + aadt_singl) / aadt * delay * 33
+
+
+   // Convert to numbers safely
+  const d   = Number(delay);
+  const a   = Number(aadt);
+  const c   = Number(aadt_combi);
+  const s   = Number(aadt_singl);
+
+  // Bail out if invalid or zero denominator
+  if (!Number.isFinite(d) || !Number.isFinite(a) || a <= 0) {
+    return 0;
+  }
+
+  const mainlineRatio = (a - c - s) / a * d * 1.66 * 17 ;
+  const truckRatio    = (c + s) / a * d * 33;
+
+  const cost = mainlineRatio  +
+               truckRatio ;
+
+  // Handle NaN/Infinity just in case
+  return Number.isFinite(cost) ? cost : 0;
 }

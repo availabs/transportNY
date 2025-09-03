@@ -54,6 +54,7 @@ const compare1d = (arr1, arr2) => {
 	}
 }
 
+const NPMRDS_VIEW_ID = 982;
 const IncidentGrid = ({
 	event_id, 
   year,
@@ -67,8 +68,6 @@ const IncidentGrid = ({
 	const [activeGrid, setActiveGrid] = React.useState('Event Speeds')
 	const [requestKeys, setRequestKeys] = React.useState([]);
 
-
-
 	React.useEffect(() => {
 		if(congestionData && congestionData.dates) { 
 			const [newRequestKeys,,] = makeNpmrdsRequestKeys(congestionData);
@@ -76,10 +75,11 @@ const IncidentGrid = ({
      		setRequestKeys(newRequestKeys);
      	}
    	}
+
     if (requestKeys.length && tmcs.length && year) {
       falcor
         .get(
-          ["routes", "data", requestKeys],
+          ["routes", "npmrds2", "view", NPMRDS_VIEW_ID ,"data", requestKeys],
           ["pm3", "measuresByTmc", tmcs, Math.max(year-1, 2016), "freeflow_tt"]
         )
     }
@@ -108,7 +108,7 @@ const IncidentGrid = ({
 	const expandData = (tmcs, year, requestKeys, falcorCache) => {
 
 		return requestKeys.reduce((a, rk) => {
-	    const data = [...get(falcorCache, ["routes", "data", rk, "value"], [])];
+	    const data = [...get(falcorCache, ["routes", "npmrds2", "view", NPMRDS_VIEW_ID ,"data", rk, "value"], [])];
 
 	    const tmcMap = d3rollup(
 	      data,

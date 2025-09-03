@@ -15,9 +15,7 @@ const TSMO_VIEW_ID = 1947;
 const TMC_META_VIEW_ID = 984;
 const Map = ({ event_id, activeBranch }) => {
 
-  console.log('event_id', event_id, activeBranch);
   const { falcor, falcorCache } = useFalcor();
-  console.log('what is the falcor cache?', falcorCache);
 
   React.useEffect(() => {
     falcor.get([
@@ -48,8 +46,8 @@ const Map = ({ event_id, activeBranch }) => {
 
   // const eventData = [];
   const tmcs = React.useMemo(() => Object.keys(get(congestionData, 'rawTmcDelayData', {}))
-    , [congestionData])
-
+    , [congestionData]);
+    
   const year = React.useMemo(() => {
     const start_date = get(
       falcorCache,
@@ -70,9 +68,6 @@ const Map = ({ event_id, activeBranch }) => {
 
   const showRaw = true
 
-
-  console.log("point: ", point);
-
   const layers = React.useRef([new ConflationLayer(), new PointLayer()]);
   const layerProps = React.useMemo(() => {
     return {
@@ -80,7 +75,6 @@ const Map = ({ event_id, activeBranch }) => {
       [layers.current[1].id]: { point, eventData },
     };
   }, [tmcs, year, point, congestionData, activeBranch, showRaw]);
-  console.log('what is the layerProps: ', layerProps);
 
   return congestionData ?
     <div className='bg-white p-2' style={{ minHeight: "50rem", color: 'rgb(180, 180, 180)' }} >
@@ -96,43 +90,3 @@ const Map = ({ event_id, activeBranch }) => {
 
 };
 export default Map;
-
-
-/*const [prevTmcs, setPrevTmcs] = React.useState([]);
-
-const { tmcs, ways, year, point } = React.useMemo(() => {
-  let mData = {
-    tmcs: [],
-    ways: [],
-    year: null,
-    point: null,
-  };
-  if (!eventData) {
-    return mData;
-  }
-  const congestionData = get(eventData, ["congestion_data", "value"], null);
-  if (!congestionData) {
-    return mData;
-  }
-
-  const branchMap = congestionData.branches.reduce((a, c) => {
-    a[c.branch.join("|")] = c;
-    return a;
-  }, {})
-
-  const upBranch = get(branchMap, activeBranches[0], { branch: [], ways: [] });
-  const downBranch = get(branchMap, activeBranches[1], { branch: [], ways: [] });
-
-  // const upBranch = get(activeBranches, 0, { branch: [], ways: [] });
-  // const downBranch = get(activeBranches, 1, { branch: [], ways: [] });
-
-  mData.tmcs = [...new Set([...upBranch.branch, ...downBranch.branch])];
-  mData.ways = [...new Set([...upBranch.ways, ...downBranch.ways])].map((id) => +id);
-
-  const open_time = new Date(eventData.open_time);
-  mData.year = open_time.getFullYear();
-
-  mData.point = get(eventData, ["geom", "value"], null);
-
-  return mData;
-}, [eventData, activeBranches]);*/

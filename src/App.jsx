@@ -18,8 +18,6 @@ import {
 
 import {
   DmsSite,
-  registerDataType,
-  Selector,
   adminConfig,
   registerComponents
 } from "~/modules/dms/src/"
@@ -59,7 +57,7 @@ registerComponents({
   "Map": Map
 })
 
-registerDataType("selector", Selector)
+// registerDataType("selector", Selector)
 
 const defaultPgEnv = 'npmrds2';
 const adminBaseUrl = '/list'

@@ -1,6 +1,5 @@
 import React from "react"
 import {
-  registerDataType,
   dmsPageFactory
 } from "~/modules/dms/src"
 
