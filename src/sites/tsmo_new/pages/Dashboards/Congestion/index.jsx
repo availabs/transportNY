@@ -311,7 +311,7 @@ const RecurrentDelay = props => {
             }} />
         </div>
       </div>
-      <div className='bg-white shadow rounded p-4 col-span-2 col-span-4 lg:col-span-2'>
+      <div className='bg-white shadow rounded p-4 col-span-4 lg:col-span-2'>
         <div className='w-full font-medium text-blue-400 border-b px-2 pb-3 border-gray-100 text-xs mb-4 '>
           Total Congestion (Vehicle Hours) by Month
         </div>

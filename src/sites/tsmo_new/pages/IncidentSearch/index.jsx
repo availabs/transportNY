@@ -231,7 +231,7 @@ const Home = () => {
                   onChange={e => setSelectedOptions(e)}
                   name="geography"
                   style={{ maxWidth: "190px", minWidth: "190px" }}
-                  className="p-2.5 font-light text-gray-900 border border-blue-400 bg-blue-100 rounded-lg p-2 focus:border-indigo-600"
+                  className="font-light text-gray-900 border border-blue-400 bg-blue-100 rounded-lg p-2 focus:border-indigo-600"
                   classNamePrefix="select"
                 />
               </div>
@@ -263,7 +263,7 @@ const Home = () => {
                   isClearable
                   style={{ maxWidth: "190px", minWidth: "190px" }}
                   name="facility"
-                  className="p-2.5 font-light text-gray-900 border border-blue-400 bg-blue-100 rounded-lg p-2 focus:border-indigo-600"
+                  className="font-light text-gray-900 border border-blue-400 bg-blue-100 rounded-lg p-2 focus:border-indigo-600"
                 />
               </div>
             </div>
@@ -280,7 +280,7 @@ const Home = () => {
                   isClearable
                   style={{ maxWidth: "190px", minWidth: "190px" }}
                   name="general_category"
-                  className="p-2.5 font-light text-gray-900 border border-blue-400 bg-blue-100 rounded-lg p-2 focus:border-indigo-600"
+                  className="font-light text-gray-900 border border-blue-400 bg-blue-100 rounded-lg p-2 focus:border-indigo-600"
                 />
               </div>
             </div>
@@ -297,7 +297,7 @@ const Home = () => {
                   isClearable
                   style={{ maxWidth: "190px", minWidth: "190px" }}
                   name="sub_category"
-                  className="p-2.5 font-light text-gray-900 border border-blue-400 bg-blue-100 rounded-lg p-2 focus:border-indigo-600"
+                  className="font-light text-gray-900 border border-blue-400 bg-blue-100 rounded-lg p-2 focus:border-indigo-600"
                 />
               </div>
             </div>
