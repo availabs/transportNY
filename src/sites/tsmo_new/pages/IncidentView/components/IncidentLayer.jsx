@@ -40,7 +40,7 @@ class ConflationLayer extends LayerContainer {
       return Promise.resolve();
     }
     return falcor.get([
-      "transcom3", TMC_META_VIEW_ID, "tmc", tmcs, "meta", year, ["aadt", "wkb_geometry", "altrtename", /*"bounding_box",*/ "length", "road", "direction","tmclinear","road_order","county_code"]
+      "transcom3", TMC_META_VIEW_ID, "tmc", tmcs, "meta", year, ["aadt", "wkb_geometry", "altrtename", "bounding_box", "length", "road", "direction","tmclinear","road_order","county_code"]
     ]);
 
   }
@@ -71,12 +71,18 @@ class ConflationLayer extends LayerContainer {
 
     let corridors = getCorridors(tmcMetaData,year,tmcs,tmcData)
 
+    // console.log("tmcMetaData: ", tmcMetaData);
+    // console.log("year: ", year);
+    // console.log("tmcs: ", tmcs);
+    // console.log("tmcData: ", tmcData);
+    
+    
     let corridorTmcs = Object.values(
       get(corridors
         .filter(c => c.corridor === activeBranch),'[0].tmcs',{})
       )
-
-    // console.log('map corridorTmcs', corridors, corridorTmcs, activeBranch)
+      console.log("corridorTmcs: ", corridorTmcs);
+      
     
     const id2Caseid = (a) => [a.slice(0, 3), 'case', a.slice(3)].join('');
 
@@ -84,8 +90,12 @@ class ConflationLayer extends LayerContainer {
       regex = new RegExp(string);
 
     ConflationLayers.forEach(({ id }) => {
+      console.log("id: ", id);
+      
       if (regex.test(id)) {
 
+        console.log("regex.test(id) ", regex.test(id));
+        
         mapboxMap.setLayoutProperty(id, "visibility", "visible");
         mapboxMap.setFilter(id,
           ["all",
@@ -148,7 +158,8 @@ class ConflationLayer extends LayerContainer {
     const falcorCache = this.falcor.getCache();
 
     const bounds = tmcs.reduce((a, c) => {
-      const bbox = get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc", c, "meta", this.props.year, "wkb_geometry", "value"], null);
+      const bbox = get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc", c, "meta", this.props.year, "bounding_box", "value"], null);
+
       if (bbox) {
         return a.extend(bbox);
       }
