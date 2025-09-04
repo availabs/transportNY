@@ -12,14 +12,12 @@ import { getSubdomain }  from '~/utils'
 
 import {
   Messages,
-  withAuth, 
+  withAuth,
   useAuth
 } from "~/modules/ams/src"
 
 import {
   DmsSite,
-  registerDataType,
-  Selector,
   adminConfig,
   registerComponents
 } from "~/modules/dms/src/"
@@ -28,6 +26,7 @@ import DefaultRoutes from '~/Routes';
 
 import transportNY from '~/sites/transportny'
 import tsmo from '~/sites/tsmo'
+import tsmonew from '~/sites/tsmo_new'
 import freightatlas from '~/sites/freightatlas'
 import fdi from '~/sites/fdi'
 
@@ -39,7 +38,8 @@ import themes from './dms_themes'
 
 const Sites = {
   www: transportNY,
-  tsmo,
+  tsmo: tsmonew,
+  tsmo_old: tsmo,
   freightatlas,
   fdi,
   npmrds,
@@ -57,7 +57,7 @@ registerComponents({
   "Map": Map
 })
 
-registerDataType("selector", Selector)
+// registerDataType("selector", Selector)
 
 const defaultPgEnv = 'npmrds2';
 const adminBaseUrl = '/list'
@@ -101,13 +101,13 @@ const App = (props) => {
         }
         adminPath={adminBaseUrl}
         pgEnvs={[defaultPgEnv]}
-        
+
         authWrapper={withAuth}
         themes={themes}
         damaBaseUrl={damaBaseUrl}
         //API_HOST={API_HOST}
 
-        routes={WrappedRoutes} 
+        routes={WrappedRoutes}
       />
       <Messages />
     </>
