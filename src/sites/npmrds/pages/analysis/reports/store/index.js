@@ -104,7 +104,7 @@ export const getDataDateExtent = () =>
       ["MAX(date) as latest_date", "MIN(date) AS earliest_date"]
     ])
 			.then(res => {
-        console.log("DATE EXTENT RES:", res)
+        // console.log("DATE EXTENT RES:", res)
 
         const datePath = [
           "json", "uda", "npmrds2", "viewsById", NPMRDS_VIEW_ID,
@@ -140,16 +140,11 @@ export const getDataDateExtent = () =>
 }
 
 const getRouteData = (routeIds, report) => {
-
-console.log("getRouteData", report)
-
 	return falcorGraph.get(["routes2", "id", routeIds, ["name", "metadata"]])
     .then(() =>
       falcorGraph.get(
         ["routes2", "id", routeIds, report.allYearsWithData, "tmc_array"]
-      ).then(res => {
-        console.log("getRouteData::res", res)
-      })
+      )
     )
 }
 
@@ -1832,7 +1827,7 @@ const _loadReport = report =>
 
 const _addRouteComp = (state, routeIds, copiedSettings, groupId = null) => {
 
-console.log("ADD ROUTE COMP:", routeIds)
+// console.log("ADD ROUTE COMP:", routeIds)
 
   routeIds = Array.isArray(routeIds) ? routeIds : [routeIds];
 
@@ -1987,7 +1982,7 @@ const _removeRouteComp = (state, compId) => {
 
 const _loadTemplateWithDates = (templateId, routeIds, datesMap, state, stationIds = []) => {
 
-console.log("_loadTemplateWithDates::datesMap", datesMap);
+// console.log("_loadTemplateWithDates::datesMap", datesMap);
 
   const falcorCache = falcorGraph.getCache();
   const template = get(falcorCache, `templates2.id.${ templateId }`, {});

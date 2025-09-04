@@ -223,8 +223,6 @@ class GeneralGraphComp extends React.Component {
 				)//.then(res => console.log("RES:", res))
 				.then(() => {
 
-console.log("FALCOR CACHE:", this.props.falcor.getCache());
-
 					return requestKeys.reduce((promise, { dd, alias, group, key }) => {
 						return promise.then(() => {
 							return this.props.falcor.get(

@@ -309,7 +309,7 @@ class RouteMap extends HybridGraphComp {
 		}
 	}
 	getBounds() {
-console.log("this.props.tmcGraph",this.props.tmcGraph)
+// console.log("this.props.tmcGraph",this.props.tmcGraph)
 		const coords = this.getActiveRouteComponents()
 			.reduce((a, route) => {
 				const { tmcArray } = route,
