@@ -24,27 +24,27 @@ const oneSixtieth = 1.0 / 60.0,
 
 	indexReducer = (data, tmcGraph, year) => {
 		const tmcArray = [...new Set(data.map(d => d.tmc))],
-			length = tmcArray.reduce((a, c) => a + get(tmcGraph, `${ c }.meta.${ year }.miles`, 0), 0);
+			length = tmcArray.reduce((a, c) => a + get(tmcGraph, `${ c }.npmrds2.meta.${ year }.miles`, 0), 0);
 		if (length === 0) return 0;
-		return sum(data, d => d.value * get(tmcGraph, `${ d.tmc }.meta.${ year }.miles`, 0)) / length;
+		return sum(data, d => d.value * get(tmcGraph, `${ d.tmc }.npmrds2.meta.${ year }.miles`, 0)) / length;
 	},
 
 	speedReducer = (data, tmcGraph, year) => {
 		const tmcArray = [...new Set(data.map(d => d.tmc))],
-			length = tmcArray.reduce((a, c) => a + get(tmcGraph, `${ c }.meta.${ year }.miles`, 0), 0);
+			length = tmcArray.reduce((a, c) => a + get(tmcGraph, `${ c }.npmrds2.meta.${ year }.miles`, 0), 0);
 		if (length === 0) return 0;
 		return toSpeed(sum(data, d => d.value), length);
 	},
 	speedTmcReducer = (data, tmcGraph, year) => {
 		const tmcArray = [...new Set(data.map(d => d.tmc))],
-			length = tmcArray.reduce((a, c) => a + get(tmcGraph, `${ c }.meta.${ year }.miles`, 0), 0);
+			length = tmcArray.reduce((a, c) => a + get(tmcGraph, `${ c }.npmrds2.meta.${ year }.miles`, 0), 0);
 		if (length === 0) return 0;
 		return toSpeed(mean(data, d => d.value), length);
 	},
 	speedAllReducer = (data, tmcGraph, year) => {
 		const byTmc = Array.from(rollup(data, v => mean(v, d => d.value), d => d.tmc)),
 			tmcArray = [...new Set(byTmc.map(d => d[0]))],
-			length = tmcArray.reduce((a, c) => a + get(tmcGraph, `${ c }.meta.${ year }.miles`, 0), 0);
+			length = tmcArray.reduce((a, c) => a + get(tmcGraph, `${ c }.npmrds2.meta.${ year }.miles`, 0), 0);
 		if (length === 0) return 0;
 		return toSpeed(sum(byTmc, d => d[1]), length);
 	},
@@ -156,7 +156,7 @@ export const INDICES_BY_DATE_RANGE = [
 
 const vmtReducer = (data, tmcGraph, year) => {
 	const tmcArray = [...new Set(data.filter(d => d.value).map(d => d.tmc))],
-		length = tmcArray.reduce((a, c) => a + get(tmcGraph, `${ c }.meta.${ year }.miles`, 0), 0);
+		length = tmcArray.reduce((a, c) => a + get(tmcGraph, `${ c }.npmrds2.meta.${ year }.miles`, 0), 0);
 	if (length === 0) return 0;
 
 	return aadtToVmt(mean(data, d => d.value), length)

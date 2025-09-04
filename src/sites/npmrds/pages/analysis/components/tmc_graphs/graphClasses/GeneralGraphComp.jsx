@@ -217,8 +217,9 @@ class GeneralGraphComp extends React.Component {
 
 			return promise.then(() => {
 				return this.props.falcor.get(
-					['tmc', tmcArray, 'meta', year, ['miles', 'bounding_box', 'congestion_level', 'directionality', 'f_system']],
-					['tmc', tmcArray, 'year', year, 'geometries'],
+					['tmc', tmcArray, "npmrds2", 'meta', year,
+						['miles', 'bounding_box', 'geometry']
+					],
 				)//.then(res => console.log("RES:", res))
 				.then(() => {
 
@@ -289,7 +290,7 @@ class GeneralGraphComp extends React.Component {
 	}
 
 	getTmcLength(year, tmc) {
-		return get(this.props.tmcGraph, `[${ tmc }].meta[${ year }].miles`, 0);
+		return get(this.props.tmcGraph, `[${ tmc }].npmrds2.meta[${ year }].miles`, 0);
 	}
 	getTmcLengths(year, tmcs) {
 		return tmcs.reduce((length, tmc) =>

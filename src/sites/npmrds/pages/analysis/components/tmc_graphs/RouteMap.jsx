@@ -309,12 +309,13 @@ class RouteMap extends HybridGraphComp {
 		}
 	}
 	getBounds() {
+// console.log("this.props.tmcGraph",this.props.tmcGraph)
 		const coords = this.getActiveRouteComponents()
 			.reduce((a, route) => {
 				const { tmcArray } = route,
 					year = this.getMaxYear(route),
 					boxes = tmcArray.reduce((boxes, tmc) => {
-						const bb = get(this.props.tmcGraph, `${ tmc }.meta.${ year }.bounding_box.value`, null);
+						const bb = get(this.props.tmcGraph, `${ tmc }.npmrds2.meta.${ year }.bounding_box.value`, null);
 						if (bb) {
 							boxes.push(...bb);
 						}
@@ -432,7 +433,7 @@ class RouteMap extends HybridGraphComp {
 					const year = this.getMaxYear(rc),
 						tmcArray = get(rc, "tmcArray", []),
 						tmc = tmcArray[0],
-						geom = get(this.props.tmcGraph, [tmc, 'year', year, 'geometries', 'value'], null),
+						geom = get(this.props.tmcGraph, [tmc, 'npmrds2', 'meta', year, 'geometry', 'value'], null),
 						coordinates = get(geom, ["coordinates", 0, 0], null);
 					if (coordinates) {
 						collection.features.push({
@@ -463,7 +464,7 @@ class RouteMap extends HybridGraphComp {
 						tmcArray = get(rc, "tmcArray", []);
 
 					tmcArray.forEach((tmc, i) => {
-						const geometry = get(this.props.tmcGraph, [tmc, 'year', year, 'geometries', 'value'], null);
+						const geometry = get(this.props.tmcGraph, [tmc, 'npmrds2', 'meta', year, 'geometry', 'value'], null);
 						let lineWidth = BASE_WIDTH;
 						if (this.props.highlightedTmcs.includes(tmc)) {
 							lineWidth = BASE_WIDTH * 2.5
