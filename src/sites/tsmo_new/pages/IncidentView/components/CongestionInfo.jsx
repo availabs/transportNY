@@ -68,7 +68,7 @@ export const congestionController = (Component) => (props) => {
     if (tmcs.length !== 0)
       falcor.get(
         [
-          "transcom3", TMC_META_VIEW_ID, "tmc", tmcs, "meta", year, ["length", "road", "tmclinear", "road_order", "county_code", "direction", "avg_speedlimit"]
+          "transcom3", TMC_META_VIEW_ID, "tmc", tmcs, "meta", year, ["length", "road", "tmclinear", "road_order", "county_code", "direction", "avg_speedlimit", "intersection"]
         ]
       );
   }, [falcor, tmcs, year]);
@@ -184,7 +184,7 @@ const CongestionInfo = ({
                 `}
             >
               <div className='flex-1'>
-                <div className='text-xl'>{cor.roadname} {cor.direction} </div>
+                <div className='text-xl'>{cor.road} {cor.direction} </div>
                 <div className='text-xs'>
                   {cor.from}
                 </div>

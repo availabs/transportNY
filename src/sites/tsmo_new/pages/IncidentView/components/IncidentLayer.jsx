@@ -40,7 +40,7 @@ class ConflationLayer extends LayerContainer {
       return Promise.resolve();
     }
     return falcor.get([
-      "transcom3", TMC_META_VIEW_ID, "tmc", tmcs, "meta", year, ["aadt", "wkb_geometry", "altrtename", "bounding_box", "length", "road", "direction","tmclinear","road_order","county_code"]
+      "transcom3", TMC_META_VIEW_ID, "tmc", tmcs, "meta", year, ["aadt", "wkb_geometry", "altrtename", "bounding_box", "length", "road", "direction","tmclinear","road_order","county_code", "intersection"]
     ]);
 
   }

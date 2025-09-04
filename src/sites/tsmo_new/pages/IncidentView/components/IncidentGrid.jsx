@@ -389,7 +389,7 @@ const IncidentGrid = ({
 	}, [congestionData]);
 
 	const axisLeftFormat = React.useCallback(tmc => {
-		return get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc", tmc, "meta", year, "altrtename"]);
+		return get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc", tmc, "meta", year, "intersection"]);
 	}, [falcorCache, year])
 
 	const corridorName = React.useMemo(() => {
