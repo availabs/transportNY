@@ -140,11 +140,16 @@ export const getDataDateExtent = () =>
 }
 
 const getRouteData = (routeIds, report) => {
+
+console.log("getRouteData", report)
+
 	return falcorGraph.get(["routes2", "id", routeIds, ["name", "metadata"]])
     .then(() =>
       falcorGraph.get(
         ["routes2", "id", routeIds, report.allYearsWithData, "tmc_array"]
-      )
+      ).then(res => {
+        console.log("getRouteData::res", res)
+      })
     )
 }
 
