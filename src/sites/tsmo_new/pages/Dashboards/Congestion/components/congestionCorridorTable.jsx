@@ -109,7 +109,7 @@ const CongestionSegmentTable = ({ rawDelayData, setHoveredTMCs }) => {
     if (Object.keys(tmcs).length) {
       falcor.chunk(
         [
-        "transcom3", TMC_META_VIEW_ID, "tmc", Object.keys(tmcs), "meta", Years, ["length", "road", "tmclinear","road_order","county_code", "altrtename", "direction"]
+        "transcom3", TMC_META_VIEW_ID, "tmc", Object.keys(tmcs), "meta", Years, ["length", "road", "wkb_geometry", "tmclinear","road_order","county_code", "altrtename", "direction", "intersection"]
         ]
       );
     }

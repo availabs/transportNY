@@ -122,7 +122,7 @@ const RecurrentDelay = props => {
 
   React.useEffect(() => {
     if (TMCs.length) {
-      falcor.chunk(["transcom3", TMC_META_VIEW_ID, "tmc", TMCs, "meta", [year - 1, year], ["aadt", "aadt_combi", "aadt_singl"]])
+      falcor.chunk(["transcom3", TMC_META_VIEW_ID, "tmc", TMCs, "meta", [year - 1, year], ["aadt", "aadt_combi", "aadt_singl", "wkb_geometry"]])
     }
   }, [falcor, TMCs, year]);
 
