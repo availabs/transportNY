@@ -249,8 +249,8 @@ class DataDownloader extends React.Component {
             }
             // console.log('download csv rows', rows)
             rows.unshift(header.join(","))
-            // const blob = new Blob([rows.join("\n")], { type: "text/csv" });
-            // saveAs(blob, this.makeFileName() + '.csv');
+            const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+            saveAs(blob, this.makeFileName() + '.csv');
           })
           .then(() => this.setState({ loading: false }));
       })
