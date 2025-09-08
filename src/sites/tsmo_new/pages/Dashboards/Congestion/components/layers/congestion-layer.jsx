@@ -32,6 +32,8 @@ import {getTMCs, getCorridors} from '../data_processing'
 
    ---------------- */
 
+   const TSMO_VIEW_ID = 1947;
+const TMC_META_VIEW_ID = 984;
 const siFormat = d3format(".3s")
 
 class CongestionLayer extends LayerContainer {
@@ -216,10 +218,12 @@ class CongestionLayer extends LayerContainer {
   getTMCMetaData (falcorCache,tmcs) {
     const { month: tableDate } = this.props
     const [year,] = tableDate.split("-").map(Number)
+    console.log("tmcs: ", tmcs);
+    
     return tmcs.reduce((a, c) => {
       a[c] = [year].reduce((aa, cc) => {
-        const d = get(falcorCache, ["tmc", c, "meta", cc], null);
-        const geom = get(falcorCache, ['tmc',c,'year',cc,'geometries','value'], null)
+        const d = get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc", c, "meta", cc], null);
+        const geom = get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc",c,'year',cc,'wkb_geometry','value'], null)
         if (d) {
           aa[cc] = d;
           aa[cc].geom = geom
@@ -268,11 +272,11 @@ class CongestionLayer extends LayerContainer {
       },[])
 
     let requests = [["geo", geolevel.toLowerCase(), value, "geometry"]]
-    if(corridorsTmcs.length > 0) {
-      requests.push(
-        ['tmc',corridorsTmcs,'year',year,'geometries']
-      )
-    }
+    // if(corridorsTmcs.length > 0) {
+    //   requests.push(
+    //     ['tmc',corridorsTmcs,'year',year,'geometries']
+    //   )
+    // }
 // console.log('requests', requests)
     return falcor.get(...requests)
       // .then(d => {
@@ -313,12 +317,13 @@ class CongestionLayer extends LayerContainer {
 // console.log('testing', tmcs)
     const tmcMetadata = this.getTMCMetaData(falcorCache,tmcs.map(d => d.tmc))
     const corridors =  getCorridors(tmcMetadata,year,tmcMap)
+
     const corridorsTmcs =  corridors.filter((d,i) => i < 15)
       .reduce((out,cor) => {
          return [...out, ...Object.values(cor.tmcs)]
 
       },[])
-
+      
     const corridorCollection = {
       type: "FeatureCollection",
       features: []
@@ -328,6 +333,9 @@ class CongestionLayer extends LayerContainer {
       corridorCollection.features = corridorsTmcs.map((tmc,i) => {
         let meta = get(tmcMetadata,`[${tmc}][${year}]`, {})
         let data = get(tmcMap, `[${tmc}]`, {})
+        let geom = get(meta, ["wkb_geometry", "value"], null);
+        if (geom) geom = JSON.parse(geom);
+        
         return {
           type: "Feature",
           id: i,
@@ -340,7 +348,7 @@ class CongestionLayer extends LayerContainer {
             total_delay: siFormat(data.total),
             non_recurrent: siFormat(data.non_recurrent)
           },
-          geometry: meta.geom
+          geometry: geom
         }
       })
       map.getSource("corridors-source").setData(corridorCollection);
