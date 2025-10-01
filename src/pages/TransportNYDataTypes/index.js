@@ -16,6 +16,7 @@ import transcom from "./transcom";
 import schedule from "./schedule";
 
 import osm_upload from "./osm"
+import osm_pgr_upload from "./osm_pgr"
 
 const transportNYDataTypes = {
   // freight_atlas_shapefile
@@ -30,7 +31,9 @@ const transportNYDataTypes = {
   production_transfer,
   schedule,
   pm3,
-  osm_upload
+
+  osm_upload,
+  osm_pgr_upload
 }
 
 
