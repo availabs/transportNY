@@ -87,9 +87,6 @@ const Incidents = props => {
     ];
   }, [geographies, geography, month])
 
-
-  console.log("requests: ", requests);
-
   const [eventIds, setEventIds] = React.useState([]);
 
   React.useEffect(() => {
@@ -140,8 +137,6 @@ const Incidents = props => {
 
   const [TMCs, setTMCs] = React.useState([]);
 
-  // console.log("TMCs: ", TMCs);
-
   React.useEffect(() => {
     if (eventIds.length) {
       const tmcSet = eventIds.reduce((a, c) => {
@@ -189,7 +184,6 @@ const Incidents = props => {
       let event = get(falcorCache, ["transcom3", TSMO_VIEW_ID, "eventsbyId", eventId], null)
 
       if (event && (!fSystems.length || fSystems.includes(event.n))) {
-        //console.log('this is an event', event)
         let day = event.start_date_time.split(' ')[0]
         events.push(event)
         if (!keys.includes(event.nysdot_sub_category)) {
@@ -208,7 +202,6 @@ const Incidents = props => {
       return out
     }, {})
 
-    console.log("data: ", data);
 
     const [y1, m] = month.split("-");
     const y2 = new Date(y1, m - 1, 0).getFullYear();
@@ -227,7 +220,7 @@ const Incidents = props => {
             currentMonthDays.push(date)
           }
 
-          let cost = Number(get(e, "cost", 0));
+          let cost = Number(get(e, "cost", 0)) || 0;
           // const tmcDD = get(e, ["congestion_data", "value", "tmcDelayData"], {});
           // for (const tmc in tmcDD) {
           //   const tmcMeta = get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc", tmc, "meta", y1], {});
@@ -266,7 +259,8 @@ const Incidents = props => {
             prevMonthDays.push(date)
           }
 
-          let cost = get(e, "cost", 0);
+          let cost = Number(get(e, "cost", 0)) || 0;
+          
           // const tmcDD = get(e, ["congestion_data", "value", "tmcDelayData"], {});
           // for (const tmc in tmcDD) {
           //   const tmcMeta = get(falcorCache, ["transcom3", TMC_META_VIEW_ID, "tmc", tmc, "meta", y1], {});
@@ -363,7 +357,6 @@ const Incidents = props => {
   }, [falcorCache, requests, month, theme.graphCategorical, fsystem])
 
   const [hoveredEvent, setHoveredEvent] = React.useState(null);
-  console.log('output', data)
 
   return (
     <DashboardLayout loading={loading}>

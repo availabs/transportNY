@@ -36,8 +36,8 @@ export default function ManageCongestion({
             user_id: ctxUser?.id,
             email: ctxUser?.email,
             pgEnv,
-            start_date: moment(processingStartDate).startOf("day").toDate(),
-            end_date: moment(processingEndDate).endOf("day").toDate(),
+            start_date: moment(processingStartDate).startOf("day").format('YYYY-MM-DD'),
+            end_date: moment(processingEndDate).endOf("day").format('YYYY-MM-DD'),
         };
 
         setLoading(true);
