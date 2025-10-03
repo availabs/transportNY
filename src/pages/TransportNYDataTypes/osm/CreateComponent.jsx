@@ -12,7 +12,7 @@ const CreateComponent = ({ source }) => {
   const uploadOSMFile = React.useCallback(file => {
     const formData = new FormData();
     formData.append("name", sourceName);
-    formData.append("type", "osm-dataset");
+    formData.append("type", "gis_dataset");
     formData.append("categories", JSON.stringify([["OSM"]]));
     formData.append("file.size", file.size);
     formData.append("file", file);
