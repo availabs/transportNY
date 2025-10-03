@@ -32,7 +32,6 @@ import { duration2minutes, vehicleDelay2cost } from '../Incidents/components/uti
 const TSMO_VIEW_ID = 1947;
 const TMC_META_VIEW_ID = 984;
 const Incidents = props => {
-
   const theme = useTheme()
   const { falcor, falcorCache } = useFalcor();
   const { region, month, fsystem } = useSelector(state => state.dashboard)
@@ -88,18 +87,13 @@ const Incidents = props => {
 
     falcor.get(["transcom3", "eventsbyGeom", TSMO_VIEW_ID, requests])
       .then(res => {
-
-        //console.log('use effect', res, requests)
         const eventIds = requests.reduce((a, c) => {
           const ids = get(res, ["json", "transcom3", "eventsbyGeom", TSMO_VIEW_ID, c], []);
           a.push(...ids);
           return a;
         }, []);
 
-
-
         if (eventIds.length) {
-          //console.log('request some geoms', eventIds)
           return falcor.chunk([
             "transcom3", TSMO_VIEW_ID, "eventsbyId", eventIds,
             ["event_id",
@@ -121,12 +115,9 @@ const Incidents = props => {
         }
       })
       .then((resp) => {
-        console.log('testing', falcor.getCache())
         setLoading(-1);
       });
   }, [falcor, requests, setLoading]);
-
-
 
   let data = React.useMemo(() => {
 
@@ -135,22 +126,14 @@ const Incidents = props => {
     let eventIds = get(falcorCache, ["transcom3", "eventsbyGeom", TSMO_VIEW_ID, request, "value"], [])
     let keys = []
     let events = []
-    // let totalDuration = 0;
-    // let totalVehicleDelay = 0
     let currentMonthDays = []
     let prevMonthDays = []
 
-    //console.log('getting data', eventIds,falcorCache)
-
-
     let data = eventIds.reduce((out, eventId) => {
       let event = get(falcorCache, ["transcom3", TSMO_VIEW_ID, "eventsbyId", eventId],  null)
-      // console.log('testing', event)
-      // if(['incident'].includes(event.event_category)){
+      
       if (event && (!fSystems.length || fSystems.includes(event.n))) {
-        //console.log('this is an event', event)
         let day = event.start_date_time.split(' ')[0]
-        //totalVehicleDelay += get(event,'congestion_data.value.vehicleDelay',0)
         events.push(event)
         if (!keys.includes(event.nysdot_sub_category)) {
           keys.push(event.nysdot_sub_category)

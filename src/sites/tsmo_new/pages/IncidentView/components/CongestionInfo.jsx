@@ -21,11 +21,11 @@ const INCIDENT_TEMPLATE_ID = 291;
 *
 *******************/
 
-const TSMO_VIEW_ID = 1947;
-const TMC_META_VIEW_ID = 984;
+// const TSMO_VIEW_ID = 1947;
+// const TMC_META_VIEW_ID = 984;
 export const congestionController = (Component) => (props) => {
   const { falcor, falcorCache } = useFalcor();
-  const { event_id } = props;
+  const { event_id, TSMO_VIEW_ID, TMC_META_VIEW_ID } = props;
 
   React.useEffect(() => {
     if (event_id) {
@@ -131,7 +131,7 @@ const CongestionInfo = ({
           activeBranch = c.corridor
         }
       })
-      // console.log('activeBranch', activeBranch, eventTmc, congestionData)
+
       if (activeBranch) {
         setActiveBranch(activeBranch)
       }

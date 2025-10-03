@@ -37,7 +37,6 @@ const displayFormats = {
 	"diff": d3format("+,.0%"),
 	"mph": (v) => isNaN(String(v)) ? "No Data" : `${Math.round(v)} MPH`,
 	"round": (v) => `${Math.round(v)}`
-
 }
 
 const compare1d = (arr1, arr2) => {
@@ -53,8 +52,7 @@ const compare1d = (arr1, arr2) => {
 		return false
 	}
 }
-const TSMO_VIEW_ID = 1947;
-const TMC_META_VIEW_ID = 984;
+
 const NPMRDS_VIEW_ID = 982;
 const IncidentGrid = ({
 	event_id,
@@ -63,13 +61,12 @@ const IncidentGrid = ({
 	corridors,
 	tmcMetaData,
 	congestionData,
-	activeBranch
+	activeBranch,
+  	TMC_META_VIEW_ID
 }, ...rest) => {
 	const { falcor, falcorCache } = useFalcor();
 	const [activeGrid, setActiveGrid] = React.useState('Event Speeds')
 	const [requestKeys, setRequestKeys] = React.useState([]);
-
-// ["routes", "npmrds2", "view", NPMRDS_VIEW_ID ,"data", requestKeys]
 
 	React.useEffect(() => {
 		if (congestionData && congestionData.dates) {
@@ -98,7 +95,6 @@ const IncidentGrid = ({
 			return fftt;
 		}
 
-
 		const { length, avg_speedlimit } = get(
 			falcorCache,
 			["transcom3", TMC_META_VIEW_ID, "tmc", tmc, "meta", year],
@@ -109,7 +105,6 @@ const IncidentGrid = ({
 	};
 
 	const expandData = (tmcs, year, requestKeys, falcorCache) => {
-
 		return requestKeys.reduce((a, rk) => {
 			const data = [...get(falcorCache, ["routes", "npmrds2", "view", NPMRDS_VIEW_ID ,"data", rk, "value"], [])];
 
@@ -343,8 +338,6 @@ const IncidentGrid = ({
 		}));
 	}, [requestKeys, falcorCache, activeBranch, corridors, congestionData, year, expandData]);
 
-	console.log("gridData: ", gridData);
-
 	const points = React.useMemo(() => {
 		if (!congestionData || !congestionData.dates) return []
 		const { startTime, endTime, eventTmcs, dates } = congestionData;
@@ -394,9 +387,7 @@ const IncidentGrid = ({
 
 	const corridorName = React.useMemo(() => {
 		return `${get(corridors.filter(c => c.corridor === activeBranch), '[0].road', '')} ${get(corridors.filter(c => c.corridor === activeBranch), '[0].direction', '')}`
-	},
-		[corridors, activeBranch])
-
+	}, [corridors, activeBranch])
 
 	return !congestionData ? <span /> : (
 		<div className='flex w-full bg-white p-2'>

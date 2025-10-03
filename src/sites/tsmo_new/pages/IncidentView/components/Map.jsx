@@ -13,7 +13,7 @@ const MAPBOX_TOKEN = config.MAPBOX_TOKEN;
 
 const TSMO_VIEW_ID = 1947;
 const TMC_META_VIEW_ID = 984;
-const Map = ({ event_id, activeBranch }) => {
+const Map = ({ event_id, activeBranch, TSMO_VIEW_ID }) => {
 
   const { falcor, falcorCache } = useFalcor();
 
