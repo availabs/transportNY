@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import { ScalableLoading } from "~/modules/avl-components/src";
 import { DAMA_HOST } from "~/config";
 
-const pm3Publish = async (props, navigate, pgEnv) => {
+const pm3AggregatePublish = async (props, navigate, pgEnv) => {
   props.setLoading(true);
   let years = props.years;
   if(props.startDate && props.endDate) {
@@ -23,16 +23,14 @@ const pm3Publish = async (props, navigate, pgEnv) => {
     name: props?.name,
     type: props?.type || "pm3",
     pgEnv: pgEnv || props?.pgEnv,
-    dates:[props.startDate, props.endDate],
-    years,
-    npmrdsSourceId: props.npmrdsSourceId,
-    view_id: props.view_id
+    pm3SourceId: props.pm3SourceId,
+    pm3ViewId: props.pm3ViewId,
   };
 
   try {
     console.log("attempting to make pm3 source", publishData)
     const res = await fetch(
-      `${DAMA_HOST}/dama-admin/${pgEnv}/pm3/publish`,
+      `${DAMA_HOST}/dama-admin/${pgEnv}/pm3_aggregate/publish`,
       {
         method: "POST",
         body: JSON.stringify(publishData),
@@ -56,12 +54,12 @@ const pm3Publish = async (props, navigate, pgEnv) => {
   }
 };
 
-export default function PublishPm3(props) {
+export default function PublishPm3Aggregate(props) {
   const navigate = useNavigate();
   const { loading, setLoading, pgEnv, ...restProps } = props;
   
   const handlePublishClick = useCallback(() => {
-    pm3Publish({ ...restProps, setLoading }, navigate, pgEnv);
+    pm3AggregatePublish({ ...restProps, setLoading }, navigate, pgEnv);
   }, [restProps, navigate, setLoading]);
   const buttonClass = props.disabled
       ? "cursor-not-allowed bg-gray-400 text-white font-bold py-2 px-4 rounded"
