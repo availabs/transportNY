@@ -1,22 +1,20 @@
 
-import Auth from "~/pages/Auth"
 
-// import Auth from "~/pages/Auth/Auth1.0.14"
 
 import NoMatch from "~/pages/404"
 import DataManager from "~/pages/DataManager"
-import Documentation from "~/pages/Documentation"
+//import Documentation from "~/pages/Documentation"
 
-import GraphTest from "./GraphTest"
+//import GraphTest from "./GraphTest"
 
 import { useFalcor } from "~/modules/avl-components/src"
 // import { useAuth } from "@availabs/ams"
-import { useAuth } from "~/modules/ams/src"
+import { useAuth } from "~/modules/dms/src"
 
 import transportNYDataTypes from '~/pages/TransportNYDataTypes'
 
 // const authMenuConfig = {
-  
+
 //   topNav: {
 //     position: 'fixed',
 //     size: 'compact'
@@ -42,10 +40,9 @@ const DAMA_ARGS = {
 }
 
 const Routes = [
-  ...Auth,
   ...DataManager(DAMA_ARGS),
-  ...Documentation,
-  GraphTest,
+  // ...Documentation,
+  // GraphTest,
   NoMatch
 ]
 

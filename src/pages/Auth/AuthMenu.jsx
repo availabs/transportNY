@@ -1,8 +1,9 @@
 import React from "react"
-import {useTheme, Dropdown } from '~/modules/avl-components/src'
+//import {useTheme, Dropdown } from '~/modules/avl-components/src'
 // import { withAuth } from "@availabs/ams"
-import { withAuth } from "~/modules/ams/src"
+import { useAuth } from "~/modules/dms/src"
 import {Link} from 'react-router'
+import { use } from "react"
 // import {NavItem, NavMenu, NavMenuItem, NavMenuSeparator, withAuth} from 'components/avl-components/src'
 // import user from "@availabs/ams/dist/reducers/user";
 
@@ -27,6 +28,55 @@ const UserMenu = ({user}) => {
     )
 }
 
+export const useClickOutside = handleClick => {
+  const [node, setNode] = React.useState(null);
+
+  React.useEffect(() => {
+    const checkOutside = e => {
+      if (node.contains(e.target)) {
+        return;
+      }
+      (typeof handleClick === "function") && handleClick(e);
+    }
+    node && document.addEventListener("mousedown", checkOutside);
+    return () => document.removeEventListener("mousedown", checkOutside);
+  }, [node, handleClick])
+
+  return [setNode, node];
+}
+
+// import { useTheme } from "../../wrappers/with-theme"
+
+const Dropdown = ({ control, children, className, openType='hover' }) => {
+    const [open, setOpen] = React.useState(false),
+        clickedOutside = React.useCallback(() => setOpen(false), []),
+        [setRef] = useClickOutside(clickedOutside);
+        // console.log('openType', openType)
+    return (
+        <div ref={ setRef }
+             className={`h-full relative cursor-pointer ${className}` }
+             onMouseEnter={ e => {
+                if(openType === 'hover') {
+                 setOpen(true)
+                }
+            }}
+            onMouseLeave={ e => setOpen(false) }
+            onClick={ e => {
+                 //e.preventDefault();
+                 setOpen(!open)
+             } }
+        >
+            {control}
+            {open ?
+                <div className={ `shadow fixed w-full max-w-[200px] rounded-b-lg ${open ? `block` : `hidden`} z-10` }>
+                    { children }
+                </div> : ''
+
+            }
+        </div>
+    )
+}
+
 export const Item = (to, icon, span, condition) => (
     condition === undefined || condition ?
         <Link to={ to } >
@@ -41,27 +91,33 @@ export const Item = (to, icon, span, condition) => (
 )
 
 
-export default withAuth(({title, shadowed = true, user, children}) => {
-
-    const theme = useTheme()
+export default ({title, shadowed = true, children}) => {
+    const { user } = useAuth()
+    //const theme = useTheme()
     // console.log('Auth Menu', theme)
     return (
         <div className="h-full w-full">
-            {!user.authed ?
-                <Link className={`${theme.topnav({}).navitemTop}`} to="/auth/login">Login</Link> :
+            {!user?.authed ?
+                <Link className={`
+                  group font-sans
+                  flex items-center text-sm px-4 border-r h-12 text-neutral-500 border-neutral-100
+                  hover:bg-blue-500 hover:text-white
+                  focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
+                  transition cursor-pointer
+              `} to="/auth/login">Login</Link> :
                 <Dropdown control={<UserMenu user={user}/>} className={`hover:bg-blue-500 group z-50`} >
                     <div key={'x'} className='p-1 bg-blue-500'>
-                        { user.authLevel >= 5 ? 
+                        { user.authLevel >= 5 ?
                         <>
-                            <div key={'docs'} className=''> 
+                            <div key={'docs'} className=''>
                                 {Item('/docs/edit', 'fa fa-file-pen flex-shrink-0  pr-1', 'Edit Docs')}
                             </div>
-                            <div key={'tracking'} className=''> 
+                            <div key={'tracking'} className=''>
                                 {Item('/docs/tracking', 'fa fa-list-check flex-shrink-0  pr-1', 'Tracking')}
                             </div>
                         </>
                          : ''}
-                        <div key={'logout'} className='py-1 border-t border-blue-400'> 
+                        <div key={'logout'} className='py-1 border-t border-blue-400'>
                             {Item('/auth/logout', 'fad fa-sign-out-alt pb-2 pr-1', 'Logout')}
                         </div>
                     </div>
@@ -69,7 +125,7 @@ export default withAuth(({title, shadowed = true, user, children}) => {
             }
         </div>
     )
-})
+}
 
 // unused routes
 /* user.authLevel < 5 ? null :

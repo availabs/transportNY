@@ -12,8 +12,7 @@ import { getSubdomain }  from '~/utils'
 
 import {
   Messages,
-  withAuth,
-  useAuth
+  withAuth
 } from "~/modules/ams/src"
 
 import {
@@ -27,25 +26,27 @@ import DefaultRoutes from '~/Routes';
 import transportNY from '~/sites/transportny'
 import tsmo from '~/sites/tsmo'
 import tsmonew from '~/sites/tsmo_new'
-import freightatlas from '~/sites/freightatlas'
-import fdi from '~/sites/fdi'
+//import freightatlas from '~/sites/freightatlas'
+//import fdi from '~/sites/fdi'
 
 import npmrds from '~/sites/npmrds'
 import transit from '~/sites/transit'
-import demos from '~/sites/demos'
-import sandbox from '~/sites/sandbox'
+//import demos from '~/sites/demos'
+//import sandbox from '~/sites/sandbox'
 import themes from './dms_themes'
+import {PROJECT_NAME, API_HOST, AUTH_HOST} from "./config.js";
+
 
 const Sites = {
   www: transportNY,
   tsmo: tsmonew,
   tsmo_old: tsmo,
-  freightatlas,
-  fdi,
+  //freightatlasv1: freightatlas,
+  //fdi,
   npmrds,
   //transit,
-  demos,
-  sandbox
+  //demos,
+  // sandbox
 }
 //import AdditionalComponents from "./additional_components";
 import { DamaMap, Map } from "./pages/DataManager/"
@@ -95,8 +96,8 @@ const App = (props) => {
           adminConfig[0]({
               app: 'npmrdsv5',
               type: 'dev2',
-              baseUrl: adminBaseUrl
-             // API_HOST
+              baseUrl: adminBaseUrl,
+              API_HOST
           })
         }
         adminPath={adminBaseUrl}
@@ -105,7 +106,9 @@ const App = (props) => {
         authWrapper={withAuth}
         themes={themes}
         damaBaseUrl={damaBaseUrl}
-        //API_HOST={API_HOST}
+        API_HOST={API_HOST}
+        AUTH_HOST={AUTH_HOST}
+        PROJECT_NAME={PROJECT_NAME}
 
         routes={WrappedRoutes}
       />

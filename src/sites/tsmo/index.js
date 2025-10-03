@@ -6,7 +6,7 @@ import IncidentSearch from './pages/IncidentSearch'
 import IncidentView from "./pages/IncidentView"
 import CorridorView from "./pages/CorridorView"
 
-import TSMODocs from "./pages/docsTSMO"
+//import TSMODocs from "./pages/docsTSMO"
 
 import Home from './pages/Home'
 
@@ -18,7 +18,7 @@ const Routes = [
   Congestion,
   IncidentView,
   ...CorridorView,
-  ...TSMODocs
+  //...TSMODocs
 ]
 
 
