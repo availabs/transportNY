@@ -117,8 +117,8 @@ const ValueContainer = props => {
         <PlaceHolder>
           { placeholder }
         </PlaceHolder> :
-        displayValues.map((v, i) => (
-          <ValueItem key={ v.key } { ...v }
+        displayValues.map(({ key, ...v }, i) => (
+          <ValueItem key={ key } { ...v }
             isRemovable={ isRemovable }
             remove={ remove }/>
         ))
