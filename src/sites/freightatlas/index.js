@@ -13,7 +13,7 @@ import { useAuth } from "~/modules/ams/src"
 import transportNYDataTypes from '~/pages/TransportNYDataTypes'
 
 // const authMenuConfig = {
-  
+
 //   topNav: {
 //     position: 'fixed',
 //     size: 'compact'
@@ -38,10 +38,10 @@ const DAMA_ARGS = {
   }
 }
 
- 
+
 const Routes = [
-  ...FreightAtlasCMS,
-  ...DataManager(DAMA_ARGS),  
+  //...FreightAtlasCMS,
+  //...DataManager(DAMA_ARGS),
   // ...FreightMap,
   // ...FreightAtlas,
   // ...CollectionAtlas

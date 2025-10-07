@@ -323,7 +323,7 @@ const BatchReports = props => {
         case "relative":
           const sd = route[base].startDate;
           const ed = route[base].endDate;
-          return calculateRelativeDates(column.relativeDate, sd, ed, "YYYY-MM-DD")
+          return calculateRelativeDates(column.relativeDate, sd, ed, "YYYY-MM-DD", "YYYY-MM-DD")
       }
     }
 

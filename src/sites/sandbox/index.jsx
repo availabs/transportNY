@@ -44,8 +44,8 @@ const theme = {
       search: 'right',
       logo: 'left',
       position: 'fixed',
-      
-      nav: 'none' 
+
+      nav: 'none'
     }
   },
   page: {
@@ -97,7 +97,6 @@ const Routes = [
         pgEnv:'npmrds2',
         damaBaseUrl: '/datasources'
       }),
-      withAuth,
 
     ),
     authLevel: 1,

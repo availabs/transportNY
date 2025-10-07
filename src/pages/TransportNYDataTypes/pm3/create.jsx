@@ -14,7 +14,7 @@ import {
   ViewAttributes,
   getAttributes,
 } from "~/pages/DataManager/Source/attributes";
-
+import { MultiLevelSelect } from "~/modules/avl-map-2/src";
 
 import PublishPm3 from "./publish";
 export function reducer(state, action) {
@@ -29,7 +29,7 @@ export function reducer(state, action) {
 }
 
 const BlankComponent = () => <></>;
-export default function NpmrdsCreate({
+export default function Pm3Create({
   source = {},
   user = {},
   dataType = "npmrds",
@@ -44,8 +44,9 @@ export default function NpmrdsCreate({
   const [loading, setLoading] = useState(false);
   const [state, dispatch] = useReducer(reducer, {
     npmrdsSourceId: '',
-    year: 2025,
+    years: [2025],
     damaSourceId: sourceId,
+    damaViewId: '',
     damaSourceName: damaSourceName,
     userId: user?.id ?? ctxUser.id,
     email: user?.email ?? ctxUser.email,
@@ -56,9 +57,7 @@ export default function NpmrdsCreate({
     startDate: '',
     endDate: '',
   });
-  console.log("state::",state)
-  const { npmrdsSourceId, year } = state;
-
+  const { npmrdsSourceId, years, damaViewId } = state;
   useEffect(() => {
     dispatch({ type: "update", payload: { damaSourceName } });
   }, [damaSourceName]);
@@ -76,21 +75,38 @@ export default function NpmrdsCreate({
   }, [endDate]);
 
   useEffect(() => {
-    if(year !== '') {
+    if(years.length > 0) {
       setStartDate('');
       setEndDate('');
     }
-  }, [year]);
+  }, [years]);
 
   useEffect(() => {
-          console.log({startDate})
-    if(startDate){
-      console.log("getyear",startDate.getFullYear());
-      dispatch({ type: "update", payload: { year: '' } })
+    if(startDate || endDate){
+      dispatch({ type: "update", payload: { years: [] } })
     }
 
-
   }, [startDate, endDate]);
+
+  //If viewId is selected, must use the same npmrdsSourceID
+  useEffect(() => {
+    if(damaViewId) {
+      const curView = views.find(v => v.view_id === parseInt(damaViewId));
+      dispatch({type:"update", payload:{npmrdsSourceId: curView.metadata.npmrds_prod_source_id}})
+    }
+  }, [damaViewId]);
+
+  //if npmrdsSourceId is selected, cannot select an existing view to append to
+  useEffect(() => {
+    if(npmrdsSourceId) {
+      if(damaViewId) {
+        const curView = views.find(v => v.view_id === parseInt(damaViewId));
+        if(!curView || parseInt(curView.metadata.npmrds_prod_source_id) !== parseInt(npmrdsSourceId) ) {
+          dispatch({type:"update", payload:{damaViewId: ''}})
+        }
+      }
+    }
+  }, [npmrdsSourceId]);
 
 
   useEffect(() => {
@@ -135,7 +151,7 @@ export default function NpmrdsCreate({
 
   const availableYears = useMemo(() => {
     return currentDataSource
-      ? Object.keys(currentDataSource?.metadata?.npmrds_meta_layer_view_id).map(
+      ? Object.keys(currentDataSource?.metadata?.npmrds_meta_layer_view_id || {}).map(
           (yearString) => parseInt(yearString)
         )
       : Array.from(
@@ -146,24 +162,86 @@ export default function NpmrdsCreate({
   }, [currentDataSource]);
 
   useEffect(() => {
-    if (!year || !availableYears.includes(year)) {
-      dispatch({ type: "update", payload: { year: availableYears[0] } })
+    if (!years.length || !availableYears.some(sourceYear => years.includes(sourceYear))) {
+      dispatch({ type: "update", payload: { years: [availableYears[0]] } })
     }
   }, [availableYears]);
-  
-  const yearInputClass = !npmrdsSourceId
-    ? `flex-0 w-full p-1 cursor-not-allowed bg-gray-200 hover:bg-gray-300 rounded-md`
-    : `flex-0 w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md`;
+
+  useEffect(() => {
+    async function getData() {
+      const lengthPath = [
+        "dama",
+        pgEnv,
+        "sources",
+        "byId",
+        sourceId,
+        "views",
+        "length",
+      ];
+
+      const resp = await falcor.get(lengthPath);
+      await falcor.get([
+        "dama",
+        pgEnv,
+        "sources",
+        "byId",
+        sourceId,
+        "views",
+        "byIndex",
+        {
+          from: 0,
+          to: get(resp.json, lengthPath, 0) - 1,
+        },
+        "attributes",
+        Object.values(ViewAttributes),
+      ]);
+    }
+    if(sourceId) {
+      getData();
+    }
+  }, [sourceId])
+
+  const views = useMemo(() => {
+    return Object.values(
+      get(
+        falcorCache,
+        ["dama", pgEnv, "sources", "byId", sourceId, "views", "byIndex"],
+        {}
+      )
+    ).map((v) =>
+      getAttributes(get(falcorCache, v.value, { attributes: {} })["attributes"])
+    );
+  }, [falcorCache, sourceId, pgEnv]);
+
 
   if (!sourceId && !damaSourceName) {
     return <div> Please enter a datasource name.</div>;
   }
+  let errMsg = ''
+  const isValidYearRange = (!startDate || !endDate) || (startDate && endDate && startDate.getFullYear() === endDate.getFullYear())
+  if(!isValidYearRange){
+    errMsg = 'Date range must be contained within the same calendar year.' 
+  }
 
-  const isButtonEnabled = (sourceId || damaSourceName) && (year || (startDate && endDate)) && npmrdsSourceId;
+  const isButtonEnabled = (sourceId || damaSourceName) && (years.length || (startDate && endDate)) && npmrdsSourceId && isValidYearRange;
   return (
     <div className="w-full my-4">
-      <div className="flex items-center justify-center p-2">
-        <div className="w-full max-w-xs mx-auto">
+      <div className="flex flex-col items-center justify-center p-2">
+        <div className="flex flex-col items-center">
+          <div>
+            Select a NPMRDS Production Source
+          </div>
+          {sourceId && (<>
+            <div className="font-bold underline">
+              or
+            </div>
+            <div>
+              Choose an existing PM3 Version to append to (<b>must</b> use the same NPMRDS source)
+            </div>
+          </>)}
+        </div>
+
+        <div className="flex gap-24">
           <div className="flex flex-col pt-2">
             <div className="flex px-2 text-sm text-gray-600 capitalize">
               NPMRDS Production Source
@@ -190,30 +268,52 @@ export default function NpmrdsCreate({
               </select>
             </div>
           </div>
+          {sourceId && (<div className="flex flex-col pt-2">
+            <div className="flex px-2 text-sm text-gray-600 capitalize">
+              Versions
+            </div>
+            <div className="flex pl-1">
+              <select
+                className={
+                  "flex-0 w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md"
+                }
+                onChange={(e) => {
+                  dispatch({ type: "update", payload: { damaViewId: e.target.value } })
+                }}
+                value={damaViewId}
+              >
+                <option value="">--</option>
+                {views?.map((view) => (
+                  <option key={`pm3_option_${view.view_id}`} value={view.view_id}>
+                    {view.version || view.view_id}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>)}
         </div>
       </div>
-      <div className="flex items-center justify-center p-2">
-        Select a year OR starting/ending dates
+      <div className="flex flex-col items-center justify-center p-2">
+        <div>Select full year(s) OR starting/ending dates</div>
+        <div className="text-xs font-grey">Specific dates can only span a single year</div>
       </div>
       <div className="flex items-center justify-center p-2">
         <div className="w-full max-w-xs mx-auto">
           <div className="flex items-center justify-center">
-            <div className="w-[50%]">
+            <div className="w-[60%]">
               <div className="flex px-2 pb-1 text-sm text-gray-600 capitalize">
                 Year
               </div>
               <div className="flex pl-1">
-                <input
-                  disabled={!npmrdsSourceId}
-                  className={yearInputClass}
-                  type="number"
-                  max={availableYears[availableYears.length-1]}
-                  min={availableYears[0]}
-                  step={1}
+                <MultiLevelSelect
+                  isMulti={true}
+                  placeholder={"Select year(s)"}
+                  options={npmrdsSourceId ? availableYears : []}
+                  value={years}
                   onChange={(e) => {
-                    dispatch({ type: "update", payload: { year: e.target.value } })
+                    console.log("year multi select e::",e)
+                    dispatch({ type: "update", payload: { years:e } })
                   }}
-                  value={year}
                 />
               </div>
             </div>
@@ -260,23 +360,30 @@ export default function NpmrdsCreate({
           </div>
         </div>
       </div>
-      <div className="md:flex md:items-center gap-4">
-        <PublishPm3
-          disabled={!isButtonEnabled}
-          year={year}
-          startDate={startDate}
-          endDate={endDate}
-          npmrdsSourceId={npmrdsSourceId}
-          loading={loading}
-          setLoading={setLoading}
-          source_id={sourceId}
-          user_id={state.userId}
-          email={state.email}
-          name={source?.name}
-          type={source?.type}
-          pgEnv={pgEnv}
-          newVersion={newVersion}
-        />
+      <div className="md:flex md:items-center gap-4 flex-col">
+        <div className="text-red-500 text-sm">
+          {errMsg}
+        </div>
+        <div>
+          <PublishPm3
+            disabled={!isButtonEnabled}
+            years={years}
+            startDate={startDate}
+            endDate={endDate}
+            npmrdsSourceId={npmrdsSourceId}
+            loading={loading}
+            setLoading={setLoading}
+            source_id={sourceId}
+            view_id={damaViewId}
+            user_id={state.userId}
+            email={state.email}
+            name={source?.name}
+            type={source?.type}
+            pgEnv={pgEnv}
+            newVersion={newVersion}
+          />
+        </div>
+
       </div>
     </div>
   );

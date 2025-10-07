@@ -46,7 +46,9 @@ const calculateTimespanOf = (startDate, endDate, timespan, format = "YYYYMMDD") 
   return [start.format(format), end.format(format)];
 }
 
-export const calculateRelativeDates = (relativeDate, startDate, endDate, format = "YYYYMMDD") => {
+export const calculateRelativeDates = (relativeDate, startDate, endDate, outputFormat = "YYYYMMDD", inputFormat = "YYYYMMDD") => {
+
+console.log("calculateRelativeDates::args", relativeDate, startDate, endDate, outputFormat)
 
   const match = RELATIVE_DATE_REGEX.exec(relativeDate);
   if (!match) return [null, null];
@@ -54,31 +56,33 @@ export const calculateRelativeDates = (relativeDate, startDate, endDate, format 
 
   const [, inputdate, timespan, operation = "", amount = "", duration = ""] = match;
 
+console.log("calculateRelativeDates::match", inputdate, timespan, operation, amount, duration);
+
   if (SpecialOptions.includes(timespan)) {
     switch (timespan) {
       case "dayof":
         return [
-          moment(startDate, "YYYYMMDD").format(format),
-          moment(endDate, "YYYYMMDD").format(format)
+          moment(startDate, inputFormat).format(outputFormat),
+          moment(endDate, inputFormat).format(outputFormat)
         ]
       case "weekof":
-        return calculateTimespanOf(startDate, endDate, "week", format);
+        return calculateTimespanOf(startDate, endDate, "week", outputFormat);
       case "monthof":
-        return calculateTimespanOf(startDate, endDate, "month", format);
+        return calculateTimespanOf(startDate, endDate, "month", outputFormat);
       case "yearof":
-        return calculateTimespanOf(startDate, endDate, "year", format);
+        return calculateTimespanOf(startDate, endDate, "year", outputFormat);
     }
   }
 
   if (inputdate === "startDate") {
-    const start = moment(startDate, "YYYYMMDD").startOf(timespan).subtract(amount, timespan);
+    const start = moment(startDate, inputFormat).startOf(timespan).subtract(amount, timespan);
     const end = moment(start).add(duration, timespan).subtract(1, "day");
-    return [start.format(format), end.format(format)];
+    return [start.format(outputFormat), end.format(outputFormat)];
   }
 
-  const start = moment(endDate, "YYYYMMDD").startOf(timespan).add(amount, timespan);
+  const start = moment(endDate, inputFormat).startOf(timespan).add(amount, timespan);
   const end = moment(start).add(duration, timespan).subtract(1, "day");
-  return [start.format(format), end.format(format)];
+  return [start.format(outputFormat), end.format(outputFormat)];
 }
 
 const DATE_TIME_REGEX_1 = /^(\d{8})(?:T(\d{2}[:]\d{2}(?:[:]\d{2})?))?/
