@@ -6,9 +6,11 @@ import moment from "moment"
 
 import {
   useFalcor,
-  withAuth,
   Input
 } from "~/modules/avl-components/src"
+
+import { withAuth } from "~/modules/dms/src"
+
 
 import { FolderStuff, getStuffSorter } from "./Stuff"
 import { Link } from 'react-router'

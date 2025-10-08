@@ -4,13 +4,14 @@ import get from "lodash/get"
 
 import {
   useFalcor,
-  withAuth,
+
   Input,
   Select,
   ColorInput,
   Button,
   Modal
 } from "~/modules/avl-components/src"
+import { withAuth } from "~/modules/dms/src"
 
 import FolderIcon from "./FolderIcon"
 
