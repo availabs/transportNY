@@ -25,11 +25,11 @@ import {
 
 import { Button, Input } from "~/modules/avl-map-2/src/uicomponents"
 
-const LoadingScreen = ({ loading, message }) => {
+const LoadingIndicator = ({ loading, message }) => {
   return (
     <div className={ `
-        inset-0 flex items-center justify-center text-center
-        bg-opacity-75 bg-black z-50 text-6xl font-bold text-white
+        right-0 bottom-0 p-12
+        bg-opacity-75 bg-black z-50 text-3xl font-bold text-white
         ${ loading ? "fixed" : "hidden" }
       ` }
     >
@@ -154,22 +154,30 @@ const BatchReports = props => {
   React.useEffect(() => {
     const numRoutes = get(falcorCache, ["routes2", "user", "length"], 0);
     const numFolders = get(falcorCache, ["folders2", "user", "length"], 0);
-    const requests = [];
+    // const requests = [];
     if (numRoutes) {
-      requests.push([
-        "routes2", "user", "index", { from: 0, to: numRoutes - 1 },
+      // requests.push([
+      //   "routes2", "user", "index", { from: 0, to: numRoutes - 1 },
+      //   ["id", "name", "metadata", "tmc_array"]
+      // ])
+      falcor.chunk([
+        "routes2", "user", "index", d3range(0, numRoutes),
         ["id", "name", "metadata", "tmc_array"]
-      ])
+      ]);
     }
     if (numFolders) {
-      requests.push([
+      falcor.get([
         "folders2", "user", "index", { from: 0, to: numFolders - 1 },
         ["id", "name", "type"]
-      ])
+      ]);
+      // requests.push([
+      //   "folders2", "user", "index", { from: 0, to: numFolders - 1 },
+      //   ["id", "name", "type"]
+      // ])
     }
-    if (requests.length) {
-      falcor.get(...requests);
-    }
+    // if (requests.length) {
+    //   falcor.get(...requests);
+    // }
   }, [falcor, falcorCache]);
 
   React.useEffect(() => {
@@ -315,7 +323,7 @@ const BatchReports = props => {
         case "relative":
           const sd = route[base].startDate;
           const ed = route[base].endDate;
-          return calculateRelativeDates(column.relativeDate, sd, ed, "YYYY-MM-DD")
+          return calculateRelativeDates(column.relativeDate, sd, ed, "YYYY-MM-DD", "YYYY-MM-DD")
       }
     }
 
@@ -492,7 +500,7 @@ const BatchReports = props => {
   return (
     <div className="h-full max-h-full flex">
 
-      <LoadingScreen loading={ loading }
+      <LoadingIndicator loading={ loading }
         message={ loadingMessage }/>
 
       <Sidebar

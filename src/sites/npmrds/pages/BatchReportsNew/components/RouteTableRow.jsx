@@ -231,7 +231,7 @@ const RouteTableRow = ({ route, remove, update, index, columns }) => {
                     <span className="font-normal text-sm">
                       { route[columns[0].name].startDate === route[columns[0].name].endDate ?
                         `(Base Date: ${ moment(route[columns[0].name].startDate, "YYYY-MM-DD").format("MMM Do YYYY") })` :
-                        `(Base Dates: ${ moment(route[columns[0].name].startDate, "YYYY-MM-DD").format("MMM Do YYYY") } - ${ moment(route[columns[0].name].endtDate, "YYYY-MM-DD").format("MMM Do YYYY") })`
+                        `(Base Dates: ${ moment(route[columns[0].name].startDate, "YYYY-MM-DD").format("MMM Do YYYY") } - ${ moment(route[columns[0].name].endDate, "YYYY-MM-DD").format("MMM Do YYYY") })`
                       }
 
                     </span>
