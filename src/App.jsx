@@ -72,11 +72,11 @@ const damaBaseUrl = '/datasources'
 
 const App = (props) => {
   const SUBDOMAIN = getSubdomain(window.location.host)
-  console.log('SUBDOMAIN')
+  //console.log('SUBDOMAIN')
 
   const site = useMemo(() => {
       let siteOutpt = SUBDOMAIN ? get(Sites, SUBDOMAIN, {Routes:[]}) : Sites['www']
-      console.log('SUBDOMAIN', siteOutpt)
+      //console.log('SUBDOMAIN', siteOutpt)
       return siteOutpt
   },[SUBDOMAIN])
 
@@ -102,14 +102,11 @@ const App = (props) => {
         }
         adminPath={adminBaseUrl}
         pgEnvs={[defaultPgEnv]}
-
-        authWrapper={withAuth}
         themes={themes}
         damaBaseUrl={damaBaseUrl}
         API_HOST={API_HOST}
         AUTH_HOST={AUTH_HOST}
         PROJECT_NAME={PROJECT_NAME}
-
         routes={WrappedRoutes}
       />
       <Messages />

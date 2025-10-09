@@ -55,38 +55,33 @@ const theme = {
     title: '',
     linkPath: '/'
   },
-  page: {
-    container: 'bg-slate-100',
-    wrapper1: 'w-full h-full flex-1 flex flex-col', // first div inside Layout
-    wrapper2: 'w-full h-full flex-1 flex flex-row', // inside page header, wraps sidebar
-    wrapper3: 'flex flex-1 w-full flex-col border shadow bg-white relative text-md font-light  min-h-[calc(100vh_-_132px)] overflow-hidden', // content wrapepr
-    //wrapper3: 'flex flex-1 w-full  flex-col border shadow bg-white relative text-md font-light leading-7 p-4 min-h-[calc(100vh_-_102px)]' , // content wrapepr
-    iconWrapper : 'z-20 absolute right-[10px] top-[15px]',
-    icon: 'text-slate-400 hover:text-blue-500'
-  },
-  "sectionGroup": {
-        "sideNavContainer1": "w-[302px] hidden xl:block",
-        "sideNavContainer2": "w-[302px] sticky top-[120px] hidden xl:block h-[calc(100vh_-_128px)] pr-2",
-        "sideNavContainer3": "shadow-md rounded-lg overflow-hidden h-full",
+  "pages": {
+    "sectionGroup": {
+      "sideNavContainer1": "w-[302px] hidden xl:block",
+      "sideNavContainer2": "w-[302px] sticky top-[120px] hidden xl:block h-[calc(100vh_-_128px)] pr-2",
+      "sideNavContainer3": "shadow-md rounded-lg overflow-hidden h-full",
+      "group": {
         "default": {
-            "wrapper1": "w-full h-full flex-1 flex flex-row pt-2",
-            "wrapper2": "flex flex-1 w-full  flex-col  shadow-md bg-white rounded-lg relative text-md font-light leading-7 h-full min-h-[200px]",
-            "iconWrapper": "z-[10] w-[30px] h-[30px] absolute right-[30px] top-[5px]",
-            "icon": "text-slate-400 hover:text-blue-500",
-            viewIcon: 'ViewPage',
-            editIcon: 'EditPage'
+          "wrapper1": "w-full h-full flex-1 flex flex-row pt-2",
+          "wrapper2": "flex flex-1 w-full  flex-col  shadow-md bg-white rounded-lg relative text-md font-light leading-7 h-full min-h-[200px]",
+          "iconWrapper": "z-[10] w-[30px] h-[30px] absolute right-[30px] top-[5px]",
+          "icon": "text-slate-400 hover:text-blue-500",
+          "viewIcon": 'ViewPage',
+          "editIcon": 'EditPage'
         },
         "content": {
-            "wrapper1": "w-full h-full flex-1 flex flex-row",
-            "wrapper2": "flex flex-1 w-full  flex-col  shadow-md bg-white rounded-lg relative text-md font-light leading-7 h-full min-h-[200px]",
-            "iconWrapper": "z-[10] w-[30px] h-[30px] absolute right-[30px] top-[5px]",
-            "icon": "text-slate-400 hover:text-blue-500",
-            viewIcon: 'ViewPage',
-            editIcon: 'EditPage'
+          "wrapper1": "w-full h-full flex-1 flex flex-row",
+          "wrapper2": "flex flex-1 w-full  flex-col  shadow-md bg-white rounded-lg relative text-md font-light leading-7 h-full min-h-[200px]",
+          "iconWrapper": "z-[10] w-[30px] h-[30px] absolute right-[30px] top-[5px]",
+          "icon": "text-slate-400 hover:text-blue-500",
+          "viewIcon": 'ViewPage',
+          "editIcon": 'EditPage'
         },
-  },
-  section: {
-    editTopLineIcons: 'flex w-full pt-12 bg-white'
+      }
+    },
+    section: {
+      editTopLineIcons: 'flex w-full pt-12 bg-white'
+    },
   },
   topnav: {
       fixed: 'mt-12',
