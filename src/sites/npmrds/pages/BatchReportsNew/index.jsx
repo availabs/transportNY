@@ -9,7 +9,11 @@ import download from "downloadjs"
 import { v4 as uuidv4 } from "uuid"
 import moment from "moment"
 
+import { useParams } from "react-router";
+
 import { useFalcor } from "~/modules/avl-components/src"
+
+import { useAuth } from "~/modules/ams/src"
 
 import { API_HOST } from "~/config"
 
@@ -22,6 +26,8 @@ import {
   calculateRelativeDates,
   RelativeDateOptions
 } from "~/sites/npmrds/pages/analysis/reports/store/utils/relativedates.utils"
+
+import { MultiLevelSelect as MultiLevelSelectNew } from "./components/MultiLevelSelect"
 
 import { Button, Input } from "~/modules/avl-map-2/src/uicomponents"
 
@@ -52,7 +58,10 @@ const Reducer = (state, action) => {
   const { type, ...payload } = action;
   switch (type) {
     case "load-state":
-      return payload.state;
+      return {
+        ...InitialState,
+        ...payload.state
+      };
     case "update-state":
     case "set-route-data":
       return { ...state, ...payload };
@@ -198,12 +207,41 @@ const BatchReports = props => {
 
   const [state, dispatch] = React.useReducer(Reducer, InitialState);
 
+  const [filename, setFilename] = React.useState("");
+
   const loadState = React.useCallback(state => {
     dispatch({
       type: "load-state",
       state
     })
   }, []);
+
+  const params = useParams();
+  
+  React.useEffect(() => {
+    if (params.batchreportId) {
+
+      const brid = params.batchreportId;
+
+      startLoading(`Loading batch report: ${ brid }`);
+
+      falcor.get([
+        "batch", "report", "id", brid,
+        ["name", "batchreport"]
+      ])
+
+      const filename = get(falcorCache, ["batch", "report", "id", brid, "name"], null);
+      if (filename) {
+        setFilename(filename);
+      }
+
+      const batchreport = get(falcorCache, ["batch", "report", "id", brid, "batchreport", "value"], null);
+      if (batchreport) {
+        loadState(batchreport);
+        stopLoading();
+      }
+    }
+  }, [falcor, falcorCache, params, startLoading, stopLoading, loadState]);
 
   const {
     selectedRoutes,
@@ -433,17 +471,15 @@ const BatchReports = props => {
     //   }).then(() => { stopLoading(); })
   }, [routes, columns, okToSend, setRouteData, startLoading, stopLoading]);
 
-  const okToSave = React.useMemo(() => {
+  const okToSaveAsCsv = React.useMemo(() => {
     if (!okToSend) return false;
     if (!routeData.length) return false;
-
+    if (!filename) return false;
     return true;
-  }, [routeData, okToSend]);
-
-  const [filename, setFilename] = React.useState(`csv_data_${ moment().format("MM_DD_YYYY") }`)
+  }, [routeData, okToSend, filename]);
 
   const saveAsCsv = React.useCallback(e => {
-    if (!okToSave) return;
+    if (!okToSaveAsCsv) return;
     startLoading("Saving selections as CSV file...");
 
     const headers = ["route name", "tmcs", "start time", "end time"];
@@ -470,9 +506,32 @@ const BatchReports = props => {
       csvData.push(csvRow);
     })
     const csv = d3csvFormatRows(csvData);
-    download(new Blob([csv]), `${ filename }.csv`, "text/csv")
+    download(new Blob([csv]), `${ filename }.csv`, "text/csv");
     stopLoading();
-  }, [routes, columns, routeData, okToSave, startLoading, stopLoading, filename]);
+  }, [routes, columns, routeData, okToSaveAsCsv, startLoading, stopLoading, filename]);
+
+  const okToSaveToFolder = React.useMemo(() => {
+    if (!okToSend) return false;
+    if (!filename) return false;
+    return true;
+  }, [okToSend, filename]);
+
+  const saveToFolder = React.useCallback(fid => {
+    if (!okToSaveToFolder) return;
+
+    startLoading("Saving Batch Report to folder...");
+
+    const data = {
+      batchreport: { ...state, routeData: [] },
+      name: filename,
+      description: "",
+      batchreportId: null,
+      folder: fid
+    };
+    falcor.call(
+      ["batch", "report", "save"], [data]
+    ).then(() => stopLoading());
+  }, [okToSaveToFolder, startLoading, stopLoading, falcor, state, filename]);
 
   React.useEffect(() => {
     if (window.localStorage) {
@@ -497,6 +556,22 @@ const BatchReports = props => {
     }
   }, [state]);
 
+  const [hovering, setHovering] = React.useState(false);
+  const onMouseEnter = React.useCallback(e => {
+    setHovering(true);
+  }, []);
+  const onMouseLeave = React.useCallback(e => {
+    setHovering(false);
+  }, []);
+
+  const [open, setOpen] = React.useState(false);
+  const openFolderSelector = React.useCallback(e => {
+    setOpen(true);
+  }, []);
+  const closeFolderSelector = React.useCallback(e => {
+    setOpen(false);
+  }, []);
+
   return (
     <div className="h-full max-h-full flex">
 
@@ -517,31 +592,71 @@ const BatchReports = props => {
         editColumn={ editColumn }
         deleteColumn={ deleteColumn }
       >
-        <div className="p-4 grid grid-cols-1 gap-2">
-          <Button className="buttonBlock"
-            disabled={ !okToSend }
-            onClick={ sendToServer }
-          >
-            Generate Data
-          </Button>
-          <div className="grid grid-cols-3">
-            <div className="py-1 text-right mr-1 font-bold">File Name</div>
-            <div className="col-span-2 flex">
-              <div className="flex-1">
-                <Input type="text"
-                  className="input text-right"
-                  value={ filename }
-                  onChange={ setFilename }/>
-              </div>
-              <div className="py-1 ml-1">.csv</div>
+        <div className="p-4 grid grid-cols-2 gap-2">
+
+          <div className="col-span-2">
+            <Button className="buttonBlock"
+              disabled={ !okToSend }
+              onClick={ sendToServer }
+            >
+              Generate Data
+            </Button>
+          </div>
+
+          <div className="border-b-2 mt-2 border-current font-bold col-span-2">
+            Save Options
+          </div>
+
+
+          <div className="flex col-span-2 items-center">
+            <div className="whitespace-nowrap font-bold mr-1">
+              Name:
+            </div>
+            <Input type="text"
+              className="input"
+              value={ filename }
+              onChange={ setFilename }
+              placeholder="First, enter a name..."/>
+            <div className={ `
+                py-1 ml-1 
+                ${ hovering ? "text-current" : "text-gray-200" }
+              `}
+            >
+              .csv
             </div>
           </div>
-          <Button className="buttonBlock"
-            disabled={ !okToSave }
-            onClick={ saveAsCsv }
-          >
-            Save as CSV
-          </Button>
+
+          <div>
+            <Button className={ okToSaveAsCsv ? "buttonBlockPrimary" : "buttonBlock" }
+              style={ { opacity: okToSaveAsCsv ? "1.0" : "0.5" } }
+              disabled={ !okToSaveAsCsv }
+              onClick={ saveAsCsv }
+              onMouseEnter={ onMouseEnter }
+              onMouseLeave={ onMouseLeave }
+            >
+              Save as CSV
+            </Button>
+          </div>
+
+          <div className="relative">
+            <Button className={ okToSaveToFolder ? "buttonBlockSuccess" : "buttonBlock" }
+              style={ { opacity: okToSaveToFolder ? "1.0" : "0.5" } }
+              disabled={ !okToSaveToFolder }
+              onClick={ openFolderSelector }
+            >
+              Save to a Folder...
+            </Button>
+            <div className={ `
+                absolute bottom-[-1px] left-[-1px] z-50
+                rounded-bl bg-white shadow-lg shadow-black
+              ` }
+              style={ { display: open ? "block" : "none" } }
+              onClick={ closeFolderSelector }
+            >
+              <FolderSelector saveToFolder={ saveToFolder }/>
+            </div>
+          </div>
+
         </div>
       </Sidebar>
 
@@ -613,12 +728,116 @@ const BatchReports = props => {
   )
 }
 
-const brConfig = {
-  name:'Batch Report',
-  path: "/batchreportsnew",
-  component: BatchReports,
-  mainNav: true,
-  icon: 'fa fa-table-list',
-  auth: true
-}
+const brConfig = [
+  { name:'Batch Report',
+    path: "/batchreportsnew",
+    component: BatchReports,
+    mainNav: true,
+    icon: 'fa fa-table-list',
+    auth: true
+  },
+  { name:'Batch Report',
+    path: "/batchreportsnew/report/:batchreportId",
+    component: BatchReports,
+    mainNav: false,
+    icon: 'fa fa-table-list',
+    auth: true
+  }
+]
 export default brConfig
+
+const FolderItem = ({ folder, saveToFolder, isChild = false }) => {
+
+  const hasChildren = React.useMemo(() => {
+    return Boolean(folder.children.length);
+  }, [folder.children]);
+
+  const [hovering, setHovering] = React.useState(false);
+  const onMouseOver = React.useCallback(e => {
+    setHovering(true);
+  }, []);
+  const onMouseOut = React.useCallback(e => {
+    setHovering(false);
+  }, []);
+
+  const doSaveToFolder = React.useCallback(e => {
+    saveToFolder(folder.id);
+  }, [saveToFolder, folder.id]);
+
+  return (
+    <div className={ `
+        whitespace-nowrap px-1 cursor-pointer
+        ${ isChild ? "" : "rounded-l" }
+        ${ hasChildren ? "" : "mr-2 rounded-r" } relative
+        bg-white hover:bg-gray-200
+      ` }
+      onMouseOver={ hasChildren ? onMouseOver : null }
+      onMouseOut={ hasChildren ? onMouseOut : null }
+      onClick={ doSaveToFolder }
+    >
+      <div className="flex items-center">
+        <div className="flex-1 flex">
+          <div className="w-16 text-center">({ folder.id })</div> { folder.name }
+        </div>
+        { !hasChildren ? null :
+          <span className="fa fa-caret-right mr-1"/>
+        }
+      </div>
+
+      { !hasChildren ? null :
+        <div className={ `
+            h-fit w-fit absolute z-75 bottom-0 bg-white py-2
+          ` }
+          style={ {
+            display: hovering ? "block" : "none",
+            left: "100%",
+            bottom: "-0.5rem"
+          } }
+        >
+          { folder.children.map(f =>
+              <FolderItem key={ f.id } folder={ f } isChild
+                saveToFolder={ saveToFolder }/>
+            )
+        }
+        </div>
+      }
+    </div>
+  )
+}
+
+const FOLDER_TYPES_SORT_VALUES = {
+  "user": 1,
+  "group": 2,
+  "AVAIL": 3
+}
+
+const FolderSelector = ({ folderTree, ...props }) => {
+
+  const { falcor, falcorCache } = useFalcor();
+
+  const foldersTree = React.useMemo(() => {
+    return get(falcorCache, ["folders2", "user", "tree", "value"], [])
+      .sort((a, b) => {
+        if (a.type === b.type) {
+          return a.name.localeCompare(b.name);
+        }
+        return FOLDER_TYPES_SORT_VALUES[a.type] - FOLDER_TYPES_SORT_VALUES[b.type];
+      });
+  }, [falcorCache]);
+
+  return (
+    <div className="py-2 pl-2 relative">
+      <span className={ `
+          fa fa-close bg-gray-200 hover:bg-gray-400 rounded-bl
+          px-2 py-1 cursor-pointer absolute right-0 top-0
+        ` }/>
+      <div className="font-bold border-b-2 border-current mb-1 mr-2 flex">
+        <div className="flex-1">Select a folder to save to...</div>
+      </div>
+      { foldersTree.map(f =>
+          <FolderItem key={ f.id } { ...props } folder={ f }/>
+        )
+      }
+    </div>
+  )
+}

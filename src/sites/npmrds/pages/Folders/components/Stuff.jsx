@@ -338,6 +338,62 @@ const Template = ({ id, forFolder = false, ...props }) => {
   )
 }
 
+const BatchReport = ({ id, forFolder = false, ...props }) => {
+
+  const { falcor, falcorCache } = useFalcor();
+
+  React.useEffect(() => {
+    falcor.get(
+      ["batch", "report", "id", id,
+        ["name", "description", "updated_at", "batchreport", "id"]
+      ]
+    );
+  }, [falcor, id]);
+
+  const [batchreport, setBatchreport] = React.useState({});
+  React.useEffect(() => {
+    setBatchreport(get(falcorCache, ["batch", "report", "id", id], {}));
+  }, [falcorCache, id]);
+
+  const BatchReportItems = React.useMemo(() => {
+    return [
+      { Item: (
+          () => (
+            <Link to={ `/batchreportsnew/report/${ id }` }>
+              <ListItem>
+                <span className="fa fa-eye mr-1"/>View
+              </ListItem>
+            </Link>
+          )
+        )
+      },
+      // { Item: (
+      //     () => (
+      //       <Link to={ `/report/edit/${ id }` }>
+      //         <ListItem>
+      //           <span className="fa fa-pen-to-square mr-1"/>Edit
+      //         </ListItem>
+      //       </Link>
+      //     )
+      //   )
+      // }
+    ]
+  }, [id]);
+
+  const Container = forFolder ? FolderStuffContainer : StuffContainer;
+
+  return (
+    <Container { ...props } { ...batchreport } id={ id } type="batch-report"
+      items={ BatchReportItems }
+    >
+      <span className="fa-solid fa-gears text-orange-500 text-sm px-2"/>
+      <span className="pt-1">
+        { get(batchreport, "name", "loading...") }
+      </span>
+    </Container>
+  )
+}
+
 const DateTimeRegex = /(\d{4}[-]\d{2}[-]\d{2})(?:T(\d{2}[:]\d{2}[:]\d{2}))?/;
 
 const RouteSelectModal = ({ folders, template, action, ...props }) => {
@@ -722,7 +778,8 @@ const Stuff = ({ type, ...props }) => {
     type === "folder" ? <TrackVisibility once><Folder { ...props }/></TrackVisibility> :
     type === "route" ? <TrackVisibility once><Route { ...props }/></TrackVisibility> :
     type === "report" ? <TrackVisibility once><Report { ...props }/></TrackVisibility> :
-    type === "template" ? <TrackVisibility once><Template { ...props }/></TrackVisibility> : null
+    type === "template" ? <TrackVisibility once><Template { ...props }/></TrackVisibility> :
+    type === "batch-report" ? <TrackVisibility once><BatchReport { ...props }/></TrackVisibility> : null
   )
 }
 
@@ -731,7 +788,8 @@ const FolderStuff = ({ type, ...props }) => {
     type === "folder" ? <Folder { ...props } forFolder={ true }/> :
     type === "route" ? <Route { ...props } forFolder={ true }/> :
     type === "report" ? <Report { ...props } forFolder={ true }/> :
-    type === "template" ? <Template { ...props } forFolder={ true }/> : null
+    type === "template" ? <Template { ...props } forFolder={ true }/> :
+    type === "batch-report" ? <BatchReport { ...props } forFolder={ true }/> : null
   )
 }
 
@@ -739,7 +797,8 @@ const StuffOrder = {
   folder: 0,
   report: 1,
   template: 1,
-  route: 2
+  route: 2,
+  "batch-report": 3
 }
 
 const getStuffSorter = ({ type }) => {
@@ -1260,6 +1319,9 @@ const FolderStuffContainer = props => {
         break;
       case "template":
         falcor.call(["templates2", "delete"], [id])
+        break;
+      case "batch-report":
+        falcor.call(["batch", "report", "delete"], [id])
         break;
     }
   }, [falcor, type, id]);

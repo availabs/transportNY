@@ -48,7 +48,7 @@ const calculateTimespanOf = (startDate, endDate, timespan, format = "YYYYMMDD") 
 
 export const calculateRelativeDates = (relativeDate, startDate, endDate, outputFormat = "YYYYMMDD", inputFormat = "YYYYMMDD") => {
 
-console.log("calculateRelativeDates::args", relativeDate, startDate, endDate, outputFormat)
+// console.log("calculateRelativeDates::args", relativeDate, startDate, endDate, outputFormat)
 
   const match = RELATIVE_DATE_REGEX.exec(relativeDate);
   if (!match) return [null, null];
@@ -56,7 +56,7 @@ console.log("calculateRelativeDates::args", relativeDate, startDate, endDate, ou
 
   const [, inputdate, timespan, operation = "", amount = "", duration = ""] = match;
 
-console.log("calculateRelativeDates::match", inputdate, timespan, operation, amount, duration);
+// console.log("calculateRelativeDates::match", inputdate, timespan, operation, amount, duration);
 
   if (SpecialOptions.includes(timespan)) {
     switch (timespan) {

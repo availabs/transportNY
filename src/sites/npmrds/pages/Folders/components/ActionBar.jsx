@@ -30,8 +30,11 @@ const stuffIdsByType = stuff => {
     else if (c.type === "folder") {
       a[3].push(c.id);
     }
+    else if (c.type === "batch-report") {
+      a[4].push(c.id);
+    }
     return a;
-  }, [[], [], [], []]);
+  }, [[], [], [], [], []]);
 }
 
 const useStuffActions = (selectedStuff, parent, deselectAll) => {
@@ -39,7 +42,7 @@ const useStuffActions = (selectedStuff, parent, deselectAll) => {
   const { falcor, falcorCache } = useFalcor();
 
   const deleteSelected = React.useCallback(() => {
-    const [routes, reports, templates, folders] = stuffIdsByType(selectedStuff);
+    const [routes, reports, templates, folders, batchreports] = stuffIdsByType(selectedStuff);
     if (routes.length) {
       falcor.call(["routes2", "delete"], routes);
     }
@@ -51,6 +54,9 @@ const useStuffActions = (selectedStuff, parent, deselectAll) => {
     }
     if (folders.length) {
       falcor.call(["folders2", "delete"], folders);
+    }
+    if (batchreports.length) {
+      falcor.call(["batch", "report", "delete"], batchreports);
     }
   }, [falcor, selectedStuff]);
 
@@ -86,7 +92,7 @@ const useStuffActions = (selectedStuff, parent, deselectAll) => {
       sourceAuth: true,
       targetAuth: true,
       multiple: true,
-      types: new Set(["route", "report", "template", "folder"]),
+      types: new Set(["route", "report", "template", "folder", "batch-report"]),
       action: moveTo,
       Comp: FoldersDropdown
     },
@@ -95,7 +101,7 @@ const useStuffActions = (selectedStuff, parent, deselectAll) => {
       icon: 'fad fa-folder-open text-sm pr-1',
       targetAuth: true,
       multiple: true,
-      types: new Set(["route", "report", "template", "folder"]),
+      types: new Set(["route", "report", "template", "folder", "batch-report"]),
       action: copyTo,
       Comp: FoldersDropdown
     },
@@ -121,7 +127,7 @@ const useStuffActions = (selectedStuff, parent, deselectAll) => {
       icon: 'fad fa-trash text-sm pr-',
       sourceAuth: true,
       multiple: true,
-      types: new Set(["route", "report", "template", "folder"]),
+      types: new Set(["route", "report", "template", "folder", "batch-report"]),
       color: "red-400",
       action: confirmDelete,
       Comp: ActionButton

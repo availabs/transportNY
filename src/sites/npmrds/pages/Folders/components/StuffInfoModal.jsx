@@ -266,11 +266,57 @@ const useTemplateInfo = id => {
   return info;
 }
 
+const useBatchReportInfo = id => {
+  const { falcor, falcorCache } = useFalcor();
+
+  const [info, setInfo] = React.useState([]);
+
+  React.useEffect(() => {
+    if (!id) return;
+    falcor.get([
+      "batch", "report", "id", id,
+      ["name", "description",
+        "created_at", "updated_at"]
+    ]);
+  }, [falcor, id]);
+
+  React.useEffect(() => {
+    const info = [];
+    const data = get(falcorCache, ["batch", "report", "id", id], null);
+    if (data) {
+      info.push({
+        key: "name",
+        value: get(data, "name", ""),
+        className: "text-lg font-bold border-b-2 border-current",
+        icon: "fa-solid fa-gears mr-1"
+      })
+      info.push({
+        key: "description",
+        value: get(data, "description", "")
+      })
+      info.push({
+        key: "created_at",
+        name: "Created At",
+        value: new Date(get(data, "created_at")).toLocaleString()
+      })
+      info.push({
+        key: "updated_at",
+        name: "Updated At",
+        value: new Date(get(data, "updated_at")).toLocaleString()
+      })
+    }
+    setInfo(info);
+  }, [falcorCache, id]);
+
+  return info;
+}
+
 const Hooks = [
   { type: "folder", hook: useFolderInfo },
   { type: "route", hook: useRouteInfo },
   { type: "report", hook: useReportInfo },
-  { type: "template", hook: useTemplateInfo }
+  { type: "template", hook: useTemplateInfo },
+  { type: "batch-report", hook: useBatchReportInfo }
 ]
 
 const StuffInfoModal = ({ type, id, isOpen = false, close }) => {

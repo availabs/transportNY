@@ -28,7 +28,7 @@ const Routes = [
   PM3,
   //...NpmrdsDocs,
   BatchReports,
-  BatchReportsNew,
+  ...BatchReportsNew,
   IncidentView
 ]
 

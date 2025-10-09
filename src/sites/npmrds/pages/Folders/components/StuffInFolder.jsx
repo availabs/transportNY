@@ -34,7 +34,7 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
 
   React.useEffect(() => {
     const stuff = get(falcorCache, ["folders2", "stuff", folder?.id, "value"], []);
-    const [folders, routes, reports, templates] = stuff.reduce((a, c) => {
+    const [folders, routes, reports, templates, batchreports] = stuff.reduce((a, c) => {
       switch (c.stuff_type) {
         case "folder":
           a[0].push(c.stuff_id);
@@ -48,9 +48,12 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
         case "template":
           a[3].push(c.stuff_id);
           break;
+        case "batch-report":
+          a[4].push(c.stuff_id);
+          break;
       }
       return a;
-    }, [[], [], [], []]);
+    }, [[], [], [], [], []]);
 
     const requests = [];
     if (folders.length) {
@@ -64,6 +67,9 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
     }
     if (templates.length && (!filter || (filter === "templates"))) {
       requests.push(["templates2", "id", templates, ["name", "description", "updated_at"]])
+    }
+    if (batchreports.length && (!filter || (filter === "batch-report"))) {
+      requests.push(["batch", "report", "id", batchreports, ["name", "description", "updated_at"]])
     }
     if (requests.length) {
       falcor.get(...requests);
@@ -80,7 +86,8 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
       .filter(s => !filter ||
                   (s.stuff_type === "folder") ||
                   filter.includes(s.stuff_type) ||
-                  ((filter === "reports") && (s.stuff_type === "template"))
+                  ((filter === "reports") && (s.stuff_type === "template")) ||
+                  ((filter === "reports") && (s.stuff_type === "batch-report"))
       )
       .map(s => {
         switch (s.stuff_type) {
@@ -103,6 +110,11 @@ const StuffInFolder = ({ folders, openedFolders, setOpenedFolders, filter, delet
             return {
               ...s,
               ...get(falcorCache, ["templates2", "id", s.stuff_id], {})
+            };
+          case "batch-report":
+            return {
+              ...s,
+              ...get(falcorCache, ["batch", "report", "id", s.stuff_id], {})
             };
         }
       })
