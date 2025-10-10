@@ -208,6 +208,10 @@ const BatchReports = props => {
   const [state, dispatch] = React.useReducer(Reducer, InitialState);
 
   const [filename, setFilename] = React.useState("");
+  const [description, setDescription] = React.useState("");
+  const setDescriptionCallback = React.useCallback(e => {
+    setDescription(e.target.value);
+  }, []);
 
   const loadState = React.useCallback(state => {
     dispatch({
@@ -228,11 +232,16 @@ const BatchReports = props => {
       falcor.get([
         "batch", "report", "id", brid,
         ["name", "batchreport"]
-      ])
+      ]);
 
       const filename = get(falcorCache, ["batch", "report", "id", brid, "name"], null);
       if (filename) {
         setFilename(filename);
+      }
+
+      const description = get(falcorCache, ["batch", "report", "id", brid, "description"], null);
+      if (description) {
+        setDescription(description);
       }
 
       const batchreport = get(falcorCache, ["batch", "report", "id", brid, "batchreport", "value"], null);
@@ -524,14 +533,14 @@ const BatchReports = props => {
     const data = {
       batchreport: { ...state, routeData: [] },
       name: filename,
-      description: "",
+      description,
       batchreportId: null,
       folder: fid
     };
     falcor.call(
       ["batch", "report", "save"], [data]
     ).then(() => stopLoading());
-  }, [okToSaveToFolder, startLoading, stopLoading, falcor, state, filename]);
+  }, [okToSaveToFolder, startLoading, stopLoading, falcor, state, filename, description]);
 
   React.useEffect(() => {
     if (window.localStorage) {
@@ -570,6 +579,10 @@ const BatchReports = props => {
   }, []);
   const closeFolderSelector = React.useCallback(e => {
     setOpen(false);
+  }, []);
+
+  const stoptheProp = React.useCallback(e => {
+    e.stopPropagation();
   }, []);
 
   return (
@@ -653,6 +666,25 @@ const BatchReports = props => {
               style={ { display: open ? "block" : "none" } }
               onClick={ closeFolderSelector }
             >
+              <span className={ `
+                  fa fa-close bg-gray-200 hover:bg-gray-400 rounded-bl
+                  px-2 py-1 cursor-pointer absolute right-0 top-0
+                ` }/>
+              <div className="pl-2 pt-2 grid grid-cols-1"
+                onClick={ stoptheProp }
+              >
+                <div className="font-bold border-b-2 border-current mb-1 mr-2">
+                  Add a description...
+                </div>
+                <div className="mr-2">
+                  <textarea
+                    value={ description }
+                    onChange={ setDescriptionCallback }
+                    className={ `
+                      w-full px-2 py-1 pointer-events-auto
+                    ` }/>
+                </div>
+              </div>
               <FolderSelector saveToFolder={ saveToFolder }/>
             </div>
           </div>
@@ -842,13 +874,9 @@ const FolderSelector = ({ folderTree, ...props }) => {
   }, [falcorCache, groupAuthLevels]);
 
   return (
-    <div className="py-2 pl-2 relative">
-      <span className={ `
-          fa fa-close bg-gray-200 hover:bg-gray-400 rounded-bl
-          px-2 py-1 cursor-pointer absolute right-0 top-0
-        ` }/>
-      <div className="font-bold border-b-2 border-current mb-1 mr-2 flex">
-        <div className="flex-1">Select a folder to save to...</div>
+    <div className="py-2 pl-2">
+      <div className="font-bold border-b-2 border-current mb-1 mr-2">
+        Select a folder to save to...
       </div>
       { foldersTree.map(f =>
           <FolderItem key={ f.id } { ...props } folder={ f }/>
