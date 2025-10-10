@@ -30,7 +30,7 @@ import tsmonew from '~/sites/tsmo_new'
 //import fdi from '~/sites/fdi'
 
 import npmrds from '~/sites/npmrds'
-import transit from '~/sites/transit'
+// import transit from '~/sites/transit'
 //import demos from '~/sites/demos'
 //import sandbox from '~/sites/sandbox'
 import themes from './dms_themes'

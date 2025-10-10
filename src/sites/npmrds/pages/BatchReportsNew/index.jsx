@@ -776,8 +776,10 @@ const FolderItem = ({ folder, saveToFolder, isChild = false }) => {
       onClick={ doSaveToFolder }
     >
       <div className="flex items-center">
-        <div className="flex-1 flex">
-          <div className="w-16 text-center">({ folder.id })</div> { folder.name }
+        <div className="flex-1 flex items-center">
+            <span className={ `${ folder.icon } mr-1 w-6 text-center` }
+                  style={ { color: folder.color } }/>
+          { folder.name }
         </div>
         { !hasChildren ? null :
           <span className="fa fa-caret-right mr-1"/>
@@ -815,15 +817,29 @@ const FolderSelector = ({ folderTree, ...props }) => {
 
   const { falcor, falcorCache } = useFalcor();
 
+  const user = useAuth();
+
+  const groupAuthLevels = React.useMemo(() => {
+    return (user.meta || []).reduce((a, c) => {
+      a[c.group] = c.authLevel;
+      return a;
+    }, {});
+  }, [user]);
+
   const foldersTree = React.useMemo(() => {
     return get(falcorCache, ["folders2", "user", "tree", "value"], [])
+      .filter(f => {
+        if (f.type === "user") return true;
+        if (f.type === "AVAIL") return groupAuthLevels["AVAIL"] >= f.editable;
+        return (groupAuthLevels[f.owner] || 0) >= f.editable;
+      })
       .sort((a, b) => {
         if (a.type === b.type) {
           return a.name.localeCompare(b.name);
         }
         return FOLDER_TYPES_SORT_VALUES[a.type] - FOLDER_TYPES_SORT_VALUES[b.type];
       });
-  }, [falcorCache]);
+  }, [falcorCache, groupAuthLevels]);
 
   return (
     <div className="py-2 pl-2 relative">

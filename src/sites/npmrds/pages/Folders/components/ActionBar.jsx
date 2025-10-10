@@ -196,6 +196,7 @@ const ActionBar = ({ selectedStuff, selectAll, deselectAll, parent, stuff }) => 
   React.useEffect(() => {
     falcor.get(
         ["folders2", "user", "length"],
+        ["folders2", "user", "tree"],
         ["folders2", "stuff", parent]
       )
       .then(res => {
@@ -236,37 +237,35 @@ const ActionBar = ({ selectedStuff, selectAll, deselectAll, parent, stuff }) => 
   }, [falcor, parent]);
 
   React.useEffect(() => {
-    const length = get(falcorCache, ["folders2", "user", "length"], 0);
-    const refs = d3range(length).map(i => get(falcorCache, ["folders2", "user", "index", i, "value"]));
-    const folders = refs.map(ref => get(falcorCache, ref, null))
-      .filter(Boolean)
-      .filter(f => f.id != parent)
-      .filter(f => f.type !== "AVAIL");
-
-    folders.sort((a, b) => {
-      if (a.type === b.type) {
-        const aDate = new Date(a.updated_at);
-        const bDate = new Date(b.updated_at);
-        return bDate.getTime() - aDate.getTime();
-      }
-      return (a.type === "user") ? -1 : 1;
-    });
+    const folderTree = get(falcorCache, ["folders2", "user", "tree", "value"], []);
 
     const selectedFolders = selectedStuff
       .filter(({ type }) => type === "folder")
       .reduce((a, c) => {
-        a.add(c.id);
+        a.add(+c.id);
         return a;
-      }, new Set());
+      }, new Set([+parent]));
 
-    const subFolders = get(falcorCache, ["folders2", "stuff", parent, "value"], [])
-      .filter(s => s.stuff_type === "folder")
-      .map(f => {
-        return get(falcorCache, ["folders2", "id", f.stuff_id], null)
-      }).filter(Boolean)
-      .filter(f => !selectedFolders.has(f.id));
+    const FOLDER_TYPES_SORT_VALUES = {
+      "user": 1,
+      "group": 2,
+      "AVAIL": 3
+    }
 
-    setFolders([...folders, ...subFolders]);
+    const followFolderTree = tree => {
+      return tree.map(f => ({
+        ...f,
+        disabled: selectedFolders.has(+f.id),
+        children: followFolderTree(f.children)
+      }))
+      .sort((a, b) => {
+        if (a.type === b.type) {
+          return a.name.localeCompare(b.name);
+        }
+        return FOLDER_TYPES_SORT_VALUES[a.type] - FOLDER_TYPES_SORT_VALUES[b.type];
+      });
+    }
+    setFolders(followFolderTree(folderTree));
   }, [falcorCache, parent, selectedStuff]);
 
   const [templates, setTemplates] = React.useState([]);
@@ -369,7 +368,7 @@ const ActionDropdown = ({ children, icon, items, disabled = false }) => {
         { icon ? <i className={ `${ icon }` }/> : '' } { children }
       </ActionButton>
       { !show ? null :
-        <div className="absolute bg-white shadow-lg z-10"
+        <div className="absolute bg-white shadow-lg shadow-black z-10"
           style={ {
             top: "100%",
             left: "0%"
@@ -381,24 +380,75 @@ const ActionDropdown = ({ children, icon, items, disabled = false }) => {
     </div>
   )
 }
+
+const FoldersDropdownItem = ({ folder, action }) => {
+  const doAction = React.useCallback(e => {
+    if (!folder.disabled) {
+      action(e, folder.id);
+    }
+  }, [action, folder]);
+
+  const [hovering, setHovering] = React.useState(false);
+  const onMouseEnter = React.useCallback(e => {
+    setHovering(true);
+  }, []);
+  const onMouseLeave = React.useCallback(e => {
+    setHovering(false);
+  }, []);
+
+  return (
+    <div key={ `${ folder.id }-${ folder.name }` }
+      className={ `
+        px-2 flex items-center hover:bg-gray-300 w-full relative
+        ${ folder.disabled ? "cursor-not-allowed" : "cursor-pointer" }
+      ` }
+      onClick={ doAction }
+      onMouseEnter={ onMouseEnter }
+      onMouseLeave={ onMouseLeave }
+    >
+      <div className="mr-1">
+        <FolderIcon size={ 1.25 }
+          icon={ get(folder, "icon", "") }
+          color={ get(folder, "color", "#000") }/>
+      </div>
+      <span className={ `
+          pt-1 whitespace-nowrap
+          ${ folder.disabled ? "line-through opacity-25" : "" }
+        ` }
+      >
+        { get(folder, "name", "loading...") }
+      </span>
+
+      { <div className={ `
+            bg-white top-0 absolute shadow-lg shadow-black z-20
+          ` }
+          style={ {
+            left: "100%",
+            display: !folder.children.length || !hovering ? "none" : "block"
+          } }
+        >
+          { folder.children.map(f => (
+              <FoldersDropdownItem
+                key={ `${ f.id }-${ f.name }` }
+                folder={ f }
+                action={ action }/>
+            ))
+          }
+        </div>
+      }
+    </div>
+  )
+}
 const FoldersDropdown = ({ action = NoOp, folders, icon, children }) => {
   return (
     <ActionDropdown
       icon={ icon }
       items={
         folders.map(f => (
-          <div key={ f.id } className="px-2 flex items-center hover:bg-gray-300 w-52"
-            onClick={ e => action(e, f.id) }
-          >
-            <div className="mr-1">
-              <FolderIcon size={ 1.25 }
-                icon={ get(f, "icon", "") }
-                color={ get(f, "color", "#000") }/>
-            </div>
-            <span className="pt-1">
-              { get(f, "name", "loading...") }
-            </span>
-          </div>
+          <FoldersDropdownItem
+            key={ `${ f.id }-${ f.name }` }
+            folder={ f }
+            action={ action }/>
         ))
       }
     >
