@@ -13,6 +13,8 @@ import {
   // Select
 } from "~/modules/avl-components/src"
 
+import { useAuth } from "~/modules/ams/src"
+
 import ConfirmModal from "./ConfirmModal"
 import FolderIcon from "./FolderIcon"
 
@@ -236,6 +238,15 @@ const ActionBar = ({ selectedStuff, selectAll, deselectAll, parent, stuff }) => 
       })
   }, [falcor, parent]);
 
+  const user = useAuth();
+
+  const groupAuthLevels = React.useMemo(() => {
+    return (user.meta || []).reduce((a, c) => {
+      a[c.group] = c.authLevel;
+      return a;
+    }, {});
+  }, [user]);
+
   React.useEffect(() => {
     const folderTree = get(falcorCache, ["folders2", "user", "tree", "value"], []);
 
@@ -258,6 +269,11 @@ const ActionBar = ({ selectedStuff, selectAll, deselectAll, parent, stuff }) => 
         disabled: selectedFolders.has(+f.id),
         children: followFolderTree(f.children)
       }))
+      .filter(f => {
+        if (f.type === "user") return true;
+        if (f.type === "AVAIL") return groupAuthLevels["AVAIL"] >= f.editable;
+        return (groupAuthLevels[f.owner] || 0) >= f.editable;
+      })
       .sort((a, b) => {
         if (a.type === b.type) {
           return a.name.localeCompare(b.name);
@@ -266,7 +282,7 @@ const ActionBar = ({ selectedStuff, selectAll, deselectAll, parent, stuff }) => 
       });
     }
     setFolders(followFolderTree(folderTree));
-  }, [falcorCache, parent, selectedStuff]);
+  }, [falcorCache, parent, selectedStuff, groupAuthLevels]);
 
   const [templates, setTemplates] = React.useState([]);
 
