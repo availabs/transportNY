@@ -1,6 +1,5 @@
 import React from "react"
-import get from "lodash/get"
-import set from "lodash/set"
+import {get, set} from "lodash-es";
 import { filters, updateSubMeasures, getMeasure } from "./updateFilters"
 import { InternalPanel } from "./internalPanel"
 import { ExternalPanel } from "./externalPanel"
@@ -46,7 +45,7 @@ export const MacroviewPlugin = {
         //     })
         //   }
         // }
-        
+
       })
     },
     dataUpdate: DataUpdate,

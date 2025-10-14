@@ -1,11 +1,10 @@
 import React, {useState, useMemo, useEffect} from "react";
-import get from "lodash/get";
-import set from "lodash/set";
+import {get, set } from "lodash-es";
 import { filters, getMeasure } from "./updateFilters";
 import { DAMA_HOST } from '~/config'
 import { measure_info } from "./measures";
 import { Button } from "~/modules/avl-components/src";
-import { DamaContext } from "../../../store";
+import { DamaContext } from "~/pages/DataManager/store";
 import { CMSContext } from "~/modules/dms/src";
 import { PM3_LAYER_KEY } from "./constants";
 import { MultiLevelSelect } from "~/modules/avl-map-2/src"
@@ -132,7 +131,7 @@ const Comp = ({ state, setState }) => {
 
     nameBase += modalState.fileType;
     return nameBase;
-  }, [modalState.columns, geography, view, viewId]) 
+  }, [modalState.columns, geography, view, viewId])
   useEffect(() => {
     const getUniqueFileNameBase = async () => {
       const uniqueFileNameBase = await hashString(fileNameBase);
@@ -328,7 +327,7 @@ const Comp = ({ state, setState }) => {
       setPolling(false);
       setPollingInterval(null);
     }
-  }, [polling, pollingInterval]); 
+  }, [polling, pollingInterval]);
   /**
    * end polling
    */
@@ -437,7 +436,7 @@ const Comp = ({ state, setState }) => {
           )}
         </div>
         <div>
-          
+
           <Button
             disabled={(downloadFileName && !viewDownloads[downloadFileName])}
             themeOptions={{ color: "transparent" }}
@@ -456,12 +455,12 @@ const Comp = ({ state, setState }) => {
                 </span>
               ) : "Open Data Downloader"
             }
-            
+
           </Button>
-          
+
 
         </div>
-        <CreateDownloadModal 
+        <CreateDownloadModal
           view={view}
           viewId={viewId}
           geography={geography}
@@ -662,7 +661,7 @@ const CreateDownloadModal = ({
 
 const DownloadColumnList = ({ columns, setColumns, maxHeight }) => {
   return (
-    <div 
+    <div
       style={{ maxHeight, overflowY: 'auto', minHeight:"20%" }}
       className="w-full"
     >
