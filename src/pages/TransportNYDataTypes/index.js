@@ -18,6 +18,9 @@ import schedule from "./schedule";
 
 import osm_upload from "./osm"
 import osm_pgr_upload from "./osm_pgr"
+import { MacroviewPlugin } from "./plugins/macroview/macroview.plugin";
+import { PointselectorPlugin } from "./plugins/pointselector/pointselector.plugin";
+
 
 const transportNYDataTypes = {
   // freight_atlas_shapefile
@@ -36,6 +39,11 @@ const transportNYDataTypes = {
   osm_upload,
   osm_pgr_upload
 }
+
+export const plugins = {
+  macroview: MacroviewPlugin,
+  pointselector: PointselectorPlugin
+};
 
 
 export default transportNYDataTypes

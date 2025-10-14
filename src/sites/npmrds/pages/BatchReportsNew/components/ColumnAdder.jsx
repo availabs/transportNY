@@ -241,31 +241,7 @@ const ColumnAdder = props => {
   }, [addColumn, state, resetState, props.columns]);
 
   const doEditColumn = React.useCallback(e => {
-    const {
-      name,
-      dateSelection,
-      relativeDate,
-      descriptor,
-      startDate,
-      endDate,
-      dataColumns,
-      dataSource,
-      uuid,
-      isBase
-    } = state;
-    const column = {
-      name,
-      dateSelection,
-      relativeDate,
-      descriptor,
-      startDate,
-      endDate,
-      dataColumns,
-      dataSource,
-      uuid,
-      isBase
-    };
-    editColumn(column);
+    editColumn({ ...state });
   }, [editColumn, state, resetState, props.columns]);
 
   const prevColumns = React.useRef([]);
@@ -302,43 +278,51 @@ const ColumnAdder = props => {
   }, [columns.length, editing, uuid]);
 
   return (
-    <div ref={ setRef } className="grid grid-cols-1 gap-1">
+    <div ref={ setRef } className="grid grid-cols-1 gap-1"
+    >
       <div className="border-b-2 font-bold border-current mb-1">
         Column Editor
       </div>
-      <Button onClick={ isOpen ? close : startNewColumn }>
-        { isOpen ?
-          <>
-            <ChevronsLeft /> Close
-          </> :
-          <>
-            Create a New Column <ChevronsRight />
-          </>
-        }
-      </Button>
 
-      { columns.map((column, i) => (
-          <div key={ column.name }
-            className="flex"
-          >
-            <div>
-              <Button className="buttonDangerSmall"
-                onClick={ e => deleteColumn(column.uuid) }
-                disabled={ columns.length > 1 && i === 0 }
-              >
-                Delete
-              </Button>
+      <div className="grid grid-cols-1 gap-1 overflow-auto scrollbar-sm px-1 py-1"
+        style={ { maxHeight: "260px" } }
+      >
+        <Button className="buttonBlock"
+          onClick={ isOpen ? close : startNewColumn }
+        >
+          { isOpen ?
+            <>
+              <ChevronsLeft /> Close
+            </> :
+            <>
+              Create a New Column <ChevronsRight />
+            </>
+          }
+        </Button>
+
+        { columns.map((column, i) => (
+            <div key={ column.name }
+              className="flex"
+            >
+              <div>
+                <Button className="buttonDangerSmall"
+                  onClick={ e => deleteColumn(column.uuid) }
+                  disabled={ columns.length > 1 && i === 0 }
+                >
+                  Delete
+                </Button>
+              </div>
+              <div className="flex-1 ml-2">
+                <Button className="buttonSmallBlock"
+                  onClick={ e => startEditColumn(column) }
+                >
+                  Edit Column: { column.name } <ChevronsRight />
+                </Button>
+              </div>
             </div>
-            <div className="flex-1 ml-2">
-              <Button className="buttonSmallBlock"
-                onClick={ e => startEditColumn(column) }
-              >
-                Edit Column: { column.name } <ChevronsRight />
-              </Button>
-            </div>
-          </div>
-        ))
-      }
+          ))
+        }
+      </div>
 
       <div className={ `
           absolute top-0 left-full pb-4 h-full z-20
@@ -416,11 +400,11 @@ const ColumnAdder = props => {
 
           </div>
           <div className="flex-1 flex flex-col justify-end">
-            <Button className="buttonBlock"
+            <Button className={ editing ? "buttonBlockSuccess" : "buttonBlock" }
               disabled={ disabled }
               onClick={ editing ? doEditColumn : doAddColumn }
             >
-              { editing ? "Edit" : "Add" } Column
+              { editing ? "Save Edits" : "Add Column" }
             </Button>
           </div>
         </div>

@@ -11,7 +11,7 @@ import { useFalcor } from "~/modules/avl-components/src"
 // import { useAuth } from "@availabs/ams"
 import { useAuth } from "~/modules/dms/src"
 
-import transportNYDataTypes from '~/pages/TransportNYDataTypes'
+import transportNYDataTypes, { mapPlugins } from '~/pages/TransportNYDataTypes'
 
 // const authMenuConfig = {
 
@@ -25,6 +25,7 @@ const DAMA_ARGS = {
   baseUrl: '/datasources',
   defaultPgEnv: 'npmrds2',
   dataTypes: transportNYDataTypes,
+  mapPlugins: mapPlugins,
   useFalcor,
   useAuth,
   navSettings: {

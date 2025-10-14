@@ -6,14 +6,7 @@ import get from 'lodash/get'
 
 import { getSubdomain }  from '~/utils'
 
-// import {
-//   Messages
-// } from "@availabs/ams"
 
-// import {
-//   Messages,
-//   withAuth
-// } from "~/modules/ams/src"
 
 import {
   DmsSite,
@@ -77,30 +70,24 @@ const App = (props) => {
   }, [site])
 
   return (
-    <>
-      {/*<RouterProvider
-        router={createBrowserRouter(WrappedRoutes)}
-      />*/}
-      <DmsSite
-        dmsConfig = {
-          adminConfig[0]({
-              app: 'npmrdsv5',
-              type: 'dev2',
-              baseUrl: adminBaseUrl,
-              API_HOST
-          })
-        }
-        adminPath={adminBaseUrl}
-        pgEnvs={[defaultPgEnv]}
-        themes={themes}
-        damaBaseUrl={damaBaseUrl}
-        API_HOST={API_HOST}
-        AUTH_HOST={AUTH_HOST}
-        PROJECT_NAME={PROJECT_NAME}
-        routes={WrappedRoutes}
-      />
-
-    </>
+    <DmsSite
+      dmsConfig = {
+        adminConfig[0]({
+            app: 'npmrdsv5',
+            type: 'dev2',
+            baseUrl: adminBaseUrl,
+            API_HOST
+        })
+      }
+      adminPath={adminBaseUrl}
+      pgEnvs={[defaultPgEnv]}
+      themes={themes}
+      damaBaseUrl={damaBaseUrl}
+      API_HOST={API_HOST}
+      AUTH_HOST={AUTH_HOST}
+      PROJECT_NAME={PROJECT_NAME}
+      routes={WrappedRoutes}
+    />
   )
 
 

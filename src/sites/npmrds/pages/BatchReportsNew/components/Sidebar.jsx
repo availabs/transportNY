@@ -31,8 +31,10 @@ const Sidebar = ({ children, ...props }) => {
 
         </div>
 
-        <div className="flex-1 flex flex-col justify-end">
-          { children }
+        <div className="flex-1 flex flex-col justify-end relative">
+          <div className="absolute bottom-0 right-0 left-0">
+            { children }
+          </div>
         </div>
 
       </div>
