@@ -1,11 +1,11 @@
 import { useFalcor } from "~/modules/avl-components/src"
-import { useAuth } from "~/modules/ams/src";
+import { useAuth } from "~/modules/dms/src";
 import { Link } from 'react-router'
 
 
 import { dmsPageFactory, registerComponents } from "~/modules/dms/src"
 import pageConfig from "~/modules/dms/src/patterns/page/siteConfig"
-import { withAuth } from "~/modules/ams/src"
+import { withAuth } from "~/modules/dms/src"
 
 import checkAuth from "~/layout/checkAuth"
 import { Logo } from '~/layout/ppdaf-layout'
@@ -91,7 +91,7 @@ const theme = {
       menuOpenIcon: `fa-light fa-bars fa-fw`,
       menuCloseIcon: `fa-light fa-xmark fa-fw"`,
       navitemTop: `
-          
+
       w-fit group font-display whitespace-nowrap border-r border-slate-200
       flex font-medium tracking-widest items-center text-[14px] px-4 h-12 text-slate-700 border-slate-100
       hover:bg-white hover:text-blue-500
@@ -104,7 +104,7 @@ const theme = {
       transition cursor-pointer
       `,
       navitemTopActive:
-        ` 
+        `
           w-fit group font-display whitespace-nowrap
           flex font-medium tracking-widest items-center text-[14px] px-4 h-12 text-slate-700 border-slate-100
           hover:bg-white hover:text-blue-500
@@ -118,11 +118,11 @@ const theme = {
         `,
       topmenuRightNavContainer: "hidden md:flex h-full items-center",
       topnavMobileContainer: "bg-slate-50",
-     
+
       mobileButton:`md:hidden bg-slate-100 inline-flex items-center justify-center pt-[12px] px-2 hover:text-blue-400  text-gray-400 hover:bg-gray-100 `,
       indicatorIcon: 'fal fa-angle-down pl-2 pt-1',
       indicatorIconOpen: 'fal fa-angle-down pl-2 pt-1',
-      
+
       subMenuWrapper: `hidden`, //`absolute bg-white `,
       subMenuParentWrapper: 'hidden', //,`flex flex-row  max-w-[1400px] mx-auto`,
       subMenuWrapperChild: `divide-x overflow-x-auto max-w-[1400px] mx-auto`,
@@ -130,7 +130,7 @@ const theme = {
       subMenuWrapperInactiveFlyout: `absolute left-0 right-0  mt-8 normal-case bg-white shadow-lg z-10 p-2`,
       subMenuWrapperInactiveFlyoutBelow: ` absolute ml-40 normal-case bg-white shadow-lg z-10 p-2`,
       subMenuWrapperInactiveFlyoutDirection: 'grid grid-cols-4',
-      
+
   }
 }
 

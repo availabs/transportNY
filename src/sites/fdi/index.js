@@ -8,7 +8,7 @@ import FreightCMS from "./FreightCMS.jsx"
 
 import DataManager from "~/pages/DataManager"
 import { useFalcor } from "~/modules/avl-components/src"
-import { useAuth } from "~/modules/ams/src"
+import { useAuth } from "~/modules/dms/src"
 
 import transportNYDataTypes from '~/pages/TransportNYDataTypes'
 
@@ -32,10 +32,10 @@ const DAMA_ARGS = {
   }
 }
 
- 
+
 const Routes = [
   ...FreightCMS,
-  ...DataManager(DAMA_ARGS),  
+  ...DataManager(DAMA_ARGS),
   // ...FreightMap,
   // ...FreightAtlas,
   // ...CollectionAtlas

@@ -10,10 +10,10 @@ import { getSubdomain }  from '~/utils'
 //   Messages
 // } from "@availabs/ams"
 
-import {
-  Messages,
-  withAuth
-} from "~/modules/ams/src"
+// import {
+//   Messages,
+//   withAuth
+// } from "~/modules/ams/src"
 
 import {
   DmsSite,
@@ -26,13 +26,8 @@ import DefaultRoutes from '~/Routes';
 import transportNY from '~/sites/transportny'
 import tsmo from '~/sites/tsmo'
 import tsmonew from '~/sites/tsmo_new'
-//import freightatlas from '~/sites/freightatlas'
-//import fdi from '~/sites/fdi'
 
 import npmrds from '~/sites/npmrds'
-import transit from '~/sites/transit'
-//import demos from '~/sites/demos'
-//import sandbox from '~/sites/sandbox'
 import themes from './dms_themes'
 import {PROJECT_NAME, API_HOST, AUTH_HOST} from "./config.js";
 
@@ -41,12 +36,7 @@ const Sites = {
   www: transportNY,
   tsmo: tsmonew,
   tsmo_old: tsmo,
-  //freightatlasv1: freightatlas,
-  //fdi,
-  npmrds,
-  //transit,
-  //demos,
-  // sandbox
+  npmrds
 }
 //import AdditionalComponents from "./additional_components";
 import { DamaMap, Map } from "./pages/DataManager/"
@@ -109,7 +99,7 @@ const App = (props) => {
         PROJECT_NAME={PROJECT_NAME}
         routes={WrappedRoutes}
       />
-      <Messages />
+
     </>
   )
 

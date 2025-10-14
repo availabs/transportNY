@@ -1,11 +1,11 @@
 import { useFalcor } from "~/modules/avl-components/src"
-import { useAuth } from "~/modules/ams/src";
+
 import { Link } from 'react-router'
 
 
 import { dmsPageFactory, registerComponents } from "~/modules/dms/src"
 import pageConfig from "~/modules/dms/src/patterns/page/siteConfig"
-import { withAuth } from "~/modules/ams/src"
+import { withAuth } from "~/modules/dms/src"
 
 import checkAuth from "~/layout/checkAuth"
 import { Logo } from '~/layout/ppdaf-layout'
