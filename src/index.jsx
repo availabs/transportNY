@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { Provider } from 'react-redux';
+import store from './store';
 
 import { API_HOST } from './config'
 
@@ -21,11 +23,13 @@ export const falcor = falcorGraph(API_HOST)
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
+    <Provider store={ store }>
   		<FalcorProvider falcor={ falcor }>
         <ThemeContext.Provider value={PPDAF_THEME}>
           <App />
         </ThemeContext.Provider>
       </FalcorProvider>
+    </Provider>
   </React.StrictMode>
 );
 
