@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, createContext, useRef } from "react"
-import { DamaContext } from "../../../store"
+// import { DamaContext } from "../../../store"
+import { DamaContext } from "~/pages/DataManager/store";
 import get from "lodash/get"
 import set from "lodash/set"
 import { getAttributes } from "~/pages/DataManager/Collection/attributes";
-import { ViewAttributes } from "../../../Source/attributes"
+import { ViewAttributes } from "~/pages/DataManager/Source/attributes"
 import {
   REGION_CODE_TO_NAME,
   PM3_LAYER_KEY,

@@ -128,7 +128,7 @@ export const PointselectorPlugin = {
   externalPanel: ({ state, setState }) => {
     return [];
   },
-  comp: ({ state, setState }) => {
+  comp: ({ map, state, setState }) => {
     let symbologyLayerPath = "";
     let symbPath = "";
     if (state.symbologies) {
@@ -148,6 +148,8 @@ export const PointselectorPlugin = {
         points: get(state, `${pluginDataPath}['points']`, []),
       };
     }, [state]);
+
+console.log("COMP???????????????:", map, state);
 
     return (
       <div
@@ -174,7 +176,7 @@ export const PointselectorPlugin = {
           themeOptions={{ color: "transparent" }}
           //className='bg-white hover:bg-cool-gray-700 font-sans text-sm text-npmrds-100 font-medium'
           onClick={(e) => {
-            console.log("sending points to API!");
+            console.log("sending points to API???????????????");
             console.log({ points });
             resetPointsAndMarkers({ setState, pluginDataPath });
           }}

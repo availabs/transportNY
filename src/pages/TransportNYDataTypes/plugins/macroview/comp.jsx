@@ -5,7 +5,8 @@ import { filters, getMeasure } from "./updateFilters";
 import { DAMA_HOST } from '~/config'
 import { measure_info } from "./measures";
 import { Button } from "~/modules/avl-components/src";
-import { DamaContext } from "../../../store";
+// import { DamaContext } from "../../../store";
+import { DamaContext } from "~/pages/DataManager/store";
 import { CMSContext } from "~/modules/dms/src";
 import { PM3_LAYER_KEY } from "./constants";
 import { MultiLevelSelect } from "~/modules/avl-map-2/src"

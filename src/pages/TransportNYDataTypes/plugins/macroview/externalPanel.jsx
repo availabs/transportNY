@@ -8,8 +8,9 @@ import React, {
 import get from "lodash/get";
 import set from "lodash/set";
 import isEqual from "lodash/isEqual";
-import { format as d3format } from "d3-format";
-import { extractState, createFalcorFilterOptions } from "../../stateUtils";
+// import { format as d3format } from "d3-format";
+// import { extractState, createFalcorFilterOptions } from "../../stateUtils";
+import { extractState, createFalcorFilterOptions } from "~/pages/DataManager/MapEditor/stateUtils";
 import {
   filters,
   updateSubMeasures,
@@ -17,10 +18,11 @@ import {
   getColorRange,
   updateLegend,
 } from "./updateFilters";
-import { DamaContext } from "../../../store";
+// import { DamaContext } from "../../../store";
+import { DamaContext } from "~/pages/DataManager/store";
 import { CMSContext } from "~/modules/dms/src";
-import { usePrevious } from "../../components/LayerManager/utils";
-import { choroplethPaint } from "../../components/LayerEditor/datamaps";
+import { usePrevious } from "~/pages/DataManager/MapEditor/components/LayerManager/utils";
+import { choroplethPaint } from "~/pages/DataManager/MapEditor/components/LayerEditor/datamaps";
 import { npmrdsPaint } from "./paint";
 
 import {

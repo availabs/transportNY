@@ -42,7 +42,7 @@ const CreateComponent = ({ source }) => {
                                       });
 
   useFetchSourceViews({ falcor, falcorCache, pgEnv, source_id: createState.osmDataSourceId });
-  const osmDatalViews = useGetViews({ falcorCache, pgEnv, source_id: createState.osmDataSourceId });
+  const osmDataViews = useGetViews({ falcorCache, pgEnv, source_id: createState.osmDataSourceId });
 
   const okToSend = React.useMemo(() => {
     const {
@@ -94,7 +94,7 @@ const CreateComponent = ({ source }) => {
           sourceKey="osmDataSourceId"
           sourceValue={ createState.osmDataSourceId }
 
-          views={ osmDatalViews }
+          views={ osmDataViews }
           viewKey="osmDataViewId"
           viewValue={ createState.osmDataViewId }
 
