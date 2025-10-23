@@ -28,6 +28,50 @@
     const pgEnv = l.getAttribute("data-pg-env");
     const viewId = l.getAttribute("data-view-id");
 
+    const SESSION_KEY = 'avail_analytics_session';
+    const SESSION_TIMEOUT_MS = (minutes = 30) => minutes * 60 * 1000;
+    // Set session timeout in minutes
+    // const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
+
+    function getSession() {
+      const now = Date.now();
+      let session = {};
+
+      try {
+        const stored = localStorage.getItem(SESSION_KEY);
+        if (stored) {
+          session = JSON.parse(stored);
+
+          if (now - session.timestamp > SESSION_TIMEOUT_MS(30)) {
+            session = {
+              session_id: crypto.randomUUID(),
+              timestamp: now
+            };
+            localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+          } else {
+            session.timestamp = now;
+            localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+          }
+        } else {
+          session = {
+            session_id: crypto.randomUUID(),
+            timestamp: now
+          };
+          localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        }
+      } catch (err) {
+        console.warn('[avail] session storage error:', err);
+        session = {
+          session_id: crypto.randomUUID(),
+          timestamp: now
+        };
+      }
+
+      return session?.session_id;
+    }
+
+    const getSessionId = () => getSession();
+
     const {
       hostname: f,
       href: m,
@@ -61,7 +105,8 @@
         url: z,
         referrer: F,
         tag: N,
-        id: q || void 0
+        id: q || void 0,
+        session_id: getSessionId()
       }),
       W = (t, e, a) => {
         if (a) {
@@ -152,20 +197,20 @@
     }
 
     function trackAllUserEvents() {
-        
+
       const events = [
-        // "click", 
-        // "dblclick", 
-        // "submit", 
-        // "change", 
+        // "click",
+        // "dblclick",
+        // "submit",
+        // "change",
         // "input",
-        // "focus", 
-        // "blur", 
-        // "scroll", 
-        // "copy", 
+        // "focus",
+        // "blur",
+        // "scroll",
+        // "copy",
         // "paste",
-        // "keydown", 
-        // "keyup", 
+        // "keydown",
+        // "keyup",
         // "visibilitychange"
       ];
 

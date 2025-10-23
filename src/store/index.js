@@ -1,7 +1,7 @@
 /*import { createStore, combineReducers, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'*/
 // import { Reducers, messages } from "@availabs/ams";
-import { Reducers, messages } from "~/modules/ams/src"
+// import { Reducers, messages } from "~/modules/ams/src"
 
 import dashboard from "~/sites/tsmo/pages/Dashboards/components/dashboardSlice";
 
@@ -18,8 +18,6 @@ import report from "~/sites/npmrds/pages/analysis/reports/store"
 export default configureStore({
   reducer: {
     dashboard,
-    ...Reducers,
-    messages,
     report
   },
   middleware: getDefaultMiddleware =>

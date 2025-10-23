@@ -1,6 +1,6 @@
-import Incidents from "~/sites/tsmo_new/pages/Dashboards/Incidents"
-import Workzones from "~/sites/tsmo_new/pages/Dashboards/Workzones"
-import Congestion from "~/sites/tsmo_new/pages/Dashboards/Congestion"
+import Incidents from "./pages/Dashboards/Incidents"
+import Workzones from "./pages/Dashboards/Workzones"
+import Congestion from "./pages/Dashboards/Congestion"
 
 import IncidentSearch from './pages/IncidentSearch'
 import IncidentView from "./pages/IncidentView"

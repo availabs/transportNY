@@ -5,11 +5,8 @@ import React, {
   createContext,
   useRef,
 } from "react";
-import get from "lodash/get";
-import set from "lodash/set";
-import isEqual from "lodash/isEqual";
-// import { format as d3format } from "d3-format";
-// import { extractState, createFalcorFilterOptions } from "../../stateUtils";
+import {get, set, isEqual } from "lodash-es";
+import { format as d3format } from "d3-format";
 import { extractState, createFalcorFilterOptions } from "~/pages/DataManager/MapEditor/stateUtils";
 import {
   filters,
@@ -18,7 +15,10 @@ import {
   getColorRange,
   updateLegend,
 } from "./updateFilters";
+<<<<<<< HEAD
 // import { DamaContext } from "../../../store";
+=======
+>>>>>>> 9ede98a844698e67eeeb3aaf8997666a762ed46c
 import { DamaContext } from "~/pages/DataManager/store";
 import { CMSContext } from "~/modules/dms/src";
 import { usePrevious } from "~/pages/DataManager/MapEditor/components/LayerManager/utils";
@@ -403,10 +403,10 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         .filter(onlyUnique)
         .filter(objectFilter)
         .filter(truthyFilter)
-        .map((da) => ({ 
+        .map((da) => ({
           name: UA_CODE_TO_NAME[da] + " UA",
           value: da,
-          type: "urban_code" 
+          type: "urban_code"
         }))
         .sort(nameSort);
       geoms.region_code = geoms.region_code

@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo, createContext, useRef } from "react"
-// import { DamaContext } from "../../../store"
-import { DamaContext } from "~/pages/DataManager/store";
-import get from "lodash/get"
-import set from "lodash/set"
+import { DamaContext } from "~/pages/DataManager/store"
+import {get, set } from "lodash-es";
 import { getAttributes } from "~/pages/DataManager/Collection/attributes";
 import { ViewAttributes } from "~/pages/DataManager/Source/attributes"
 import {
@@ -102,7 +100,7 @@ const InternalPanel = ({ state, setState }) => {
   }, [pm3LayerId]);
 
   useEffect(() => {
-    if(pm3LayerId) { 
+    if(pm3LayerId) {
       setState(draft => {
         set(draft, `${symbologyLayerPath}['${pm3LayerId}'].layers[0].paint['line-width']`, 0);
       })

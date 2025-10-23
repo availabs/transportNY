@@ -1,8 +1,5 @@
-import get from "lodash/get"
-import set from "lodash/set"
-import omit from "lodash/omit"
-import cloneDeep from 'lodash/cloneDeep'
-import { range } from "lodash";
+import {get, set, omit, cloneDeep, range} from "lodash-es";
+
 
 import colorbrewer from "colorbrewer"
 const ColorRanges = {};
@@ -501,7 +498,7 @@ const getMeasure = (filters) => {
   //console.log("getMeasure:", filters)
 
   //if lottr/ttr, measure - timeframe - measure
-  //if phed, measure - [truck] - [freeflow] - timeframe 
+  //if phed, measure - [truck] - [freeflow] - timeframe
   //if phed and `hrs`, measure - [truck] - [freeflow] hrs
 
   let out;
@@ -549,7 +546,7 @@ const getMeasure = (filters) => {
     default:
       break;
   }
-  
+
   // out = [
   //   measure.value,
   //   (trafficType.value !== "all") && trafficType.value,

@@ -279,7 +279,8 @@ class ReportBase extends React.Component {
   }
 
   fetchFalcorDeps() {
-    if (!this.props.user.authed) return Promise.resolve();
+    console.log('testing user', this.props.user)
+    if (!this.props.user?.authed) return Promise.resolve();
 
     return this.props.falcor
       .get(

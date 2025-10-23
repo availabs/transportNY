@@ -40,7 +40,7 @@ const transportNYDataTypes = {
   osm_pgr_upload
 }
 
-export const plugins = {
+export const mapPlugins = {
   macroview: MacroviewPlugin,
   pointselector: PointselectorPlugin
 };
