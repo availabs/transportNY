@@ -15,10 +15,6 @@ import {
   getColorRange,
   updateLegend,
 } from "./updateFilters";
-<<<<<<< HEAD
-// import { DamaContext } from "../../../store";
-=======
->>>>>>> 9ede98a844698e67eeeb3aaf8997666a762ed46c
 import { DamaContext } from "~/pages/DataManager/store";
 import { CMSContext } from "~/modules/dms/src";
 import { usePrevious } from "~/pages/DataManager/MapEditor/components/LayerManager/utils";

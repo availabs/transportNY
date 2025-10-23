@@ -11,7 +11,7 @@ import { useFalcor } from "~/modules/avl-components/src"
 // import { useAuth } from "@availabs/ams"
 import { useAuth } from "~/modules/dms/src"
 
-import transportNYDataTypes, { plugins as mapPlugins } from '~/pages/TransportNYDataTypes'
+import transportNYDataTypes, { mapPlugins } from '~/pages/TransportNYDataTypes'
 
 // const authMenuConfig = {
 
