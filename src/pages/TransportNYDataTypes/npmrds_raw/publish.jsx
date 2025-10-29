@@ -17,10 +17,15 @@ const submitUpload = (props, navigate, pgEnv) => {
         states: props?.states,
         user_id: props?.user_id,
         pgEnv: pgEnv || props?.pgEnv,
+        email: props?.email,
+        passUuid: props?.passUuid,
+        truckUuid: props?.truckUuid,
+        allUuid: props?.allUuid,
+        numTmc: props?.numTmc
       };
 
       const res = await fetch(
-        `${DAMA_HOST}/dama-admin/${pgEnv}/npmrds-raw/publish`,
+        `${DAMA_HOST}/dama-admin/${pgEnv}/npmrds-raw/download-and-publish`,
         {
           method: "POST",
           body: JSON.stringify(publishData),
