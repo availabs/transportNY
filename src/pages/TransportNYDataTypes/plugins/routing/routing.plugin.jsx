@@ -51,7 +51,7 @@ const OsmResultLayer = {
  */
 
 export const RoutingPlugin = {
-  id: "pointselector",
+  id: "routing",
   type: "plugin",
   mapRegister: (map, state, setState) => {
   },
