@@ -120,12 +120,18 @@ const errorMsg = useMemo(() => {
     return `Select a state`;
   } else if (!truckUuid || !passUuid || !allUuid) {
     return 'Enter UUIDs for all data types'
+  } else if(truckUuid.length !== 36) {
+    return 'Invalid truck UUID'
+  } else if(passUuid.length !== 36) {
+    return 'Invalid passenger UUID'
+  } else if(allUuid.length !== 36) {
+    return 'Invalid all vehicles UUID'
   } else if (!numTmc) {
     return 'Enter number of TMC in dataset'
   } else {
     return ''
   }
-}, [source, startDate, endDate, states])
+}, [source, startDate, endDate, states, truckUuid, passUuid, allUuid])
   return (
     <div className="w-full p-5 m-5">
       <div className="flex flex-row mt-4">
