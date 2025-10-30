@@ -12,10 +12,17 @@ export default function NpmrdsRawOverview({
         ["metadata.start_date", "metadata.end_date"],
         ["asc", "asc"]
       ),
-      (v) => v?.metadata?.state_code
+      (v) => {
+        if (typeof v?.metadata?.state_code === "object") {
+          //updated format
+          return Object.keys(v?.metadata?.state_code).join(", ");
+        } else {
+          //legacy format
+          return v?.metadata?.state_code;
+        }
+      }
     );
   }, [views]);
-
   const headers = [
     "State",
     "View Id",

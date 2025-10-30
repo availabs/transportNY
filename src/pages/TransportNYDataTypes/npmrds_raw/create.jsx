@@ -72,8 +72,8 @@ const statesObj = {
 };
 const Create = (props) => {
   const { source } = props;
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [startDate, setStartDate] = useState();
+  const [endDate, setEndDate] = useState();
   const [loading, setLoading] = useState(false);
   const [passUuid, setPassUuid] = useState('');
   const [truckUuid, setTruckUuid] = useState('');
@@ -112,9 +112,11 @@ const isButtonEnabled = !!source?.name?.length && doesPassNameLengthCheck && !!s
 //1. User is missing only 1 piece of data out of 4
 //2. Source name is too long
 const errorMsg = useMemo(() => {
-  if(!source?.name && !!startDate && !!endDate && !!states.length){
+  if(!source?.name && !!states.length){
     return 'Type in a source name';
-  } else if (!doesPassNameLengthCheck) {
+  } else if(!startDate || !endDate){
+    return 'Enter both a start date and an end date';
+  }else if (!doesPassNameLengthCheck) {
     return `The source name is too long. Please enter a name with ${MAX_NPMRDS_SOURCE_NAME_LENGTH + " "} characters or less`
   } else if (!!source?.name && doesPassNameLengthCheck && !!startDate && !!endDate && !states.length) {
     return `Select a state`;
@@ -131,7 +133,7 @@ const errorMsg = useMemo(() => {
   } else {
     return ''
   }
-}, [source, startDate, endDate, states, truckUuid, passUuid, allUuid])
+}, [source, startDate, endDate, states, truckUuid, passUuid, allUuid, numTmc])
   return (
     <div className="w-full p-5 m-5">
       <div className="flex flex-row mt-4">
