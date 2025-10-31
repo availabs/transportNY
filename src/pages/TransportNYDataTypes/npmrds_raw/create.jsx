@@ -105,8 +105,9 @@ const Create = (props) => {
     setStates(removedSelection);
   }
 
-const doesPassNameLengthCheck = !!source?.source_id || source?.name.length <= MAX_NPMRDS_SOURCE_NAME_LENGTH
-const isButtonEnabled = !!source?.name?.length && doesPassNameLengthCheck && !!startDate && !!endDate && !!states.length;
+const doesPassNameLengthCheck = !!source?.source_id || source?.name.length <= MAX_NPMRDS_SOURCE_NAME_LENGTH;
+const areDatesValid = startDate && endDate && !(startDate > new Date()) && !(endDate > new Date()) && !(startDate >= endDate)
+const isButtonEnabled = !!source?.name?.length && doesPassNameLengthCheck && !!startDate && !!endDate && !!states.length && areDatesValid;
 
 //Display error message in the following scenarios:
 //1. User is missing only 1 piece of data out of 4
@@ -116,7 +117,11 @@ const errorMsg = useMemo(() => {
     return 'Type in a source name';
   } else if(!startDate || !endDate){
     return 'Enter both a start date and an end date';
-  }else if (!doesPassNameLengthCheck) {
+  } else if(startDate > new Date() || endDate > new Date()){
+    return 'Cannot have dates in the future';
+  } else if (startDate >= endDate){
+    return 'Start date must be earlier than end date';
+  } else if (!doesPassNameLengthCheck) {
     return `The source name is too long. Please enter a name with ${MAX_NPMRDS_SOURCE_NAME_LENGTH + " "} characters or less`
   } else if (!!source?.name && doesPassNameLengthCheck && !!startDate && !!endDate && !states.length) {
     return `Select a state`;
@@ -199,13 +204,13 @@ const errorMsg = useMemo(() => {
           <div className="flex items-center justify-left mt-4">
             <div className="w-full max-w-xs mx-auto">
               <div className="block text-sm leading-5 font-medium text-gray-700">
-                All Vehicles UUID
+                Passenger UUID
               </div>
               <div className="relative">
                 <Input
-                  placeholder={'Enter UUID for All Vehicle Data'}
-                  value={allUuid}
-                  onChange={e => setAllUuid(e)}
+                  placeholder={'Enter UUID for Passenger Data'}
+                  value={passUuid}
+                  onChange={e => setPassUuid(e)}
                 />
               </div>
             </div>
@@ -215,13 +220,13 @@ const errorMsg = useMemo(() => {
           <div className="flex items-center justify-left mt-4">
             <div className="w-full max-w-xs mx-auto">
               <div className="block text-sm leading-5 font-medium text-gray-700">
-                Passenger UUID
+                All Vehicles UUID
               </div>
               <div className="relative">
                 <Input
-                  placeholder={'Enter UUID for Passenger Data'}
-                  value={passUuid}
-                  onChange={e => setPassUuid(e)}
+                  placeholder={'Enter UUID for All Vehicle Data'}
+                  value={allUuid}
+                  onChange={e => setAllUuid(e)}
                 />
               </div>
             </div>
