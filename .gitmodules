@@ -1,21 +1,21 @@
 [submodule "src/modules/avl-components"]
 	path = src/modules/avl-components
-	url = https://github.com/availabs/avl-components
+	url = git@github.com:availabs/avl-components.git
 [submodule "src/modules/avl-graph"]
 	path = src/modules/avl-graph
-	url = https://github.com/availabs/avl-graph.git
+	url = git@github.com:availabs/avl-graph.git
 [submodule "src/modules/avl-map"]
 	path = src/modules/avl-map
-	url = https://github.com/availabs/avl-map.git
+	url = git@github.com:availabs/avl-map.git
 [submodule "src/pages/DataManager"]
 	path = src/pages/DataManager
-	url = https://github.com/availabs/DataManagerClient
+	url = git@github.com:availabs/DataManagerClient.git
 [submodule "src/modules/avl-maplibre"]
 	path = src/modules/avl-maplibre
-	url = https://github.com/availabs/avl-maplibre.git
+	url = git@github.com:availabs/avl-maplibre.git
 [submodule "src/modules/dms"]
 	path = src/modules/dms
-	url = https://github.com/availabs/dms.git
+	url = git@github.com:availabs/dms.git
 [submodule "src/modules/avl-map-2"]
 	path = src/modules/avl-map-2
-	url = https://github.com/availabs/avl-map-2.git
+	url = git@github.com:availabs/avl-map-2.git

@@ -43,8 +43,8 @@ const transportNYDataTypes = {
 
 export const mapPlugins = {
   macroview: MacroviewPlugin,
-  //pointselector: PointselectorPlugin,
-  routing: RoutingPlugin
+  pointselector: PointselectorPlugin,
+  // routing: RoutingPlugin
 };
 
 
