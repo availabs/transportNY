@@ -29,7 +29,7 @@ export const CompareComp = ({ prev, curr, currPer=1, prevPer=1, perUnit='day', t
 export const HeroStatComp = ({data,stat,display=fraction, displayPrefix='', perUnit='day'}) => ( 
   <div className='text-gray-800 text-center '>
     {Object.keys(data.prevMonthByCat).map(cat => {
-      if(get(data, `currentMonthbyCat[${cat}].count`,0) < 5) return ''
+      // if(get(data, `currentMonthbyCat[${cat}].count`,0) < 5) return ''
       return (
       <div key={cat} className='border-b'>
         <div className='text-left w-full'>{cat}</div>
@@ -64,7 +64,7 @@ export const HeroStatComp = ({data,stat,display=fraction, displayPrefix='', perU
 export const CongestionStatComp = ({data,stat,display=fraction, perUnit='day'}) => ( 
   <div className='text-gray-800 text-center '>
     {['total', 'recurrent', 'non-recurrent','accident','construction'].map(cat => {
-      if(get(data, `currMonth[${cat}]`,0) < 5) return ''
+      // if(get(data, `currMonth[${cat}]`,0) < 5) return ''
       return (
       <div key={cat} className='border-b'>
         <div className='text-left w-full'>{cat}</div>
