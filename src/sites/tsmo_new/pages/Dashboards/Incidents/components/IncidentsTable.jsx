@@ -16,7 +16,7 @@ import {
 
 import {duration2minutes, timeConvert, /*vehicleDelay2cost*/} from './utils'
 
-import { calcCost } from "~/sites/tsmo/pages/Dashboards/Congestion/components/data_processing"
+import { calcCost } from "~/sites/tsmo_new/pages/Dashboards/Congestion/components/data_processing"
 
 const TSMO_VIEW_ID = 1947;
 const TMC_META_VIEW_ID = 984;
@@ -39,8 +39,6 @@ const calcDelayCost = (data, cache) => {
 }
 
 const IncidentsTable = ({ events, setHoveredEvent }) => {
-
-console.log("IncidentsTable::events", events);
 
   const { falcorCache } = useFalcor();
 

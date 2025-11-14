@@ -14,7 +14,7 @@ import {
 
 import {getTMCs, getCorridors} from './data_processing'
 
-import { F_SYSTEM_MAP } from '~/sites/tsmo/pages/Dashboards/components/metaData'
+import { F_SYSTEM_MAP } from '~/sites/tsmo_new/pages/Dashboards/components/metaData'
 
 
 // const fFormat = d3format(",.1f")
