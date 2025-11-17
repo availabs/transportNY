@@ -17,12 +17,12 @@ import {
 import {
   useGeographies,
   useComponentDidMount
-} from '~/sites/tsmo/pages/Dashboards/components/utils'
+} from '~/sites/tsmo_new/pages/Dashboards/components/utils'
 
 import IncidentTable from '../Incidents/components/IncidentsTable'
 import IncidentMap from '../Incidents/components/IncidentsMap'
 
-import DashboardLayout from "~/sites/tsmo/pages/Dashboards/components/DashboardLayout"
+import DashboardLayout from "~/sites/tsmo_new/pages/Dashboards/components/DashboardLayout"
 
 import { HeroStatComp } from "../Incidents/components/CompareComp"
 

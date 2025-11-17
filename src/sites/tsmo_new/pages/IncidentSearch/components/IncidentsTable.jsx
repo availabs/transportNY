@@ -10,9 +10,9 @@ import {
 } from "~/modules/avl-components/src"
 
 // import {duration2minutes, timeConvert, /*vehicleDelay2cost*/} from '~/utils'
-import { duration2minutes, timeConvert, /*vehicleDelay2cost*/ } from '~/sites/tsmo/pages/Dashboards/Incidents/components/utils'
+import { duration2minutes, timeConvert, /*vehicleDelay2cost*/ } from '~/sites/tsmo_new/pages/Dashboards/Incidents/components/utils'
 
-import { calcCost } from "~/sites/tsmo/pages/Dashboards/Congestion/components/data_processing"
+import { calcCost } from "~/sites/tsmo_new/pages/Dashboards/Congestion/components/data_processing"
 
 
 const TSMO_VIEW_ID = 1947;
