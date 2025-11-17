@@ -3,7 +3,6 @@ import mapboxgl from "mapbox-gl";
 import get from "lodash/get";
 import set from "lodash/set";
 import moment from "moment"
-
 import { scaleLinear } from "d3-scale"
 
 import { DAMA_HOST } from "~/config";
@@ -29,6 +28,7 @@ const OsmResultSource = {
     data: EMPTY_COLLECTION
   }
 }
+
 const OsmResultLayer = {
   id: "osm-result-layer",
   type: "line",
@@ -40,16 +40,68 @@ const OsmResultLayer = {
   }
 }
 
-/**
- * Some ideas:
- * If user clicks button, `point selector` mode is enabled/disabled
- * If enabled, map click adds the lng/lat to state var
- * When user clicks `calculate route` button, it sends to "API"
- *
- * EVENTUALLY -- will prob want to have internal panel control that can set activeLayer
- * And mapClick will only allow user to pick lng/lat that is in activeLayer
- * Perhaps it will snap to closest or something?
- */
+const IsochroneResultSource = {
+  id: "isochrone-result-source",
+  source: {
+    type: "geojson",
+    data: EMPTY_COLLECTION
+  }
+}
+
+const IsochroneResultLayer = {
+  id: "isochrone-result-layer",
+  type: "line",
+  source: "isochrone-result-source",
+  paint: {
+    "line-width": 2,
+    "line-color": ["get", "color"],
+    "line-offset": 1,
+  },
+  layout: {
+    "line-join": "miter",
+    "line-cap": "square"
+  }
+}
+
+const ALL_OSM_HIGHWAY_TYPES = [
+  "motorway",
+  "motorway_link",
+  "trunk",
+  "trunk_link",
+  "primary",
+  "primary_link",
+  "secondary",
+  "secondary_link",
+  "tertiary",
+  "tertiary_link",
+  "unclassified",
+  "residential",
+  "living_street",
+]
+const MAJOR_OSM_HIGHWAY_TYPES = [
+  "motorway",
+  "motorway_link",
+  "trunk",
+  "trunk_link",
+  "primary",
+  "primary_link",
+  "secondary",
+  "secondary_link",
+  "tertiary",
+  "tertiary_link",
+  "unclassified",
+]
+
+const getColorScale = num => {
+  const scale = scaleLinear()
+    .domain([0, num * 0.5, num])
+    .range(["#1a9850", "#ffffbf", "#d73027" ]);
+  return i => {
+console.log("COLOR SCALE::NUM:", num)
+    if (num === 0) return scale.range()[0];
+    return scale(i);
+  }
+}
 
 export const PointselectorPlugin = {
   id: "pointselector",
@@ -59,6 +111,7 @@ export const PointselectorPlugin = {
   dataUpdate: (map, state, setState) => {
   },
   internalPanel: ({ state, setState }) => {
+    return [];
   },
   externalPanel: ({ state, setState }) => {
     return [];
@@ -99,9 +152,7 @@ export const PointselectorPlugin = {
 
       const num = points.length - 1;
 
-      const colorScale = scaleLinear()
-        .domain([0, num * 0.5, num])
-        .range(["#1a9850", "#ffffbf", "#d73027" ]);
+      const colorScale = getColorScale(num);
 
       setMarkers(
         points.map((p, i) =>
@@ -125,9 +176,7 @@ export const PointselectorPlugin = {
 
       const num = points.length - 1;
 
-      const colorScale = scaleLinear()
-        .domain([0, num * 0.5, num])
-        .range(["#1a9850", "#ffffbf", "#d73027" ]);
+      const colorScale = getColorScale(num);
 
       setMarkers(
         points.map((p, i) =>
@@ -158,9 +207,7 @@ export const PointselectorPlugin = {
           return { ...m.getLngLat() };
         });
 
-        const colorScale = scaleLinear()
-          .domain([0, prevPoints.length * 0.5, prevPoints.length])
-          .range(["#1a9850", "#ffffbf", "#d73027" ]);
+        const colorScale = getColorScale(prevPoints.length);
 
         setMarkers(
           [...prevPoints, clickedPoint].map((p, i) =>
@@ -180,6 +227,7 @@ export const PointselectorPlugin = {
 
     // const [osmDataView, setOsmDataView] = React.useState(null);
     const [conflationDataView, setConflationDataView] = React.useState(null);
+    const [npmrdsViewId, setNpmrdsViewId] = React.useState(null);
 
     const [startDate, setStartDate] = React.useState(moment().subtract(1, "years").format("YYYY-MM-DD"));
     const doSetStartDate = React.useCallback(e => {
@@ -201,9 +249,8 @@ export const PointselectorPlugin = {
       setEndTime(e.target.value);
     }, []);
 
-    const okToSend = React.useMemo(() => {
+    const okToSendRoutingRequest = React.useMemo(() => {
       return (points.length >= 2) &&
-              // Boolean(osmDataView) &&
               Boolean(conflationDataView) &&
               Boolean(startDate) &&
               Boolean(endDate) &&
@@ -211,22 +258,36 @@ export const PointselectorPlugin = {
               Boolean(endTime);
     }, [points, conflationDataView, startDate, endDate, startTime, endTime]);
 
+    const okToSendIsochroneRequest = React.useMemo(() => {
+      return (points.length === 1) &&
+              Boolean(conflationDataView) &&
+              Boolean(startDate) &&
+              Boolean(endDate) &&
+              Boolean(startTime) &&
+              Boolean(endTime);
+    }, [points, conflationDataView, startDate, endDate, startTime, endTime]);
+
+    const [excludeResidential, setExcludeResidential] = React.useState(true);
+    const toggleResidential = React.useCallback(e => {
+      setExcludeResidential(prev => !prev);
+    }, [okToSendIsochroneRequest]);
+
     const [loading, setLoading] = React.useState(false);
 
     const { pgEnv } = React.useContext(DamaContext);
 
-    const [resultFeature, setResultFeature] = React.useState(EMPTY_COLLECTION);
+    const [osmResultFeature, setOsmResultFeature] = React.useState(EMPTY_COLLECTION);
 
-    const hasResultFeature = React.useMemo(() => {
-      return resultFeature.type === "Feature";
-    }, [resultFeature]);
+    const hasOsmResultFeature = React.useMemo(() => {
+      return osmResultFeature.type === "Feature";
+    }, [osmResultFeature]);
 
-    const clearResultFeature = React.useCallback(() => {
-      setResultFeature(EMPTY_COLLECTION);
+    const clearOsmResultFeature = React.useCallback(() => {
+      setOsmResultFeature(EMPTY_COLLECTION);
     }, []);
 
-    const sendRequest = React.useCallback(() => {
-      if (!okToSend) return;
+    const sendRoutingRequest = React.useCallback(() => {
+      if (!okToSendRoutingRequest) return;
 
       setLoading(true);
 
@@ -245,12 +306,14 @@ export const PointselectorPlugin = {
         { method: "POST", body: formData }
       ).then(res => res.json())
         .then(json => {
-          console.log("RES:", json);
+          console.log("OSM RES:", json);
           const f = json.ok ? json.result.feature : EMPTY_COLLECTION;
-          setResultFeature(f);
+          setOsmResultFeature(f);
         })
         .finally(() => setLoading(false));
-    }, [okToSend, points, conflationDataView, pgEnv, startDate, endDate, startTime, endTime]);
+    }, [okToSendRoutingRequest, points, conflationDataView, pgEnv,
+        startDate, endDate, startTime, endTime
+      ]);
 
     React.useEffect(() => {
       if (!map || map._removed) return;
@@ -279,15 +342,90 @@ export const PointselectorPlugin = {
       if (!map || map._removed) return;
 
       if (map.getSource(OsmResultSource.id)) {
-        map.getSource(OsmResultSource.id).setData(resultFeature);
+        map.getSource(OsmResultSource.id).setData(osmResultFeature);
       }
-    }, [map, resultFeature]);
+    }, [map, osmResultFeature]);
+
+    const [isochroneResultCollection, setIsochroneResultCollection] = React.useState(EMPTY_COLLECTION);
+
+    const hasIsochroneResultCollection = React.useMemo(() => {
+      return isochroneResultCollection.features.length > 0;
+    }, [isochroneResultCollection]);
+
+    const clearIsochroneResultCollection = React.useCallback(() => {
+      setIsochroneResultCollection(EMPTY_COLLECTION);
+    }, []);
+
+    const sendIsochroneRequest = React.useCallback(() => {
+      if (!okToSendIsochroneRequest) return;
+
+      setLoading(true);
+
+      const formData = new FormData();
+
+      const [point] = points;
+
+      // formData.append("osm_view_id", osmDataView);
+      formData.append("conflation_view_id", conflationDataView);
+      formData.append("start_date", startDate);
+      formData.append("end_date", endDate);
+      formData.append("start_time", startTime);
+      formData.append("end_time", endTime);
+      formData.append("point", JSON.stringify(point));
+      formData.append("highway_filter", excludeResidential ?
+                                        JSON.stringify(MAJOR_OSM_HIGHWAY_TYPES) :
+                                        JSON.stringify(ALL_OSM_HIGHWAY_TYPES)
+                      )
+
+      fetch(
+        `${ DAMA_HOST }/dama-admin/${ pgEnv }/osm/isochrone`,
+        { method: "POST", body: formData }
+      ).then(res => res.json())
+        .then(json => {
+          console.log("ISOCHRONE RES:", json);
+          const c = json.ok ? json.result.collection : EMPTY_COLLECTION;
+          setIsochroneResultCollection(c);
+        })
+        .finally(() => setLoading(false));
+
+    }, [okToSendIsochroneRequest, points, conflationDataView,
+        pgEnv, startDate, endDate, startTime, endTime, excludeResidential
+      ]);
+
+    React.useEffect(() => {
+      if (!map || map._removed) return;
+
+      if (!map.getSource(IsochroneResultSource.id)) {
+        map.addSource(IsochroneResultSource.id, IsochroneResultSource.source);
+      }
+
+      if (map.getSource(IsochroneResultSource.id)) {
+        map.addLayer(IsochroneResultLayer);
+      }
+      
+      return () => {
+        if (!map || map._removed) return;
+
+        if (map.getLayer(IsochroneResultLayer.id)) {
+          map.removeLayer(IsochroneResultLayer.id);
+        }
+        if (map.getSource(IsochroneResultSource.id)) {
+          map.removeSource(IsochroneResultSource.id);
+        }
+      }
+    }, [map]);
+
+    React.useEffect(() => {
+      if (!map || map._removed) return;
+
+      if (map.getSource(IsochroneResultSource.id)) {
+        map.getSource(IsochroneResultSource.id).setData(isochroneResultCollection);
+      }
+    }, [map, isochroneResultCollection]);
 
     const colorScale = React.useMemo(() => {
       const num = markers.length - 1;
-      return scaleLinear()
-        .domain([0, num * 0.5, num])
-        .range(["#1a9850", "#ffffbf", "#d73027" ]);
+      return getColorScale(num);
     }, [markers]);
 
     const [minimized, setMinimized] = React.useState(false);
@@ -310,7 +448,7 @@ export const PointselectorPlugin = {
 
         <div onClick={ toggle }
           className={ `
-            absolute right-0 top-0 px-3 py-1
+            absolute right-0 top-0 px-3 py-1 z-50
             bg-gray-200 hover:bg-gray-400 cursor-pointer
             ${ minimized ? "rounded-r-lg" : "rounded-tr-lg" }
           ` }
@@ -323,12 +461,12 @@ export const PointselectorPlugin = {
 
         { !loading ? null :
           <div className={ `
-              absolute inset-0 bg-black bg-opacity-75 z-50
+              absolute inset-0 bg-black bg-opacity-75 z-40
               flex items-center justify-center rounded-lg
               font-bold text-2xl text-white pointer-events-auto
             ` }
           >
-            Request sent...<br />...please wait...
+            Request sent{ minimized ? null : <>{ "..." }<br /></> }...please wait...
           </div>
         }
 
@@ -384,6 +522,23 @@ export const PointselectorPlugin = {
             </div>
 
             <div className="border-b-2 border-current font-bold">
+              Residential Roadway Filter (Isochrone Requests only)
+            </div>
+            <div className="grid grid-cols-5 gap-1 mb-2">
+              <div className={ `
+                  col-span-4 ${ !okToSendIsochroneRequest ? "opacity-50" : "" }
+                ` }
+              >
+                Exlude Residential Roadways
+              </div>
+              <input type="checkbox"
+                className="cursor-pointer disabled:hover:cursor-not-allowed disabled:opacity-50"
+                checked={ excludeResidential }
+                onChange={ toggleResidential }
+                disabled={ !okToSendIsochroneRequest }/>
+            </div>
+
+            <div className="border-b-2 border-current font-bold">
               { !points.length ?
                 "Hold control and click map to add a point..." :
                 "Selected Points"
@@ -400,7 +555,9 @@ export const PointselectorPlugin = {
                 }
               </div>
             }
-            <div className="grid grid-cols-3 gap-1 text-sm">
+
+            <div className="grid grid-cols-2 gap-1 text-sm">
+
               <Button disabled={ !points.length || loading }
                 onClick={ removeLast }
               >
@@ -411,19 +568,33 @@ export const PointselectorPlugin = {
               >
                 Remove All Points
               </Button>
-              <Button disabled={ !hasResultFeature || loading }
-                onClick={ clearResultFeature }
+
+              <Button disabled={ !okToSendRoutingRequest || loading }
+                onClick={ sendRoutingRequest }
+                className="bg-green-200 hover:bg-green-400 disabled:hover:bg-green-200"
               >
-                Remove Geometry
+                Send Routing Request
               </Button>
-              <div className="col-span-3">
-                <Button disabled={ !okToSend || loading }
-                  onClick={ sendRequest }
+              <div>
+                <Button disabled={ !okToSendIsochroneRequest || loading }
+                  onClick={ sendIsochroneRequest }
                   className="bg-green-200 hover:bg-green-400 disabled:hover:bg-green-200"
                 >
-                  Send Request
+                  Send Isochrone Request
                 </Button>
               </div>
+
+              <Button disabled={ !hasOsmResultFeature || loading }
+                onClick={ clearOsmResultFeature }
+              >
+                Remove Routing Feature
+              </Button>
+              <Button disabled={ !hasIsochroneResultCollection || loading }
+                onClick={ clearIsochroneResultCollection }
+              >
+                Remove Isochrone Collection
+              </Button>
+
             </div>
           </>
         }
