@@ -17,12 +17,12 @@ import {
 import {
   useGeographies,
   useComponentDidMount
-} from '~/sites/tsmo/pages/Dashboards/components/utils'
+} from '~/sites/tsmo_new/pages/Dashboards/components/utils'
 
 import IncidentTable from '../Incidents/components/IncidentsTable'
 import IncidentMap from '../Incidents/components/IncidentsMap'
 
-import DashboardLayout from "~/sites/tsmo/pages/Dashboards/components/DashboardLayout"
+import DashboardLayout from "~/sites/tsmo_new/pages/Dashboards/components/DashboardLayout"
 
 import { HeroStatComp } from "../Incidents/components/CompareComp"
 
@@ -153,7 +153,7 @@ const Incidents = props => {
 
     const currentMonthbyCat = get(falcorCache, ["transcom3", "eventsbyGeom", TSMO_VIEW_ID, requests[0], "value"], [])
       .map(c => get(falcorCache, ["transcom3", TSMO_VIEW_ID, "eventsbyId", c], {}))
-      .sort((a, b) => get(a, 'congestion_data.value.vehicleDelay', 0) - get(b, 'congestion_data.value.vehicleDelay', 0))
+      .sort((a, b) => get(a, 'congestion_data.value.rawVehicleDelay', 0) - get(b, 'congestion_data.value.rawVehicleDelay', 0))
       .reduce((a, e, i) => {
         if (e && (!fSystems.length || fSystems.includes(e.n))) {
           if (!a[e.nysdot_sub_category]) {
@@ -163,13 +163,14 @@ const Incidents = props => {
           if (!currentMonthDays.includes(day)) {
             currentMonthDays.push(day)
           }
-          a[e.nysdot_sub_category].v_delay += get(e, 'congestion_data.value.vehicleDelay', 0)
+          let cost = Number(get(e, "cost", 0)) || 0;
+          a[e.nysdot_sub_category].v_delay +=  get(e, 'congestion_data.value.rawVehicleDelay', 0)
           if (i < 20) {
-            a[e.nysdot_sub_category].top_20_v_delay += get(e, 'congestion_data.value.vehicleDelay', 0)
+            a[e.nysdot_sub_category].top_20_v_delay +=  get(e, 'congestion_data.value.rawVehicleDelay', 0)
           }
           a[e.nysdot_sub_category].duration += duration2minutes(e.event_duration);
           a[e.nysdot_sub_category].count += 1;
-          a['Total'].v_delay += get(e, 'congestion_data.value.vehicleDelay', 0)
+          a['Total'].v_delay +=  get(e, 'congestion_data.value.rawVehicleDelay', 0)
           a['Total'].duration += duration2minutes(e.event_duration);
           a['Total'].count += 1;
           return a
@@ -179,7 +180,7 @@ const Incidents = props => {
 
     const prevMonthByCat = get(falcorCache, ["transcom3", "eventsbyGeom", TSMO_VIEW_ID, requests[1], "value"], [])
       .map(c => get(falcorCache, ["transcom3", TSMO_VIEW_ID, "eventsbyId", c], {}))
-      .sort((a, b) => get(a, 'congestion_data.value.vehicleDelay', 0) - get(b, 'congestion_data.value.vehicleDelay', 0))
+      .sort((a, b) => get(a, 'congestion_data.value.rawVehicleDelay', 0) - get(b, 'congestion_data.value.rawVehicleDelay', 0))
       .reduce((a, e, i) => {
         if (e && (!fSystems.length || fSystems.includes(e.n))) {
           if (!a[e.nysdot_sub_category]) {
@@ -189,13 +190,15 @@ const Incidents = props => {
           if (!prevMonthDays.includes(day)) {
             prevMonthDays.push(day)
           }
+
+          let cost = Number(get(e, "cost", 0)) || 0;
           if (i < 20) {
-            a[e.nysdot_sub_category].top_20_v_delay += get(e, 'congestion_data.value.vehicleDelay', 0)
+            a[e.nysdot_sub_category].top_20_v_delay += get(e, 'congestion_data.value.rawVehicleDelay', 0)
           }
-          a[e.nysdot_sub_category].v_delay += get(e, 'congestion_data.value.vehicleDelay', 0)
+          a[e.nysdot_sub_category].v_delay += get(e, 'congestion_data.value.rawVehicleDelay', 0)
           a[e.nysdot_sub_category].duration += duration2minutes(e.event_duration);
           a[e.nysdot_sub_category].count += 1;
-          a['Total'].v_delay += get(e, 'congestion_data.value.vehicleDelay', 0)
+          a['Total'].v_delay += get(e, 'congestion_data.value.rawVehicleDelay', 0)
           a['Total'].duration += duration2minutes(e.event_duration);
           a['Total'].count += 1;
           return a
@@ -213,7 +216,7 @@ const Incidents = props => {
 
     return {
       events: events
-        .sort((a, b) => get(b, 'congestion_data.value.vehicleDelay', 0) - get(a, 'congestion_data.value.vehicleDelay', 0))
+        .sort((a, b) => get(b, 'congestion_data.value.rawVehicleDelay', 0) - get(a, 'congestion_data.value.rawVehicleDelay', 0))
         .filter((d, i) => i < 20),
       numEvents: events.length,
       currentMonthbyCat,

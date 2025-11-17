@@ -25,7 +25,7 @@ import { ckmeans } from "simple-statistics";
 
 
 import { LayerContainer } from "~/modules/avl-map/src";
-import { F_SYSTEM_MAP } from "~/sites/tsmo/pages/Dashboards/components/metaData"
+import { F_SYSTEM_MAP } from "~/sites/tsmo_new/pages/Dashboards/components/metaData"
 
 import { getTMCs, getCorridors } from '../data_processing'
 /* ---- To Do -----

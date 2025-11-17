@@ -10,7 +10,7 @@ import {
 
 import { GridGraph } from "~/modules/avl-graph/src"
 
-import { useComponentDidMount } from "~/sites/tsmo/pages/Dashboards/components/utils"
+import { useComponentDidMount } from "~/sites/tsmo_new/pages/Dashboards/components/utils"
 
 import Stoplights from "./Stoplights"
 

@@ -7,7 +7,7 @@ import moment from "moment"
 import { groups as d3groups, /*extent as d3extent, */ range as d3range } from "d3-array"
 import { scaleQuantile, /*scaleQuantize,*/ scaleThreshold } from "d3-scale"
 
-import { useComponentDidMount } from "~/sites/tsmo/pages/Dashboards/components/utils"
+import { useComponentDidMount } from "~/sites/tsmo_new/pages/Dashboards/components/utils"
 
 import {
   useFalcor,

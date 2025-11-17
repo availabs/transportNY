@@ -22,5 +22,5 @@ export const  timeConvert = (n) => {
 export const vehicleDelay2cost = (delay,perUnit=1) => {
   if(!delay) return 0
 
-  return `$${fFormat((delay/perUnit)*15)}`
+  return `$${fFormat((delay/perUnit)*20)}`
 }
