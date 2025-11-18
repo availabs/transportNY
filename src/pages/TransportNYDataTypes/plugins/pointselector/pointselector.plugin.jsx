@@ -48,36 +48,30 @@ const IsochroneResultSource = {
   }
 }
 
+// const IsochroneResultLayer = {
+//   id: "isochrone-result-layer",
+//   type: "line",
+//   source: "isochrone-result-source",
+//   paint: {
+//     "line-width": 2,
+//     "line-color": ["get", "color"],
+//     "line-offset": 1,
+//   },
+//   layout: {
+//     "line-join": "miter",
+//     "line-cap": "square"
+//   }
+// }
 const IsochroneResultLayer = {
   id: "isochrone-result-layer",
-  type: "line",
+  type: "fill",
   source: "isochrone-result-source",
   paint: {
-    "line-width": 2,
-    "line-color": ["get", "color"],
-    "line-offset": 1,
+    "fill-color": ["get", "color"],
+    "fill-opacity": 0.5
   },
-  layout: {
-    "line-join": "miter",
-    "line-cap": "square"
-  }
 }
 
-const ALL_OSM_HIGHWAY_TYPES = [
-  "motorway",
-  "motorway_link",
-  "trunk",
-  "trunk_link",
-  "primary",
-  "primary_link",
-  "secondary",
-  "secondary_link",
-  "tertiary",
-  "tertiary_link",
-  "unclassified",
-  "residential",
-  "living_street",
-]
 const MAJOR_OSM_HIGHWAY_TYPES = [
   "motorway",
   "motorway_link",
@@ -91,13 +85,17 @@ const MAJOR_OSM_HIGHWAY_TYPES = [
   "tertiary_link",
   "unclassified",
 ]
+const ALL_OSM_HIGHWAY_TYPES = [
+  ...MAJOR_OSM_HIGHWAY_TYPES,
+  "residential",
+  "living_street",
+]
 
 const getColorScale = num => {
   const scale = scaleLinear()
     .domain([0, num * 0.5, num])
     .range(["#1a9850", "#ffffbf", "#d73027" ]);
   return i => {
-console.log("COLOR SCALE::NUM:", num)
     if (num === 0) return scale.range()[0];
     return scale(i);
   }
