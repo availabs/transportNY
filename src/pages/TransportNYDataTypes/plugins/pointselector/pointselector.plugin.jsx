@@ -524,7 +524,8 @@ export const PointselectorPlugin = {
             </div>
             <div className="grid grid-cols-5 gap-1 mb-2">
               <div className={ `
-                  col-span-4 ${ !okToSendIsochroneRequest ? "opacity-50" : "" }
+                  col-span-4 text-sm
+                  ${ !okToSendIsochroneRequest ? "opacity-50" : "" }
                 ` }
               >
                 Exlude Residential Roadways
@@ -542,16 +543,16 @@ export const PointselectorPlugin = {
                 "Selected Points"
               }
             </div>
-            { !points.length ? null :
-              <div className="text-sm">
-                { points.map((p, i) => (
-                    <Point key={ i } { ...p } index={ i }
-                      bgColor={ colorScale(i) }
-                      remove={ removeMarker }
-                      disabled={ loading }/>
-                  ))
-                }
-              </div>
+            { !points.length ?
+                <PointInstructions /> :
+                <div className="text-sm">
+                  { points.map((p, i) => (
+                      <Point key={ i } { ...p } index={ i }
+                        bgColor={ colorScale(i) }
+                        remove={ removeMarker }/>
+                    ))
+                  }
+                </div>
             }
 
             <div className="grid grid-cols-2 gap-1 text-sm">
@@ -602,7 +603,20 @@ export const PointselectorPlugin = {
   }
 };
 
-const Point = ({ lng, lat, index, remove, bgColor, disabled }) => {
+const PointInstructions = () => {
+  return (
+    <div className="text-sm">
+      <div>
+        Routes require at least 2 points.
+      </div>
+      <div>
+        Isochrones must include only a single point.
+      </div>
+    </div>
+  );
+}
+
+const Point = ({ lng, lat, index, remove, bgColor }) => {
   const doRemove = React.useCallback(e => {
     remove(index);
   }, [remove, index]);
@@ -616,7 +630,7 @@ const Point = ({ lng, lat, index, remove, bgColor, disabled }) => {
         { lng.toFixed(4) }, { lat.toFixed(4) }
       </div>
       <div className="flex justify-center w-8 text-red-600 hover:text-red-700">
-        <Button onClick={ doRemove } disabled={ disabled }>
+        <Button onClick={ doRemove }>
           <span className="fa-solid fa-trash"/>
         </Button>
       </div>
