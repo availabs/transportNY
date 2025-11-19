@@ -247,6 +247,17 @@ export const PointselectorPlugin = {
       setEndTime(e.target.value);
     }, []);
 
+    const [duration, setDuration] = React.useState(15);
+    const doSetDuration = React.useCallback(e => {
+      setDuration(+e.target.value);
+    }, []);
+
+    React.useEffect(() => {
+      if ((duration <= 0) || (duration > 60)) {
+        setDuration(60);
+      }
+    }, [duration]);
+
     const okToSendRoutingRequest = React.useMemo(() => {
       return (points.length >= 2) &&
               Boolean(conflationDataView) &&
@@ -262,8 +273,9 @@ export const PointselectorPlugin = {
               Boolean(startDate) &&
               Boolean(endDate) &&
               Boolean(startTime) &&
-              Boolean(endTime);
-    }, [points, conflationDataView, startDate, endDate, startTime, endTime]);
+              Boolean(endTime) &&
+              (duration > 0 && duration <= 60);
+    }, [points, conflationDataView, startDate, endDate, startTime, endTime, duration]);
 
     const [excludeResidential, setExcludeResidential] = React.useState(true);
     const toggleResidential = React.useCallback(e => {
@@ -369,6 +381,7 @@ export const PointselectorPlugin = {
       formData.append("end_date", endDate);
       formData.append("start_time", startTime);
       formData.append("end_time", endTime);
+      formData.append("duration", duration);
       formData.append("point", JSON.stringify(point));
       formData.append("highway_filter", excludeResidential ?
                                         JSON.stringify(MAJOR_OSM_HIGHWAY_TYPES) :
@@ -386,7 +399,7 @@ export const PointselectorPlugin = {
         })
         .finally(() => setLoading(false));
 
-    }, [okToSendIsochroneRequest, points, conflationDataView,
+    }, [okToSendIsochroneRequest, points, conflationDataView, duration,
         pgEnv, startDate, endDate, startTime, endTime, excludeResidential
       ]);
 
@@ -520,21 +533,39 @@ export const PointselectorPlugin = {
             </div>
 
             <div className="border-b-2 border-current font-bold">
-              Residential Roadway Filter (Isochrone Requests only)
+              Isochrone Requests only
             </div>
-            <div className="grid grid-cols-5 gap-1 mb-2">
+            <div className="grid grid-cols-2 gap-1 mb-2">
+              <div>
+                <div className={ `
+                    col-span-4 text-sm text-center
+                    ${ !okToSendIsochroneRequest ? "opacity-50" : "" }
+                  ` }
+                >
+                  Isochrone Duration (minutes)
+                </div>
+                <input type="number"
+                  className="w-full block px-2 py-1 cursor-pointer disabled:hover:cursor-not-allowed disabled:opacity-50 bg-white shadow"
+                  value={ duration }
+                  min={ 0 }
+                  max={ 60 }
+                  onChange={ doSetDuration }
+                  disabled={ !okToSendIsochroneRequest }/>
+              </div>
+              <div>
               <div className={ `
-                  col-span-4 text-sm
+                  col-span-4 text-sm text-center
                   ${ !okToSendIsochroneRequest ? "opacity-50" : "" }
                 ` }
               >
                 Exlude Residential Roadways
               </div>
               <input type="checkbox"
-                className="cursor-pointer disabled:hover:cursor-not-allowed disabled:opacity-50"
+                className="w-full h-6 mt-1 block cursor-pointer disabled:hover:cursor-not-allowed disabled:opacity-50"
                 checked={ excludeResidential }
                 onChange={ toggleResidential }
                 disabled={ !okToSendIsochroneRequest }/>
+              </div>
             </div>
 
             <div className="border-b-2 border-current font-bold">
