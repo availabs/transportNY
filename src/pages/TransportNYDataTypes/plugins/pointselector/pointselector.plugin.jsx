@@ -600,7 +600,7 @@ export const PointselectorPlugin = {
 
       </div>
     );
-  }
+  },
 };
 
 const PointInstructions = () => {
@@ -655,44 +655,44 @@ const Button = ({ children, className="bg-gray-200 hover:bg-gray-400 disabled:ho
 const OSM_DATA_CATEGORIES = ["OSM Data"];
 const OSM_DATA_COLUMNS = ["osm_id", "wkb_geometry"];
 
-const OsmDataViewSelector = ({ setOsmDataView }) => {
+// const OsmDataViewSelector = ({ setOsmDataView }) => {
 
-  const { pgEnv, falcor, falcorCache } = React.useContext(DamaContext);
+//   const { pgEnv, falcor, falcorCache } = React.useContext(DamaContext);
 
-  const [createState, setCreateState] = React.useState({
-    osmDataSourceId: null,
-    osmDataViewId: null
-  });
+//   const [createState, setCreateState] = React.useState({
+//     osmDataSourceId: null,
+//     osmDataViewId: null
+//   });
 
-  useFetchSources({ falcor, falcorCache, pgEnv });
-  const osmDataSources = useGetSources({ falcorCache,
-                                          pgEnv,
-                                          categories: OSM_DATA_CATEGORIES,
-                                          columns: OSM_DATA_COLUMNS
-                                      });
+//   useFetchSources({ falcor, falcorCache, pgEnv });
+//   const osmDataSources = useGetSources({ falcorCache,
+//                                           pgEnv,
+//                                           categories: OSM_DATA_CATEGORIES,
+//                                           columns: OSM_DATA_COLUMNS
+//                                       });
 
-  useFetchSourceViews({ falcor, falcorCache, pgEnv, source_id: createState.osmDataSourceId });
-  const osmDataViews = useGetViews({ falcorCache, pgEnv, source_id: createState.osmDataSourceId });
+//   useFetchSourceViews({ falcor, falcorCache, pgEnv, source_id: createState.osmDataSourceId });
+//   const osmDataViews = useGetViews({ falcorCache, pgEnv, source_id: createState.osmDataSourceId });
 
-  React.useEffect(() => {
-    setOsmDataView(createState.osmDataViewId);
-  }, [setOsmDataView, createState.osmDataViewId]);
+//   React.useEffect(() => {
+//     setOsmDataView(createState.osmDataViewId);
+//   }, [setOsmDataView, createState.osmDataViewId]);
 
-  return (
-    <SourceAndViewSelectors
-      label="OSM Data"
+//   return (
+//     <SourceAndViewSelectors
+//       label="OSM Data"
 
-      sources={ osmDataSources }
-      sourceKey="osmDataSourceId"
-      sourceValue={ createState.osmDataSourceId }
+//       sources={ osmDataSources }
+//       sourceKey="osmDataSourceId"
+//       sourceValue={ createState.osmDataSourceId }
 
-      views={ osmDataViews }
-      viewKey="osmDataViewId"
-      viewValue={ createState.osmDataViewId }
+//       views={ osmDataViews }
+//       viewKey="osmDataViewId"
+//       viewValue={ createState.osmDataViewId }
 
-      setCreateState={ setCreateState }/>
-  )
-}
+//       setCreateState={ setCreateState }/>
+//   )
+// }
 
 const CONFLATION_DATA_CATEGORIES = ["OSM Conflation"];
 const CONFLATION_DATA_COLUMNS = ["osm", "ris", "tmc", "osm_fwd"];
