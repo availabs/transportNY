@@ -7,6 +7,8 @@ import { scaleLinear } from "d3-scale"
 
 import { DAMA_HOST } from "~/config";
 import { DamaContext } from "~/pages/DataManager/store";
+import { CMSContext } from "~/modules/dms/src";
+
 
 import {
   useFetchSources,
@@ -128,7 +130,7 @@ export const PointselectorPlugin = {
 
     React.useEffect(() => {
       if (!map || map._removed) return;
-      
+
       map.on("click", click);
       return () => {
         if (!map || map._removed) return;
@@ -272,8 +274,12 @@ export const PointselectorPlugin = {
 
     const [loading, setLoading] = React.useState(false);
 
-    const { pgEnv } = React.useContext(DamaContext);
 
+    // const dctx = React.useContext(DamaContext);
+    // const cctx = React.useContext(CMSContext);
+    // const ctx = dctx?.falcor ? dctx : cctx;
+    // const { pgEnv } = ctx  || { pgEnv: 'npmrds2'};
+    const pgEnv = 'npmrds2'
     const [osmResultFeature, setOsmResultFeature] = React.useState(EMPTY_COLLECTION);
 
     const hasOsmResultFeature = React.useMemo(() => {
@@ -323,7 +329,7 @@ export const PointselectorPlugin = {
       if (map.getSource(OsmResultSource.id)) {
         map.addLayer(OsmResultLayer);
       }
-      
+
       return () => {
         if (!map || map._removed) return;
 
@@ -400,7 +406,7 @@ export const PointselectorPlugin = {
       if (map.getSource(IsochroneResultSource.id)) {
         map.addLayer(IsochroneResultLayer);
       }
-      
+
       return () => {
         if (!map || map._removed) return;
 
@@ -432,7 +438,7 @@ export const PointselectorPlugin = {
     }, []);
 
     return (
-      <div 
+      <div
         style={ {
           left: "50%",
           transform: "translate(-50%, 0)"
@@ -699,7 +705,11 @@ const CONFLATION_DATA_COLUMNS = ["osm", "ris", "tmc", "osm_fwd"];
 
 const ConflationDataViewSelector = ({ setConflationDataView }) => {
 
-  const { pgEnv, falcor, falcorCache } = React.useContext(DamaContext);
+  const dctx = React.useContext(DamaContext);
+  const cctx = React.useContext(CMSContext);
+  const ctx = dctx?.falcor ? dctx : cctx;
+  const { falcor, falcorCache } = ctx || {};
+  const pgEnv = 'npmrds2'
 
   const [createState, setCreateState] = React.useState({
     conflationDataSourceId: null,
