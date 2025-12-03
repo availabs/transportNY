@@ -1,12 +1,15 @@
 import React from "react";
 
-// import {
-//   useFetchSources,
-//   useGetSources,
-//   useFetchSourceViews,
-//   useGetViews,
-//   SourceAndViewSelectors
-// } from "./utils"
+import { DAMA_HOST } from "~/config";
+import { DamaContext } from "~/pages/DataManager/store";
+
+import {
+  useFetchSources,
+  useGetSources,
+  useFetchSourceViews,
+  useGetViews,
+  SourceAndViewSelectors
+} from "./utils"
 
 export const RerouterPlugin = {
   id: "rerouter",
@@ -25,12 +28,62 @@ export const RerouterPlugin = {
   },
   comp: ({ map }) => {
 
-    const [conflationSource, setConflationSource] = React.useState(null);
+    const [conflationDataView, setConflationDataView] = React.useState(null);
+
+    const [minimized, setMinimized] = React.useState(false);
+    const toggle = React.useCallback(e => {
+      setMinimized(min => !min);
+    }, []);
+
 
     
-    
     return (
-      <div>
+      <div
+        style={ {
+          left: "50%",
+          transform: "translate(-50%, 0)"
+        } }
+        className={ `
+          pointer-events-auto w-screen max-w-xl h-fit grid grid-cols-1 gap-1
+          bg-white items-center absolute bottom-4 rounded-lg
+          ${ minimized ? "px-2 pt-2" : "p-2" }
+        ` }
+      >
+
+        <div onClick={ toggle }
+          className={ `
+            absolute right-0 top-0 px-3 py-1 z-50
+            bg-gray-200 hover:bg-gray-400 cursor-pointer
+            ${ minimized ? "rounded-r-lg" : "rounded-tr-lg" }
+          ` }
+        >
+          { minimized ?
+            <span className="fa fa-caret-up"/> :
+            <span className="fa fa-caret-down"/>
+          }
+        </div>
+
+        { minimized ?
+          <>
+            <div>&nbsp;</div>
+          </> :
+          <>
+
+            <div className="border-b-4 border-current text-xl font-bold">
+              Rerouter Plugin
+            </div>
+            
+            <div className="border-b-2 border-current font-bold">
+              OSM Data Source and View
+            </div>
+
+            <ConflationDataViewSelector
+              setConflationDataView={ setConflationDataView }/>
+
+            <div className="h-24"/>
+
+          </>
+        }
 
       </div>
     );
@@ -44,7 +97,7 @@ const ConflationDataViewSelector = ({ setConflationDataView }) => {
 
   const { pgEnv, falcor, falcorCache } = React.useContext(DamaContext);
 
-  const [createState, setCreateState] = React.useState({
+  const [sourceState, setSourceState] =   React.useState({
     conflationDataSourceId: null,
     conflationDataViewId: null
   });
@@ -56,12 +109,12 @@ const ConflationDataViewSelector = ({ setConflationDataView }) => {
                                           columns: CONFLATION_DATA_COLUMNS
                                       });
 
-  useFetchSourceViews({ falcor, falcorCache, pgEnv, source_id: createState.conflationDataSourceId });
-  const conflationDataViews = useGetViews({ falcorCache, pgEnv, source_id: createState.conflationDataSourceId });
+  useFetchSourceViews({ falcor, falcorCache, pgEnv, source_id: sourceState.conflationDataSourceId });
+  const conflationDataViews = useGetViews({ falcorCache, pgEnv, source_id: sourceState.conflationDataSourceId });
 
   React.useEffect(() => {
-    setConflationDataView(createState.conflationDataViewId);
-  }, [setConflationDataView, createState.conflationDataViewId]);
+    setConflationDataView(sourceState.conflationDataViewId);
+  }, [setConflationDataView, sourceState.conflationDataViewId]);
 
   return (
     <SourceAndViewSelectors
@@ -69,12 +122,12 @@ const ConflationDataViewSelector = ({ setConflationDataView }) => {
 
       sources={ conflationDataSources }
       sourceKey="conflationDataSourceId"
-      sourceValue={ createState.conflationDataSourceId }
+      sourceValue={ sourceState.conflationDataSourceId }
 
       views={ conflationDataViews }
       viewKey="conflationDataViewId"
-      viewValue={ createState.conflationDataViewId }
+      viewValue={ sourceState.conflationDataViewId }
 
-      setCreateState={ setCreateState }/>
+      setCreateState={ setSourceState }/>
   )
 }
