@@ -35,7 +35,7 @@ export const RerouterPlugin = {
       setMinimized(min => !min);
     }, []);
 
-
+    const viewMetadata = getViewMetadata({ viewId: conflationDataView });
     
     return (
       <div
@@ -72,7 +72,7 @@ export const RerouterPlugin = {
             <div className="border-b-4 border-current text-xl font-bold">
               Rerouter Plugin
             </div>
-            
+
             <div className="border-b-2 border-current font-bold">
               OSM Data Source and View
             </div>
@@ -88,6 +88,12 @@ export const RerouterPlugin = {
       </div>
     );
   },
+}
+
+const getViewMetadata = ({ viewId }) => {
+
+  const { pgEnv, falcor, falcorCache } = React.useContext(DamaContext);
+  
 }
 
 const CONFLATION_DATA_CATEGORIES = ["OSM Conflation"];
