@@ -54,6 +54,11 @@ const REROUTER_METHODS = [
   "one-to-many",
   "many-to-many"
 ]
+const REROUTER_DISTANCES = [
+  "short",
+  "medium",
+  "far"
+]
 
 export const RerouterPlugin = {
   id: "rerouter",
@@ -193,6 +198,11 @@ export const RerouterPlugin = {
       setMethod(e.target.value);
     }, []);
 
+    const [distance, setDistance] = React.useState(REROUTER_DISTANCES[1]);
+    const doSetDistance = React.useCallback(e => {
+      setDistance(e.target.value);
+    }, []);
+
     const { pgEnv } = React.useContext(DamaContext);
 
     const [loading, setLoading] = React.useState(false);
@@ -210,6 +220,7 @@ export const RerouterPlugin = {
 
       formData.append("conflation_view_id", conflationDataView);
       formData.append("method", method);
+      formData.append("distance_modifier", distance);
       formData.append("osm", osm);
       formData.append("reversed", !osm_fwd);
       formData.append("point", JSON.stringify(lngLat));
@@ -224,7 +235,7 @@ export const RerouterPlugin = {
           setResultCollection(c);
         })
         .finally(() => setLoading(false));
-    }, [pgEnv, okToSend, conflationDataView, clickedInfo, method]);
+    }, [pgEnv, okToSend, conflationDataView, clickedInfo, method, distance]);
 
     React.useEffect(() => {
       if (!map || map._removed) return;
@@ -314,6 +325,30 @@ export const RerouterPlugin = {
 
             </div>
 
+            <div className="text-sm flex items-center mb-1">
+
+              <div className="font-medium mr-1 flex-1">
+                Distance:
+              </div>
+
+              <select
+                value={ distance }
+                onChange={ doSetDistance }
+                className='text-sm px-2 py-1 bg-white shadow w-3/5 cursor-pointer'
+              >
+                { REROUTER_DISTANCES.map(d =>
+                    <option key={ d }
+                      value={ d }
+                      className="text-sm"
+                    >
+                      { d }
+                    </option>
+                  )
+                }
+              </select>
+
+            </div>
+
             <div className="border-b-2 border-current font-bold"/>
 
             <div className="grid grid-cols-2 gap-1">
@@ -337,8 +372,6 @@ export const RerouterPlugin = {
               </Button>
 
             </div>
-
-            <div className="h-24"/>
 
           </>
         }
