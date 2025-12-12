@@ -52,6 +52,7 @@ const ResultLayer = {
 const REROUTER_METHODS = [
   "one-to-one",
   "one-to-many",
+  "many-to-one",
   "many-to-many"
 ]
 const REROUTER_DISTANCES = [
