@@ -210,6 +210,37 @@ export const RerouterPlugin = {
 
     const [resultCollection, setResultCollection] = React.useState(EMPTY_COLLECTION);
 
+    const [origins, setOrigins] = React.useState([]);
+    const [destinations, setDestinations] = React.useState([]);
+
+console.log("ORIGINS:", origins);
+
+    React.useEffect(() => {
+      const markers = origins.map(o => {
+        return new mapboxgl.Marker({ color: "green" })
+                          .setLngLat(o)
+                          .addTo(map);
+      });
+
+console.log("ORIGIN MARKERS:", markers.length);
+
+      return () => {
+        markers.forEach(m => m.remove());
+      }
+    }, [map, origins]);
+
+    React.useEffect(() => {
+      const markers = destinations.map(d => {
+        return new mapboxgl.Marker({ color: "red" })
+                          .setLngLat(d)
+                          .addTo(map);
+      });
+
+      return () => {
+        markers.forEach(m => m.remove());
+      }
+    }, [map, destinations]);
+
     const sendRequest = React.useCallback(() => {
       if (!okToSend) return;
 
@@ -232,8 +263,11 @@ export const RerouterPlugin = {
       ).then(res => res.json())
         .then(json => {
           console.log("RES:", json);
-          const c = json.ok ? json.result.collection : EMPTY_COLLECTION;
-          setResultCollection(c);
+          if (json.ok) {
+            setResultCollection(json.result.collection);
+            setOrigins(json.result.origins)
+            setDestinations(json.result.destinations)
+          }
         })
         .finally(() => setLoading(false));
     }, [pgEnv, okToSend, conflationDataView, clickedInfo, method, distance]);
