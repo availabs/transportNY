@@ -194,7 +194,7 @@ export const RerouterPlugin = {
       return Boolean(conflationDataView && osm && lngLat);
     }, [conflationDataView, clickedInfo]);
 
-    const [method, setMethod] = React.useState(REROUTER_METHODS[0]);
+    const [method, setMethod] = React.useState(REROUTER_METHODS[1]);
     const doSetMethod = React.useCallback(e => {
       setMethod(e.target.value);
     }, []);
