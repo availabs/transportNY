@@ -7,7 +7,7 @@ import moment from "moment"
 import { groups as d3groups, /*extent as d3extent, */ range as d3range } from "d3-array"
 import { scaleQuantile, /*scaleQuantize,*/ scaleThreshold } from "d3-scale"
 
-import { useComponentDidMount } from "~/sites/tsmo/pages/Dashboards/components/utils"
+import { useComponentDidMount } from "~/sites/tsmo_new/pages/Dashboards/components/utils"
 
 import {
   useFalcor,
@@ -21,11 +21,26 @@ import GridComp from "./components/GridComponent"
 
 
 const DirectionMap = {
-  N: "North",
-  S: "South",
-  E: "East",
-  W: "West"
+  NORTHBOUND: "North",
+  SOUTHBOUND: "South",
+  EASTBOUND: "East",
+  WESTBOUND: "West"
 }
+
+function normalizeDirection(dir) {
+  if (!dir) return undefined;
+
+  const d = dir.toString().toUpperCase().trim();
+
+  if (d.endsWith("NORTHBOUND")) return DirectionMap.NORTHBOUND;
+  if (d.endsWith("SOUTHBOUND")) return DirectionMap.SOUTHBOUND;
+  if (d.endsWith("EASTBOUND")) return DirectionMap.EASTBOUND;
+  if (d.endsWith("WESTBOUND")) return DirectionMap.WESTBOUND;
+
+  return undefined;
+}
+
+
 const Year = new Date().getFullYear();
 const Years = d3range(Year, 2015, -1);
 const MonthMap = {
@@ -81,31 +96,31 @@ const MonthGrid = () => {
   const [selectedGeo, setSelectedGeo] = React.useState(geo);
 
   const [tmclinear, setTmcLinear] = React.useState(430);
-  const [direction, setDirection] = React.useState("E");
-  const tmclinearKey = `${ tmclinear }_${ direction }`;
+  const [direction, setDirection] = React.useState("EASTBOUND");
+  const tmclinearKey = `${tmclinear}_${direction}`;
 
   const navigate = useNavigate();
 
   const setUrlFromTmclinearKey = React.useCallback(tmclinearKey => {
     const [, geoid] = selectedGeo.split("|");
-    navigate(`/corridor/${ geoid }_${ tmclinearKey }/${ date }`);
+    navigate(`/corridor/${geoid}_${tmclinearKey}/${date}`);
   }, [navigate, date, selectedGeo]);
 
   const setUrlFromMonth = React.useCallback(month => {
     const [, geoid] = selectedGeo.split("|");
-    const date = `${ year }-${ `0${ month }`.slice(-2) }`;
-    navigate(`/corridor/${ geoid }_${ tmclinearKey }/${ date }`);
+    const date = `${year}-${`0${month}`.slice(-2)}`;
+    navigate(`/corridor/${geoid}_${tmclinearKey}/${date}`);
 
   }, [navigate, year, tmclinearKey, selectedGeo]);
   const setUrlFromYear = React.useCallback(year => {
     const [, geoid] = selectedGeo.split("|");
-    const date = `${ year }-${ `0${ month }`.slice(-2) }`;
-    navigate(`/corridor/${ geoid }_${ tmclinearKey }/${ date }`);
+    const date = `${year}-${`0${month}`.slice(-2)}`;
+    navigate(`/corridor/${geoid}_${tmclinearKey}/${date}`);
   }, [navigate, month, tmclinearKey, selectedGeo]);
 
   const setUrlFromDate = React.useCallback(date => {
     const [, geoid] = selectedGeo.split("|");
-    navigate(`/corridor/${ geoid }_${ tmclinearKey }/${ date }`);
+    navigate(`/corridor/${geoid}_${tmclinearKey}/${date}`);
   }, [navigate, tmclinearKey, selectedGeo])
 
   const [TMCs, setTMCs] = React.useState([]);
@@ -133,8 +148,8 @@ const MonthGrid = () => {
     }
     if (params.tmclinear) {
       const [geoid, tmclinear, direction] = params.tmclinear.split("_");
-      setGeo(`COUNTY|${ geoid }`);
-      setSelectedGeo(`COUNTY|${ geoid }`);
+      setGeo(`COUNTY|${geoid}`);
+      setSelectedGeo(`COUNTY|${geoid}`);
       setTmcLinear(tmclinear);
       setDirection(direction.toUpperCase());
     }
@@ -149,7 +164,7 @@ const MonthGrid = () => {
   const counties = React.useMemo(() => {
     return get(falcorCache, ["geo", "36", "geoLevels", "value"], [])
       .filter(({ geolevel }) => geolevel === "COUNTY")
-      .map(geo => ({ ...geo, geo: `${ geo.geolevel }|${ geo.geoid }` }))
+      .map(geo => ({ ...geo, geo: `${geo.geolevel}|${geo.geoid}` }))
       .sort((a, b) => a.geo.localeCompare(b.geo))
   }, [falcorCache]);
 
@@ -170,25 +185,30 @@ const MonthGrid = () => {
   }, [falcor, counties, year]);
 
   const tmclinearsByCounties = React.useMemo(() => {
-    return counties.reduce((a, c) => {
+    return counties.reduce((acc, c) => {
       const linears = get(falcorCache, ["geo", c.geo, year, "tmclinear", "value"], []);
-      a[c.geo] = linears.map(l => {
-        const roadName = l.roadname != null ? l.roadname : "Unamed Road";
-        return ({ ...l,
-          key: `${ l.tmclinear }_${ l.direction }`,
-          name: `${ roadName } ${ DirectionMap[l.direction] } (${ l.tmclinear })`
+
+      acc[c.geo] = linears
+        .filter(l => normalizeDirection(l.direction))
+        .map(l => {
+          const roadName = l.roadname != null ? l.roadname : "Unamed Road";
+          return {
+            ...l,
+            key: `${l.tmclinear}_${l.direction}`,
+            name: `${roadName} ${normalizeDirection(l.direction)} (${l.tmclinear})`
+          };
         })
-      }
-      ).sort((a, b) => a.name.localeCompare(b.name))
-      return a;
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      return acc;
     }, {});
   }, [falcorCache, counties, year]);
 
   React.useEffect(() => {
     falcor.get(
-        ["tmc", "tmclinear", year, geo, tmclinear, direction],
-        ["tmclinear", "meta", year, geo, tmclinear, direction, 'roadname']
-      )
+      ["tmc", "tmclinear", year, geo, tmclinear, direction],
+      ["tmclinear", "meta", year, geo, tmclinear, direction, 'roadname']
+    )
 
   }, [falcor, year, geo, tmclinear, direction, loadingStart, loadingStop]);
 
@@ -245,7 +265,7 @@ const MonthGrid = () => {
 
     if (dataType === "tt") {
       let avgSL = Math.round(
-        TMCs.reduce((a, c) =>  {
+        TMCs.reduce((a, c) => {
           return a + (get(widths, c, 1) * get(falcorCache, ["tmc", c, "meta", year, "avg_speedlimit"], 35))
         }, 0) / Object.values(widths).reduce((a, b) => a + b, 0)
       );
@@ -254,15 +274,15 @@ const MonthGrid = () => {
         .range(GridColors);
     }
 
-    setScale(() =>  scl);
+    setScale(() => scl);
 
     let grouped = [];
     if (dateType === "month") {
-      grouped = d3groups(data, d => `${ d.date }:${ `0${ d.resolution }`.slice(-2) }`);
+      grouped = d3groups(data, d => `${d.date}:${`0${d.resolution}`.slice(-2)}`);
     }
     else {
-      const epochs = new Set(d3range(0, 288).map(e => `00${ e }`.slice(-3)));
-      grouped = d3groups(data, d => `00${ d.resolution }`.slice(-3) );
+      const epochs = new Set(d3range(0, 288).map(e => `00${e}`.slice(-3)));
+      grouped = d3groups(data, d => `00${d.resolution}`.slice(-3));
       grouped.forEach(([index]) => {
         epochs.delete(index);
       })
@@ -296,20 +316,20 @@ const MonthGrid = () => {
       const nm = m === 12 ? 1 : m + 1;
 
       return [
-        `/corridor/${ geoid }_${ tmclinear }_${ direction }/${ py }-${ `0${ pm }`.slice(-2) }`,
-        `/corridor/${ geoid }_${ tmclinear }_${ direction }/${ ny }-${ `0${ nm }`.slice(-2) }`
+        `/corridor/${geoid}_${tmclinear}_${direction}/${py}-${`0${pm}`.slice(-2)}`,
+        `/corridor/${geoid}_${tmclinear}_${direction}/${ny}-${`0${nm}`.slice(-2)}`
       ]
     }
     const [y, m, d] = date.split("-").map(Number);
     const pDate = new Date(y, m - 1, d - 1);
-    const pd = `${ pDate.getFullYear() }-${ `0${ pDate.getMonth() + 1 }`.slice(-2) }-${ `0${ pDate.getDate() }`.slice(-2) }`;
+    const pd = `${pDate.getFullYear()}-${`0${pDate.getMonth() + 1}`.slice(-2)}-${`0${pDate.getDate()}`.slice(-2)}`;
 
     const nDate = new Date(y, m - 1, d + 1);
-    const nd = `${ nDate.getFullYear() }-${ `0${ nDate.getMonth() + 1 }`.slice(-2) }-${ `0${ nDate.getDate() }`.slice(-2) }`;
+    const nd = `${nDate.getFullYear()}-${`0${nDate.getMonth() + 1}`.slice(-2)}-${`0${nDate.getDate()}`.slice(-2)}`;
 
     return [
-      `/corridor/${ geoid }_${ tmclinear }_${ direction }/${ pd }`,
-      `/corridor/${ geoid }_${ tmclinear }_${ direction }/${ nd }`
+      `/corridor/${geoid}_${tmclinear}_${direction}/${pd}`,
+      `/corridor/${geoid}_${tmclinear}_${direction}/${nd}`
     ]
   }, [geoid, tmclinear, direction, date, dateType]);
 
@@ -323,18 +343,18 @@ const MonthGrid = () => {
 
   const reportURL = React.useMemo(() => {
     const origin = window.location.origin;
-    return `${ origin.replace("tsmo", "npmrds") }/template/edit/${ REPORT_ID }/tmcs/${ TMCs.join("_") }/dates/${ date }T00:00_${ date }T24:00`
+    return `${origin.replace("tsmo", "npmrds")}/template/edit/${REPORT_ID}/tmcs/${TMCs.join("_")}/dates/${date}T00:00_${date}T24:00`
   }, [TMCs, date]);
 
   const dateOptions = React.useMemo(() => {
     if (dateType === "month") return [];
 
     let [year, month] = date.split("-").map(Number);
-    const start = moment(`${ year }-${ month }-1`, "YYYY-MM-DD");
+    const start = moment(`${year}-${month}-1`, "YYYY-MM-DD");
     if (month === 12) {
       ++year;
     }
-    const end = moment(`${ year }-${ (month % 12) + 1 }-1`, "YYYY-MM-DD");
+    const end = moment(`${year}-${(month % 12) + 1}-1`, "YYYY-MM-DD");
     const options = [];
     while (start.isBefore(end)) {
       options.push(start.format("YYYY-MM-DD"));
@@ -344,9 +364,9 @@ const MonthGrid = () => {
   }, [dateType, date]);
 
   return (
-    <div style={ { width: "calc(100vw - 3.5rem)"}}>
-      <div className={ `
-          inset-0 ${ loading ? "fixed" : "hidden" }
+    <div style={{ width: "calc(100vw - 3.5rem)" }}>
+      <div className={`
+          inset-0 ${loading ? "fixed" : "hidden"}
           flex justify-center items-center z-50 bg-black opacity-50
         ` }
       >
@@ -356,53 +376,53 @@ const MonthGrid = () => {
         <div className="text-xl font-bold col-span-2">
         </div>
         <div className="text-xl font-bold">
-          <Select options={ DataTypes }
-            value={ dataType }
-            accessor={ d => d.name }
-            valueAccessor={ d => d.value }
-            onChange={ setDataType }/>
+          <Select options={DataTypes}
+            value={dataType}
+            accessor={d => d.name}
+            valueAccessor={d => d.value}
+            onChange={setDataType} />
         </div>
       </div>
 
       <div className="px-12 grid grid-cols-12 gap-1">
         <div className="text-xl font-bold col-span-8 grid grid-cols-10 gap-1">
           <div className="col-span-3">
-            <Select options={ counties }
-              onChange={ setSelectedGeo }
-              value={ selectedGeo }
-              valueAccessor={ d => d.geo }
-              accessor={ d => get(falcorCache, ["geo", d.geoid, "name"], geoid) }/>
+            <Select options={counties}
+              onChange={setSelectedGeo}
+              value={selectedGeo}
+              valueAccessor={d => d.geo}
+              accessor={d => get(falcorCache, ["geo", d.geoid, "name"], geoid)} />
           </div>
           <div className="col-span-3">
-            <Select options={ tmclinearsByCounties[selectedGeo] }
-              onChange={ setUrlFromTmclinearKey }
-              value={ tmclinearKey }
-              accessor={ d => d.name }
-              valueAccessor={ d => d.key }/>
+            <Select options={tmclinearsByCounties[selectedGeo]}
+              onChange={setUrlFromTmclinearKey}
+              value={tmclinearKey}
+              accessor={d => d.name}
+              valueAccessor={d => d.key} />
           </div>
           <div className="col-span-2">
-            <Select options={ Months }
-              onChange={ setUrlFromMonth }
-              value={ month }
-              valueAccessor={ m => m.value }
-              accessor={ m => m.name }/>
+            <Select options={Months}
+              onChange={setUrlFromMonth}
+              value={month}
+              valueAccessor={m => m.value}
+              accessor={m => m.name} />
           </div>
           <div className="col-span-2">
-            <Select options={ Years }
-              onChange={ setUrlFromYear }
-              value={ year }/>
+            <Select options={Years}
+              onChange={setUrlFromYear}
+              value={year} />
           </div>
         </div>
         <div className="col-span-4 flex items-center">
-          <Scale scale={ scale }/>
+          <Scale scale={scale} />
         </div>
       </div>
 
-      { dateType === "month" ? null :
+      {dateType === "month" ? null :
         <div className="my-2 flex justify-center font-bold text-lg">
-          <Link to={ reportURL } target="_blank">
+          <Link to={reportURL} target="_blank">
             <div className="bg-white rounded hover:bg-gray-200 px-4 py-2 w-72">
-              <span>Open in NPMRDS Reports</span><span className="fa fa-arrow-up-right-from-square ml-2"/>
+              <span>Open in NPMRDS Reports</span><span className="fa fa-arrow-up-right-from-square ml-2" />
             </div>
           </Link>
         </div>
@@ -410,28 +430,28 @@ const MonthGrid = () => {
 
       <div className="flex justify-center items-center mx-8 font-bold text-lg my-2">
         <div className="flex-0 w-40">
-          <Link to={ prev }><span className="fa fa-caret-left"/> Previous { dateType }</Link>
+          <Link to={prev}><span className="fa fa-caret-left" /> Previous {dateType}</Link>
         </div>
         <div className="flex-1 flex justify-center items-center">
-          { dateType === "month" ? null :
+          {dateType === "month" ? null :
             <div className="w-72">
-              <Select options={ dateOptions }
-                value={ date }
-                onChange={ setUrlFromDate }/>
+              <Select options={dateOptions}
+                value={date}
+                onChange={setUrlFromDate} />
             </div>
           }
         </div>
         <div className="flex-0 w-40 text-right">
-          <Link to={ next }>Next { dateType } <span className="fa fa-caret-right"/></Link>
+          <Link to={next}>Next {dateType} <span className="fa fa-caret-right" /></Link>
         </div>
       </div>
 
-      <GridComp date={ date }
-        TMCs={ TMCs }
-        tmcWidths={ tmcWidths }
-        data={ gridData }
-        scale={ scale }
-        onClick={ onClick }
+      <GridComp date={date}
+        TMCs={TMCs}
+        tmcWidths={tmcWidths}
+        data={gridData}
+        scale={scale}
+        onClick={onClick}
       />
     </div>
   )
@@ -443,18 +463,18 @@ const Scale = ({ scale }) => {
   return (
     <div className="w-full">
       <div className="flex flex-row">
-        { range.map(color => (
-            <div key={ color } className="h-4 flex-1"
-              style={ { background: color } }/>
-          ))
+        {range.map(color => (
+          <div key={color} className="h-4 flex-1"
+            style={{ background: color }} />
+        ))
         }
       </div>
       <div className="flex flex-row">
-        { range.map((color, i) => (
-            <div key={ color } className="flex-1 text-center text-sm">
-              { i < domain.length ? `< ${ domain[i] }` : `${ domain[i - 1] }+` }
-            </div>
-          ))
+        {range.map((color, i) => (
+          <div key={color} className="flex-1 text-center text-sm">
+            {i < domain.length ? `< ${domain[i]}` : `${domain[i - 1]}+`}
+          </div>
+        ))
         }
       </div>
     </div>
@@ -462,7 +482,8 @@ const Scale = ({ scale }) => {
 }
 
 const config = [
-  { name:'Month Grid',
+  {
+    name: 'Month Grid',
     path: "/corridor/:tmclinear/:date",
     showInBlocks: false,
     exact: true,
@@ -474,7 +495,8 @@ const config = [
     },
     component: MonthGrid
   },
-  { name:'Month Grid',
+  {
+    name: 'Month Grid',
     path: "/corridor",
     exact: true,
     auth: false,

@@ -18,9 +18,11 @@ import schedule from "./schedule";
 
 import osm_upload from "./osm"
 import osm_pgr_upload from "./osm_pgr"
+
 import { MacroviewPlugin } from "./plugins/macroview/macroview.plugin";
 import { PointselectorPlugin } from "./plugins/pointselector/pointselector.plugin";
-import { RoutingPlugin } from "./plugins/routing/routing.plugin";
+import { RerouterPlugin } from "./plugins/rerouter/rerouter.plugin";
+// import { RoutingPlugin } from "./plugins/routing/routing.plugin";
 
 
 const transportNYDataTypes = {
@@ -43,8 +45,8 @@ const transportNYDataTypes = {
 
 export const mapPlugins = {
   macroview: MacroviewPlugin,
-  //pointselector: PointselectorPlugin,
-  routing: RoutingPlugin
+  pointselector: PointselectorPlugin,
+  rerouter: RerouterPlugin
 };
 
 

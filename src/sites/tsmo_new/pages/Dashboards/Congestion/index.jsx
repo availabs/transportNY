@@ -15,17 +15,17 @@ import {
   useTheme
 } from "~/modules/avl-components/src"
 
-import { F_SYSTEM_MAP } from '~/sites/tsmo/pages/Dashboards/components/metaData'
+import { F_SYSTEM_MAP } from '~/sites/tsmo_new/pages/Dashboards/components/metaData'
 
-import DashboardLayout from '~/sites/tsmo/pages/Dashboards/components/DashboardLayout'
+import DashboardLayout from '~/sites/tsmo_new/pages/Dashboards/components/DashboardLayout'
 // import CongestionSegmentTable from './components/congestionSegmentTable'
 import CongestionCorridorTable from './components/congestionCorridorTable'
 import CongestionMap from './components/congestionMap'
 
 
-import { CongestionStatComp/*, displayDuration*/ } from "~/sites/tsmo/pages/Dashboards/Incidents/components/CompareComp"
+import { CongestionStatComp/*, displayDuration*/ } from "~/sites/tsmo_new/pages/Dashboards/Incidents/components/CompareComp"
 
-import {/*duration2minutes*/  vehicleDelay2cost } from '~/sites/tsmo/pages/Dashboards/Incidents/components/utils'
+import {/*duration2minutes*/  vehicleDelay2cost } from '~/sites/tsmo_new/pages/Dashboards/Incidents/components/utils'
 
 import { calcCost } from "./components/data_processing";
 
@@ -138,7 +138,6 @@ const RecurrentDelay = props => {
     const currDelayData = F_SYSTEM_MAP[fsystem].reduce((a, c) => {
       const d = get(falcorCache, ["delay2",
           EXCESSIVE_DELAY_VIEW_ID, ...dates.curr, region, c, "delay", "value"], []);
-          // console.log("dddddddd: ", d);
           
       return d.reduce((aa, { tmc, ...rest }) => {
         if (!aa[tmc]) {
@@ -166,9 +165,6 @@ const RecurrentDelay = props => {
     }, {});
 
     const currMonth = calculateCosts(currDelayData, currTmcMetaData);
-
-    console.log("currMonth: ", currMonth);
-    
 
     const pmDelayData = F_SYSTEM_MAP[fsystem].reduce((a, c) => {
       const d = get(falcorCache, ["delay2",
@@ -291,8 +287,6 @@ const RecurrentDelay = props => {
 
 
   const [hoveredTMCs, setHoveredTMCs] = React.useState([]);
-
-  console.log("fullDelayData: ", fullDelayData);
   
   return (
     <DashboardLayout

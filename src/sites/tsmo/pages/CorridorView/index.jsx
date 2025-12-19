@@ -172,7 +172,7 @@ const MonthGrid = () => {
   const tmclinearsByCounties = React.useMemo(() => {
     return counties.reduce((a, c) => {
       const linears = get(falcorCache, ["geo", c.geo, year, "tmclinear", "value"], []);
-      a[c.geo] = linears.map(l => {
+      a[c.geo] = (linears || []).map(l => {
         const roadName = l.roadname != null ? l.roadname : "Unamed Road";
         return ({ ...l,
           key: `${ l.tmclinear }_${ l.direction }`,
