@@ -492,6 +492,7 @@ export const PointselectorPlugin = {
             <div>&nbsp;</div>
           </> :
           <>
+
             <div className="border-b-2 border-current font-bold">
               OSM Data Source and View
             </div>

@@ -276,11 +276,19 @@ export default function NpmrdsManage({
   const groupbyState = useMemo(() => {
     return groupBy(
       orderBy(
-        dependentViews,
+        dependentViews.filter(v => v && v.metadata),
         ["metadata.start_date", "metadata.end_date"],
         ["asc", "asc"]
       ),
-      (v) => v?.metadata?.state_code
+      (v) => {
+        if (typeof v?.metadata?.state_code === "object") {
+          //updated format
+          return Object.keys(v?.metadata?.state_code).join(", ");
+        } else {
+          //legacy format
+          return v?.metadata?.state_code;
+        }
+      }
     );
   }, [dependentViews]);
 
@@ -409,7 +417,6 @@ export default function NpmrdsManage({
       setLoading(false);
     }
   };
-
   const rerunMetadata = async (rerunViewId) => {
     const publishData = {
       source_id: source?.source_id || null,
@@ -420,7 +427,6 @@ export default function NpmrdsManage({
       year: rerunViewId.start_date.substring(0,4),
       pgEnv,
     };
-
     const res = await fetch(
       `${DAMA_HOST}/dama-admin/${pgEnv}/npmrds/metadata`,
       {
