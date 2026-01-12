@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { Input } from "~/modules/avl-components/src";
+import moment from "moment";
 import {
   Listbox,
   ListboxOption,
@@ -72,13 +72,10 @@ const statesObj = {
 };
 const Create = (props) => {
   const { source } = props;
-  const [startDate, setStartDate] = useState();
-  const [endDate, setEndDate] = useState();
+  const targetWednesday = moment().day(3).subtract(14, 'days').endOf('day').toDate();
+  const [startDate, setStartDate] = useState(targetWednesday);
+  const [endDate, setEndDate] = useState(targetWednesday);
   const [loading, setLoading] = useState(false);
-  const [passUuid, setPassUuid] = useState('');
-  const [truckUuid, setTruckUuid] = useState('');
-  const [allUuid, setAllUuid] = useState('');
-  const [numTmc, setNumTmc] = useState()
   const [states, setStates] = useState([]);
 
   const { pgEnv, user } = React.useContext(DamaContext);
@@ -106,39 +103,22 @@ const Create = (props) => {
   }
 
 const doesPassNameLengthCheck = !!source?.source_id || source?.name.length <= MAX_NPMRDS_SOURCE_NAME_LENGTH;
-const areDatesValid = startDate && endDate && !(startDate > new Date()) && !(endDate > new Date()) && !(startDate >= endDate)
-const isButtonEnabled = !!source?.name?.length && doesPassNameLengthCheck && !!startDate && !!endDate && !!states.length && areDatesValid;
+const isButtonEnabled = !!source?.name?.length && doesPassNameLengthCheck && !!startDate && !!endDate && !!states.length;
 
 //Display error message in the following scenarios:
 //1. User is missing only 1 piece of data out of 4
 //2. Source name is too long
 const errorMsg = useMemo(() => {
-  if(!source?.name && !!states.length){
+  if(!source?.name && !!startDate && !!endDate && !!states.length){
     return 'Type in a source name';
-  } else if(!startDate || !endDate){
-    return 'Enter both a start date and an end date';
-  } else if(startDate > new Date() || endDate > new Date()){
-    return 'Cannot have dates in the future';
-  } else if (startDate >= endDate){
-    return 'Start date must be earlier than end date';
   } else if (!doesPassNameLengthCheck) {
     return `The source name is too long. Please enter a name with ${MAX_NPMRDS_SOURCE_NAME_LENGTH + " "} characters or less`
   } else if (!!source?.name && doesPassNameLengthCheck && !!startDate && !!endDate && !states.length) {
     return `Select a state`;
-  } else if (!truckUuid || !passUuid || !allUuid) {
-    return 'Enter UUIDs for all data types'
-  } else if(truckUuid.length !== 36) {
-    return 'Invalid truck UUID'
-  } else if(passUuid.length !== 36) {
-    return 'Invalid passenger UUID'
-  } else if(allUuid.length !== 36) {
-    return 'Invalid all vehicles UUID'
-  } else if (!numTmc) {
-    return 'Enter number of TMC in dataset'
   } else {
     return ''
   }
-}, [source, startDate, endDate, states, truckUuid, passUuid, allUuid, numTmc])
+}, [source, startDate, endDate, states])
   return (
     <div className="w-full p-5 m-5">
       <div className="flex flex-row mt-4">
@@ -176,74 +156,8 @@ const errorMsg = useMemo(() => {
                   selected={endDate}
                   onChange={(date) => setEndDate(date)}
                   minDate={startDate}
+                  maxDate={targetWednesday}
                   isClearable
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="flex flex-row mt-4">
-        <div className="basis-1/2">
-          <div className="flex items-center justify-left mt-4">
-            <div className="w-full max-w-xs mx-auto">
-              <div className="block text-sm leading-5 font-medium text-gray-700">
-                Truck UUID
-              </div>
-              <div className="relative">
-                <Input
-                  placeholder={'Enter UUID for Truck Data'}
-                  value={truckUuid}
-                  onChange={e => setTruckUuid(e)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="basis-1/2">
-          <div className="flex items-center justify-left mt-4">
-            <div className="w-full max-w-xs mx-auto">
-              <div className="block text-sm leading-5 font-medium text-gray-700">
-                Passenger UUID
-              </div>
-              <div className="relative">
-                <Input
-                  placeholder={'Enter UUID for Passenger Data'}
-                  value={passUuid}
-                  onChange={e => setPassUuid(e)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="basis-1/2">
-          <div className="flex items-center justify-left mt-4">
-            <div className="w-full max-w-xs mx-auto">
-              <div className="block text-sm leading-5 font-medium text-gray-700">
-                All Vehicles UUID
-              </div>
-              <div className="relative">
-                <Input
-                  placeholder={'Enter UUID for All Vehicle Data'}
-                  value={allUuid}
-                  onChange={e => setAllUuid(e)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="basis-1/2">
-          <div className="flex items-center justify-left mt-4">
-            <div className="w-full max-w-xs mx-auto">
-              <div className="block text-sm leading-5 font-medium text-gray-700">
-                Number of TMC
-              </div>
-              <div className="relative">
-                <Input
-                  placeholder={'Enter number of TMC in dataset'}
-                  value={numTmc}
-                  onChange={e => setNumTmc(e)}
-                  type="number"
                 />
               </div>
             </div>
@@ -394,17 +308,13 @@ const errorMsg = useMemo(() => {
         setLoading={setLoading}
         source_id={source?.source_id || null}
         name={source?.name}
-        email={user?.email}
         type={source?.type}
         startDate={startDate}
         endDate={endDate}
         states={states}
         user_id={user?.id}
         pgEnv={pgEnv}
-        passUuid={passUuid}
-        truckUuid={truckUuid}
-        allUuid={allUuid}
-        numTmc={numTmc}
+        email={user?.email}
       />
     </div>
   );
