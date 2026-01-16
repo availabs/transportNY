@@ -213,16 +213,12 @@ export const RerouterPlugin = {
     const [origins, setOrigins] = React.useState([]);
     const [destinations, setDestinations] = React.useState([]);
 
-console.log("ORIGINS:", origins);
-
     React.useEffect(() => {
       const markers = origins.map(o => {
         return new mapboxgl.Marker({ color: "green" })
                           .setLngLat(o)
                           .addTo(map);
       });
-
-console.log("ORIGIN MARKERS:", markers.length);
 
       return () => {
         markers.forEach(m => m.remove());

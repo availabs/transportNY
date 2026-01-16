@@ -160,11 +160,11 @@ const RouteSaveModal = ({ isOpen, close, loadedRoute, folderId, ...props }) => {
   const [folders, setFolders] = React.useState([]);
 
   React.useEffect(() => {
-    falcor.get(["folders2", "for", "user"]);
+    falcor.get(["folders2", "user", "tree"]);
   }, [falcor]);
 
   React.useEffect(() => {
-    const folders = get(falcorCache, ["folders2", "for", "user", "value"], []);
+    const folders = get(falcorCache, ["folders2", "user", "tree", "value"], []);
     if (Array.isArray(folders)) {
       setFolders(folders);
     }
