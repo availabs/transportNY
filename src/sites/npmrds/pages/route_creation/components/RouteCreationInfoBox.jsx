@@ -112,7 +112,7 @@ const InfoBox = props => {
   const searchForTmc = React.useCallback(e => {
     if (!tmcSearch) return;
     falcor.get(["tmc", tmcSearch, "meta", year, "bounding_box"])
-      .then(res => console.log("TMC BBOX RES:", res));
+      // .then(res => console.log("TMC BBOX RES:", res));
     setTmcBoundingBox("searching");
   }, [falcor, tmcSearch, year]);
   React.useEffect(() => {
