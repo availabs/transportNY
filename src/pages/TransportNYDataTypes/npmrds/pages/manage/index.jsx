@@ -276,11 +276,19 @@ export default function NpmrdsManage({
   const groupbyState = useMemo(() => {
     return groupBy(
       orderBy(
-        dependentViews,
+        dependentViews.filter(v => v && v.metadata),
         ["metadata.start_date", "metadata.end_date"],
         ["asc", "asc"]
       ),
-      (v) => v?.metadata?.state_code
+      (v) => {
+        if (typeof v?.metadata?.state_code === "object") {
+          //updated format
+          return Object.keys(v?.metadata?.state_code).join(", ");
+        } else {
+          //legacy format
+          return v?.metadata?.state_code;
+        }
+      }
     );
   }, [dependentViews]);
 
@@ -409,7 +417,6 @@ export default function NpmrdsManage({
       setLoading(false);
     }
   };
-
   const rerunMetadata = async (rerunViewId) => {
     const publishData = {
       source_id: source?.source_id || null,
@@ -420,7 +427,6 @@ export default function NpmrdsManage({
       year: rerunViewId.start_date.substring(0,4),
       pgEnv,
     };
-
     const res = await fetch(
       `${DAMA_HOST}/dama-admin/${pgEnv}/npmrds/metadata`,
       {
@@ -792,7 +798,7 @@ export default function NpmrdsManage({
                           className="py-2 px-4 border-b"
                         >
                           <button
-                            className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-blue-500 text-white shadow-md shadow-blue-900/10 hover:shadow-lg hover:shadow-blue-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+                            className="relative cursor-pointer align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-blue-500 text-white shadow-md shadow-blue-900/10 hover:shadow-lg hover:shadow-blue-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                             type="button"
                             disabled={polling}
                             onClick={() => {

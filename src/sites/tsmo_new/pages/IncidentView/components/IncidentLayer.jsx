@@ -40,13 +40,13 @@ class ConflationLayer extends LayerContainer {
       return Promise.resolve();
     }
     return falcor.get([
-      "transcom3", TMC_META_VIEW_ID, "tmc", tmcs, "meta", year, ["aadt", "wkb_geometry", "altrtename", "bounding_box", "length", "road", "direction","tmclinear","road_order","county_code", "intersection"]
+      "transcom3", TMC_META_VIEW_ID, "tmc", tmcs, "meta", year, ["aadt", "wkb_geometry", "altrtename", "bounding_box", "length", "road", "direction", "tmclinear", "road_order", "county_code", "intersection"]
     ]);
 
   }
   render(mapboxMap, falcor) {
     // if (this.zoomToBounds || (this.props.tmcs !== this.props.prevTmcs)) {
-       this.doZoom(mapboxMap);
+    this.doZoom(mapboxMap);
     // }
     //map
     const falcorCache = falcor.getCache();
@@ -69,33 +69,21 @@ class ConflationLayer extends LayerContainer {
         return a;
       }, {});
 
-    let corridors = getCorridors(tmcMetaData,year,tmcs,tmcData)
+    let corridors = getCorridors(tmcMetaData, year, tmcs, tmcData);
 
-    // console.log("tmcMetaData: ", tmcMetaData);
-    // console.log("year: ", year);
-    // console.log("tmcs: ", tmcs);
-    // console.log("tmcData: ", tmcData);
-    
-    
     let corridorTmcs = Object.values(
       get(corridors
-        .filter(c => c.corridor === activeBranch),'[0].tmcs',{})
-      )
-      console.log("corridorTmcs: ", corridorTmcs);
-      
-    
+        .filter(c => c.corridor === activeBranch), '[0].tmcs', {})
+    );
+
     const id2Caseid = (a) => [a.slice(0, 3), 'case', a.slice(3)].join('');
 
     const string = `^con-${year}(?:-\\w+)+?`,
       regex = new RegExp(string);
 
     ConflationLayers.forEach(({ id }) => {
-      console.log("id: ", id);
-      
       if (regex.test(id)) {
 
-        console.log("regex.test(id) ", regex.test(id));
-        
         mapboxMap.setLayoutProperty(id, "visibility", "visible");
         mapboxMap.setFilter(id,
           ["all",
@@ -195,7 +183,7 @@ class ConflationLayer extends LayerContainer {
   ];
   onHover = {
     layers: ConflationLayers.map((l) => l.id),
-    callback: function(layerId, features) {
+    callback: function (layerId, features) {
       const year = this.props.year;
       const tmcs = new Set();
       const fCache = this.falcor.getCache();
@@ -230,7 +218,7 @@ class ConflationLayer extends LayerContainer {
               "V. Delay",
               `${DelayFormat(d)} ${d === "No Data" ? "" : "(hh:mm:ss)"}`,
             ],
-            ['layer',layerId]
+            ['layer', layerId]
           );
         }
         return a;
@@ -284,7 +272,7 @@ class PointLayer extends LayerContainer {
   onHover = {
     layers: ["point-layer"],
     sortOrder: 0,
-    callback: function(layerId, features) {
+    callback: function (layerId, features) {
       return features.reduce((a, c) => {
         const eData = get(c, "properties", null);
         if (eData) {
