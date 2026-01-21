@@ -12,7 +12,16 @@ const BatchReportsTitle = () => {
   )
 }
 
-const Sidebar = ({ children, ...props }) => {
+const Sidebar = ({ children, setReferenceValue, useBaseAsReference, ...props }) => {
+
+  const baseColumnName = props.columns[0]?.name;
+
+  const doSet = React.useCallback(e => {
+    setReferenceValue(Boolean(e.target.checked));
+  }, [setReferenceValue]);
+
+console.log("useBaseAsReference", useBaseAsReference)
+
   return (
     <Collapsable>
       <div className="flex h-full flex-col">
@@ -25,6 +34,27 @@ const Sidebar = ({ children, ...props }) => {
             <RouteSelector { ...props }/>
 
             <TimeSelector { ...props }/>
+
+            { !baseColumnName ? null :
+              <div className="grid grid-cols-12">
+                <div className={ `
+                    col-span-12 border-b-2 font-bold border-current
+                  ` }
+                >
+                  Percent Change Calculation
+                </div>
+                  <div className="col-span-10">
+                    Use column "{ baseColumnName }" as reference 
+                    values for percent change calculations
+                  </div>
+                  <div className="col-span-2 flex items-center justify-center">
+                    <input type="checkbox"
+                      className="flex-1 h-6 cursor-pointer"
+                      checked={ useBaseAsReference }
+                      onChange={ doSet }/>
+                  </div>
+              </div>
+            }
 
             <ColumnAdder { ...props }/>
           </div>

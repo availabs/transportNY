@@ -304,7 +304,8 @@ export default function NpmrdsManage({
         >
           {`${
             availableView?.metadata?.name ||
-            availableView?.metadata?.dama_source_name
+            availableView?.metadata?.dama_source_name ||
+            `s${availableView?.source_id} v${availableView?.view_id}`
           } From ${availableView?.metadata?.start_date} to ${
             availableView?.metadata?.end_date
           }`}
@@ -713,13 +714,13 @@ export default function NpmrdsManage({
                           {item?.metadata?.npmrds_version}
                         </td>
                         <td
-                          key={`${group}.${item?.metadata?.start_date}`}
+                          key={`start_date_${group}.${item?.metadata?.start_date}`}
                           className="py-2 px-4 border-b"
                         >
                           {item?.metadata?.start_date}
                         </td>
                         <td
-                          key={`${group}.${item?.metadata?.end_date}`}
+                          key={`end_date_${group}.${item?.metadata?.end_date}`}
                           className="py-2 px-4 border-b"
                         >
                           {item?.metadata?.end_date}

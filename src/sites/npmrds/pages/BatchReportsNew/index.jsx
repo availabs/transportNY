@@ -52,6 +52,7 @@ const InitialState = {
   timeSource: TimeSourceOptions[0],
   startTime: "06:00:00",
   endTime: "21:00:00",
+  useBaseAsReference: true,
   routeData: []
 }
 const Reducer = (state, action) => {
@@ -126,6 +127,11 @@ const Reducer = (state, action) => {
         routeData: []
       }
     }
+    case "set-reference-value":
+      return {
+        ...state,
+        useBaseAsReference: payload.useBaseAsReference
+      }
     default:
       return state;
   }
@@ -258,7 +264,8 @@ const BatchReports = props => {
     startTime,
     endTime,
     columns,
-    routeData
+    routeData,
+    useBaseAsReference
   } = state;
 
   const setTimeSource = React.useCallback(ts => {
@@ -353,6 +360,13 @@ const BatchReports = props => {
       type: "set-route-data",
       routeData
     })
+  }, []);
+
+  const setReferenceValue = React.useCallback(bool => {
+    dispatch({
+      type: "set-reference-value",
+      useBaseAsReference: bool
+    });
   }, []);
 
   const routes = React.useMemo(() => {
@@ -456,7 +470,7 @@ const BatchReports = props => {
       return promise.then(() => {
         return fetch(`${ API_HOST }/batchreports/npmrds2/982`, {
           method: "POST",
-          body: JSON.stringify({ id, routes, columns })
+          body: JSON.stringify({ id, routes, columns, useBaseAsReference })
         }).then(res => res.json())
           .then(({ id, data }) => {
             if (id in result) {
@@ -478,7 +492,8 @@ const BatchReports = props => {
     //   .then(json => {
     //     setRouteData(json.data);
     //   }).then(() => { stopLoading(); })
-  }, [routes, columns, okToSend, setRouteData, startLoading, stopLoading]);
+  }, [routes, columns, okToSend, setRouteData, useBaseAsReference,
+      startLoading, stopLoading]);
 
   const okToSaveAsCsv = React.useMemo(() => {
     if (!okToSend) return false;
@@ -604,6 +619,8 @@ const BatchReports = props => {
         addColumn={ addColumn }
         editColumn={ editColumn }
         deleteColumn={ deleteColumn }
+        setReferenceValue={ setReferenceValue }
+        useBaseAsReference={ useBaseAsReference }
       >
         <div className="p-4 grid grid-cols-2 gap-2">
 

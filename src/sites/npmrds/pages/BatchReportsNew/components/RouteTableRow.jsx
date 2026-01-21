@@ -55,8 +55,8 @@ const RouteTd = props => {
     <td ref={ setRef }
       style={ { minWidth: minWidth ? `${ minWidth }rem` : null } }
       className={ `
-        pl-1 last:pr-1 py-1 ml-1 last:mr-1 relative bg-gray-600
-        ${ isShaded ? "bg-opacity-25" : "bg-opacity-0" }
+        pl-1 last:pr-1 py-1 ml-1 last:mr-1 relative
+        ${ isShaded ? "bg-gray-600/25" : "bg-gray-600/0" }
         ${ Children.length === 1 ? "cursor-pointer" : "" }
          whitespace-nowrap ${ isData ? "text-center" : "" }
       ` }

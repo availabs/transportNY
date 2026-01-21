@@ -36,7 +36,7 @@ const ChevronsLeft = () => {
   )
 }
 
-const RadioOptions = [
+const DateRadioOptions = [
   { label: "Relative Dates",
     value: "relative"
   },
@@ -60,6 +60,18 @@ const DataSources = [
   }
 ]
 
+const DelayOverrides = [
+  { label: "AADT",
+    KEY: "aadt"
+  },
+  { label: "Threshold Speed",
+    KEY: "threshold"
+  },
+  { label: "Speed Limit",
+    KEY: "speed"
+  }
+]
+
 const displayAccessor = o => o.label;
 const valueAccessor = o => o.value;
 const headerAccessor = c => c.header;
@@ -79,6 +91,11 @@ const getInitialState = (columns = []) => {
     dataSource: "travel_time_all_vehicles",
     uuid: uuidv4(),
     isBase: num === 0,
+    overrides: {
+      aadt: null,
+      threshold: null,
+      speed: null
+    },
     editing: false
   }
 }
@@ -106,6 +123,14 @@ const Reducer = (state, action) => {
       return { ...state, dataSource: payload.source }
     case "set-relative-date":
       return { ...state, ...payload };
+    case "set-override":
+      return {
+        ...state,
+        overrides: {
+          ...state.overrides,
+          ...payload.override
+        }
+      }
     case "reset-state":
       return getInitialState(payload.columns);
     default:
@@ -182,7 +207,13 @@ const ColumnAdder = props => {
     dispatch({
       type: "set-data-source",
       source
-    })
+    });
+  }, []);
+  const setOverride = React.useCallback((variable, value) => {
+    dispatch({
+      type: "set-override",
+      override: { [variable]: value }
+    });
   }, []);
   const resetState = React.useCallback(columns => {
     dispatch({ type: "reset-state", columns });
@@ -223,7 +254,8 @@ const ColumnAdder = props => {
       dataColumns,
       dataSource,
       uuid,
-      isBase
+      isBase,
+      overrides
     } = state;
     const column = {
       name,
@@ -235,7 +267,8 @@ const ColumnAdder = props => {
       dataColumns,
       dataSource,
       uuid,
-      isBase
+      isBase,
+      overrides
     };
     addColumn(column);
   }, [addColumn, state, resetState, props.columns]);
@@ -261,6 +294,7 @@ const ColumnAdder = props => {
     dataColumns,
     dataSource,
     uuid,
+    overrides,
     editing
   } = state;
 
@@ -270,12 +304,34 @@ const ColumnAdder = props => {
       setDataColumns(prev.dataColumns.map(dc => ({ ...dc })));
     }
   }, [columns, setDataColumns]);
-
   const dataColumnOptions = React.useMemo(() => {
     const isBase = (columns.length === 0) || (editing && (uuid === columns[0].uuid));
+    const colKeysSet = (columns[0]?.dataColumns || []).reduce((a, c) => {
+      a.add(c.key);
+      return a;
+    }, new Set());
+    console.log("colKeysSet", colKeysSet)
     const regex = /^.+[-]pc$/
-    return DATA_COLUMNS.filter(col => !isBase || (isBase && !regex.test(col.key)))
+    return DATA_COLUMNS
+              .filter(col => (!isBase && colKeysSet.has(col.base)) || (isBase && !regex.test(col.key)))
   }, [columns.length, editing, uuid]);
+
+  const hasDelay = React.useMemo(() => {
+    return dataColumns.reduce((a, c) => {
+      return a || (c.key === "delay");
+    }, false);
+  }, [dataColumns]);
+
+  React.useEffect(() => {
+    if (!hasDelay) {
+      dispatch({
+        type: "set-override",
+        override: { aadt: null, threshold: null, speed: null }
+      });
+    }
+  }, [hasDelay]);
+
+console.log("dataColumns:", dataColumns, hasDelay, overrides)
 
   return (
     <div ref={ setRef } className="grid grid-cols-1 gap-1"
@@ -359,7 +415,7 @@ const ColumnAdder = props => {
               <div className="col-span-2 col-start-2">
                 <RadioSelector
                   options={
-                    state.isBase ? RadioOptions.slice(1) : RadioOptions
+                    state.isBase ? DateRadioOptions.slice(1) : DateRadioOptions
                   }
                   value={ dateSelection }
                   onChange={ setDateSelection }
@@ -380,7 +436,7 @@ const ColumnAdder = props => {
                 dateSelection={ dateSelection }/>
             }
 
-            <div className="border-b-2">Data Source</div>
+            <div className="border-b-2 font-bold">Data Source</div>
             <MultiLevelSelect removable={ false }
               onChange={ setDataSource }
               options={ DataSources }
@@ -389,7 +445,7 @@ const ColumnAdder = props => {
               value={ dataSource }
               placeholder="Select a data source..."/>
 
-            <div className="border-b-2">Data Selection</div>
+            <div className="border-b-2 font-bold">Data Selection</div>
             <MultiLevelSelect isMulti
               onChange={ setDataColumns }
               options={ dataColumnOptions }
@@ -397,6 +453,12 @@ const ColumnAdder = props => {
               value={ dataColumns }
               valueComparator={ valueComparator }
               placeholder="Add a data column..."/>
+
+            { !hasDelay ? null :
+              <OverridesSelector
+                overrides={ overrides }
+                setOverride={ setOverride }/>
+            }
 
           </div>
           <div className="flex-1 flex flex-col justify-end">
@@ -447,6 +509,62 @@ const DateSelector = ({ startDate, setStartDate, endDate, setEndDate, dateSelect
             disabled={ !startDate }/>
         </div>
       </div>
+    </div>
+  )
+}
+
+const OverridesSelector = props => {
+
+  const {
+    overrides,
+    setOverride,
+    clearOverride
+  } = props;
+
+  return (
+    <div>
+      <div className="border-b-2 font-bold">Hours of Delay Overrides</div>
+      <div>
+        { DelayOverrides.map(o => (
+            <Override key={ o.KEY } { ...o }
+              value={ overrides[o.KEY] || "" }
+              set={ setOverride }/>
+          ))
+        }
+      </div>
+    </div>
+  )
+}
+
+const Override = ({ label, KEY, value, set }) => {
+
+  const doSet = React.useCallback(e => {
+    set(KEY, +e.target.value);
+  }, [KEY, set]);
+
+  const clear = React.useCallback(e => {
+    set(KEY, null);
+  }, [KEY, set]);
+
+  return (
+    <div className="my-1 flex grid grid-cols-12">
+      <div className="col-span-6 text-right font-bold">
+        { label }:
+      </div>
+      <div className="col-span-5">
+        <input type="number"
+          className="block w-full text-right"
+          value={ value }
+          onChange={ doSet }/>
+      </div>
+      <button className="col-span-1 text-center"
+        onClick={ clear }
+      >
+        <span className={ `
+            fas fa-remove px-2 py-1 cursor-pointer
+            hover:bg-gray-300 rounded
+          ` }/>
+      </button>
     </div>
   )
 }
