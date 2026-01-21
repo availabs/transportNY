@@ -3,7 +3,15 @@ import { useNavigate } from "react-router";
 
 import { ScalableLoading } from "~/modules/avl-components/src";
 import { DAMA_HOST } from "~/config";
+const changeDate = (date) => {
+  // Get the date in YYYY-MM-DD format based on local time
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const dateString = `${year}-${month}-${day}`; // "2017-09-10"
 
+  return dateString;
+};
 const submitUpload = (props, navigate, pgEnv) => {
   props.setLoading(true);
   const runPublishNpmrdsRaw = async () => {
@@ -12,14 +20,13 @@ const submitUpload = (props, navigate, pgEnv) => {
         source_id: props?.source_id || null,
         name: props?.name,
         type: props?.type,
-        startDate: props?.startDate,
-        endDate: props?.endDate,
+        startDate: changeDate(props?.startDate),
+        endDate: changeDate(props?.endDate),
         states: props?.states,
         user_id: props?.user_id,
         pgEnv: pgEnv || props?.pgEnv,
         email: props?.email,
       };
-
       const res = await fetch(
         `${DAMA_HOST}/dama-admin/${pgEnv}/npmrds-raw/publish`,
         {
@@ -32,8 +39,6 @@ const submitUpload = (props, navigate, pgEnv) => {
       );
       const publishFinalEvent = await res.json();
       const { etl_context_id, source_id } = publishFinalEvent;
-
-      console.log(etl_context_id, source_id);
       props.setLoading(false);
       if (source_id && etl_context_id) {
         navigate(`/datasources/source/${source_id}/uploads/${etl_context_id}`);
