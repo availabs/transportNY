@@ -126,6 +126,11 @@ const Create = ({ source }) => {
             ));
     }, [falcorCache, selectedSource, pgEnv]);
 
+
+    //TODO CANNOT FIGURE OUT THIS BUG
+    //But, when npmrds_Raw is selected, after source is chosen, it auto-resets the source
+    //it always only happens once...
+    //Maybe because when I select source, the views change. But, that should only change the view??
     useEffect(() => {
         if (typeSources && typeSources.length) {
             setSelectSource(typeSources[0]);
@@ -171,6 +176,13 @@ const Create = ({ source }) => {
       return inputs;
     }, [type, typeSources, typeViews]);
 
+    //NPMRDS always gets pulled at 5pm on Wedensday
+    useEffect(() => {
+        if(type === NPMRDS_RAW_TYPE) {
+            setCron("0 17 * * 3");
+        }
+    }, [type])
+
 
     return (
         <div className="w-full p-5 m-5">
@@ -187,35 +199,36 @@ const Create = ({ source }) => {
                 }]}
             />
             {type && <InputRow inputs={typeInputs} /> }
-            <div className="flex flex-row mt-4 mb-6">
-                <div className="basis-1/6" />
-                <div className="basis-1/2" >
-                    <div className="flex items-center justify-left mt-4">
-                        <div className="w-full max-w-xs mx-auto">
-                            <div className="block text-sm leading-5 font-medium text-gray-700">
-                                Select Cron:
-                            </div>
-                            <div className="relative w-m max-w-sm">
-                                <Cron cron={cron} onCronChange={setCron} />
-                            </div>
-                        </div>
-                    </div></div>
-                <div className="basis-1/3" />
-            </div>
-
+            {(type && type !== NPMRDS_RAW_TYPE) && <InputRow 
+                inputs={[{
+                    label:"Select Cron:",
+                    control: <Cron cron={cron} onCronChange={setCron} />}]}
+            />}
+            {type === NPMRDS_RAW_TYPE && <div className="flex flex-col items-center justify-center w-full">
+                <div>
+                    Raw NPMRDS data will be downloaded <b>every Wednesday at 5pm Eastern</b>
+                </div>
+                <div>
+                    One week's data will be requested, starting 16 days before the date that the job runs
+                </div>
+                <div className='text-sm'>
+                    Example: The scheduled job runs on Jan 21st 2026, at 7pm. It requests data for January 5th 2026 thru January 11th 2026. 
+                </div>
+            </div>}
             {selectedSource && type && cron ? (
-                <>
+                <div className="flex w-full mt-1 items-center justify-center">
                     <Publish
                         type={type}
                         pgEnv={pgEnv}
                         loading={loading}
                         user_id={user?.id}
+                        email={user?.email}
                         setLoading={setLoading}
                         view_id={selectedView?.view_id || null}
                         source_id={selectedSource?.source_id || null}
                         cron={cron}
                     />
-                </>
+                </div>
             ) : null}
         </div>
     );
