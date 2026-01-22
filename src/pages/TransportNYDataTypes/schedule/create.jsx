@@ -67,8 +67,9 @@ export const Select = ({ selectedOption, options, setSelecteOptions, visibleFiel
         </div>
     );
 };
-
-var types = ['npmrds_raw', 'transcom'];
+const NPMRDS_RAW_TYPE = 'npmrds_raw';
+const TRANSCOM_TYPE = 'transcom';
+const types = [NPMRDS_RAW_TYPE, TRANSCOM_TYPE];
 const Create = ({ source }) => {
     const [loading, setLoading] = useState(false);
     const { pgEnv, falcor, falcorCache, user } = useContext(DamaContext);
@@ -137,71 +138,55 @@ const Create = ({ source }) => {
         }
     }, [type, typeViews]);
 
+    const typeInputs = useMemo(() => {
+      const inputs = [
+        {
+          label: "Source:",
+          control: (
+            <Select
+              selectedOption={selectedSource}
+              options={typeSources || []}
+              setSelecteOptions={setSelectSource}
+              visibleField={"name"}
+              defaultText={`Select ${type} source.`}
+            />
+          ),
+        },
+      ];
+
+      if (type === TRANSCOM_TYPE) {
+        inputs.push({
+          label: "View:",
+          control: (
+            <Select
+              selectedOption={selectedView}
+              options={typeViews || []}
+              setSelecteOptions={setSelectView}
+              visibleField={"view_id"}
+              defaultText={`Select ${type} view.`}
+            />
+          ),
+        });
+      }
+      return inputs;
+    }, [type, typeSources, typeViews]);
+
+
     return (
         <div className="w-full p-5 m-5">
-            <div className="flex flex-row mt-4 mb-6">
-                <div className="basis-1/4" />
-                <div className="basis-1/2">
-                    <div className="flex items-center justify-left mt-4">
-                        <div className="w-full max-w-xs mx-auto">
-                            <div className="block text-sm leading-5 font-medium text-gray-700">
-                                Source Type:
-                            </div>
-                            <div className="relative w-full max-w-sm">
-                                <Select
-                                    selectedOption={type}
-                                    options={types || []}
-                                    setSelecteOptions={setType}
-                                    visibleField={null}
-                                    defaultText={"Select dama type..."}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="basis-1/4" />
-            </div>
-
-            {type ? <div className="flex flex-row mt-4 mb-6">
-                <div className={(['transcom'].indexOf(type) >= 0) ? "basis-1/6" : "basis-1/2"} />
-                <div className="basis-1/3" >
-                    <div className="flex items-center justify-left mt-4">
-                        <div className="w-full max-w-xs mx-auto">
-                            <div className="block text-sm leading-5 font-medium text-gray-700">
-                                Source:
-                            </div>
-                            <div className="relative w-full max-w-sm">
-                                <Select
-                                    selectedOption={selectedSource}
-                                    options={typeSources || []}
-                                    setSelecteOptions={setSelectSource}
-                                    visibleField={"name"}
-                                    defaultText={`Select ${type} source.`}
-                                />
-                            </div>
-                        </div>
-                    </div></div>
-                <div className="basis-1/3">
-                    {(['transcom'].indexOf(type) >= 0) ? <div className="flex items-center justify-left mt-4">
-                        <div className="w-full max-w-xs mx-auto">
-                            <div className="block text-sm leading-5 font-medium text-gray-700">
-                                View:
-                            </div>
-                            <div className="relative w-full max-w-sm">
-                                <Select
-                                    selectedOption={selectedView}
-                                    options={typeViews || []}
-                                    setSelecteOptions={setSelectView}
-                                    visibleField={"view_id"}
-                                    defaultText={`Select ${type} view.`}
-                                />
-                            </div>
-                        </div>
-                    </div> : null}
-                </div>
-                <div className="basis-1/6" />
-            </div> : null}
-
+            <InputRow 
+                inputs={[{
+                    label:"SourceType:",
+                    control: <Select
+                        selectedOption={type}
+                        options={types || []}
+                        setSelecteOptions={setType}
+                        visibleField={null}
+                        defaultText={"Select dama type..."}
+                    />
+                }]}
+            />
+            {type && <InputRow inputs={typeInputs} /> }
             <div className="flex flex-row mt-4 mb-6">
                 <div className="basis-1/6" />
                 <div className="basis-1/2" >
@@ -235,5 +220,33 @@ const Create = ({ source }) => {
         </div>
     );
 };
+
+const InputRow = ({ inputs }) => {
+  return (
+    <div className="flex flex-row mt-4 mb-6">
+      <div className="basis-1/4" />
+      {inputs.map((input) => {
+        return <InputContainer label={input.label} input={input.control} />;
+      })}
+      <div className="basis-1/4" />
+    </div>
+  );
+};
+
+const InputContainer = ({label, input}) => {
+  return (
+    <div className="basis-1/2">
+      <div className="flex items-center justify-left mt-4">
+        <div className="w-full max-w-xs mx-auto">
+          <div className="block text-sm leading-5 font-medium text-gray-700">
+            {label}
+          </div>
+          <div className="relative w-full max-w-sm">{input}</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 export default Create;

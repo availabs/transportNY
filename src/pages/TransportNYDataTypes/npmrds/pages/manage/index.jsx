@@ -513,6 +513,14 @@ export default function NpmrdsManage({
     [falcorCache, pgEnv]
   );
 
+  /**
+   * KINDA TODO BUG:
+   * 
+   * Metadata worker is called from add worker
+   * add worker returns done. It is the only one that is in the `ctxsWithEvent` resp
+   * IDK why the child event is not also in the list.
+   * But that means, after data is added, metadata button will be enabled even though its already running!! 
+   */
   const openMetadataCtxs = useMemo(() => {
     if (ctxsWithEvent) {
       return Object.values(ctxsWithEvent)
@@ -703,7 +711,7 @@ export default function NpmrdsManage({
                           {metaViews.length && (metaView?.meta_view_id)}
                         </td>
                         <td
-                          key={`${group}.${item?.metadata?.npmrds_version}`}
+                          key={`npmrds_version_${group}.${item?.metadata?.npmrds_version}`}
                           className="py-2 px-4 border-b"
                         >
                           {item?.metadata?.npmrds_version}
