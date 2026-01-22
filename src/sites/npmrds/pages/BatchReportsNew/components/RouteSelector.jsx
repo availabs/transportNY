@@ -181,7 +181,7 @@ console.log("FOLDERS TREE:", foldersTree);
         </div>
       </MultiLevelSelectNew>
 
-      <button className="px-2 py-1 col-start-2 outline outline-2 outline-red-500 text-red-500 rounded hover:bg-red-200"
+      <button className="cursor-pointer px-2 py-1 col-start-2 outline outline-2 outline-red-500 text-red-500 rounded hover:bg-red-200"
         onClick={ clearRoutes }
       >
         Clear Routes
