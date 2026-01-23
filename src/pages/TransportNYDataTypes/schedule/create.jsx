@@ -212,7 +212,7 @@ const Create = ({ source }) => {
                     One week's data will be requested, starting 16 days before the date that the job runs
                 </div>
                 <div className='text-sm'>
-                    Example: The scheduled job runs on Jan 21st 2026, at 7pm. It requests data for January 5th 2026 thru January 11th 2026. 
+                    Example: The scheduled job runs on Jan 21st 2026, at 5pm. It requests data for January 5th 2026 thru January 11th 2026. 
                 </div>
             </div>}
             {selectedSource && type && cron ? (
@@ -227,6 +227,7 @@ const Create = ({ source }) => {
                         view_id={selectedView?.view_id || null}
                         source_id={selectedSource?.source_id || null}
                         cron={cron}
+                        name={source?.name}
                     />
                 </div>
             ) : null}
