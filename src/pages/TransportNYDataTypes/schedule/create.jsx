@@ -125,12 +125,23 @@ const Create = ({ source }) => {
                     }, {})
             ));
     }, [falcorCache, selectedSource, pgEnv]);
+    // const now = new Date();
+    // const future = new Date(now.getTime() + 5 * 12000); // Add 1 minutes
 
+    // const minute = future.getMinutes();
+    // const hour = future.getHours();
+    // const dayOfWeek = future.getDay(); // 0-6 (Sunday-Saturday)
+
+    // // Format: minute hour dayOfMonth month dayOfWeek
+    // const cronString = `${minute} ${hour} * * ${dayOfWeek}`;
+
+    // console.log(`Your weekly cron string: ${cronString}`);
 
     //TODO CANNOT FIGURE OUT THIS BUG
     //But, when npmrds_Raw is selected, after source is chosen, it auto-resets the source
     //it always only happens once...
     //Maybe because when I select source, the views change. But, that should only change the view??
+    //Maybe if I just grab all views for all sources (for these types) ASAP?
     useEffect(() => {
         if (typeSources && typeSources.length) {
             setSelectSource(typeSources[0]);
@@ -209,10 +220,10 @@ const Create = ({ source }) => {
                     Raw NPMRDS data will be downloaded <b>every Wednesday at 5pm Eastern</b>
                 </div>
                 <div>
-                    One week's data will be requested, starting 16 days before the date that the job runs
+                    One week's data will be requested, starting 23 days before the date that the job runs
                 </div>
                 <div className='text-sm'>
-                    Example: The scheduled job runs on Jan 21st 2026, at 5pm. It requests data for January 5th 2026 thru January 11th 2026. 
+                    Example: A job is schedule to run on Jan 28th 2026, at 5pm. It requests data for January 5th 2026 thru January 11th 2026. 
                 </div>
             </div>}
             {selectedSource && type && cron ? (
