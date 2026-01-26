@@ -217,13 +217,10 @@ const Create = ({ source }) => {
             />}
             {type === NPMRDS_RAW_TYPE && <div className="flex flex-col items-center justify-center w-full">
                 <div>
-                    Raw NPMRDS data will be downloaded <b>every Wednesday at 5pm Eastern</b>
+                    Raw NPMRDS data will be requested/downloaded <b>every Wednesday at 5pm Eastern</b>
                 </div>
                 <div>
-                    One week's data will be requested, starting 23 days before the date that the job runs
-                </div>
-                <div className='text-sm'>
-                    Example: A job is schedule to run on Jan 28th 2026, at 5pm. It requests data for January 5th 2026 thru January 11th 2026. 
+                    Up to one month of data will be requested. The starting date will be one day after the previous data request. 
                 </div>
             </div>}
             {selectedSource && type && cron ? (
