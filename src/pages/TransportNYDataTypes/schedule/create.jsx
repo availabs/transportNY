@@ -77,6 +77,7 @@ const Create = ({ source }) => {
     const [cron, setCron] = useState(null);
     const [selectedView, setSelectView] = useState(null);
     const [selectedSource, setSelectSource] = useState(null);
+    const [selectedNpmrdsSource, setSelectedNpmrdsSource] = useState(null);
 
     useEffect(() => {
         async function fetchData() {
@@ -97,6 +98,12 @@ const Create = ({ source }) => {
             .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
             .filter(s => s.type === type)
     }, [falcorCache, pgEnv, type]);
+
+    const npmrdsSources = useMemo(() => {
+        return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
+            .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
+            .filter(s => s.type.toLowerCase() === "npmrds")   
+    }, [falcorCache, type, pgEnv])
 
     useEffect(() => {
         async function fetchData() {
@@ -154,38 +161,48 @@ const Create = ({ source }) => {
         }
     }, [type, typeViews]);
 
-    const typeInputs = useMemo(() => {
-      const inputs = [
-        {
-          label: "Source:",
-          control: (
-            <Select
-              selectedOption={selectedSource}
-              options={typeSources || []}
-              setSelecteOptions={setSelectSource}
-              visibleField={"name"}
-              defaultText={`Select ${type} source.`}
-            />
-          ),
-        },
-      ];
+    const typeInputs = [
+      {
+        label: "Raw Source:",
+        control: (
+          <Select
+            selectedOption={selectedSource}
+            options={typeSources || []}
+            setSelecteOptions={setSelectSource}
+            visibleField={"name"}
+            defaultText={`Select ${type} source.`}
+          />
+        ),
+      },
+    ];
 
-      if (type === TRANSCOM_TYPE) {
-        inputs.push({
-          label: "View:",
-          control: (
-            <Select
-              selectedOption={selectedView}
-              options={typeViews || []}
-              setSelecteOptions={setSelectView}
-              visibleField={"view_id"}
-              defaultText={`Select ${type} view.`}
-            />
-          ),
-        });
-      }
-      return inputs;
-    }, [type, typeSources, typeViews]);
+    if (type === TRANSCOM_TYPE) {
+      typeInputs.push({
+        label: "View:",
+        control: (
+          <Select
+            selectedOption={selectedView}
+            options={typeViews || []}
+            setSelecteOptions={setSelectView}
+            visibleField={"view_id"}
+            defaultText={`Select ${type} view.`}
+          />
+        ),
+      });
+    } else if (type === NPMRDS_RAW_TYPE){
+      typeInputs.push({
+        label: "Production Source:",
+        control: (
+          <Select
+            selectedOption={selectedNpmrdsSource}
+            options={npmrdsSources || []}
+            setSelecteOptions={setSelectedNpmrdsSource}
+            visibleField={"name"}
+            defaultText={`Select a production NPMRDS source.`}
+          />
+        ),
+      });
+    }
 
     //NPMRDS always gets pulled at 5pm on Wedensday
     useEffect(() => {
@@ -222,6 +239,9 @@ const Create = ({ source }) => {
                 <div>
                     Up to one month of data will be requested. The starting date will be one day after the previous data request. 
                 </div>
+                <div>
+                    After downloading, the data will be automatically loaded into the specified production source
+                </div>
             </div>}
             {selectedSource && type && cron ? (
                 <div className="flex w-full mt-1 items-center justify-center">
@@ -234,6 +254,7 @@ const Create = ({ source }) => {
                         setLoading={setLoading}
                         view_id={selectedView?.view_id || null}
                         source_id={selectedSource?.source_id || null}
+                        npmrds_prod_id={selectedNpmrdsSource?.source_id || null}
                         cron={cron}
                         name={source?.name}
                     />

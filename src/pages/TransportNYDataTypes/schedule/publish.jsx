@@ -15,7 +15,8 @@ const schedulePublish = async (props, navigate, pgEnv) => {
         name: props?.name,
         type: props?.type,
         pgEnv: pgEnv || props?.pgEnv,
-        cron: props?.cron
+        cron: props?.cron,
+        npmrds_prod_id: props?.npmrds_prod_id
     };
     
     try {
