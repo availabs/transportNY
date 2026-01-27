@@ -67,8 +67,9 @@ export const Select = ({ selectedOption, options, setSelecteOptions, visibleFiel
         </div>
     );
 };
-
-var types = ['npmrds_raw', 'transcom'];
+const NPMRDS_RAW_TYPE = 'npmrds_raw';
+const TRANSCOM_TYPE = 'transcom';
+const types = [NPMRDS_RAW_TYPE, TRANSCOM_TYPE];
 const Create = ({ source }) => {
     const [loading, setLoading] = useState(false);
     const { pgEnv, falcor, falcorCache, user } = useContext(DamaContext);
@@ -76,6 +77,7 @@ const Create = ({ source }) => {
     const [cron, setCron] = useState(null);
     const [selectedView, setSelectView] = useState(null);
     const [selectedSource, setSelectSource] = useState(null);
+    const [selectedNpmrdsSource, setSelectedNpmrdsSource] = useState(null);
 
     useEffect(() => {
         async function fetchData() {
@@ -96,6 +98,12 @@ const Create = ({ source }) => {
             .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
             .filter(s => s.type === type)
     }, [falcorCache, pgEnv, type]);
+
+    const npmrdsSources = useMemo(() => {
+        return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
+            .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
+            .filter(s => s.type.toLowerCase() === "npmrds")   
+    }, [falcorCache, type, pgEnv])
 
     useEffect(() => {
         async function fetchData() {
@@ -124,7 +132,23 @@ const Create = ({ source }) => {
                     }, {})
             ));
     }, [falcorCache, selectedSource, pgEnv]);
+    // const now = new Date();
+    // const future = new Date(now.getTime() + 5 * 12000); // Add 1 minutes
 
+    // const minute = future.getMinutes();
+    // const hour = future.getHours();
+    // const dayOfWeek = future.getDay(); // 0-6 (Sunday-Saturday)
+
+    // // Format: minute hour dayOfMonth month dayOfWeek
+    // const cronString = `${minute} ${hour} * * ${dayOfWeek}`;
+
+    // console.log(`Your weekly cron string: ${cronString}`);
+
+    //TODO CANNOT FIGURE OUT THIS BUG
+    //But, when npmrds_Raw is selected, after source is chosen, it auto-resets the source
+    //it always only happens once...
+    //Maybe because when I select source, the views change. But, that should only change the view??
+    //Maybe if I just grab all views for all sources (for these types) ASAP?
     useEffect(() => {
         if (typeSources && typeSources.length) {
             setSelectSource(typeSources[0]);
@@ -137,103 +161,135 @@ const Create = ({ source }) => {
         }
     }, [type, typeViews]);
 
+    const typeInputs = [
+      {
+        label: "Raw Source:",
+        control: (
+          <Select
+            selectedOption={selectedSource}
+            options={typeSources || []}
+            setSelecteOptions={setSelectSource}
+            visibleField={"name"}
+            defaultText={`Select ${type} source.`}
+          />
+        ),
+      },
+    ];
+
+    if (type === TRANSCOM_TYPE) {
+      typeInputs.push({
+        label: "View:",
+        control: (
+          <Select
+            selectedOption={selectedView}
+            options={typeViews || []}
+            setSelecteOptions={setSelectView}
+            visibleField={"view_id"}
+            defaultText={`Select ${type} view.`}
+          />
+        ),
+      });
+    } else if (type === NPMRDS_RAW_TYPE){
+      typeInputs.push({
+        label: "Production Source:",
+        control: (
+          <Select
+            selectedOption={selectedNpmrdsSource}
+            options={npmrdsSources || []}
+            setSelecteOptions={setSelectedNpmrdsSource}
+            visibleField={"name"}
+            defaultText={`Select a production NPMRDS source.`}
+          />
+        ),
+      });
+    }
+
+    //NPMRDS always gets pulled at 5pm on Wedensday
+    useEffect(() => {
+        if(type === NPMRDS_RAW_TYPE) {
+            setCron("0 17 * * 3");
+        }
+    }, [type])
+
+
     return (
         <div className="w-full p-5 m-5">
-            <div className="flex flex-row mt-4 mb-6">
-                <div className="basis-1/4" />
-                <div className="basis-1/2">
-                    <div className="flex items-center justify-left mt-4">
-                        <div className="w-full max-w-xs mx-auto">
-                            <div className="block text-sm leading-5 font-medium text-gray-700">
-                                Source Type:
-                            </div>
-                            <div className="relative w-full max-w-sm">
-                                <Select
-                                    selectedOption={type}
-                                    options={types || []}
-                                    setSelecteOptions={setType}
-                                    visibleField={null}
-                                    defaultText={"Select dama type..."}
-                                />
-                            </div>
-                        </div>
-                    </div>
+            <InputRow 
+                inputs={[{
+                    label:"SourceType:",
+                    control: <Select
+                        selectedOption={type}
+                        options={types || []}
+                        setSelecteOptions={setType}
+                        visibleField={null}
+                        defaultText={"Select dama type..."}
+                    />
+                }]}
+            />
+            {type && <InputRow inputs={typeInputs} /> }
+            {(type && type !== NPMRDS_RAW_TYPE) && <InputRow 
+                inputs={[{
+                    label:"Select Cron:",
+                    control: <Cron cron={cron} onCronChange={setCron} />}]}
+            />}
+            {type === NPMRDS_RAW_TYPE && <div className="flex flex-col items-center justify-center w-full">
+                <div>
+                    Raw NPMRDS data will be requested/downloaded <b>every Wednesday at 5pm Eastern</b>
                 </div>
-                <div className="basis-1/4" />
-            </div>
-
-            {type ? <div className="flex flex-row mt-4 mb-6">
-                <div className={(['transcom'].indexOf(type) >= 0) ? "basis-1/6" : "basis-1/2"} />
-                <div className="basis-1/3" >
-                    <div className="flex items-center justify-left mt-4">
-                        <div className="w-full max-w-xs mx-auto">
-                            <div className="block text-sm leading-5 font-medium text-gray-700">
-                                Source:
-                            </div>
-                            <div className="relative w-full max-w-sm">
-                                <Select
-                                    selectedOption={selectedSource}
-                                    options={typeSources || []}
-                                    setSelecteOptions={setSelectSource}
-                                    visibleField={"name"}
-                                    defaultText={`Select ${type} source.`}
-                                />
-                            </div>
-                        </div>
-                    </div></div>
-                <div className="basis-1/3">
-                    {(['transcom'].indexOf(type) >= 0) ? <div className="flex items-center justify-left mt-4">
-                        <div className="w-full max-w-xs mx-auto">
-                            <div className="block text-sm leading-5 font-medium text-gray-700">
-                                View:
-                            </div>
-                            <div className="relative w-full max-w-sm">
-                                <Select
-                                    selectedOption={selectedView}
-                                    options={typeViews || []}
-                                    setSelecteOptions={setSelectView}
-                                    visibleField={"view_id"}
-                                    defaultText={`Select ${type} view.`}
-                                />
-                            </div>
-                        </div>
-                    </div> : null}
+                <div>
+                    Up to one month of data will be requested. The starting date will be one day after the previous data request. 
                 </div>
-                <div className="basis-1/6" />
-            </div> : null}
-
-            <div className="flex flex-row mt-4 mb-6">
-                <div className="basis-1/6" />
-                <div className="basis-1/2" >
-                    <div className="flex items-center justify-left mt-4">
-                        <div className="w-full max-w-xs mx-auto">
-                            <div className="block text-sm leading-5 font-medium text-gray-700">
-                                Select Cron:
-                            </div>
-                            <div className="relative w-m max-w-sm">
-                                <Cron cron={cron} onCronChange={setCron} />
-                            </div>
-                        </div>
-                    </div></div>
-                <div className="basis-1/3" />
-            </div>
-
+                <div>
+                    After downloading, the data will be automatically loaded into the specified production source
+                </div>
+            </div>}
             {selectedSource && type && cron ? (
-                <>
+                <div className="flex w-full mt-1 items-center justify-center">
                     <Publish
                         type={type}
                         pgEnv={pgEnv}
                         loading={loading}
                         user_id={user?.id}
+                        email={user?.email}
                         setLoading={setLoading}
                         view_id={selectedView?.view_id || null}
                         source_id={selectedSource?.source_id || null}
+                        npmrds_prod_id={selectedNpmrdsSource?.source_id || null}
                         cron={cron}
+                        name={source?.name}
                     />
-                </>
+                </div>
             ) : null}
         </div>
     );
 };
+
+const InputRow = ({ inputs }) => {
+  return (
+    <div className="flex flex-row mt-4 mb-6">
+      <div className="basis-1/4" />
+      {inputs.map((input) => {
+        return <InputContainer label={input.label} input={input.control} />;
+      })}
+      <div className="basis-1/4" />
+    </div>
+  );
+};
+
+const InputContainer = ({label, input}) => {
+  return (
+    <div className="basis-1/2">
+      <div className="flex items-center justify-left mt-4">
+        <div className="w-full max-w-xs mx-auto">
+          <div className="block text-sm leading-5 font-medium text-gray-700">
+            {label}
+          </div>
+          <div className="relative w-full max-w-sm">{input}</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 export default Create;

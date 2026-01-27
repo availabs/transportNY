@@ -254,11 +254,6 @@ export default function NpmrdsManage({
     return views.find((v) => Number(v.view_id) === Number(activeViewId));
   }, [activeViewId, views]);
 
-  const activeRawViewIds = useMemo(
-    () => activeView?.metadata?.npmrds_raw_view_ids,
-    [activeView]
-  );
-
   const [availableViews, dependentViews] = useMemo(() => {
     return [
       (npmrdsRawViews || []).filter(
@@ -518,21 +513,29 @@ export default function NpmrdsManage({
     [falcorCache, pgEnv]
   );
 
+  /**
+   * KINDA TODO BUG:
+   * 
+   * Metadata worker is called from add worker
+   * add worker returns done. It is the only one that is in the `ctxsWithEvent` resp
+   * IDK why the child event is not also in the list.
+   * But that means, after data is added, metadata button will be enabled even though its already running!! 
+   */
   const openMetadataCtxs = useMemo(() => {
     if (ctxsWithEvent) {
       return Object.values(ctxsWithEvent)
         .map((item) => item?.value)
         .filter((ctx) => OPEN_CTX_STATUSES.includes(ctx.meta.etl_status))
         .filter((ctx) =>
-          ctx.events.some((ctxEvent) => ctxEvent.type.includes("metadata"))
+          ctx.events.some((ctxEvent) => ctxEvent.type.includes("metadata") || ctxEvent.type.includes("npmrds-add"))
         )
         .map((ctx) => ({
           ...ctx,
           raw_view_id: ctx?.events?.[0]?.payload.npmrds_raw_view_ids?.[0],
         }))
-        .filter((ctx) => activeRawViewIds?.includes(ctx.raw_view_id));
+        .filter((ctx => ctx.meta._created_timestamp >= moment().subtract(2, 'days').toISOString()));
     }
-  }, [falcorCache, falcor, source?.source_id]);
+  }, [falcorCache, falcor, source?.source_id, ctxsWithEvent]);
 
   useEffect(() => {
     if ((openMetadataCtxs && openMetadataCtxs.length > 0) || (polling && !ctxsWithEvent)) {
@@ -708,7 +711,7 @@ export default function NpmrdsManage({
                           {metaViews.length && (metaView?.meta_view_id)}
                         </td>
                         <td
-                          key={`${group}.${item?.metadata?.npmrds_version}`}
+                          key={`npmrds_version_${group}.${item?.metadata?.npmrds_version}`}
                           className="py-2 px-4 border-b"
                         >
                           {item?.metadata?.npmrds_version}
@@ -771,6 +774,7 @@ export default function NpmrdsManage({
                               <button
                                 className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-red-500 text-white shadow-md shadow-red-900/10 hover:shadow-lg hover:shadow-red-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                                 type="button"
+                                disabled={polling}
                                 onClick={() => {
                                   setRemoveViewId(item?.view_id);
                                   setRemoveStateKey(group);
