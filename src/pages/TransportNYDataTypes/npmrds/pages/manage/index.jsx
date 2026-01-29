@@ -130,9 +130,11 @@ export default function NpmrdsManage({
   const navigate = useNavigate();
 
   const [showModal, setShowModal] = React.useState(false);
+  const [showReplaceModal, setShowReplaceModal] = React.useState(false);
+  const [replaceYear, setReplaceYear] = React.useState();
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
   const [showReRunModal, setShowReRunModal] = React.useState(false);
-  const [selectedView, setSelectedView] = React.useState([]);
+  const [selectedView, setSelectedView] = React.useState();
   const [metaViews, setMetaViews] = React.useState([]);
   const [removeViewId, setRemoveViewId] = React.useState(null);
   const [removeStateKey, setRemoveStateKey] = React.useState(null);
@@ -309,6 +311,56 @@ export default function NpmrdsManage({
     [availableViews]
   );
 
+  const allSourceYears = Object.keys(source?.metadata?.npmrds_meta_layer_view_id ?? {}).reverse();
+
+  /**
+   * Sets default year in "replace entire year of data" modal 
+   */
+  useEffect(() => {
+    if(!replaceYear) { 
+      setReplaceYear(allSourceYears[0])
+    }
+  },[allSourceYears]);
+
+  const availableReplaceViewOptions = useMemo(
+    () =>
+      dependentViews
+        .filter((v) => {
+          const isFullRange =
+            v.metadata.start_date.endsWith("-01-01") &&
+            v.metadata.end_date.endsWith("-12-31");
+          const isSameYear =
+            v.metadata.start_date.substring(0, 4) ===
+            v.metadata.end_date.substring(0, 4);
+
+          return isFullRange && isSameYear;
+        })
+        .filter(
+          (v) =>
+            new Date(v.metadata.end_date).getFullYear().toString() ===
+            replaceYear,
+        )
+        .map((availableView) => (
+          <option
+            className="max-h-60 rounded-md py-1 text-base leading-6 shadow-xs overflow-auto focus:outline-none sm:text-sm sm:leading-5"
+            value={{
+              value: availableView?.view_id,
+              metadata: availableView?.metadata,
+            }}
+          >
+            {`${
+              availableView?.metadata?.name ||
+              availableView?.metadata?.dama_source_name ||
+              `s${availableView?.source_id} v${availableView?.view_id}`
+            } From ${availableView?.metadata?.start_date} to ${
+              availableView?.metadata?.end_date
+            }`}
+          </option>
+        )),
+    [dependentViews, replaceYear],
+  );
+
+
   //get info about tmc_meta
   //source.npmrds_meta_layer_view_id[year]
   useEffect(() => {
@@ -398,6 +450,45 @@ export default function NpmrdsManage({
     setLoading(true);
     try {
       const res = await fetch(`${DAMA_HOST}/dama-admin/${pgEnv}/npmrds/add`, {
+        method: "POST",
+        body: JSON.stringify(publishData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const publishFinalEvent = await res.json();
+      const { source_id } = publishFinalEvent;
+
+      setLoading(false);
+      navigate(`/datasources/source/${source_id}`);
+    } catch (err) {
+      setLoading(false);
+    }
+  };
+  const replaceNpmrds = async () => {
+    const raw_remove_view_ids = Object.keys(
+      activeView?.metadata.npmrds_raw_view_id_to_year,
+    ).filter(
+      (rViewId) =>
+        activeView?.metadata.npmrds_raw_view_id_to_year[rViewId].toString(7) ===
+        replaceYear,
+    );
+
+    const publishData = {
+      source_id: source?.source_id || null,
+      view_id: activeView?.view_id,
+      user_id: ctxUser?.id,
+      email: ctxUser?.email,
+      npmrds_raw_add_view_ids: [selectedView?.props?.value?.value],
+      npmrds_raw_remove_view_ids:raw_remove_view_ids,
+      name: source?.name,
+      type: "npmrds",
+      ...findMinMaxDates(dateRanges),
+      pgEnv,
+    };
+    setLoading(true);
+    try {
+      const res = await fetch(`${DAMA_HOST}/dama-admin/${pgEnv}/npmrds/replace`, {
         method: "POST",
         body: JSON.stringify(publishData),
         headers: {
@@ -650,14 +741,19 @@ export default function NpmrdsManage({
         </div>
 
         <div className="justify-right">
-          <button className="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold mr-3 py-2 px-4 rounded">
+          <button
+            className="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold mr-3 py-2 px-4 rounded disabled:hover:cursor-not-allowed disabled:opacity-50"
+            onClick={() => setShowReplaceModal(true)}
+            disabled={(openMetadataCtxs && openMetadataCtxs.length > 0)}
+          >
             <div style={{ display: "flex" }}>
               <span className="mr-2">Replace</span>
             </div>
           </button>
           <button
-            className="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            className="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:hover:cursor-not-allowed disabled:opacity-50"
             onClick={() => setShowModal(true)}
+                        disabled={(openMetadataCtxs && openMetadataCtxs.length > 0)}
           >
             <div style={{ display: "flex" }}>
               <span className="mr-2">Add</span>
@@ -906,6 +1002,91 @@ export default function NpmrdsManage({
                     className="ml-3 inline-flex justify-center px-4 py-2 text-sm text-green-900 bg-green-100 border border-transparent rounded-md hover:bg-green-200 duration-300"
                     type="button"
                     onClick={updateNpmrds}
+                  >
+                    {loading ? (
+                      <div style={{ display: "flex" }}>
+                        <div className="mr-2">Saving...</div>
+                        <ScalableLoading scale={0.25} color={"#fefefe"} />
+                      </div>
+                    ) : (
+                      "Save Changes"
+                    )}
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </DialogPanel>
+        </div>
+      </Dialog>
+
+      <Dialog
+        as="div"
+        className="relative z-50"
+        open={showReplaceModal}
+        onClose={() => setShowReplaceModal(false)}
+      >
+        <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
+          <span
+            className="inline-block h-screen align-middle"
+            aria-hidden="true"
+          >
+            &#8203;
+          </span>
+          <DialogPanel>
+            <div className="inline-block w-full min-w-xl max-w-xl p-6 my-8 text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
+              <DialogTitle
+                as="h3"
+                className="text-lg font-medium leading-6 text-gray-900"
+              >
+                Replace full year of NPMRDS data
+              </DialogTitle>
+                <div className="relative p-6 flex-auto">
+                  <div className="text-sm">Year to replace</div>
+                  <Select
+                    options={allSourceYears}
+                    onChange={setReplaceYear}
+                    value={replaceYear}
+                    themeOptions={{color: 'white'}}
+                    className = 'min-w-[479px] border border-gray-300 rounded-md'
+                  />
+                </div>
+              {availableReplaceViewOptions && availableReplaceViewOptions.length > 0 ? (
+                <div className="relative p-6 flex-auto">
+                  <div className="text-sm">Raw data view to insert</div>
+                  <Select
+                    options={availableReplaceViewOptions}
+                    onChange={setSelectedView}
+                    value={selectedView}
+                    themeOptions={{color: 'white'}}
+                    className = 'min-w-[479px] border border-gray-300 rounded-md'
+                  />
+                </div>
+              ) : (
+                <>
+                  <div
+                    className="p-4 m-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+                    role="alert"
+                  >
+                    <span className="font-medium">
+                      {"Npmrds Data for the replace is not available."}
+                    </span>
+                  </div>
+                </>
+              )}
+
+              <div className="mt-4">
+                <button
+                  type="button"
+                  className="inline-flex justify-center px-4 py-2 text-sm text-red-900 bg-red-100 border border-transparent rounded-md hover:bg-red-200 duration-300"
+                  onClick={() => setShowReplaceModal(false)}
+                >
+                  Close
+                </button>
+                {selectedView ? (
+                  <button
+                    className="ml-3 inline-flex justify-center px-4 py-2 text-sm text-green-900 bg-green-100 border border-transparent rounded-md hover:bg-green-200 duration-300"
+                    type="button"
+                    onClick={replaceNpmrds}
                   >
                     {loading ? (
                       <div style={{ display: "flex" }}>
