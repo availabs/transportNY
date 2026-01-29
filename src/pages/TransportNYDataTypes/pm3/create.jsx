@@ -249,7 +249,7 @@ export default function Pm3Create({
             <div className="flex pl-1">
               <select
                 className={
-                  "flex-0 w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md"
+                  "w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md"
                 }
                 onChange={(e) => {
                   dispatch({ type: "update", payload: { npmrdsSourceId: e.target.value } })
@@ -311,7 +311,6 @@ export default function Pm3Create({
                   options={npmrdsSourceId ? availableYears : []}
                   value={years}
                   onChange={(e) => {
-                    console.log("year multi select e::",e)
                     dispatch({ type: "update", payload: { years:e } })
                   }}
                 />

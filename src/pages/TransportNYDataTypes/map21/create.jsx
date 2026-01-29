@@ -84,8 +84,8 @@ const Create = ({ source, newVersion }) => {
   }, [availableYears]);
   
   const yearInputClass = !npmrdsSourceId
-    ? `flex-0 w-full p-1 cursor-not-allowed bg-gray-200 hover:bg-gray-300 rounded-md`
-    : `flex-0 w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md`;
+    ? `w-full p-1 cursor-not-allowed bg-gray-200 hover:bg-gray-300 rounded-md`
+    : `w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md`;
   
   return (
     <div className="w-full m-5">
@@ -98,7 +98,7 @@ const Create = ({ source, newVersion }) => {
             <div className="flex pl-1">
               <select
                 className={
-                  "flex-0 w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md"
+                  "w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md"
                 }
                 onChange={(e) => {
                   setNpmrdsSourceId(e.target.value);
@@ -151,7 +151,7 @@ const Create = ({ source, newVersion }) => {
                   min={.1}
                   max={100}
                   className={
-                    "flex-0 w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md"
+                    "w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md"
                   }
                   step={.1}
                   onChange={(e) => {
