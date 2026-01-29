@@ -13,7 +13,7 @@ import {
   // Select
 } from "~/modules/avl-components/src"
 
-import { useAuth } from "~/modules/dms/src"
+import { useAuth } from "~/modules/dms/packages/dms/src"
 
 import ConfirmModal from "./ConfirmModal"
 import FolderIcon from "./FolderIcon"

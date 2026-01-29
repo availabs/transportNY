@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, createContext, useRef } from "react"
 import { DamaContext } from "~/pages/DataManager/store"
 import {get, set } from "lodash-es";
-import { getAttributes } from "~/pages/DataManager/Collection/attributes";
+import { getAttributes } from "~/pages/DataManager/MapEditor/attributes";
 import { ViewAttributes } from "~/pages/DataManager/Source/attributes"
 import {
   REGION_CODE_TO_NAME,

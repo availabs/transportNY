@@ -7,7 +7,7 @@ import { scaleLinear } from "d3-scale"
 
 import { DAMA_HOST } from "~/config";
 import { DamaContext } from "~/pages/DataManager/store";
-import { CMSContext } from "~/modules/dms/src";
+import { CMSContext } from "~/modules/dms/packages/dms/src";
 
 
 import {

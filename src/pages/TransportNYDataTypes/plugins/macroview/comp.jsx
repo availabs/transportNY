@@ -5,7 +5,7 @@ import { DAMA_HOST } from '~/config'
 import { measure_info } from "./measures";
 import { Button } from "~/modules/avl-components/src";
 import { DamaContext } from "~/pages/DataManager/store";
-import { CMSContext } from "~/modules/dms/src";
+import { CMSContext } from "~/modules/dms/packages/dms/src";
 import { PM3_LAYER_KEY } from "./constants";
 import { MultiLevelSelect } from "~/modules/avl-map-2/src"
 import {CheckCircleIcon, XCircleIcon} from "@heroicons/react/20/solid/index.js";

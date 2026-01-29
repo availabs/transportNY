@@ -16,7 +16,7 @@ import {
   updateLegend,
 } from "./updateFilters";
 import { DamaContext } from "~/pages/DataManager/store";
-import { CMSContext } from "~/modules/dms/src";
+import { CMSContext } from "~/modules/dms/packages/dms/src";
 import { usePrevious } from "~/pages/DataManager/MapEditor/components/LayerManager/utils";
 import { choroplethPaint } from "~/pages/DataManager/MapEditor/components/LayerEditor/datamaps";
 import { npmrdsPaint } from "./paint";

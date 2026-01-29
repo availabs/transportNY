@@ -9,7 +9,7 @@ import {
 } from "~/modules/avl-components/src"
 
 // import { withAuth } from "@availabs/ams"
-import { withAuth } from "~/modules/dms/src"
+import { withAuth } from "~/modules/dms/packages/dms/src"
 
 
 import FolderIcon from "./components/FolderIcon"
