@@ -12,7 +12,11 @@ import {
   DmsSite,
   adminConfig,
   registerComponents
+<<<<<<< HEAD
 } from "~/modules/dms/packages/dms/src/"
+=======
+} from "~/modules/dms/packages/dms/src"
+>>>>>>> 97143d202db1f956f12c68f2f0822ae9b03bf5d5
 
 import DefaultRoutes from '~/Routes';
 

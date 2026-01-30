@@ -11,10 +11,12 @@ const schedulePublish = async (props, navigate, pgEnv) => {
         source_id: props?.source_id,
         view_id: props?.view_id,
         user_id: props?.user_id,
+        email: props?.email,
         name: props?.name,
         type: props?.type,
         pgEnv: pgEnv || props?.pgEnv,
-        cron: props?.cron
+        cron: props?.cron,
+        npmrds_prod_id: props?.npmrds_prod_id
     };
     
     try {
