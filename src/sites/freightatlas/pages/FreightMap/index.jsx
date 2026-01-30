@@ -4,7 +4,7 @@ import Map from './components/FreightMap'
 import { DamaContext } from "~/pages/DataManager/store"
 import { useFalcor } from "~/modules/avl-components/src"
 // import { useAuth } from "@availabs/ams"
-import { useAuth } from "~/modules/dms/src"
+import { useAuth } from "~/modules/dms/packages/dms/src"
 
 const baseUrl = '/datasources';
 const defaultPgEnv = 'npmrds';

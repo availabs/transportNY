@@ -1,7 +1,7 @@
 import React from "react"
 import {
   dmsPageFactory
-} from "~/modules/dms/src"
+} from "~/modules/dms/packages/dms/src"
 
 //import DmsLexical from "~/modules/dms-custom/lexical"
 // import { withAuth } from "@availabs/ams"

@@ -8,7 +8,7 @@ import FreightCMS from "./FreightCMS.jsx"
 
 import DataManager from "~/pages/DataManager"
 import { useFalcor } from "~/modules/avl-components/src"
-import { useAuth } from "~/modules/dms/src"
+import { useAuth } from "~/modules/dms/packages/dms/src"
 
 import transportNYDataTypes from '~/pages/TransportNYDataTypes'
 

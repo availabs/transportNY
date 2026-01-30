@@ -13,7 +13,7 @@ import { useParams } from "react-router";
 
 import { useFalcor } from "~/modules/avl-components/src"
 
-import { useAuth } from "~/modules/dms/src"
+import { useAuth } from "~/modules/dms/packages/dms/src"
 
 import { API_HOST } from "~/config"
 

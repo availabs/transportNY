@@ -1,7 +1,7 @@
 import React from "react"
 //import {useTheme, Dropdown } from '~/modules/avl-components/src'
 // import { withAuth } from "@availabs/ams"
-import { useAuth } from "~/modules/dms/src"
+import { useAuth } from "~/modules/dms/packages/dms/src"
 import {Link} from 'react-router'
 import { use } from "react"
 // import {NavItem, NavMenu, NavMenuItem, NavMenuSeparator, withAuth} from 'components/avl-components/src'

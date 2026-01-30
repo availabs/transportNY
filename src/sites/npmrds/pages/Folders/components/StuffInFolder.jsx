@@ -9,7 +9,7 @@ import {
   Input
 } from "~/modules/avl-components/src"
 
-import { withAuth } from "~/modules/dms/src"
+import { withAuth } from "~/modules/dms/packages/dms/src"
 
 
 import { FolderStuff, getStuffSorter } from "./Stuff"
