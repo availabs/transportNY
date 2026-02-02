@@ -470,7 +470,7 @@ export default function NpmrdsManage({
       activeView?.metadata.npmrds_raw_view_id_to_year,
     ).filter(
       (rViewId) =>
-        activeView?.metadata.npmrds_raw_view_id_to_year[rViewId].toString(7) ===
+        activeView?.metadata.npmrds_raw_view_id_to_year[rViewId].toString() ===
         replaceYear,
     );
 
@@ -480,10 +480,11 @@ export default function NpmrdsManage({
       user_id: ctxUser?.id,
       email: ctxUser?.email,
       npmrds_raw_add_view_ids: [selectedView?.props?.value?.value],
-      npmrds_raw_remove_view_ids:raw_remove_view_ids,
+      npmrds_raw_remove_view_ids:raw_remove_view_ids.map(id => parseInt(id)),
       name: source?.name,
       type: "npmrds",
       ...findMinMaxDates(dateRanges),
+      replace_year: replaceYear,
       pgEnv,
     };
     setLoading(true);
