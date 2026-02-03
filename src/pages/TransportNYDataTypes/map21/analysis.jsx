@@ -94,15 +94,20 @@ export const AnalysisPage = (props) => {
               {flatViews.map((view) => (
                 <tr key={`${view.view_id}`}>
                   {headers.map((key) => {
-                    const isNum = key !== 'year' && !!parseFloat(view[key]);
+                    let dataKey = key;
+                    if(key === "raw_view_id" && view["rawViewIdsForYear"]) {
+                      dataKey = "rawViewIdsForYear";
+                    }
+                    const isNum = dataKey !== 'year' && !!parseFloat(view[dataKey]);
+                    const isArray = Array.isArray(view[dataKey]);
                     return (
                       <td
-                        key={`${view.view_id}.${key}`}
+                        key={`${view.view_id}.${dataKey}`}
                         className="py-2 px-4 bg-gray-200 text-left border-b"
                       >
-                        {key === "version"
-                          ? view[key] || view.view_id
-                          : isNum ? parseFloat(view[key]).toLocaleString() : view[key]}
+                        {dataKey === "version"
+                          ? view[dataKey] || view.view_id
+                          : isArray ? view[dataKey].join(", "): isNum ? parseFloat(view[dataKey]).toLocaleString() : view[dataKey]}
                       </td>
                     );
                   })}
