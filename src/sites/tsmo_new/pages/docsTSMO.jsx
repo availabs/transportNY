@@ -1,9 +1,9 @@
 import { useFalcor } from "~/modules/avl-components/src"
-import { useAuth } from "~/modules/dms/src";
+import { useAuth } from "~/modules/dms/packages/dms/src";
 
-import { dmsPageFactory,  registerComponents } from "~/modules/dms/src"
-import pageConfig from "~/modules/dms/src/patterns/page/siteConfig"
-import { withAuth } from "~/modules/dms/src"
+import { dmsPageFactory,  registerComponents } from "~/modules/dms/packages/dms/src"
+import pageConfig from "~/modules/dms/packages/dms/src/patterns/page/siteConfig"
+import { withAuth } from "~/modules/dms/packages/dms/src"
 import checkAuth  from "~/layout/checkAuth"
 import {Logo} from '~/layout/ppdaf-layout'
 import AuthMenu from "~/pages/Auth/AuthMenu"
