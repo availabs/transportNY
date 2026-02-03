@@ -237,7 +237,7 @@ const Create = ({ source }) => {
                     Raw NPMRDS data will be requested/downloaded <b>every Wednesday at 5pm Eastern</b>
                 </div>
                 <div>
-                    Up to one month of data will be requested. The starting date will be one day after the previous data request. 
+                    Up to one month of data will be requested. The starting date will be one day after the latest date in the raw source. 
                 </div>
                 <div>
                     After downloading, the data will be automatically loaded into the specified production source
