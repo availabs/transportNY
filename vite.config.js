@@ -12,8 +12,14 @@ export default defineConfig({
       output: {
         // You can define a manualChunks function for custom splitting
         manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            return 'vendor'; // This will put all node_modules into a single 'vendor.js' chunk
+          if (id.includes('maplibre-gl')) {
+            return 'maplibre';
+          } else if (id.includes('dms')) {
+            return 'dms';
+          } else if (id.includes('mapbox-gl')) {
+            return 'mapbox';
+          } else if (id.includes('node_modules')) {
+            return 'vendor';
           }
         },
       },
