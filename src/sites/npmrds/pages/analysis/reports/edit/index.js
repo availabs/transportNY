@@ -2,14 +2,11 @@ import { EditReport } from "../components/ReportBase"
 
 const BASE = {
   name: 'Analysis',
-  menuSettings: {
-    image: 'none',
-    scheme: 'color-scheme-dark',
-    position: 'menu-position-side',
-    layout: 'menu-layout-mini',
-    style: 'color-style-default'
+  icon: 'fa-duotone fa-chart-line',
+  sideNav: {
+    color: 'dark',
+    size: 'compact'
   },
-  class: 'fa',
   auth: true,
   component: EditReport
 }

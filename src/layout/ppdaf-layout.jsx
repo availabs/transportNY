@@ -1,3 +1,8 @@
+/**
+ * @deprecated This layout is deprecated. Use Layout.jsx with DMS pattern instead.
+ * This file is kept for reference only during migration.
+ * TODO: Remove this file after migration is verified complete.
+ */
 import React from "react";
 import { useTheme, TopNav, SideNav, FlyoutMenu } from "~/modules/avl-components/src/";
 import { Link } from "react-router";

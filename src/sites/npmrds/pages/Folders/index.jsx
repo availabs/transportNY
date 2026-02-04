@@ -153,19 +153,19 @@ const Folders = ({ user }) => {
 
 const config = [
   { name:'Folders',
-    icon: 'fa fa-folder',
+    icon: 'fa-duotone fa-folder',
     path: "/folders",
     // subMenus: [
     //   { name: 'Routes',
-    //     icon: 'fa fa-road',
+    //     icon: 'fa-duotone fa-road',
     //     path: '/folders/routes'
     //   },
     //   { name: 'Reports',
-    //     icon: 'fa fa-file-lines',
+    //     icon: 'fa-duotone fa-file-lines',
     //     path: '/folders/reports'
     //   },
     //   // { name: 'Templates',
-    //   //   icon: 'fa fa-gear',
+    //   //   icon: 'fa-duotone fa-gear',
     //   //   path: '/folders/templates'
     //   // }
     // ],
@@ -179,7 +179,7 @@ const config = [
     component: withAuth(Folders)
   },
   { name:'Folders',
-    icon: 'fa fa-folder',
+    icon: 'fa-duotone fa-folder',
     path: "/folders/:stuff",
     exact: true,
     auth: true,
@@ -191,7 +191,7 @@ const config = [
     component: withAuth(Folders)
   },
   { name:'Routes',
-    icon: 'fa fa-road',
+    icon: 'fa-duotone fa-road',
     path: "/folders/routes",
     exact: true,
     auth: true,
@@ -203,7 +203,7 @@ const config = [
     component: withAuth(Folders)
   },
   { name:'Reports',
-    icon: 'fa fa-file-alt',
+    icon: 'fa-duotone fa-file-lines',
     path: "/folders/reports",
     exact: true,
     auth: true,

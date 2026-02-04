@@ -270,12 +270,12 @@ export default function Pm3Create({
           </div>
           {sourceId && (<div className="flex flex-col pt-2">
             <div className="flex px-2 text-sm text-gray-600 capitalize">
-              Versions
+              PM3 Versions
             </div>
             <div className="flex pl-1">
               <select
                 className={
-                  "flex-0 w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md"
+                  "w-full p-1 bg-blue-100 hover:bg-blue-300 border rounded-md"
                 }
                 onChange={(e) => {
                   dispatch({ type: "update", payload: { damaViewId: e.target.value } })

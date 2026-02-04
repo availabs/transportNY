@@ -54,7 +54,7 @@ const RouteCreation = () => {
 
 const Config = [
   { name: 'Route Creation',
-    icon: 'fa fa-road',
+    icon: 'fa-duotone fa-road',
     path: "/route/creation",
     exact: true,
     auth: true,
@@ -66,7 +66,7 @@ const Config = [
     component: RouteCreation
   },
   { name: 'Route Creation',
-    icon: 'fa fa-road',
+    icon: 'fa-duotone fa-road',
     path: "/route/creation/:routeId",
     exact: true,
     auth: true,
@@ -78,7 +78,7 @@ const Config = [
     component: RouteCreation
   },
   { name: 'Route Creation',
-    icon: 'fa fa-road',
+    icon: 'fa-duotone fa-road',
     path: "/route/creation/folder/:folderId",
     exact: true,
     auth: true,

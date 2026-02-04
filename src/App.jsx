@@ -1,10 +1,8 @@
-import React, { useEffect, useMemo} from 'react';
-import { createBrowserRouter, RouterProvider } from "react-router";
-import Layout from '~/layout/ppdaf-layout'
+import React, { useMemo } from 'react';
 import LayoutWrapper from '~/layout/LayoutWrapper'
 import get from 'lodash/get'
 
-import { getSubdomain }  from '~/utils'
+import { getSubdomain } from '~/utils'
 
 
 
@@ -13,7 +11,6 @@ import {
   adminConfig,
   registerComponents
 } from "~/modules/dms/packages/dms/src/"
-
 
 import DefaultRoutes from '~/Routes';
 
@@ -64,10 +61,9 @@ const App = (props) => {
       return siteOutpt
   },[SUBDOMAIN])
 
-  const WrappedRoutes =  useMemo(() => {
+  const WrappedRoutes = useMemo(() => {
     const Routes = [...site.Routes, ...DefaultRoutes]
-    //console.log('routes',SUBDOMAIN, Routes, )
-    return LayoutWrapper(Routes, Layout)
+    return LayoutWrapper(Routes)
   }, [site])
 
   return (

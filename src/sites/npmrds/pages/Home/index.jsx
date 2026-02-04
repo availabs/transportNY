@@ -1030,7 +1030,7 @@ const TemplateModal = ({ templateId, templateTitle = [], close }) => {
 
 const config = {
   name:'Home',
-  icon: 'fa fa-home',
+  icon: 'fa-duotone fa-house',
   path: "/",
   exact: true,
   auth: true,

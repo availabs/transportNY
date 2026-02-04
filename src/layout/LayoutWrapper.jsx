@@ -1,29 +1,20 @@
 import React from 'react';
-import { useNavigate, useLocation, Navigate } from "react-router";
-// import { withAuth } from '~/modules/ams/src'
+import { useLocation, Navigate } from "react-router";
 import { withAuth } from "~/modules/dms/packages/dms/src"
-import get from 'lodash/get'
 import cloneDeep from 'lodash/cloneDeep'
 import checkAuth from './checkAuth'
-
+import Layout from './Layout'
 
 const LayoutWrapper = withAuth(({
   element: Element,
   component: Comp,
-  Layout=({children}) => <>{children}</>,
+  navItems = [],
   ...props
 }) => {
 
   const Child = Element || Comp // support old react router routes
 
-  // const navigate = useNavigate();
   const location = useLocation();
-
-  // const { auth, authLevel, user } = props;
-
-  // React.useEffect(() => {
-  //   checkAuth({ auth, authLevel, user }, navigate, location);
-  // }, [auth, authLevel, user, navigate, location]);
 
   const check = checkAuth(props);
 
@@ -35,18 +26,24 @@ const LayoutWrapper = withAuth(({
     return <Navigate to="/"/>
   }
   return (
-    <Layout { ...props }>
+    <Layout navItems={navItems} {...props}>
       <Child />
     </Layout>
   )
 })
 
-export default function  DefaultLayoutWrapper ( routes, layout ) {
-  //console.log('routes', routes)
-  const menus = routes.filter(r => r.mainNav)
+/**
+ * Wraps routes with the Layout and LayoutWrapper components.
+ * Filters routes with mainNav: true for the navigation menu.
+ *
+ * @param {Array} routes - Array of route configurations
+ * @returns {Array} Routes wrapped with LayoutWrapper
+ */
+export default function DefaultLayoutWrapper(routes) {
+  const navItems = routes.filter(r => r.mainNav)
   return routes.map(route => {
     let out = cloneDeep(route)
-    out.element = <LayoutWrapper {...out} Layout={layout} menus={menus} />
+    out.element = <LayoutWrapper {...out} navItems={navItems} />
     return out
   })
 }
