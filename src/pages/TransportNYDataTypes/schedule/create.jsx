@@ -132,17 +132,6 @@ const Create = ({ source }) => {
                     }, {})
             ));
     }, [falcorCache, selectedSource, pgEnv]);
-    // const now = new Date();
-    // const future = new Date(now.getTime() + 5 * 12000); // Add 1 minutes
-
-    // const minute = future.getMinutes();
-    // const hour = future.getHours();
-    // const dayOfWeek = future.getDay(); // 0-6 (Sunday-Saturday)
-
-    // // Format: minute hour dayOfMonth month dayOfWeek
-    // const cronString = `${minute} ${hour} * * ${dayOfWeek}`;
-
-    // console.log(`Your weekly cron string: ${cronString}`);
 
     //TODO CANNOT FIGURE OUT THIS BUG
     //But, when npmrds_Raw is selected, after source is chosen, it auto-resets the source
@@ -204,10 +193,10 @@ const Create = ({ source }) => {
       });
     }
 
-    //NPMRDS always gets pulled at 5pm on Wedensday
+    //NPMRDS always gets pulled at 6pm on Tuesday
     useEffect(() => {
         if(type === NPMRDS_RAW_TYPE) {
-            setCron("0 17 * * 3");
+            setCron("0 18 * * 2");
         }
     }, [type])
 
@@ -234,7 +223,7 @@ const Create = ({ source }) => {
             />}
             {type === NPMRDS_RAW_TYPE && <div className="flex flex-col items-center justify-center w-full">
                 <div>
-                    Raw NPMRDS data will be requested/downloaded <b>every Wednesday at 5pm Eastern</b>
+                    Raw NPMRDS data will be requested/downloaded <b>every Tuesday night</b>
                 </div>
                 <div>
                     Up to one month of data will be requested. The starting date will be one day after the latest date in the raw source. 

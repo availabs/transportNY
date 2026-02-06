@@ -120,6 +120,10 @@ const getAttributes = (data) =>
     return out;
   }, {});
 
+const METADATA_EVENT_TYPE = 'metadata';
+const ADD_EVENT_TYPE = 'npmrds-add';
+const REPLACE_EVENT_TYPE = 'npmrds-replace';
+
 export default function NpmrdsManage({
   source,
   views,
@@ -324,7 +328,7 @@ export default function NpmrdsManage({
 
   const availableReplaceViewOptions = useMemo(
     () =>
-      dependentViews
+      availableViews
         .filter((v) => {
           const isFullRange =
             v.metadata.start_date.endsWith("-01-01") &&
@@ -619,7 +623,7 @@ export default function NpmrdsManage({
         .map((item) => item?.value)
         .filter((ctx) => OPEN_CTX_STATUSES.includes(ctx.meta.etl_status))
         .filter((ctx) =>
-          ctx.events.some((ctxEvent) => ctxEvent.type.includes("metadata") || ctxEvent.type.includes("npmrds-add"))
+          ctx.events.some((ctxEvent) => ctxEvent.type.includes(METADATA_EVENT_TYPE) || ctxEvent.type.includes(ADD_EVENT_TYPE) || ctxEvent.type.includes(REPLACE_EVENT_TYPE))
         )
         .map((ctx) => ({
           ...ctx,
@@ -732,6 +736,24 @@ export default function NpmrdsManage({
     }
   };
 
+  const buttonDisabledText = useMemo(() => {
+    if(openMetadataCtxs && openMetadataCtxs.length > 0){
+      const openCtxType = openMetadataCtxs[0]?.events?.[0]?.type.split(":")[0];
+      console.log({openCtxType})
+
+      switch(openCtxType) {
+        case METADATA_EVENT_TYPE:
+          return "Metadata operation in progress..."
+        case ADD_EVENT_TYPE:
+          return "Add operation in progress..."
+        case REPLACE_EVENT_TYPE:
+          return "Replace operation in progress..."
+        default:
+          return "Data operation in progress..."
+      }
+    }
+  }, [openMetadataCtxs]);
+
   return (
     <div className="w-full p-5">
       <div className="flex m-3">
@@ -746,6 +768,7 @@ export default function NpmrdsManage({
             className="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold mr-3 py-2 px-4 rounded disabled:hover:cursor-not-allowed disabled:opacity-50"
             onClick={() => setShowReplaceModal(true)}
             disabled={(openMetadataCtxs && openMetadataCtxs.length > 0)}
+            title={(openMetadataCtxs && openMetadataCtxs.length > 0) ? buttonDisabledText : ""}
           >
             <div style={{ display: "flex" }}>
               <span className="mr-2">Replace</span>
@@ -754,7 +777,8 @@ export default function NpmrdsManage({
           <button
             className="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:hover:cursor-not-allowed disabled:opacity-50"
             onClick={() => setShowModal(true)}
-                        disabled={(openMetadataCtxs && openMetadataCtxs.length > 0)}
+            disabled={(openMetadataCtxs && openMetadataCtxs.length > 0)}
+            title={(openMetadataCtxs && openMetadataCtxs.length > 0) ? buttonDisabledText : ""}
           >
             <div style={{ display: "flex" }}>
               <span className="mr-2">Add</span>
@@ -869,9 +893,10 @@ export default function NpmrdsManage({
                               className="py-2 px-4 border-b"
                             >
                               <button
-                                className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-red-500 text-white shadow-md shadow-red-900/10 hover:shadow-lg hover:shadow-red-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+                                className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:hover:cursor-not-allowed disabled:opacity-50 w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-red-500 text-white shadow-md shadow-red-900/10 hover:shadow-lg hover:shadow-red-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                                 type="button"
                                 disabled={polling}
+                                title={polling ? buttonDisabledText : ""}
                                 onClick={() => {
                                   setRemoveViewId(item?.view_id);
                                   setRemoveStateKey(group);
@@ -900,9 +925,10 @@ export default function NpmrdsManage({
                           className="py-2 px-4 border-b"
                         >
                           <button
-                            className="relative cursor-pointer align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-blue-500 text-white shadow-md shadow-blue-900/10 hover:shadow-lg hover:shadow-blue-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+                            className="relative cursor-pointer align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:hover:cursor-not-allowed disabled:opacity-50 w-10 max-w-[40px] h-10 max-h-[40px] rounded-lg text-xs bg-blue-500 text-white shadow-md shadow-blue-900/10 hover:shadow-lg hover:shadow-blue-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                             type="button"
                             disabled={polling}
+                            title={polling ? buttonDisabledText : ""}
                             onClick={() => {
                               console.log("RERRUN -- ITEM::", item)
                               setRerunViewId({raw_view_id: item?.view_id, start_date: item.metadata.start_date, end_date:item.metadata.end_date, year: item.metadata.start_date.substring(0, 4)  });
