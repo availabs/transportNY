@@ -5,7 +5,7 @@
   "homepage": "/",
   "dependencies": {
     "@availabs/avl-falcor": "^0.0.3",
-    "@availabs/dms": "^0.1.5",
+    "@availabs/dms": "^0.1.9",
     "@carbon/icons-react": "^11.69.0",
     "@hello-pangea/dnd": "^16.5.0",
     "@heroicons/react": "^2.2.0",

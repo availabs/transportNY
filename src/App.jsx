@@ -3,9 +3,7 @@ import LayoutWrapper from '~/layout/LayoutWrapper'
 import get from 'lodash/get'
 
 import { getSubdomain } from '~/utils'
-
-
-
+import transportNYDataTypes, { mapPlugins } from '~/pages/TransportNYDataTypes'
 import {
   DmsSite,
   adminConfig,
@@ -80,6 +78,7 @@ const App = (props) => {
       pgEnvs={[defaultPgEnv]}
       themes={themes}
       damaBaseUrl={damaBaseUrl}
+      damaDataTypes={transportNYDataTypes}
       API_HOST={API_HOST}
       AUTH_HOST={AUTH_HOST}
       PROJECT_NAME={PROJECT_NAME}
