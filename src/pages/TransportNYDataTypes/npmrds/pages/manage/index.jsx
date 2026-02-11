@@ -8,10 +8,11 @@ import {
 import { get, uniqBy, groupBy, orderBy } from "lodash";
 import moment from "moment";
 
-import { DamaContext } from "~/pages/DataManager/store";
 import { DAMA_HOST } from "~/config";
-import { useFalcor, ScalableLoading, Select } from "~/modules/avl-components/src";
-
+import { ScalableLoading, Select } from "~/modules/avl-components/src";
+import { useFalcor } from "@availabs/avl-falcor";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js'
 const OPEN_CTX_STATUSES = ["OPEN"];
 
 const checkDateRanges = (dateRanges) => {
@@ -126,13 +127,14 @@ const REPLACE_EVENT_TYPE = 'npmrds-replace';
 
 export default function NpmrdsManage({
   source,
-  views,
-  activeViewId
+  params
 }) {
-  const { user: ctxUser, pgEnv } = useContext(DamaContext);
+  const {view_id: activeViewId} = params;
+  const { views } = source;
+  const { user: ctxUser, datasources } = useContext(DatasetsContext);
   const { falcor, falcorCache } = useFalcor();
   const navigate = useNavigate();
-
+  const pgEnv = getExternalEnv(datasources);
   const [showModal, setShowModal] = React.useState(false);
   const [showReplaceModal, setShowReplaceModal] = React.useState(false);
   const [replaceYear, setReplaceYear] = React.useState();
@@ -147,18 +149,16 @@ export default function NpmrdsManage({
   const [polling, setPolling ] = React.useState(false);
   const [pollingInterval, setPollingInterval] = React.useState(false);
 
-
   useEffect(() => {
     const fetchData = async () => {
-      const lengthPath = ["dama", pgEnv, "sources", "length"];
+      const lengthPath = ["uda", pgEnv, "sources", "length"];
       const resp = await falcor.get(lengthPath);
       await falcor.get([
-        "dama",
+        "uda",
         pgEnv,
         "sources",
         "byIndex",
         { from: 0, to: get(resp.json, lengthPath, 0) - 1 },
-        "attributes",
         Object.values(SourceAttributes),
       ]);
     };
@@ -168,13 +168,9 @@ export default function NpmrdsManage({
 
   const npmrdsRawSourcesId = useMemo(() => {
     return Object.values(
-      get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {})
+      get(falcorCache, ["uda", pgEnv, "sources", "byIndex"], {})
     )
-      .map((v) =>
-        getAttributes(
-          get(falcorCache, v.value, { attributes: {} })["attributes"]
-        )
-      )
+      .map((v) => getAttributes(get(falcorCache, v.value, {})))
       .filter((source) => source?.type === "npmrds_raw")
       .map((rawS) => rawS.source_id);
   }, [falcorCache]);
@@ -182,7 +178,7 @@ export default function NpmrdsManage({
   useEffect(() => {
     const getData = async () => {
       const lengthPath = [
-        "dama",
+        "uda",
         pgEnv,
         "sources",
         "byId",
@@ -194,7 +190,7 @@ export default function NpmrdsManage({
       const resp = await falcor.get(lengthPath);
 
       const requests = npmrdsRawSourcesId.map((s_id) => [
-        "dama",
+        "uda",
         pgEnv,
         "sources",
         "byId",
@@ -206,11 +202,10 @@ export default function NpmrdsManage({
           to:
             get(
               resp.json,
-              ["dama", pgEnv, "sources", "byId", s_id, "views", "length"],
+              ["uda", pgEnv, "sources", "byId", s_id, "views", "length"],
               0
             ) - 1,
         },
-        "attributes",
         Object.values(ViewAttributes),
       ]);
       falcor.get(...requests);
@@ -226,7 +221,7 @@ export default function NpmrdsManage({
           get(
             falcorCache,
             [
-              "dama",
+              "uda",
               pgEnv,
               "sources",
               "byId",
@@ -236,11 +231,7 @@ export default function NpmrdsManage({
             ],
             {}
           )
-        ).map((v) =>
-          getAttributes(
-            get(falcorCache, v.value, { attributes: {} })["attributes"]
-          )
-        );
+        ).map((v) => getAttributes( get(falcorCache, v.value, {})));
 
         if (views.length) {
           out = uniqBy([...out, ...views], "view_id");
@@ -257,7 +248,7 @@ export default function NpmrdsManage({
   }, [falcorCache, npmrdsRawSourcesId]);
 
   const activeView = useMemo(() => {
-    return views.find((v) => Number(v.view_id) === Number(activeViewId));
+    return activeViewId ? views.find((v) => Number(v.view_id) === Number(activeViewId)) : views[0];
   }, [activeViewId, views]);
 
   const [availableViews, dependentViews] = useMemo(() => {
@@ -370,10 +361,10 @@ export default function NpmrdsManage({
   useEffect(() => {
     const getMetaViews = async () => {
       const metaViewIds = Object.values(source.metadata.npmrds_meta_layer_view_id)
-      const metaViewPath = ["dama", pgEnv, "views", "byId", metaViewIds, "attributes", Object.values(ViewAttributes)];
+      const metaViewPath = ["uda", pgEnv, "views", "byId", metaViewIds, Object.values(ViewAttributes)];
 
       const metaViewResp = await falcor.get(metaViewPath)
-      const metaViews = get(metaViewResp, ["json", "dama", pgEnv, "views", "byId"])
+      const metaViews = get(metaViewResp, ["json", "uda", pgEnv, "views", "byId"])
 
       let metadataLength;
       try {
@@ -387,7 +378,7 @@ export default function NpmrdsManage({
         return {
           meta_view_id: mViewId,
           num_tmc: metadataLength?.[mViewId]?.data?.length,
-          year: metaViews[mViewId].attributes.metadata.year
+          year: metaViews[mViewId].metadata.year
         };
       });
 
