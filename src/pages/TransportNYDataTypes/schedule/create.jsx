@@ -193,10 +193,10 @@ const Create = ({ source }) => {
       });
     }
 
-    //NPMRDS always gets pulled at 6pm on Tuesday
+    //NPMRDS always gets pulled at 8pm on Tuesday
     useEffect(() => {
         if(type === NPMRDS_RAW_TYPE) {
-            setCron("0 18 * * 2");
+            setCron("0 20 * * 2");
         }
     }, [type])
 
