@@ -104,6 +104,59 @@ Data types in `TransportNYDataTypes/` export:
 - Falcor for server data fetching
 - React hooks for local state
 
+## Falcor: Two Providers and the dama → uda Migration
+
+There are **two separate FalcorProvider instances** in the component tree with different React contexts:
+
+1. **Outer provider** (`src/index.jsx`): imports from `~/modules/avl-components/src`
+2. **DMS provider** (`dmsPageFactory.jsx`): imports from `@availabs/avl-falcor` (npm package)
+
+These are different React contexts. `useFalcor()` will connect to whichever provider matches its import source.
+
+### Custom data type pages (TransportNYDataTypes)
+
+Pages rendered via the DMS datasets pattern (at `/datasources/source/:id/:page`) must:
+
+- **Import `useFalcor` from `@availabs/avl-falcor`** (not `~/modules/avl-components/src`) to get the correct `falcor` and `falcorCache`
+- **Get `pgEnv` via `getExternalEnv(datasources)`**, not from context directly:
+  ```js
+  import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+  const { datasources } = useContext(DatasetsContext);
+  const pgEnv = getExternalEnv(datasources);
+  ```
+- **`DatasetsContext` provides**: `datasources`, `falcor`, `user`, `UI`, `baseUrl`, `damaDataTypes`, `DAMA_HOST`, `API_HOST`
+- **`DatasetsContext` does NOT provide**: `pgEnv`, `falcorCache`
+
+### Falcor route prefixes: "uda" vs "dama"
+
+The DMS module migrated source/view data access from `"dama"` to `"uda"`:
+
+| Route type | Prefix | Example |
+|---|---|---|
+| Sources (list, byId, byIndex) | `"uda"` | `["uda", pgEnv, "sources", "byIndex", ...]` |
+| Views (via source or direct) | `"uda"` | `["uda", pgEnv, "views", "byId", ...]` |
+| ETL contexts | `"dama"` | `["dama", pgEnv, "etlContexts", ...]` |
+| Events | `"dama"` | `["dama", pgEnv, "latest", "events", ...]` |
+| View data access | `"dama"` | `["dama", pgEnv, "viewsbyId", ...]` |
+
+### "uda" routes have no "attributes" nesting
+
+The `"uda"` routes return attributes flat on the object. The `"dama"` routes nested them under `"attributes"`:
+
+```js
+// OLD (dama): attributes nested
+["dama", pgEnv, "sources", "byIndex", range, "attributes", ["name", "type", ...]]
+// cache: falcorCache[ref]["attributes"]["name"]
+
+// NEW (uda): attributes flat
+["uda", pgEnv, "sources", "byIndex", range, ["name", "type", ...]]
+// cache: falcorCache[ref]["name"]
+```
+
+### Old DataManager system
+
+The old DataManager (`src/pages/DataManager/`) at `/datasourcesv1` still uses `DamaContext` with `"dama"` routes and `"attributes"` nesting. It is separate from the DMS datasets pattern.
+
 ## Deployment
 
 Deployed via Netlify. See `netlify.toml` for configuration.
