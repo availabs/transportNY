@@ -70,7 +70,7 @@ const Home = () => {
 
   useEffect(() => {
     async function fetchData() {
-      await falcor.get(["geo", "36", "geoLevels"]);
+      await falcor.get(["geo2", "36", "geoLevels"]);
       const request = [null, null, null, [null], null];
       await falcor.get(["transcom2", "generalCategories", JSON.stringify(request)]);
       await falcor.get(["transcom2", "eventType", JSON.stringify(request)]);
