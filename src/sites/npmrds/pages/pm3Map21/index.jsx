@@ -215,18 +215,11 @@ const PM3 = () => {
 
 
 const config = {
-  icon: 'fa fa-chart-bar',
+  icon: 'fa-duotone fa-chart-bar',
   path: '/map21',
   exact: true,
   mainNav: true,
-  menuSettings: {
-    display: 'none',
-    image: 'none',
-    scheme: 'color-scheme-dark',
-    position: 'menu-position-side',
-    layout: 'menu-layout-mini',
-    style: 'color-style-default'
-  },
+  sideNav: {},
   name: 'PM3',
   auth: true,
   component: PM3

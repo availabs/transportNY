@@ -4,9 +4,9 @@ import { ThemeContext, getComponentTheme } from '~/modules/dms/packages/dms/src/
 import Icon from '~/modules/dms/packages/dms/src/ui/components/Icon'
 
 const defaultSites = [
-  { name: 'NPMRDS',       subdomain: 'npmrds2',       icon: 'Pages' },
+  { name: 'NPMRDS',       subdomain: 'npmrds',       icon: 'Pages' },
   { name: 'Freight Atlas', subdomain: 'freightatlas', icon: 'Pages' },
-  { name: 'TSMO', subdomain: 'tsmo2', icon: 'Pages' },
+  { name: 'TSMO', subdomain: 'tsmo', icon: 'Pages' },
    { name: 'Sandbox',         subdomain: 'sandbox',         icon: 'Pages' },
 ]
 

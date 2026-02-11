@@ -782,15 +782,23 @@ const brConfig = [
     path: "/batchreportsnew",
     component: BatchReports,
     mainNav: true,
-    icon: 'fa fa-table-list',
-    auth: true
+    icon: 'fa-duotone fa-table-list',
+    auth: true,
+    sideNav: {
+      color: 'dark',
+      size: 'compact'
+    }
   },
   { name:'Batch Report',
     path: "/batchreportsnew/report/:batchreportId",
     component: BatchReports,
     mainNav: false,
-    icon: 'fa fa-table-list',
-    auth: true
+    icon: 'fa-duotone fa-table-list',
+    auth: true,
+    sideNav: {
+      color: 'dark',
+      size: 'compact'
+    }
   }
 ]
 export default brConfig

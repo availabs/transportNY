@@ -5,7 +5,7 @@
   "homepage": "/",
   "dependencies": {
     "@availabs/avl-falcor": "^0.0.3",
-    "@availabs/dms": "^0.1.5",
+    "@availabs/dms": "^0.1.9",
     "@carbon/icons-react": "^11.69.0",
     "@hello-pangea/dnd": "^16.5.0",
     "@heroicons/react": "^2.2.0",
@@ -76,7 +76,7 @@
     "xhr2": "^0.2.1"
   },
   "scripts": {
-    "analyze": "source-map-explorer 'build/static/js/*.js'",
+    "analyze": "npx vite-bundle-analyzer",
     "dev": "vite",
     "deploy": "netlify deploy --site 37adb33e-9f6a-45ca-9fe3-bda2a94542d6 --prod",
     "deploy-prod": "netlify deploy --site 481f8c89-adbd-4766-88ce-de34745460c6 --prod",

@@ -33,33 +33,25 @@ const Map = () => {
 
 
 const MapConfig = [
-  { icon: 'fa fa-map',
+  { icon: 'fa-duotone fa-map',
     path: '/map',
     exact: true,
     mainNav: true,
-    menuSettings: {
-      display: 'none',
-      image: 'none',
-      scheme: 'color-scheme-dark',
-      position: 'menu-position-side',
-      layout: 'menu-layout-mini',
-      style: 'color-style-default'
+    sideNav: {
+      color: 'dark',
+      size: 'compact'
     },
     name: 'Macro',
     auth: true,
     component: Map
   },
-  { icon: 'fa fa-map',
+  { icon: 'fa-duotone fa-map',
     path: '/map/:geoid/:year/:measure',
     exact: true,
     mainNav: false,
-    menuSettings: {
-      display: 'none',
-      image: 'none',
-      scheme: 'color-scheme-dark',
-      position: 'menu-position-side',
-      layout: 'menu-layout-mini',
-      style: 'color-style-default'
+    sideNav: {
+      color: 'dark',
+      size: 'compact'
     },
     name: 'Macro',
     auth: true,

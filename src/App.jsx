@@ -1,13 +1,9 @@
-import React, { useEffect, useMemo} from 'react';
-import { createBrowserRouter, RouterProvider } from "react-router";
-import Layout from '~/layout/ppdaf-layout'
+import React, { useMemo } from 'react';
 import LayoutWrapper from '~/layout/LayoutWrapper'
 import get from 'lodash/get'
 
-import { getSubdomain }  from '~/utils'
-
-
-
+import { getSubdomain } from '~/utils'
+import transportNYDataTypes, { mapPlugins } from '~/pages/TransportNYDataTypes'
 import {
   DmsSite,
   adminConfig,
@@ -63,10 +59,9 @@ const App = (props) => {
       return siteOutpt
   },[SUBDOMAIN])
 
-  const WrappedRoutes =  useMemo(() => {
+  const WrappedRoutes = useMemo(() => {
     const Routes = [...site.Routes, ...DefaultRoutes]
-    //console.log('routes',SUBDOMAIN, Routes, )
-    return LayoutWrapper(Routes, Layout)
+    return LayoutWrapper(Routes)
   }, [site])
 
   return (
@@ -83,6 +78,7 @@ const App = (props) => {
       pgEnvs={[defaultPgEnv]}
       themes={themes}
       damaBaseUrl={damaBaseUrl}
+      damaDataTypes={transportNYDataTypes}
       API_HOST={API_HOST}
       AUTH_HOST={AUTH_HOST}
       PROJECT_NAME={PROJECT_NAME}
