@@ -8,7 +8,7 @@ import { useFalcor } from "~/modules/avl-components/src"
 // import { useAuth } from "@availabs/ams"
 import { useAuth } from "~/modules/dms/packages/dms/src"
 
-import transportNYDataTypes, { mapPlugins } from '~/pages/TransportNYDataTypes'
+import transportNYDataTypes, { mapPlugins } from '~/pages/TransportNYDataTypesVOld'
 
 const DAMA_ARGS = {
   baseUrl: '/datasourcesv1',

@@ -10,9 +10,11 @@ import { get } from "lodash";
 import DatePicker from "react-datepicker";
 import moment from "moment";
 
-import { DamaContext } from "~/pages/DataManager/store";
+import { useFalcor } from "@availabs/avl-falcor";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 import { DAMA_HOST } from "~/config";
-import { useFalcor, ScalableLoading } from "~/modules/avl-components/src";
+import { ScalableLoading } from "~/modules/avl-components/src";
 
 function getMonthlyDateRanges(startDate, endDate) {
     const ranges = [];
@@ -150,10 +152,12 @@ const getAttributes = (data) =>
 
 export default function NpmrdsManage({
     source,
-    views,
-    activeViewId
+    params
 }) {
-    const { user: ctxUser, pgEnv } = useContext(DamaContext);
+    const { view_id: activeViewId } = params;
+    const { views } = source;
+    const { user: ctxUser, datasources } = useContext(DatasetsContext);
+    const pgEnv = getExternalEnv(datasources);
     const { falcor, falcorCache } = useFalcor();
     const navigate = useNavigate();
 
@@ -167,15 +171,14 @@ export default function NpmrdsManage({
 
     useEffect(() => {
         const fetchData = async () => {
-            const lengthPath = ["dama", pgEnv, "sources", "length"];
+            const lengthPath = ["uda", pgEnv, "sources", "length"];
             const resp = await falcor.get(lengthPath);
             await falcor.get([
-                "dama",
+                "uda",
                 pgEnv,
                 "sources",
                 "byIndex",
                 { from: 0, to: get(resp.json, lengthPath, 0) - 1 },
-                "attributes",
                 Object.values(SourceAttributes),
             ]);
         };
@@ -186,7 +189,7 @@ export default function NpmrdsManage({
     const activeView = useMemo(() => {
         return views.find((v) => Number(v.view_id) === Number(activeViewId));
     }, [activeViewId, views]);
-
+console.log({activeView})
     const { npmrds_production_source_id, npmrds_production_view_id, transcom_source_id } = useMemo(() => {
         return activeView?.metadata || {};
     }, [activeView]);
@@ -198,29 +201,29 @@ export default function NpmrdsManage({
 
     // -----------------------------------------------------------------------------------------------------------------------
     const geomSource = useMemo(() => {
-        return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
-            .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
+        return Object.values(get(falcorCache, ["uda", pgEnv, "sources", "byIndex"], {}))
+            .map(v => getAttributes(get(falcorCache, v?.value, {})))
             .find(f => Number(f?.source_id) === Number(npmrds_production_source_id))
     }, [falcorCache, pgEnv, npmrds_production_source_id]);
 
     useEffect(() => {
         async function fetchData() {
-            const geomLengthPath = ["dama", pgEnv, "sources", "byId", npmrds_production_source_id, "views", "length"];
+            const geomLengthPath = ["uda", pgEnv, "sources", "byId", npmrds_production_source_id, "views", "length"];
             const geomViewsLen = await falcor.get(geomLengthPath);
 
             await falcor.get([
-                "dama", pgEnv, "sources", "byId", npmrds_production_source_id, "views", "byIndex",
+                "uda", pgEnv, "sources", "byId", npmrds_production_source_id, "views", "byIndex",
                 { from: 0, to: get(geomViewsLen.json, geomLengthPath, 0) - 1 },
-                "attributes", ['view_id', 'version', 'metadata']
+                ['view_id', 'version', 'metadata']
             ]);
         }
         fetchData();
     }, [falcor, pgEnv, npmrds_production_source_id]);
 
     const geomView = useMemo(() => {
-        return npmrds_production_source_id && (Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byId", npmrds_production_source_id, "views", "byIndex"], {}))
+        return npmrds_production_source_id && (Object.values(get(falcorCache, ["uda", pgEnv, "sources", "byId", npmrds_production_source_id, "views", "byIndex"], {}))
             .map(v =>
-                Object.entries(get(falcorCache, v?.value, { "attributes": {} })["attributes"])
+                Object.entries(get(falcorCache, v?.value, {}))
                     .reduce((out, attr) => {
                         const [k, v] = attr
                         typeof v.value !== 'undefined' ?

@@ -18,6 +18,8 @@
 
 ## data-types
 
+- [ ] Migrate all data type components to UDA routes in new `TransportNYDataTypesV2/` directory (see [migrate-datatypes-to-uda.md](./tasks/current/migrate-datatypes-to-uda.md))
+
 ### data-types/npmrds
 
 ### data-types/map21

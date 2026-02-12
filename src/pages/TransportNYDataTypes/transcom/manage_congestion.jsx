@@ -7,17 +7,22 @@ import {
     DialogTitle,
 } from "@headlessui/react";
 
-import { DamaContext } from "~/pages/DataManager/store";
+import { useFalcor } from "@availabs/avl-falcor";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 import { DAMA_HOST } from "~/config";
 import { ScalableLoading } from "~/modules/avl-components/src";
 
 
 export default function ManageCongestion({
     source,
-    views,
-    activeViewId
+    params
 }) {
-    const { user: ctxUser, pgEnv } = useContext(DamaContext);
+    const { view_id: activeViewId } = params;
+    console.log({activeViewId})
+    const { views } = source;
+    const { user: ctxUser, datasources } = useContext(DatasetsContext);
+    const pgEnv = getExternalEnv(datasources);
     const navigate = useNavigate();
 
     const [loading, setLoading] = React.useState(false);
@@ -26,7 +31,7 @@ export default function ManageCongestion({
     const [showModal, setShowModal] = useState(false);
 
     const activeView = useMemo(() => {
-        return views.find((v) => Number(v.view_id) === Number(activeViewId));
+        return activeViewId ? views.find((v) => Number(v.view_id) === Number(activeViewId)) : views[0];
     }, [activeViewId, views]);
 
     const update = async () => {

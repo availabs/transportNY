@@ -2,8 +2,9 @@ import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router";
 import { get } from "lodash";
 
-import { DamaContext } from "~/pages/DataManager/store";
-import { useFalcor } from "~/modules/avl-components/src";
+import { useFalcor } from "@availabs/avl-falcor";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 
 const scheduleAttributes = {
     name: "name",
@@ -17,7 +18,8 @@ const scheduleAttributes = {
 
 export default function ListSchedules({
 }) {
-    const { user: ctxUser, pgEnv } = useContext(DamaContext);
+    const { user: ctxUser, datasources } = useContext(DatasetsContext);
+    const pgEnv = getExternalEnv(datasources);
     const { falcor, falcorCache } = useFalcor();
     const navigate = useNavigate();
 
