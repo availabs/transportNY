@@ -5,7 +5,9 @@ import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 
 import { getAttributes } from '~/pages/DataManager/Source/attributes';
 
-import { DamaContext } from "~/pages/DataManager/store";
+import { useFalcor } from "@availabs/avl-falcor";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 import Publish from "./publish";
 
 export const Select = ({ selectedOption, options, setSelecteOptions, visibleField, defaultText }) => {
@@ -71,7 +73,9 @@ const Create = ({ source }) => {
     const [selectedpm3Source, setSelectedpm3Source] = useState(null);
     const [selectedGeomView, setSelectedGeomView] = useState(null);
     const [selectedpm3View, setSelectedpm3View] = useState(null);
-    const { pgEnv, falcor, falcorCache, user } = useContext(DamaContext);
+    const { user, datasources } = useContext(DatasetsContext);
+    const { falcor, falcorCache } = useFalcor();
+    const pgEnv = getExternalEnv(datasources);
 
     useEffect(() => {
         async function fetchData() {

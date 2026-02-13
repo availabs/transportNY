@@ -1,6 +1,7 @@
 import React, { useMemo, useContext, useEffect } from 'react';
-import { DamaContext } from "~/pages/DataManager/store";
-import { useFalcor } from "~/modules/avl-components/src";
+import { useFalcor } from "@availabs/avl-falcor";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 import { get } from "lodash";
 import {
   ViewAttributes,
@@ -10,7 +11,8 @@ import {
 
 const SelectMpoBoundariesSource = ({ dispatch, selectedMpoBoundariesViewId, selectedMpoBoundariesSourceId }) => {
   const { falcor, falcorCache } = useFalcor();
-  const { pgEnv } = useContext(DamaContext);
+  const { datasources } = useContext(DatasetsContext);
+  const pgEnv = getExternalEnv(datasources);
   const handleSourceChange = (event) => {
     const selected = event.target.value;
     dispatch({ type: "update", payload: { selectedMpoBoundariesSourceId: selected } });
