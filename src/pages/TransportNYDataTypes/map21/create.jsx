@@ -10,11 +10,12 @@ import {
   Transition,
 } from "@headlessui/react";
 
-import { DamaContext } from "~/pages/DataManager/store";
+import { useFalcor } from "@availabs/avl-falcor";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 import PublishMap21 from "./publish";
 import {
   SourceAttributes,
-  ViewAttributes,
   getAttributes,
 } from "~/pages/DataManager/Source/attributes";
 const Create = ({ source, newVersion }) => {
@@ -23,21 +24,22 @@ const Create = ({ source, newVersion }) => {
   const [year, setYear] = useState(2024);
   const [loading, setLoading] = useState(false);
 
-  const { pgEnv, user, falcor, falcorCache } = React.useContext(DamaContext);
+  const { user, datasources } = React.useContext(DatasetsContext);
+  const { falcor, falcorCache } = useFalcor();
+  const pgEnv = getExternalEnv(datasources);
 
   useEffect(() => {
     async function fetchData() {
-      const lengthPath = ["dama", pgEnv, "sources", "length"];
+      const lengthPath = ["uda", pgEnv, "sources", "length"];
       const resp = await falcor.get(lengthPath);
 
       await falcor.get(
         [
-          "dama",
+          "uda",
           pgEnv,
           "sources",
           "byIndex",
           { from: 0, to: get(resp.json, lengthPath, 0) - 1 },
-          "attributes",
           Object.values(SourceAttributes),
         ],
         ["dama-info", pgEnv, "settings"]
@@ -49,11 +51,11 @@ const Create = ({ source, newVersion }) => {
 
   const sources = useMemo(() => {
     return Object.values(
-      get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {})
+      get(falcorCache, ["uda", pgEnv, "sources", "byIndex"], {})
     )
       .map((v) =>
         getAttributes(
-          get(falcorCache, v.value, { attributes: {} })["attributes"]
+          get(falcorCache, v.value, {})
         )
       )
       .filter((source) => source.type === "npmrds");

@@ -2,15 +2,16 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import "react-datepicker/dist/react-datepicker.css";
 import get from "lodash/get";
-import { DAMA_HOST } from "~/config";
+import { useFalcor } from "@availabs/avl-falcor";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 
-import { DamaContext } from "~/pages/DataManager/store";
-
-export const AnalysisPage = (props) => {
-  const { views } = props;
-  const { pgEnv, user, falcor, falcorCache } = React.useContext(DamaContext);
+export const AnalysisPage = ({source}) => {
+  const { views } = source;
+  const { datasources } = React.useContext(DatasetsContext);
+  const { falcor, falcorCache } = useFalcor();
+  const pgEnv = getExternalEnv(datasources);
   const { sourceId, viewId, vPage } = useParams();
-  // console.log("AnalysisPage views::", views)
 
   const headers = [
     "version",
@@ -29,13 +30,13 @@ export const AnalysisPage = (props) => {
   ];
 
   const sourceNames = useMemo(() => {
-    const sources = get(falcorCache, ["dama", pgEnv, "sources", "byId"]);
-    const sourceNames = Object.keys(sources).reduce((acc, sId) => {
+    const sources = get(falcorCache, ["uda", pgEnv, "sources", "byId"]);
+    const sourceNames = Object.keys(sources || {}).reduce((acc, sId) => {
       const curSource = sources[sId];
       acc[sId] =
-        typeof curSource?.attributes?.display_name === "string"
-          ? curSource?.attributes?.display_name
-          : curSource?.attributes?.name;
+        typeof curSource?.display_name === "string"
+          ? curSource?.display_name
+          : curSource?.name;
       return acc;
     }, {});
 
@@ -58,12 +59,11 @@ export const AnalysisPage = (props) => {
         (fView) => fView.npmrds_prod_source_id
       );
       await falcor.get([
-        "dama",
+        "uda",
         pgEnv,
         "sources",
         "byId",
         prodSourceIds,
-        "attributes",
         ["type", "name", "display_name"],
       ]);
     };

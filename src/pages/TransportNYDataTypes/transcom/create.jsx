@@ -6,7 +6,9 @@ import DatePicker from "react-datepicker";
 import moment from "moment";
 import "react-datepicker/dist/react-datepicker.css";
 
-import { DamaContext } from "~/pages/DataManager/store";
+import { useFalcor } from "@availabs/avl-falcor";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 import { getAttributes } from '~/pages/DataManager/Source/attributes';
 import Publish from "./publish";
 
@@ -74,7 +76,9 @@ const Create = ({ source }) => {
     const [selectedGeomSource, setselectedGeomSource] = useState(null);
     const [selectedMap21Source, setselectedMap21Source] = useState(null);
     const [selectedNpmrdsProductionSource, setselectedNpmrdsProductionSource] = useState(null);
-    const { pgEnv, falcor, falcorCache, user } = useContext(DamaContext);
+    const { user, datasources } = useContext(DatasetsContext);
+    const { falcor, falcorCache } = useFalcor();
+    const pgEnv = getExternalEnv(datasources);
 
     useEffect(() => {
         async function fetchData() {

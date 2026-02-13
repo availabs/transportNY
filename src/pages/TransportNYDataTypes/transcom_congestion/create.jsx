@@ -8,7 +8,9 @@ import "react-datepicker/dist/react-datepicker.css";
 
 import { getAttributes } from '~/pages/DataManager/Source/attributes';
 
-import { DamaContext } from "~/pages/DataManager/store";
+import { useFalcor } from "@availabs/avl-falcor";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 import Publish from "./publish";
 
 export const Select = ({ selectedOption, options, setSelecteOptions, visibleField, defaultText }) => {
@@ -75,7 +77,9 @@ const Create = ({ source }) => {
     const [selectedNpmrdsProductionSource, setselectedNpmrdsProductionSource] = useState(null);
     const [startTime, setstartTime] = useState(null);
     const [endTime, setendTime] = useState(null);
-    const { pgEnv, falcor, falcorCache, user } = useContext(DamaContext);
+    const { user, datasources } = useContext(DatasetsContext);
+    const { falcor, falcorCache } = useFalcor();
+    const pgEnv = getExternalEnv(datasources);
 
     useEffect(() => {
         async function fetchData() {

@@ -54,13 +54,13 @@ These are user-facing pages most likely to be visited. Migrated in place in `Tra
 
 Migrate in place in `TransportNYDataTypes/`.
 
-- [ ] `map21/create.jsx` — DamaContext, "dama" routes, "attributes" nesting
-- [ ] `map21/analysis.jsx` — DamaContext, "dama" routes, "attributes" nesting
-- [ ] `pm3/create.jsx` — DamaContext, "dama" routes, "attributes" nesting
-- [ ] `pm3_aggregate/create.jsx` — DamaContext, "dama" routes, "attributes" nesting
-- [ ] `excessive_delay/create.jsx` — DamaContext, "dama" routes, "attributes" nesting
-- [ ] `transcom/create.jsx` — DamaContext, "dama" routes, "attributes" nesting
-- [ ] `transcom_congestion/create.jsx` — DamaContext, "dama" routes, "attributes" nesting
+- [x] `map21/create.jsx` — DamaContext, "dama" routes, "attributes" nesting
+- [x] `map21/analysis.jsx` — DamaContext, "dama" routes, "attributes" nesting
+- [x] `pm3/create.jsx` — DamaContext, "dama" routes, "attributes" nesting
+- [x] `pm3_aggregate/create.jsx` — DamaContext, "dama" routes, "attributes" nesting
+- [x] `excessive_delay/create.jsx` — DamaContext, "dama" routes, "attributes" nesting
+- [x] `transcom/create.jsx` — DamaContext, "dama" routes, "attributes" nesting
+- [x] `transcom_congestion/create.jsx` — DamaContext, "dama" routes, "attributes" nesting
 - [ ] `freight_bottlenecks/create.jsx` — DamaContext, "dama" routes, "attributes" nesting (10+ falcor paths)
 - [ ] `production_transfer/create.jsx` — DamaContext, pgEnv fix
 - [ ] `analytics/create.jsx` — DamaContext, pgEnv fix
