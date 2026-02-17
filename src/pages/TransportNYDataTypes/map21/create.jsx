@@ -21,7 +21,11 @@ import {
 const Create = ({ source, newVersion }) => {
   const [npmrdsSourceId, setNpmrdsSourceId] = useState("");
   const [percentTmc, setPercentTmc] = useState(100);
-  const [year, setYear] = useState(2024);
+
+  const currentYear = new Date().getFullYear();
+  const lastYear = currentYear - 1;
+
+  const [year, setYear] = useState(lastYear);
   const [loading, setLoading] = useState(false);
 
   const { user, datasources } = React.useContext(DatasetsContext);
