@@ -15,6 +15,7 @@ export const AnalysisPage = ({source}) => {
 
   const headers = [
     "version",
+    "created_at",
     "year",
     "num_tmcs",
     "total_miles",
@@ -98,16 +99,32 @@ export const AnalysisPage = ({source}) => {
                     if(key === "raw_view_id" && view["rawViewIdsForYear"]) {
                       dataKey = "rawViewIdsForYear";
                     }
-                    const isNum = dataKey !== 'year' && !!parseFloat(view[dataKey]);
+                    const isNum = dataKey !== 'year' && dataKey !== "created_at" && !!parseFloat(view[dataKey]);
                     const isArray = Array.isArray(view[dataKey]);
+
+                    const displayVal =
+                      dataKey === "version"
+                        ? view[dataKey] || view.view_id
+                        : isArray
+                          ? view[dataKey].join(", ")
+                          : isNum
+                            ? parseFloat(view[dataKey]).toLocaleString()
+                            : dataKey === "created_at"
+                              ? new Date(view[dataKey]).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "2-digit",
+                                    day: "2-digit",
+                                    year: "numeric",
+                                  },
+                                )
+                              : view[dataKey];
                     return (
                       <td
                         key={`${view.view_id}.${dataKey}`}
                         className="py-2 px-4 bg-gray-200 text-left border-b"
                       >
-                        {dataKey === "version"
-                          ? view[dataKey] || view.view_id
-                          : isArray ? view[dataKey].join(", "): isNum ? parseFloat(view[dataKey]).toLocaleString() : view[dataKey]}
+                        {displayVal}
                       </td>
                     );
                   })}
