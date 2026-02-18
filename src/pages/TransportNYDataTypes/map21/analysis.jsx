@@ -14,7 +14,7 @@ export const AnalysisPage = ({source}) => {
   const { sourceId, viewId, vPage } = useParams();
 
   const headers = [
-    "version",
+    "name",
     "created_at",
     "year",
     "num_tmcs",
@@ -101,9 +101,9 @@ export const AnalysisPage = ({source}) => {
                     }
                     const isNum = dataKey !== 'year' && dataKey !== "created_at" && !!parseFloat(view[dataKey]);
                     const isArray = Array.isArray(view[dataKey]);
-
+                    console.log({dataKey, view})
                     const displayVal =
-                      dataKey === "version"
+                      dataKey === "name"
                         ? view[dataKey] || view.view_id
                         : isArray
                           ? view[dataKey].join(", ")
