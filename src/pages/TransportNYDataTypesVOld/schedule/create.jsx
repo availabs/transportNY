@@ -7,10 +7,7 @@ import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 
 import { getAttributes } from '~/pages/DataManager/Source/attributes';
 
-import { useFalcor } from "@availabs/avl-falcor";
-import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
-import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js'
-
+import { DamaContext } from "~/pages/DataManager/store";
 import Publish from "./publish";
 import Cron from "./cron";
 
@@ -75,9 +72,7 @@ const TRANSCOM_TYPE = 'transcom';
 const types = [NPMRDS_RAW_TYPE, TRANSCOM_TYPE];
 const Create = ({ source }) => {
     const [loading, setLoading] = useState(false);
-  const { user, datasources } = useContext(DatasetsContext);
-  const { falcor, falcorCache } = useFalcor();
-    const pgEnv = getExternalEnv(datasources);
+    const { pgEnv, falcor, falcorCache, user } = useContext(DamaContext);
     const [type, setType] = useState(null);
     const [cron, setCron] = useState(null);
     const [selectedView, setSelectView] = useState(null);
@@ -86,51 +81,48 @@ const Create = ({ source }) => {
 
     useEffect(() => {
         async function fetchData() {
-            const geomLengthPath = ["uda", pgEnv, "sources", "length"];;
+            const geomLengthPath = ["dama", pgEnv, "sources", "length"];
             const sourceLen = await falcor.get(geomLengthPath);
 
             await falcor.get([
-              "uda",
-              pgEnv,
-              "sources",
-              "byIndex",
-              { from: 0, to: get(sourceLen.json, geomLengthPath, 0) - 1 },
-              ["source_id", "metadata", "categories", "name", "type"],
+                "dama", pgEnv, "sources", "byIndex",
+                { from: 0, to: get(sourceLen.json, geomLengthPath, 0) - 1 },
+                "attributes", ['source_id', 'metadata', 'categories', 'name', 'type']
             ]);
         }
         fetchData();
     }, [falcor, pgEnv]);
 
     const typeSources = useMemo(() => {
-        return Object.values(get(falcorCache, ["uda", pgEnv, "sources", "byIndex"], {}))
-            .map(v => getAttributes(get(falcorCache, v?.value, { })))
+        return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
+            .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
             .filter(s => s.type === type)
     }, [falcorCache, pgEnv, type]);
 
     const npmrdsSources = useMemo(() => {
-        return Object.values(get(falcorCache, ["uda", pgEnv, "sources", "byIndex"], {}))
-            .map(v => getAttributes(get(falcorCache, v?.value, { })))
+        return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
+            .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
             .filter(s => s.type.toLowerCase() === "npmrds")   
     }, [falcorCache, type, pgEnv])
 
     useEffect(() => {
         async function fetchData() {
-            const geomLengthPath = ["uda", pgEnv, "sources", "byId", selectedSource?.source_id, "views", "length"];
+            const geomLengthPath = ["dama", pgEnv, "sources", "byId", selectedSource?.source_id, "views", "length"];
             const geomViewsLen = await falcor.get(geomLengthPath);
 
             await falcor.get([
-                "uda", pgEnv, "sources", "byId", selectedSource?.source_id, "views", "byIndex",
+                "dama", pgEnv, "sources", "byId", selectedSource?.source_id, "views", "byIndex",
                 { from: 0, to: get(geomViewsLen.json, geomLengthPath, 0) - 1 },
-                ['view_id', 'version', 'metadata']
+                "attributes", ['view_id', 'version', 'metadata']
             ]);
         }
         fetchData();
     }, [falcor, pgEnv, selectedSource]);
 
     const typeViews = useMemo(() => {
-        return selectedSource?.source_id && (Object.values(get(falcorCache, ["uda", pgEnv, "sources", "byId", selectedSource?.source_id, "views", "byIndex"], {}))
+        return selectedSource?.source_id && (Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byId", selectedSource?.source_id, "views", "byIndex"], {}))
             .map(v =>
-                Object.entries(get(falcorCache, v?.value, { "attributes": {} }))
+                Object.entries(get(falcorCache, v?.value, { "attributes": {} })["attributes"])
                     .reduce((out, attr) => {
                         const [k, v] = attr
                         typeof v.value !== 'undefined' ?
@@ -265,8 +257,8 @@ const InputRow = ({ inputs }) => {
   return (
     <div className="flex flex-row mt-4 mb-6">
       <div className="basis-1/4" />
-      {inputs.map((input,i) => {
-        return <InputContainer key={`input_row_${i}_${input.label}`} label={input.label} input={input.control} />;
+      {inputs.map((input) => {
+        return <InputContainer label={input.label} input={input.control} />;
       })}
       <div className="basis-1/4" />
     </div>
