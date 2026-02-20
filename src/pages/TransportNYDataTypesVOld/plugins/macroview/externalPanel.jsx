@@ -20,7 +20,8 @@ import { CMSContext } from "~/modules/dms/packages/dms/src";
 import { usePrevious } from "~/pages/DataManager/MapEditor/components/LayerManager/utils";
 import { choroplethPaint } from "~/pages/DataManager/MapEditor/components/LayerEditor/datamaps";
 import { npmrdsPaint } from "./paint";
-
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { useFalcor } from "@availabs/avl-falcor";
 import {
   REGION_CODE_TO_NAME,
   UA_CODE_TO_NAME,
@@ -41,8 +42,10 @@ import {
 const ExternalPanel = ({ state, setState, pathBase = "" }) => {
   const dctx = React.useContext(DamaContext);
   const cctx = React.useContext(CMSContext);
-  const ctx = dctx?.falcor ? dctx : cctx;
-  let { falcor, falcorCache, pgEnv, baseUrl } = ctx;
+  const ctx = cctx?.falcor ? cctx : dctx;
+  const { datasources } = ctx;
+  const pgEnv = getExternalEnv(datasources);
+  const { falcor, falcorCache } = useFalcor();
 
   if (!falcorCache) {
     falcorCache = falcor.getCache();

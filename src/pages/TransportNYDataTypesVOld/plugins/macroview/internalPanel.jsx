@@ -17,9 +17,12 @@ import {
 import {
   setInitialGeomStyle,
 } from "./utils";
-
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { useFalcor } from "@availabs/avl-falcor";
 const InternalPanel = ({ state, setState }) => {
-  const { falcor, falcorCache, pgEnv, baseUrl } = React.useContext(DamaContext);
+  const { datasources } = React.useContext(DamaContext);
+  const pgEnv = getExternalEnv(datasources);
+  const { falcor, falcorCache } = useFalcor();
   // console.log("internal panel state::", state)
   //if a layer is selected, use the source_id to get all the associated views
   let symbologyLayerPath = "";
