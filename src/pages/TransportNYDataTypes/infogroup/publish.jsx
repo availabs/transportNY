@@ -8,6 +8,7 @@ import {
   MPO_BOUNDARIES_PREFIX,
   UA_BOUNDARIES_PREFIX,
   REGION_BOUNDARIES_PREFIX,
+  RAW_INFOGROUP_PREFIX,
 } from "./create";
 
 const infogroupPublish = async (props, navigate, pgEnv) => {
@@ -31,33 +32,35 @@ const infogroupPublish = async (props, navigate, pgEnv) => {
     [`${UA_BOUNDARIES_PREFIX}ViewId`]: props?.[`${UA_BOUNDARIES_PREFIX}ViewId`],
     [`${REGION_BOUNDARIES_PREFIX}SourceId`]: props?.[`${REGION_BOUNDARIES_PREFIX}SourceId`],
     [`${REGION_BOUNDARIES_PREFIX}ViewId`]: props?.[`${REGION_BOUNDARIES_PREFIX}ViewId`],
+    [`${RAW_INFOGROUP_PREFIX}SourceId`]: props?.[`${RAW_INFOGROUP_PREFIX}SourceId`],
+    [`${RAW_INFOGROUP_PREFIX}ViewId`]: props?.[`${RAW_INFOGROUP_PREFIX}ViewId`],
   };
-console.log({publishData})
-  // try {
-  //   console.log("attempting to make infogroup source", publishData)
-  //   const res = await fetch(
-  //     `${DAMA_HOST}/dama-admin/${pgEnv}/infogroup/publish`,
-  //     {
-  //       method: "POST",
-  //       body: JSON.stringify(publishData),
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //     }
-  //   );
-  //   const publishFinalEvent = await res.json();
-  //   console.log("publishFinalEvent: ", publishFinalEvent);
-  //   const { source_id } = publishFinalEvent;
+  console.log({publishData})
+  try {
+    console.log("attempting to make infogroup source", publishData)
+    const res = await fetch(
+      `${DAMA_HOST}/dama-admin/${pgEnv}/infogroup/publish`,
+      {
+        method: "POST",
+        body: JSON.stringify(publishData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const publishFinalEvent = await res.json();
+    console.log("publishFinalEvent: ", publishFinalEvent);
+    const { source_id } = publishFinalEvent;
 
-  //   console.log(source_id);
-  //   props.setLoading(false);
-  //   if (source_id) {
-  //     navigate(`/datasources/source/${source_id}`);
-  //   }
-  // } catch (err) {
-  //   props.setLoading(false);
-  //   console.log("error : ", err);
-  // }
+    console.log(source_id);
+    props.setLoading(false);
+    if (source_id) {
+      navigate(`/datasources/source/${source_id}`);
+    }
+  } catch (err) {
+    props.setLoading(false);
+    console.log("error : ", err);
+  }
 };
 
 export default function PublishInfogroup(props) {

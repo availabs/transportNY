@@ -36,6 +36,7 @@ export function reducer(state, action) {
 export const MPO_BOUNDARIES_PREFIX = "mpoBoundaries"
 export const UA_BOUNDARIES_PREFIX = "uaBoundaries"
 export const REGION_BOUNDARIES_PREFIX = "regionBoundaries"
+export const RAW_INFOGROUP_PREFIX = "rawInfogroup"
 const BlankComponent = () => <></>;
 export default function InfogroupCreate({
   source = {},
@@ -72,6 +73,8 @@ export default function InfogroupCreate({
     [`${UA_BOUNDARIES_PREFIX}ViewId`]: '',
     [`${REGION_BOUNDARIES_PREFIX}SourceId`]: '',
     [`${REGION_BOUNDARIES_PREFIX}ViewId`]: '',
+    [`${RAW_INFOGROUP_PREFIX}SourceId`]: '',
+    [`${RAW_INFOGROUP_PREFIX}ViewId`]: '',
   });
   const { npmrdsSourceId, years, damaViewId } = state;
   useEffect(() => {
@@ -242,7 +245,9 @@ export default function InfogroupCreate({
     !!state[`${UA_BOUNDARIES_PREFIX}ViewId`] &&
     !!state[`${UA_BOUNDARIES_PREFIX}SourceId`] &&
     !!state[`${REGION_BOUNDARIES_PREFIX}ViewId`] &&
-    !!state[`${REGION_BOUNDARIES_PREFIX}SourceId`];
+    !!state[`${REGION_BOUNDARIES_PREFIX}SourceId`] && 
+    !!state[`${RAW_INFOGROUP_PREFIX}ViewId`] &&
+    !!state[`${RAW_INFOGROUP_PREFIX}SourceId`];
   const isButtonEnabled = (sourceId || damaSourceName) && isMetadataProvided;
   return (
     <div className="w-full my-4">
@@ -258,10 +263,19 @@ export default function InfogroupCreate({
           <div className="flex flex-col gap-4">
             <SelectMetadataSource
               dispatch={dispatch}
+              stateMetadataPrefix={RAW_INFOGROUP_PREFIX}
+              selectedViewId={state[`${RAW_INFOGROUP_PREFIX}ViewId`]}
+              selectedSourceId={state[`${RAW_INFOGROUP_PREFIX}SourceId`]}
+              inputLabel="Raw Infogroup"
+              sourceCat="raw_infogroup"
+            />
+            <SelectMetadataSource
+              dispatch={dispatch}
               stateMetadataPrefix={MPO_BOUNDARIES_PREFIX}
               selectedViewId={state[`${MPO_BOUNDARIES_PREFIX}ViewId`]}
               selectedSourceId={state[`${MPO_BOUNDARIES_PREFIX}SourceId`]}
               inputLabel="MPO Boundaries"
+              sourceCat="tmc_metadata"
             />
             <SelectMetadataSource
               dispatch={dispatch}
@@ -269,6 +283,7 @@ export default function InfogroupCreate({
               selectedViewId={state[`${UA_BOUNDARIES_PREFIX}ViewId`]}
               selectedSourceId={state[`${UA_BOUNDARIES_PREFIX}SourceId`]}
               inputLabel="UA Boundaries"
+              sourceCat="tmc_metadata"
             />
             <SelectMetadataSource
               dispatch={dispatch}
@@ -276,6 +291,7 @@ export default function InfogroupCreate({
               selectedViewId={state[`${REGION_BOUNDARIES_PREFIX}ViewId`]}
               selectedSourceId={state[`${REGION_BOUNDARIES_PREFIX}SourceId`]}
               inputLabel="Region Boundaries"
+              sourceCat="tmc_metadata"
             />
           </div>
           <PublishInfogroup

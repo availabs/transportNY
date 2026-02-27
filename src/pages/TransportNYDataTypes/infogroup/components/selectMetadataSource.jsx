@@ -11,7 +11,7 @@ import {
 /**
  * This needs a state key as well
  */
-const SelectMetadataSource = ({ dispatch, stateMetadataPrefix, inputLabel="metadata", selectedViewId, selectedSourceId }) => {
+const SelectMetadataSource = ({ dispatch, sourceCat, stateMetadataPrefix, inputLabel="metadata", selectedViewId, selectedSourceId }) => {
   const { falcor, falcorCache } = useFalcor();
   const { datasources } = useContext(DatasetsContext);
   const pgEnv = getExternalEnv(datasources);
@@ -29,7 +29,7 @@ const SelectMetadataSource = ({ dispatch, stateMetadataPrefix, inputLabel="metad
     pgEnv,
     "sources",
     "byCategory",
-    "tmc_metadata",
+    sourceCat,
   ]
   useEffect(() => {
     falcor.get(tmcMetaSourcesPath);
@@ -105,7 +105,7 @@ const SelectMetadataSource = ({ dispatch, stateMetadataPrefix, inputLabel="metad
           onChange={handleSourceChange}
         >
           <option value="" disabled>
-            -- Select a Metadata Source --
+            -- Select a Source --
           </option>
           {existingMetaSources?.map((source) => (
             <option key={`${stateMetadataPrefix}_source_option_${source.source_id}`} value={source.source_id}>
@@ -122,7 +122,7 @@ const SelectMetadataSource = ({ dispatch, stateMetadataPrefix, inputLabel="metad
           onChange={handleViewChange}
         >
           <option value="" disabled>
-            -- Select a Metadata View --
+            -- Select a View --
           </option>
           {views?.map((view) => (
             <option key={`${stateMetadataPrefix}_view_option_${view.view_id}`} value={view.view_id}>
