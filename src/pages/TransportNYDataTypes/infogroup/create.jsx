@@ -236,8 +236,14 @@ export default function InfogroupCreate({
   if(!isValidYearRange){
     errMsg = 'Date range must be contained within the same calendar year.' 
   }
-
-  const isButtonEnabled = (sourceId || damaSourceName) && (years.length || (startDate && endDate)) && npmrdsSourceId && isValidYearRange;
+  const isMetadataProvided =
+    !!state[`${MPO_BOUNDARIES_PREFIX}ViewId`] &&
+    !!state[`${MPO_BOUNDARIES_PREFIX}SourceId`] &&
+    !!state[`${UA_BOUNDARIES_PREFIX}ViewId`] &&
+    !!state[`${UA_BOUNDARIES_PREFIX}SourceId`] &&
+    !!state[`${REGION_BOUNDARIES_PREFIX}ViewId`] &&
+    !!state[`${REGION_BOUNDARIES_PREFIX}SourceId`];
+  const isButtonEnabled = (sourceId || damaSourceName) && isMetadataProvided;
   return (
     <div className="w-full my-4">
       <div className="flex flex-col items-center justify-center p-2">
@@ -282,6 +288,7 @@ export default function InfogroupCreate({
             name={source?.name}
             type={source?.type}
             pgEnv={pgEnv}
+            disabled={!isButtonEnabled}
           />
         </div>
 

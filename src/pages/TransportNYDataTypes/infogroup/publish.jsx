@@ -63,7 +63,6 @@ console.log({publishData})
 export default function PublishInfogroup(props) {
   const navigate = useNavigate();
   const { loading, setLoading, pgEnv, ...restProps } = props;
-  
   const handlePublishClick = useCallback(() => {
     infogroupPublish({ ...restProps, setLoading }, navigate, pgEnv);
   }, [restProps, navigate, setLoading]);

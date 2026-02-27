@@ -19,7 +19,6 @@ const SelectMetadataSource = ({ dispatch, stateMetadataPrefix, inputLabel="metad
     const selected = event.target.value;
     dispatch({ type: "update", payload: { [`${stateMetadataPrefix}SourceId`]: selected } });
   };
-  console.log({selectedViewId, selectedSourceId})
   const handleViewChange = (event) => {
     const selected = event.target.value;
     dispatch({ type: "update", payload: { [`${stateMetadataPrefix}ViewId`]: selected } });
@@ -39,42 +38,6 @@ const SelectMetadataSource = ({ dispatch, stateMetadataPrefix, inputLabel="metad
   const existingMetaSources = useMemo(() => {
     return get(falcorCache, tmcMetaSourcesPath, {})?.value
   },[falcorCache])
-
-  // useEffect(() => {
-  //   async function getData() {
-  //     console.log("getting data")
-  //     const lengthPath = [
-  //       "dama",
-  //       pgEnv,
-  //       "sources",
-  //       "byId",
-  //       selectedSourceId,
-  //       "views",
-  //       "length",
-  //     ];
-
-  //     const resp = await falcor.get(lengthPath);
-  //     await falcor.get([
-  //       "dama",
-  //       pgEnv,
-  //       "sources",
-  //       "byId",
-  //       selectedSourceId,
-  //       "views",
-  //       "byIndex",
-  //       {
-  //         from: 0,
-  //         to: get(resp.json, lengthPath, 0) - 1,
-  //       },
-  //       "attributes",
-  //       Object.values(ViewAttributes),
-  //     ]).then(res => console.log("views res::", res));
-  //   }
-  //   if(selectedSourceId) {
-  //     getData();
-  //   }
-  // }, [selectedSourceId])
-
 
   useEffect(() => {
     const getData = async () => {
@@ -119,7 +82,6 @@ const SelectMetadataSource = ({ dispatch, stateMetadataPrefix, inputLabel="metad
 
 
   const views = useMemo(() => {
-    console.log(falcorCache)
     return Object.values(
       get(
         falcorCache,
