@@ -1,8 +1,11 @@
 import LogoNav from './LogoNav'
 import QuickLinks from './QuickLinks'
-
+import AddPageButton from './components/AddPageButton'
 
 const theme = {
+  pageComponents: {
+    "AddPageButton": AddPageButton,
+  },
   "pages": {
     "sectionGroup": {
       "sideNavContainer1": "w-[302px] hidden xl:block",
