@@ -67,6 +67,7 @@ export default function InfogroupCreate({
     sourceType: type,
     startDate: '',
     endDate: '',
+    simplified: false,
     [`${MPO_BOUNDARIES_PREFIX}SourceId`]: '',
     [`${MPO_BOUNDARIES_PREFIX}ViewId`]: '',
     [`${UA_BOUNDARIES_PREFIX}SourceId`]: '',
@@ -230,6 +231,10 @@ export default function InfogroupCreate({
     );
   }, [falcorCache, sourceId, pgEnv]);
 
+  const handleSimplifiedChange = (event) => {
+    const selected = event.target.checked;
+    dispatch({ type: "update", payload: { simplified: selected } });
+  };
 
   if (!sourceId && !damaSourceName) {
     return <div> Please enter a datasource name.</div>;
@@ -251,15 +256,11 @@ export default function InfogroupCreate({
   const isButtonEnabled = (sourceId || damaSourceName) && isMetadataProvided;
   return (
     <div className="w-full my-4">
-      <div className="flex flex-col items-center justify-center p-2">
-
-      </div>
-
       <div className="md:flex md:items-center gap-4 flex-col">
         <div className="text-red-500 text-sm">
           {errMsg}
         </div>
-        <div className="md:flex md:items-center gap-4">
+        <div className="md:flex md:items-center gap-4 w-full">
           <div className="flex flex-col gap-4">
             <SelectMetadataSource
               dispatch={dispatch}
@@ -293,6 +294,15 @@ export default function InfogroupCreate({
               inputLabel="Region Boundaries"
               sourceCat="tmc_metadata"
             />
+          </div>
+          <div className="flex">
+            <div className="mr-2">
+              Simplified
+            </div>
+              
+              <input type="checkbox" onChange={handleSimplifiedChange} checked={state.simplified}/>
+          
+
           </div>
           <PublishInfogroup
             {...state}

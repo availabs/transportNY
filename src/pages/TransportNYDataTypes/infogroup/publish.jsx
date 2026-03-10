@@ -17,7 +17,7 @@ const infogroupPublish = async (props, navigate, pgEnv) => {
   const publishData = {
     source_values: {
       name: props?.name,
-      type:  props?.type
+      type: 'gis_dataset'
     },
     newVersion: props?.newVersion,
     source_id: props?.source_id || null,
@@ -26,6 +26,7 @@ const infogroupPublish = async (props, navigate, pgEnv) => {
     name: props?.name,
     type: props?.type || "infogroup",
     pgEnv: pgEnv || props?.pgEnv,
+    simplified: props?.simplified,
     [`${MPO_BOUNDARIES_PREFIX}SourceId`]: props?.[`${MPO_BOUNDARIES_PREFIX}SourceId`],
     [`${MPO_BOUNDARIES_PREFIX}ViewId`]: props?.[`${MPO_BOUNDARIES_PREFIX}ViewId`],
     [`${UA_BOUNDARIES_PREFIX}SourceId`]: props?.[`${UA_BOUNDARIES_PREFIX}SourceId`],
