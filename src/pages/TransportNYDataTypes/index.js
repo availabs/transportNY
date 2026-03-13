@@ -20,6 +20,7 @@ import osm_upload from "./osm"
 import osm_pgr_upload from "./osm_pgr"
 
 import infogroup from './infogroup'
+import qcew_processed from "./qcew_processed"
 
 import { MacroviewPlugin } from "./plugins/macroview/macroview.plugin";
 import { PointselectorPlugin } from "./plugins/pointselector/pointselector.plugin";
@@ -43,7 +44,8 @@ const transportNYDataTypes = {
   pm3_aggregate,
   osm_upload,
   osm_pgr_upload,
-  infogroup
+  infogroup,
+  qcew_processed
 }
 
 export const mapPlugins = {
