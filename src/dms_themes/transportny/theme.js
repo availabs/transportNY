@@ -1,10 +1,12 @@
 import LogoNav from './LogoNav'
 import QuickLinks from './QuickLinks'
+import Header from './components/Header'
 import AddPageButton from './components/AddPageButton'
 
 const theme = {
   pageComponents: {
     "AddPageButton": AddPageButton,
+    Header
   },
   "pages": {
     "sectionGroup": {
@@ -265,6 +267,13 @@ const theme = {
         "name": "header",
         "wrapper1": "w-full h-full flex-1 flex flex-row",
         "wrapper2": "flex flex-1 w-full  flex-col  relative min-h-[200px]",
+        "wrapper3": "",
+        "wrapepr3": ""
+      },
+      {
+        "name": "action_section",
+        "wrapper1": "bg-[#1a46b3] w-full h-full flex-1 flex flex-row ",
+        "wrapper2": "flex flex-1 w-full  flex-col  relative min-h-[60px]",
         "wrapper3": "",
         "wrapepr3": ""
       }
