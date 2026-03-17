@@ -158,11 +158,11 @@ const MonthGrid = () => {
   const { falcor, falcorCache } = useFalcor();
 
   React.useEffect(() => {
-    falcor.get(["geo", "36", "geoLevels"])
+    falcor.get(["geo2", "36", "geoLevels"])
   }, [falcor]);
 
   const counties = React.useMemo(() => {
-    return get(falcorCache, ["geo", "36", "geoLevels", "value"], [])
+    return get(falcorCache, ["geo2", "36", "geoLevels", "value"], [])
       .filter(({ geolevel }) => geolevel === "COUNTY")
       .map(geo => ({ ...geo, geo: `${geo.geolevel}|${geo.geoid}` }))
       .sort((a, b) => a.geo.localeCompare(b.geo))
@@ -180,16 +180,15 @@ const MonthGrid = () => {
 
   React.useEffect(() => {
     if (!counties.length) return;
-    falcor.get(["geo", counties.map(c => c.geo), year, "tmclinear"])
+    falcor.get(["geo2", counties.map(c => c.geo), year, "tmclinear"])
 
   }, [falcor, counties, year]);
 
   const tmclinearsByCounties = React.useMemo(() => {
     return counties.reduce((acc, c) => {
-      const linears = get(falcorCache, ["geo", c.geo, year, "tmclinear", "value"], []);
+      const linears = get(falcorCache, ["geo2", c.geo, year, "tmclinear", "value"], []);
 
-      acc[c.geo] = linears
-        .filter(l => normalizeDirection(l.direction))
+      acc[c.geo] = linears?.filter(l => normalizeDirection(l.direction))
         .map(l => {
           const roadName = l.roadname != null ? l.roadname : "Unamed Road";
           return {

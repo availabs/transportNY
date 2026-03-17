@@ -1,0 +1,455 @@
+import React from "react";
+import mapboxgl from "mapbox-gl";
+import get from "lodash/get";
+import set from "lodash/set";
+
+import { scaleLinear } from "d3-scale"
+
+import { DAMA_HOST } from "~/config";
+import { DamaContext } from "~/pages/DataManager/store";
+
+import {
+  useFetchSources,
+  useGetSources,
+  useFetchSourceViews,
+  useGetViews,
+  SourceAndViewSelectors
+} from "./utils"
+
+const EMPTY_COLLECTION = {
+  type: "FeatureCollection",
+  features: []
+}
+
+const OsmResultSource = {
+  id: "osm-result-source",
+  source: {
+    type: "geojson",
+    data: EMPTY_COLLECTION
+  }
+}
+const OsmResultLayer = {
+  id: "osm-result-layer",
+  type: "line",
+  source: "osm-result-source",
+  paint: {
+    "line-width": 4,
+    "line-color": "#ffffff",
+    "line-offset": 2
+  }
+}
+
+/**
+ * Some ideas:
+ * If user clicks button, `point selector` mode is enabled/disabled
+ * If enabled, map click adds the lng/lat to state var
+ * When user clicks `calculate route` button, it sends to "API"
+ *
+ * EVENTUALLY -- will prob want to have internal panel control that can set activeLayer
+ * And mapClick will only allow user to pick lng/lat that is in activeLayer
+ * Perhaps it will snap to closest or something?
+ */
+
+export const RoutingPlugin = {
+  id: "routing",
+  type: "plugin",
+  mapRegister: (map, state, setState) => {
+  },
+  dataUpdate: (map, state, setState) => {
+  },
+  internalPanel: ({ state, setState }) => {
+    return []
+  },
+  externalPanel: ({ state, setState }) => {
+    return [];
+  },
+  cleanup: (map, state, setState) => {
+  },
+  comp: ({ map }) => {
+
+    const [clickedPoint, setClickedPoint] = React.useState(null);
+
+    const click = React.useCallback(e => {
+      if (e.originalEvent.ctrlKey) {
+        setClickedPoint({ ...e.lngLat });
+      }
+    }, []);
+
+    React.useEffect(() => {
+      if (!map || map._removed) return;
+
+      map.on("click", click);
+      return () => {
+        if (!map || map._removed) return;
+
+        map.off("click", click);
+      };
+    }, [map, click]);
+
+    const [markers, setMarkers] = React.useState([]);
+
+    const removeMarker = React.useCallback(index => {
+      if (!map || map._removed) return;
+
+      const points = markers.map(m => {
+        m.remove();
+        return { ...m.getLngLat() };
+      });
+      points.splice(index, 1);
+
+      const num = points.length - 1;
+
+      const colorScale = scaleLinear()
+        .domain([0, num * 0.5, num])
+        .range(["#1a9850", "#ffffbf", "#d73027" ]);
+
+      setMarkers(
+        points.map((p, i) =>
+          new mapboxgl.Marker({ color: colorScale(i), draggable: true })
+                        .setLngLat(p)
+                        .on("dragend", dragend)
+                        .addTo(map)
+        )
+      )
+    }, [markers, map]);
+
+    const removeLast = React.useCallback(e => {
+      if (!map || map._removed) return;
+
+      const points = markers.map(m => {
+        m.remove();
+        return { ...m.getLngLat() };
+      });
+
+      points.pop();
+
+      const num = points.length - 1;
+
+      const colorScale = scaleLinear()
+        .domain([0, num * 0.5, num])
+        .range(["#1a9850", "#ffffbf", "#d73027" ]);
+
+      setMarkers(
+        points.map((p, i) =>
+          new mapboxgl.Marker({ color: colorScale(i), draggable: true })
+                        .setLngLat(p)
+                        .on("dragend", dragend)
+                        .addTo(map)
+        )
+      )
+    }, [markers, map]);
+
+    const clearMarkers = React.useCallback(() => {
+      markers.forEach(m => m.remove());
+      setMarkers([]);
+    }, [markers]);
+
+    const dragend = React.useCallback(e => {
+      setMarkers(prev => [...prev]);
+    }, []);
+
+    React.useEffect(() => {
+      if (!map || map._removed) return;
+
+      if (clickedPoint) {
+
+        const prevPoints = markers.map(m => {
+          m.remove();
+          return { ...m.getLngLat() };
+        });
+
+        const colorScale = scaleLinear()
+          .domain([0, prevPoints.length * 0.5, prevPoints.length])
+          .range(["#1a9850", "#ffffbf", "#d73027" ]);
+
+        setMarkers(
+          [...prevPoints, clickedPoint].map((p, i) =>
+            new mapboxgl.Marker({ color: colorScale(i), draggable: true })
+                          .setLngLat(p)
+                          .on("dragend", dragend)
+                          .addTo(map)
+          )
+        )
+        setClickedPoint(null);
+      }
+    }, [map, clickedPoint, markers, dragend]);
+
+    const points = React.useMemo(() => {
+      return markers.map(m => ({ ...m.getLngLat() }));
+    }, [markers]);
+
+    const [osmDataView, setOsmDataView] = React.useState(null);
+    const [conflationDataView, setConflationDataView] = React.useState(null);
+
+    const okToSend = React.useMemo(() => {
+      return (points.length >= 2) &&
+              Boolean(osmDataView) &&
+              Boolean(conflationDataView);
+    }, [points, osmDataView, conflationDataView]);
+
+    const [loading, setLoading] = React.useState(false);
+
+    const { pgEnv } = React.useContext(DamaContext);
+
+    const [resultFeature, setResultFeature] = React.useState(EMPTY_COLLECTION);
+
+    const hasResultFeature = React.useMemo(() => {
+      return resultFeature.type === "Feature";
+    }, [resultFeature]);
+
+    const clearResultFeature = React.useCallback(() => {
+      setResultFeature(EMPTY_COLLECTION);
+    }, []);
+
+    const sendRequest = React.useCallback(() => {
+      if (!okToSend) return;
+
+      setLoading(true);
+
+      const formData = new FormData();
+
+      formData.append("osm_view_id", osmDataView);
+      formData.append("conflation_view_id", conflationDataView);
+      formData.append("points", JSON.stringify(points));
+
+      fetch(
+        `${ DAMA_HOST }/dama-admin/${ pgEnv }/osm/routing`,
+        { method: "POST", body: formData }
+      ).then(res => res.json())
+        .then(json => {
+          console.log("RES:", json);
+          const f = json.ok ? json.result.feature : EMPTY_COLLECTION;
+          setResultFeature(f);
+        })
+        .finally(() => setLoading(false));
+    }, [okToSend, points, osmDataView, conflationDataView, pgEnv]);
+
+    React.useEffect(() => {
+      if (!map || map._removed) return;
+
+      if (!map.getSource(OsmResultSource.id)) {
+        map.addSource(OsmResultSource.id, OsmResultSource.source);
+      }
+
+      if (map.getSource(OsmResultSource.id)) {
+        map.addLayer(OsmResultLayer);
+      }
+
+      return () => {
+        if (!map || map._removed) return;
+
+        if (map.getLayer(OsmResultLayer.id)) {
+          map.removeLayer(OsmResultLayer.id);
+        }
+        if (map.getSource(OsmResultSource.id)) {
+          map.removeSource(OsmResultSource.id);
+        }
+      }
+    }, [map]);
+
+    React.useEffect(() => {
+      if (!map || map._removed) return;
+
+      if (map.getSource(OsmResultSource.id)) {
+        map.getSource(OsmResultSource.id).setData(resultFeature);
+      }
+    }, [map, resultFeature]);
+
+    const colorScale = React.useMemo(() => {
+      const num = markers.length - 1;
+      return scaleLinear()
+        .domain([0, num * 0.5, num])
+        .range(["#1a9850", "#ffffbf", "#d73027" ]);
+    }, [markers]);
+
+    return (
+      <div className={ `
+          pointer-events-auto w-screen max-w-xl h-fit grid grid-cols-1 gap-1
+          p-2 bg-white items-center absolute left-4 bottom-4 rounded-lg
+        ` }
+      >
+        { !loading ? null :
+          <div className={ `
+              absolute inset-0 bg-black bg-opacity-75 z-50
+              flex items-center justify-center
+              font-bold text-2xl text-white pointer-events-auto
+            ` }
+          >
+            Request sent...<br />...please wait...
+          </div>
+        }
+        <div className="border-b-2 border-current font-bold">
+          OSM Data Source and View
+        </div>
+        <div className="mb-2">
+          <OsmDataViewSelector setOsmDataView={ setOsmDataView }/>
+        </div>
+        <div className="mb-2">
+          <ConflationDataViewSelector setConflationDataView={ setConflationDataView }/>
+        </div>
+        <div className="border-b-2 border-current font-bold">
+          { !points.length ?
+            "Hold control and click map to add a point..." :
+            "Selected Points"
+          }
+        </div>
+        { !points.length ? null :
+          <div className="text-sm">
+            { points.map((p, i) => (
+                <Point key={ i } { ...p } index={ i }
+                  bgColor={ colorScale(i) }
+                  remove={ removeMarker }
+                  disabled={ loading }/>
+              ))
+            }
+          </div>
+        }
+        <div className="grid grid-cols-3 gap-1 text-sm">
+          <Button disabled={ !points.length || loading }
+            onClick={ removeLast }
+          >
+            Remove Last Point
+          </Button>
+          <Button disabled={ !points.length || loading }
+            onClick={ clearMarkers }
+          >
+            Remove All Points
+          </Button>
+          <Button disabled={ !hasResultFeature || loading }
+            onClick={ clearResultFeature }
+          >
+            Remove Geometry
+          </Button>
+          <div className="col-span-3">
+            <Button disabled={ !okToSend || loading }
+              onClick={ sendRequest }
+              className="bg-green-200 hover:bg-green-400 disabled:hover:bg-green-200"
+            >
+              Send Request
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+};
+
+const Point = ({ lng, lat, index, remove, bgColor, disabled }) => {
+  const doRemove = React.useCallback(e => {
+    remove(index);
+  }, [remove, index]);
+  return (
+    <div className="px-2 py-1 flex items-center first:rounded-t last:rounded-b"
+      style={ {
+        backgroundColor: bgColor
+      } }
+    >
+      <div className="flex-1 text-sm">
+        { lng.toFixed(4) }, { lat.toFixed(4) }
+      </div>
+      <div className="flex justify-center w-8 text-red-600 hover:text-red-700">
+        <Button onClick={ doRemove } disabled={ disabled }>
+          <span className="fa-solid fa-trash"/>
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+const Button = ({ children, className="bg-gray-200 hover:bg-gray-400 disabled:hover:bg-gray-200", ...props }) => {
+  return (
+    <button className={ `
+      w-full block rounded py-1 ${ className }
+      disabled:opacity-50
+      cursor-pointer disabled:cursor-not-allowed
+    ` }
+      { ...props }
+    >
+      { children }
+    </button>
+  )
+}
+
+const OSM_DATA_CATEGORIES = ["OSM Data"];
+const OSM_DATA_COLUMNS = ["osm_id", "wkb_geometry"];
+
+const OsmDataViewSelector = ({ setOsmDataView }) => {
+
+  const { pgEnv, falcor, falcorCache } = React.useContext(DamaContext);
+
+  const [createState, setCreateState] = React.useState({
+    osmDataSourceId: null,
+    osmDataViewId: null
+  });
+
+  useFetchSources({ falcor, falcorCache, pgEnv });
+  const osmDataSources = useGetSources({ falcorCache,
+                                          pgEnv,
+                                          categories: OSM_DATA_CATEGORIES,
+                                          columns: OSM_DATA_COLUMNS
+                                      });
+
+  useFetchSourceViews({ falcor, falcorCache, pgEnv, source_id: createState.osmDataSourceId });
+  const osmDataViews = useGetViews({ falcorCache, pgEnv, source_id: createState.osmDataSourceId });
+
+  React.useEffect(() => {
+    setOsmDataView(createState.osmDataViewId);
+  }, [setOsmDataView, createState.osmDataViewId]);
+
+  return (
+    <SourceAndViewSelectors
+      label="OSM Data"
+
+      sources={ osmDataSources }
+      sourceKey="osmDataSourceId"
+      sourceValue={ createState.osmDataSourceId }
+
+      views={ osmDataViews }
+      viewKey="osmDataViewId"
+      viewValue={ createState.osmDataViewId }
+
+      setCreateState={ setCreateState }/>
+  )
+}
+
+const CONFLATION_DATA_CATEGORIES = ["OSM Conflation"];
+const CONFLATION_DATA_COLUMNS = ["osm", "ris", "tmc", "osm_fwd"];
+
+const ConflationDataViewSelector = ({ setConflationDataView }) => {
+
+  const { pgEnv, falcor, falcorCache } = React.useContext(DamaContext);
+
+  const [createState, setCreateState] = React.useState({
+    conflationDataSourceId: null,
+    conflationDataViewId: null
+  });
+
+  useFetchSources({ falcor, falcorCache, pgEnv });
+  const conflationDataSources = useGetSources({ falcorCache,
+                                          pgEnv,
+                                          categories: CONFLATION_DATA_CATEGORIES,
+                                          columns: CONFLATION_DATA_COLUMNS
+                                      });
+
+  useFetchSourceViews({ falcor, falcorCache, pgEnv, source_id: createState.conflationDataSourceId });
+  const conflationDataViews = useGetViews({ falcorCache, pgEnv, source_id: createState.conflationDataSourceId });
+
+  React.useEffect(() => {
+    setConflationDataView(createState.conflationDataViewId);
+  }, [setConflationDataView, createState.conflationDataViewId]);
+
+  return (
+    <SourceAndViewSelectors
+      label="Conflation Data"
+
+      sources={ conflationDataSources }
+      sourceKey="conflationDataSourceId"
+      sourceValue={ createState.conflationDataSourceId }
+
+      views={ conflationDataViews }
+      viewKey="conflationDataViewId"
+      viewValue={ createState.conflationDataViewId }
+
+      setCreateState={ setCreateState }/>
+  )
+}

@@ -3,8 +3,9 @@ import { groupBy, orderBy } from "lodash";
 import moment from 'moment'
 
 export default function NpmrdsRawOverview({
-  views,
+  source,
 }) {
+  const { views } = source;
   const groupbyState = useMemo(() => {
     return groupBy(
       orderBy(
@@ -36,7 +37,7 @@ export default function NpmrdsRawOverview({
     "Extended TMC Percent",
     "Tmcs",
   ];
-
+  console.log({views})
   return (
     <div className="w-full p-5">
       <div className="flex m-3">

@@ -35,7 +35,6 @@ class ConflationLayer extends LayerContainer {
 
   fetchData(falcor) {
     const { year, tmcs = [] } = this.props;
-    console.log('Conflation Layer:', this.props);
     if (!(year && tmcs.length)) {
       return Promise.resolve();
     }
@@ -75,8 +74,6 @@ class ConflationLayer extends LayerContainer {
       get(corridors
         .filter(c => c.corridor === activeBranch),'[0].tmcs',{})
       )
-
-    // console.log('map corridorTmcs', corridors, corridorTmcs, activeBranch)
     
     const id2Caseid = (a) => [a.slice(0, 3), 'case', a.slice(3)].join('');
 

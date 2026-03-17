@@ -130,6 +130,7 @@ export default function NpmrdsManage({
   params
 }) {
   const {view_id: activeViewId} = params;
+  console.log({activeViewId})
   const { views } = source;
   const { user: ctxUser, datasources } = useContext(DatasetsContext);
   const { falcor, falcorCache } = useFalcor();

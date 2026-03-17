@@ -19,6 +19,8 @@ import schedule from "./schedule";
 import osm_upload from "./osm"
 import osm_pgr_upload from "./osm_pgr"
 
+import infogroup from './infogroup'
+
 import { MacroviewPlugin } from "./plugins/macroview/macroview.plugin";
 import { PointselectorPlugin } from "./plugins/pointselector/pointselector.plugin";
 import { RerouterPlugin } from "./plugins/rerouter/rerouter.plugin";
@@ -40,7 +42,8 @@ const transportNYDataTypes = {
   pm3,
   pm3_aggregate,
   osm_upload,
-  osm_pgr_upload
+  osm_pgr_upload,
+  infogroup
 }
 
 export const mapPlugins = {

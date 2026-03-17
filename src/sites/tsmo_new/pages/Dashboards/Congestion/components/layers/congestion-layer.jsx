@@ -242,7 +242,7 @@ class CongestionLayer extends LayerContainer {
 
       }, [])
 
-    let requests = [["geo", geolevel.toLowerCase(), value, "geometry"]]
+    let requests = [["geo2", geolevel.toLowerCase(), value, "geometry"]]
 
     return falcor.get(...requests);
   }
@@ -256,7 +256,7 @@ class CongestionLayer extends LayerContainer {
     const [geolevel, value] = region.split('|')
     const geom = get(
       falcorCache,
-      ["geo", geolevel.toLowerCase(), value, "geometry", "value"],
+      ["geo2", geolevel.toLowerCase(), value, "geometry", "value"],
       null
     )
 

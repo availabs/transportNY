@@ -4,9 +4,9 @@ import { useFalcor } from "~/modules/avl-components/src"
 
 export const useGeographies = () => {
   const { falcor, falcorCache } = useFalcor();
-  const geo = get(falcorCache, ["geo", 36, "geoLevels", "value"], []);
+  const geo = get(falcorCache, ["geo2", 36, "geoLevels", "value"], []);
   React.useEffect(() => {
-    falcor.get(["geo", 36, "geoLevels"]);
+    falcor.get(["geo2", 36, "geoLevels"]);
   }, [falcor]);
   return React.useMemo(() => {
     return [...geo].sort((a, b) => {

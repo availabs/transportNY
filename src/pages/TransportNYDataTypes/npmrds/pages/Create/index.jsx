@@ -4,7 +4,8 @@ import React, {
   useEffect,
   useContext,
 } from "react";
-import { DamaContext } from "~/pages/DataManager/store";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 import { DAMA_HOST } from "~/config";
 import { reducer } from "./components/reducer";
 import PublishNpmrds from "./components/publish";
@@ -29,7 +30,8 @@ export default function NpmrdsCreate({
   CustomAttributes = BlankComponent,
 }) {
   const { name: damaSourceName, source_id: sourceId, type } = source;
-  const { pgEnv, user: ctxUser } = useContext(DamaContext);
+  const { user: ctxUser, datasources } = useContext(DatasetsContext);
+  const pgEnv = getExternalEnv(datasources);
 
   const [loading, setLoading] = useState(false);
   const [state, dispatch] = useReducer(reducer, {

@@ -7,8 +7,9 @@ import React, {
 } from "react";
 import get from "lodash/get";
 import DatePicker from "react-datepicker";
-import { DamaContext } from "~/pages/DataManager/store";
-import { DAMA_HOST } from "~/config";
+import { useFalcor } from "@availabs/avl-falcor";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 import {
   SourceAttributes,
   ViewAttributes,
@@ -37,8 +38,9 @@ export default function Pm3Create({
   newVersion
 }) {
   const { name: damaSourceName, source_id: sourceId, type } = source;
-  const { pgEnv, user: ctxUser, falcor, falcorCache } = useContext(DamaContext);
-  console.log("in pm3 aggregate create")
+  const { user: ctxUser, datasources } = useContext(DatasetsContext);
+  const { falcor, falcorCache } = useFalcor();
+  const pgEnv = getExternalEnv(datasources);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [loading, setLoading] = useState(false);
@@ -53,7 +55,6 @@ export default function Pm3Create({
     dataType: dataType,
     sourceType: type,
   });
-  console.log("state::",state)
   const { pm3SourceId, pm3ViewId, years } = state;
 
   useEffect(() => {
@@ -74,17 +75,16 @@ export default function Pm3Create({
 
   useEffect(() => {
     async function fetchData() {
-      const lengthPath = ["dama", pgEnv, "sources", "length"];
+      const lengthPath = ["uda", pgEnv, "sources", "length"];
       const resp = await falcor.get(lengthPath);
 
       await falcor.get(
         [
-          "dama",
+          "uda",
           pgEnv,
           "sources",
           "byIndex",
           { from: 0, to: get(resp.json, lengthPath, 0) - 1 },
-          "attributes",
           Object.values(SourceAttributes),
         ],
         ["dama-info", pgEnv, "settings"]
@@ -96,11 +96,11 @@ export default function Pm3Create({
 
   const sources = useMemo(() => {
     return Object.values(
-      get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {})
+      get(falcorCache, ["uda", pgEnv, "sources", "byIndex"], {})
     )
       .map((v) =>
         getAttributes(
-          get(falcorCache, v.value, { attributes: {} })["attributes"]
+          get(falcorCache, v.value, {})
         )
       )
       .filter((source) => source.type === "pm3");
@@ -114,9 +114,8 @@ export default function Pm3Create({
 
   useEffect(() => {
     async function getData() {
-      console.log("getting view data")
       const lengthPath = [
-        "dama",
+        "uda",
         pgEnv,
         "sources",
         "byId",
@@ -127,7 +126,7 @@ export default function Pm3Create({
 
       const resp = await falcor.get(lengthPath);
       await falcor.get([
-        "dama",
+        "uda",
         pgEnv,
         "sources",
         "byId",
@@ -138,7 +137,6 @@ export default function Pm3Create({
           from: 0,
           to: get(resp.json, lengthPath, 0) - 1,
         },
-        "attributes",
         Object.values(ViewAttributes),
       ]);
     }
@@ -151,14 +149,13 @@ export default function Pm3Create({
     return Object.values(
       get(
         falcorCache,
-        ["dama", pgEnv, "sources", "byId", pm3SourceId, "views", "byIndex"],
+        ["uda", pgEnv, "sources", "byId", pm3SourceId, "views", "byIndex"],
         {}
       )
     ).map((v) =>
-      getAttributes(get(falcorCache, v.value, { attributes: {} })["attributes"])
+      getAttributes(get(falcorCache, v.value, {}))
     );
   }, [falcorCache, pm3SourceId, pgEnv]);
-  console.log({views})
 
   useEffect(() => {
     if(views && views.length === 1) {
@@ -170,7 +167,6 @@ export default function Pm3Create({
     return <div> Please enter a datasource name.</div>;
   }
   let errMsg = ''
-  console.log(!pm3SourceId)
   const isButtonEnabled = (sourceId || damaSourceName) && pm3SourceId && pm3ViewId;
   return (
     <div className="w-full my-4">

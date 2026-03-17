@@ -1,10 +1,10 @@
 import React, { Fragment, useState, useContext } from 'react';
-import { DAMA_HOST } from "~/config";
 import "react-datepicker/dist/react-datepicker.css";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 
-import { DamaContext } from "~/pages/DataManager/store";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 import Publish from "./publish";
 
 const Select = ({ selectedOption, options, setSelecteOptions, defaultText }) => {
@@ -72,7 +72,8 @@ const Create = ({ source }) => {
     const [schemaToTables, setSchemaToTables] = useState(null);
     const [schema, setSchema] = useState(null);
     const [table, setTable] = useState(null);
-    const { pgEnv, user } = useContext(DamaContext);
+    const { user, datasources, DAMA_HOST } = useContext(DatasetsContext);
+    const pgEnv = getExternalEnv(datasources);
 
     const checkValidateInfo = (formData) => {
         const requiredFields = [

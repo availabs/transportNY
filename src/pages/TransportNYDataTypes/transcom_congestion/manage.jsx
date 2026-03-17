@@ -9,9 +9,11 @@ import { get } from "lodash";
 import DatePicker from "react-datepicker";
 import moment from "moment";
 
-import { DamaContext } from "~/pages/DataManager/store";
+import { useFalcor } from "@availabs/avl-falcor";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 import { DAMA_HOST } from "~/config";
-import { useFalcor, ScalableLoading } from "~/modules/avl-components/src";
+import { ScalableLoading } from "~/modules/avl-components/src";
 
 function checkAndMergeDateRanges(
     currentStartDate,
@@ -130,10 +132,12 @@ const SourceAttributes = {
 
 export default function Manage({
     source,
-    views,
-    activeViewId
+    params
 }) {
-    const { user: ctxUser, pgEnv } = useContext(DamaContext);
+    const { view_id: activeViewId } = params;
+    const { views } = source;
+    const { user: ctxUser, datasources } = useContext(DatasetsContext);
+    const pgEnv = getExternalEnv(datasources);
     const { falcor, falcorCache } = useFalcor();
     const navigate = useNavigate();
     
@@ -148,15 +152,14 @@ export default function Manage({
 
     useEffect(() => {
         const fetchData = async () => {
-            const lengthPath = ["dama", pgEnv, "sources", "length"];
+            const lengthPath = ["uda", pgEnv, "sources", "length"];
             const resp = await falcor.get(lengthPath);
             await falcor.get([
-                "dama",
+                "uda",
                 pgEnv,
                 "sources",
                 "byIndex",
                 { from: 0, to: get(resp.json, lengthPath, 0) - 1 },
-                "attributes",
                 Object.values(SourceAttributes),
             ]);
         };
@@ -165,7 +168,7 @@ export default function Manage({
     }, [falcor]);
     
     const activeView = useMemo(() => {
-        return views.find((v) => Number(v.view_id) === Number(activeViewId));
+        return activeViewId ? views.find((v) => Number(v.view_id) === Number(activeViewId)) : views[0];
     }, [activeViewId, views]);
 
     const { npmrds_production_source_id } = useMemo(() => {
@@ -180,22 +183,22 @@ export default function Manage({
     // -----------------------------------------------------------------------------------------------------------------------
     useEffect(() => {
         async function fetchData() {
-            const geomLengthPath = ["dama", pgEnv, "sources", "byId", npmrds_production_source_id, "views", "length"];
+            const geomLengthPath = ["uda", pgEnv, "sources", "byId", npmrds_production_source_id, "views", "length"];
             const geomViewsLen = await falcor.get(geomLengthPath);
 
             await falcor.get([
-                "dama", pgEnv, "sources", "byId", npmrds_production_source_id, "views", "byIndex",
+                "uda", pgEnv, "sources", "byId", npmrds_production_source_id, "views", "byIndex",
                 { from: 0, to: get(geomViewsLen.json, geomLengthPath, 0) - 1 },
-                "attributes", ['view_id', 'version', 'metadata']
+                ['view_id', 'version', 'metadata']
             ]);
         }
         fetchData();
     }, [falcor, pgEnv, npmrds_production_source_id]);
 
     const geomView = useMemo(() => {
-        return (npmrds_production_source_id && (Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byId", npmrds_production_source_id, "views", "byIndex"], {}))
+        return (npmrds_production_source_id && (Object.values(get(falcorCache, ["uda", pgEnv, "sources", "byId", npmrds_production_source_id, "views", "byIndex"], {}))
             .map(v =>
-                Object.entries(get(falcorCache, v?.value, { "attributes": {} })["attributes"])
+                Object.entries(get(falcorCache, v?.value, {}))
                     .reduce((out, attr) => {
                         const [k, v] = attr
                         typeof v.value !== 'undefined' ?

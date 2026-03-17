@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useContext, useState, Fragment } from 'react';
-import { DamaContext } from "~/pages/DataManager/store";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 import Publish from "./publish";
 
 
 const Create = ({ source }) => {
     const [loading, setLoading] = useState(false);
-    const { pgEnv, user } = useContext(DamaContext);
+    const { user, datasources } = useContext(DatasetsContext);
+    const pgEnv = getExternalEnv(datasources);
 
     return (
         <div className="w-full p-5 m-5">
