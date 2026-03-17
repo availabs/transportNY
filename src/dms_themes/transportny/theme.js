@@ -1,10 +1,12 @@
 import LogoNav from './LogoNav'
 import QuickLinks from './QuickLinks'
+import Header from './components/Header'
 import AddPageButton from './components/AddPageButton'
 
 const theme = {
   pageComponents: {
     "AddPageButton": AddPageButton,
+    Header
   },
   "pages": {
     "sectionGroup": {
@@ -265,6 +267,13 @@ const theme = {
         "name": "header",
         "wrapper1": "w-full h-full flex-1 flex flex-row",
         "wrapper2": "flex flex-1 w-full  flex-col  relative min-h-[200px]",
+        "wrapper3": "",
+        "wrapepr3": ""
+      },
+      {
+        "name": "action_section",
+        "wrapper1": "bg-[#1a46b3] w-full h-full flex-1 flex flex-row ",
+        "wrapper2": "flex flex-1 w-full  flex-col  relative min-h-[60px]",
         "wrapper3": "",
         "wrapepr3": ""
       }
@@ -543,7 +552,7 @@ const theme = {
         "cellInner": "w-full min-h-full flex flex-wrap items-center truncate py-0.5 px-1 font-[400] text-[14px]  leading-[18px] text-slate-600",
         "cellBgOdd": "bg-gray-50 hover:bg-gray-100",
         "cellBgEven": "bg-white hover:bg-gray-100",
-        "cellBg": "bg-white hover:bg-gray-100",
+        "cellBg": "bg-white hover:bg-gray-100 p-2",
         "cellBgSelected": "bg-blue-50 hover:bg-blue-100",
         "totalCell": "hover:bg-gray-150",
         "cellEditableTextBox": "absolute border focus:outline-none min-w-[180px] min-h-[50px] z-[10] whitespace-pre-wrap",
@@ -570,7 +579,7 @@ const theme = {
         "openOutCloseIcon": "XMark",
         "openOutContainerWrapperBgColor": "#00000066",
         "openOutIconWrapper": "px-2 cursor-pointer bg-transparent text-gray-500 hover:text-gray-600",
-        "headerCellWrapper": "relative w-full",
+        "headerCellWrapper": "relative w-full px-3 py-2",
         "headerCellBtn": "group inline-flex items-center w-full justify-between gap-x-1.5 rounded-md cursor-pointer",
         "headerCellLabel": "truncate select-none",
         "headerCellBtnActive": "bg-gray-300",
@@ -591,31 +600,6 @@ const theme = {
         "headerCellControl": "p-0.5 w-full rounded-md bg-white group-hover:bg-gray-100 cursor-pointer"
       }
     ],
-    "tableContainer": "flex flex-col overflow-x-auto",
-    "tableContainerNoPagination": "",
-    "tableContainer1": "flex flex-col no-wrap min-h-[40px] max-h-[calc(78vh_-_10px)] overflow-y-auto",
-    "headerContainer": "sticky top-0 grid",
-    "thead": "flex justify-between",
-    "theadfrozen": "",
-    "thContainer": "w-full font-semibold px-3 py-1 content-center text-sm font-semibold text-gray-600",
-    "thContainerBgSelected": "bg-blue-100 text-gray-900",
-    "thContainerBg": "bg-gray-50 text-gray-500",
-    "cell": "relative flex items-center min-h-[35px]  border border-slate-50",
-    "cellInner": "\n        w-full min-h-full flex flex-wrap items-center truncate py-0.5 px-1\n        font-[400] text-[14px]  leading-[18px] text-slate-600\n    ",
-    "cellBg": "bg-white",
-    "cellBgSelected": "bg-blue-50",
-    "cellFrozenCol": "",
-    "paginationInfoContainer": "",
-    "paginationPagesInfo": "font-[500] text-[12px] uppercase text-[#2d3e4c] leading-[18px]",
-    "paginationRowsInfo": "text-xs",
-    "paginationContainer": "w-full p-2 flex items-center justify-between",
-    "paginationControlsContainer": "flex flex-row items-center overflow-hidden gap-0.5",
-    "pageRangeItem": "cursor-pointer px-3  text-[#2D3E4C] py-1  text-[12px] hover:bg-slate-50 font-[500] rounded  uppercase leading-[18px]",
-    "pageRangeItemInactive": "",
-    "pageRangeItemActive": "bg-slate-100 ",
-    "openOutContainer": "w-[330px] overflow-auto scrollbar-sm flex flex-col gap-[12px] p-[16px] bg-white h-full float-right",
-    "openOutContainerWrapper": "fixed inset-0 right-0 h-full w-full z-[100]",
-    "openOutHeader": "font-semibold text-gray-600"
   },
   "lexical": {},
   "dataCard": {

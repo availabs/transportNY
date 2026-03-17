@@ -4,11 +4,11 @@
   "private": true,
   "homepage": "/",
   "dependencies": {
-    "@availabs/avl-falcor": "^0.0.3",
-    "@availabs/dms": "^0.1.9",
+    "@availabs/dms": "^0.1.10",
     "@carbon/icons-react": "^11.69.0",
     "@hello-pangea/dnd": "^16.5.0",
     "@heroicons/react": "^2.2.0",
+    "@journeyapps/wa-sqlite": "^1.5.0",
     "@mapbox/shp-write": "^0.4.3",
     "@reduxjs/toolkit": "^1.8.0",
     "@turf/bbox": "^7.2.0",
@@ -73,7 +73,8 @@
     "vite": "^7.3.1",
     "web-vitals": "^0.2.4",
     "write-excel-file": "^2.0.9",
-    "xhr2": "^0.2.1"
+    "xhr2": "^0.2.1",
+    "yjs": "^13.6.30"
   },
   "scripts": {
     "analyze": "npx vite-bundle-analyzer",
