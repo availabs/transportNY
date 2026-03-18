@@ -258,21 +258,21 @@ const theme = {
     "styles": [
       {
         "name": "content",
-        "wrapper1": "w-full h-full flex-1 flex flex-row ",
+        "wrapper1": "w-full h-auto flex-1 flex flex-row ",
         "wrapper2": "flex flex-1 w-full  flex-col bg-white relative text-md font-light leading-7 h-full min-h-[200px]",
         "wrapper3": "",
         "wrapepr3": ""
       },
       {
         "name": "header",
-        "wrapper1": "w-full h-full flex-1 flex flex-row",
+        "wrapper1": "w-full h-auto flex-1 flex flex-row",
         "wrapper2": "flex flex-1 w-full  flex-col  relative min-h-[200px]",
         "wrapper3": "",
         "wrapepr3": ""
       },
       {
         "name": "action_section",
-        "wrapper1": "bg-[#1a46b3] w-full h-full flex-1 flex flex-row ",
+        "wrapper1": "bg-[#1a46b3] w-full h-auto flex-1 flex flex-row ",
         "wrapper2": "flex flex-1 w-full  flex-col  relative min-h-[60px]",
         "wrapper3": "",
         "wrapepr3": ""

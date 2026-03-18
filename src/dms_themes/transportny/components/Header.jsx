@@ -46,28 +46,30 @@ const Edit = ({ value, onChange }) => {
     };
 
     return (
-        <div class="bg-[url('/themes/transportny/transportNY_header_background.png')] flex items-center justify-center w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
-            <div className="px-12 py-10">
-                <div className="max-w-4xl">
+        <div className="relative bg-[url('/themes/transportny/transportNY_header_background.png')] bg-center bg-cover min-h-[340px] flex items-end justify-center">
+            <div className="absolute bottom-0 left-0 w-full h-[75%] bg-gradient-to-t from-white/80 to-transparent pointer-events-none"></div>
+            <div className="py-10 ml-[40px] w-2/3 relative">
+                <div className="max-w-2xl">
 
                     <input
-                        className="text-4xl font-bold bg-transparent outline-none w-full text-gray-900"
+                        className="text-[40px] font-semibold text-gray-900 tracking-tight leading-[1.2] bg-transparent outline-none w-full"
                         value={display.header || "Header"}
                         onChange={(e) => updateField("header", e.target.value)}
                     />
 
                     <input
-                        className="text-2xl mt-2 bg-transparent outline-none w-full text-gray-700"
+                        className="text-[24px] mt-2 font-medium text-gray-900 bg-transparent outline-none w-full"
                         value={display.sub_header || "Sub-Header"}
                         onChange={(e) => updateField("sub_header", e.target.value)}
                     />
 
                     <textarea
-                        className="mt-4 w-full bg-transparent outline-none text-gray-600 leading-relaxed"
+                        className="mt-4 text-[15px] font-normal text-gray-600 leading-relaxed bg-transparent outline-none w-full resize-none"
                         rows={3}
                         value={display.description || "Description"}
                         onChange={(e) => updateField("description", e.target.value)}
                     />
+
                 </div>
             </div>
         </div>
@@ -79,21 +81,23 @@ const View = ({ value }) => {
         value && isJson(value) ? JSON.parse(value) : {};
 
     return (
-        <div className="bg-[url('/themes/transportny/transportNY_header_background.png')] flex items-center justify-center w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
-            <div className="px-12 py-10">
-                <div className="max-w-4xl">
+        <div className="relative bg-[url('/themes/transportny/transportNY_header_background.png')] bg-center bg-cover min-h-[340px] flex items-end justify-center">
+            <div className="absolute bottom-0 left-0 w-full h-[75%] bg-gradient-to-t from-white/80 to-transparent pointer-events-none"></div>
+            <div className="py-10 ml-[40px] w-2/3 relative">
+                <div className="max-w-2xl">
 
-                    <h1 className="text-4xl font-bold text-gray-900">
+                    <h1 className="text-[40px] font-semibold text-gray-900 tracking-tight leading-[1.2]">
                         {cachedData.header || "Header"}
                     </h1>
 
-                    <h2 className="text-2xl mt-2 text-gray-700">
+                    <h2 className="text-[24px] mt-2 font-medium text-gray-900">
                         {cachedData.sub_header || "Sub-Header"}
                     </h2>
 
-                    <p className="mt-4 text-gray-600 leading-relaxed">
+                    <p className="mt-4 text-[15px] font-normal text-gray-600 leading-relaxed">
                         {cachedData.description || "Description"}
                     </p>
+
                 </div>
             </div>
         </div>
