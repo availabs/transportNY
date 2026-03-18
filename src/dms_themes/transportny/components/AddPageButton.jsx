@@ -19,7 +19,7 @@ const customTheme = {
                 'w-[238px] bg-white text-blue-500 border-l border-y' :
                 'w-[230px] hover:bg-blue-100 text-slate-600'
             }`,
-        AddPageButton: 'w-[230px] cursor-pointer px-4 py-2 mt-3 bg-blue-600 hover:bg-blue-500 text-white border-1 border-slate-200 font-bold',
+        AddPageButton: 'w-[230px] cursor-pointer px-4 py-2 mt-3 bg-[#1a46b3] hover:bg-blue-500 text-white border-1 border-slate-200 font-bold',
         expandCollapseButton: 'p-0.5 h-fit w-fit rounded-md text-blue-400 text-xs  hover:text-blue-500'
     },
   page: {
@@ -93,7 +93,7 @@ function AddPageButton(props) {
     }
     return (
         <>
-        <DeleteModal open={modalOpen} setOpen={setModalOpen} addItem={addItem} item={newItem} title="Create Page"/>
+        <NamePageModal open={modalOpen} setOpen={setModalOpen} addItem={addItem} item={newItem} title="Create Page"/>
         <div className='pr-2'>
             <div
                 onClick={() =>setModalOpen(true)}
@@ -106,7 +106,7 @@ function AddPageButton(props) {
     )
 }
 
-function DeleteModal({title, prompt, item = {}, open, setOpen, addItem}) {
+function NamePageModal({title, prompt, item = {}, open, setOpen, addItem}) {
   const cancelButtonRef = useRef(null)
   const {UI, theme} = React.useContext(ThemeContext);
   const {Dialog, Input} = UI
