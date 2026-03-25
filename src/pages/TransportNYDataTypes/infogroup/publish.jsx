@@ -9,6 +9,7 @@ import {
   UA_BOUNDARIES_PREFIX,
   REGION_BOUNDARIES_PREFIX,
   RAW_INFOGROUP_PREFIX,
+  NAICS_CODE_PREFIX
 } from "./create";
 
 const infogroupPublish = async (props, navigate, pgEnv) => {
@@ -35,6 +36,8 @@ const infogroupPublish = async (props, navigate, pgEnv) => {
     [`${REGION_BOUNDARIES_PREFIX}ViewId`]: props?.[`${REGION_BOUNDARIES_PREFIX}ViewId`],
     [`${RAW_INFOGROUP_PREFIX}SourceId`]: props?.[`${RAW_INFOGROUP_PREFIX}SourceId`],
     [`${RAW_INFOGROUP_PREFIX}ViewId`]: props?.[`${RAW_INFOGROUP_PREFIX}ViewId`],
+    [`${NAICS_CODE_PREFIX}SourceId`]: props?.[`${NAICS_CODE_PREFIX}SourceId`],
+    [`${NAICS_CODE_PREFIX}ViewId`]: props?.[`${NAICS_CODE_PREFIX}ViewId`],
   };
   console.log({publishData})
   try {
