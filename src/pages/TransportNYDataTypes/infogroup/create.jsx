@@ -37,6 +37,7 @@ export const MPO_BOUNDARIES_PREFIX = "mpoBoundaries"
 export const UA_BOUNDARIES_PREFIX = "uaBoundaries"
 export const REGION_BOUNDARIES_PREFIX = "regionBoundaries"
 export const RAW_INFOGROUP_PREFIX = "rawInfogroup"
+export const NAICS_CODE_PREFIX = "naicsCode"
 const BlankComponent = () => <></>;
 export default function InfogroupCreate({
   source = {},
@@ -76,6 +77,8 @@ export default function InfogroupCreate({
     [`${REGION_BOUNDARIES_PREFIX}ViewId`]: '',
     [`${RAW_INFOGROUP_PREFIX}SourceId`]: '',
     [`${RAW_INFOGROUP_PREFIX}ViewId`]: '',
+    [`${NAICS_CODE_PREFIX}SourceId`]: '',
+    [`${NAICS_CODE_PREFIX}ViewId`]: '',
   });
   const { npmrdsSourceId, years, damaViewId } = state;
   useEffect(() => {
@@ -252,7 +255,9 @@ export default function InfogroupCreate({
     !!state[`${REGION_BOUNDARIES_PREFIX}ViewId`] &&
     !!state[`${REGION_BOUNDARIES_PREFIX}SourceId`] && 
     !!state[`${RAW_INFOGROUP_PREFIX}ViewId`] &&
-    !!state[`${RAW_INFOGROUP_PREFIX}SourceId`];
+    !!state[`${RAW_INFOGROUP_PREFIX}SourceId`] &&
+    !!state[`${NAICS_CODE_PREFIX}ViewId`] &&
+    !!state[`${NAICS_CODE_PREFIX}SourceId`];
   const isButtonEnabled = (sourceId || damaSourceName) && isMetadataProvided;
   return (
     <div className="w-full my-4">
@@ -293,6 +298,14 @@ export default function InfogroupCreate({
               selectedSourceId={state[`${REGION_BOUNDARIES_PREFIX}SourceId`]}
               inputLabel="Region Boundaries"
               sourceCat="tmc_metadata"
+            />
+            <SelectMetadataSource
+              dispatch={dispatch}
+              stateMetadataPrefix={NAICS_CODE_PREFIX}
+              selectedViewId={state[`${NAICS_CODE_PREFIX}ViewId`]}
+              selectedSourceId={state[`${NAICS_CODE_PREFIX}SourceId`]}
+              inputLabel="NAICS code"
+              sourceCat="metadata"
             />
           </div>
           <div className="flex">
