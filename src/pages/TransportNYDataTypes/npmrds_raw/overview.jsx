@@ -27,6 +27,7 @@ export default function NpmrdsRawOverview({
   const headers = [
     "State",
     "View Id",
+    "Shapefile view Id",
     "Date Added",
     "NPMRDS Version",
     "Start Date",
@@ -83,10 +84,16 @@ export default function NpmrdsRawOverview({
                         {item?.view_id}
                       </td>
                       <td
-                        key={`${group}.${item?.['_created_timestamp']}`}
+                        key={`${group}.${item?.metadata?.tmc_identification_view_id}`}
                         className="py-2 px-4 border-b"
                       >
-                        {item?.['_created_timestamp'] && moment(item?.['_created_timestamp']).format("YYYY-MM-DD")}
+                        {item?.metadata?.tmc_identification_view_id}
+                      </td>
+                      <td
+                        key={`${group}.${item?.['created_at']}`}
+                        className="py-2 px-4 border-b"
+                      >
+                        {item?.['created_at'] && moment(item?.['created_at']).format("YYYY-MM-DD")}
                       </td>
                       <td
                         key={`${group}.npmrds_version.${index}`}
