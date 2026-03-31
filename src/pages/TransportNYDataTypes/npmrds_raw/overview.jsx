@@ -38,7 +38,7 @@ export default function NpmrdsRawOverview({
     "Extended TMC Percent",
     "Tmcs",
   ];
-  console.log({views})
+
   return (
     <div className="w-full p-5">
       <div className="flex m-3">
