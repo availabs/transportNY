@@ -19,7 +19,7 @@ import {
   ViewAttributes,
   getAttributes,
 } from "~/pages/DataManager/Source/attributes";
-
+import { MultiLevelSelect } from "~/modules/avl-map-2/src";
 export function reducer(state, action) {
   if (action.type === "update") {
     return {
@@ -38,7 +38,7 @@ const Create = ({ source, newVersion, dataType="map21" }) => {
   const currentYear = new Date().getFullYear();
   const lastYear = currentYear - 1;
 
-  const [year, setYear] = useState(lastYear);
+  const [years, setYears] = useState([lastYear]);
   const [loading, setLoading] = useState(false);
 
   const { user, datasources } = React.useContext(DatasetsContext);
@@ -180,8 +180,8 @@ const Create = ({ source, newVersion, dataType="map21" }) => {
   }, [currentDataSource]);
 
   useEffect(() => {
-    if (!year || !availableYears.includes(year)) {
-      setYear(availableYears[0]);
+    if (!years?.length) {
+      setYears([availableYears[0]]);
     }
   }, [availableYears]);
   
@@ -268,18 +268,21 @@ const Create = ({ source, newVersion, dataType="map21" }) => {
                 Year
               </div>
               <div className="flex pl-1">
-                <input
-                  disabled={!npmrdsSourceId}
-                  className={yearInputClass}
-                  type="number"
-                  max={availableYears[availableYears.length-1]}
-                  min={availableYears[0]}
-                  step={1}
+                <MultiLevelSelect
+                  isMulti={true}
+                  placeholder={"Select year(s)"}
+                  options={npmrdsSourceId ? availableYears : []}
+                  value={years}
                   onChange={(e) => {
-                    setYear(e.target.value);
+                    setYears(e);
+                    //dispatch({ type: "update", payload: { years:e } })
                   }}
-                  value={year}
                 />
+
+              <div className="flex px-2 pb-1 text-sm text-gray-600 capitalize">
+                Year
+              </div>
+
               </div>
             </div>
             <div className="w-[50%]">
@@ -305,10 +308,10 @@ const Create = ({ source, newVersion, dataType="map21" }) => {
           </div>
         </div>
       </div>
-      {npmrdsSourceId && year && source?.name ? (
+      {npmrdsSourceId && years.length && source?.name ? (
         <PublishMap21
           source_id={source?.source_id || null}
-          year={year}
+          years={years}
           npmrdsSourceId={npmrdsSourceId}
           loading={loading}
           setLoading={setLoading}

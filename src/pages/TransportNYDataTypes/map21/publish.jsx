@@ -19,7 +19,7 @@ const submitUpload = (props, navigate, pgEnv) => {
         percentTmc: props?.percentTmc || 100,
         name: props?.name,
         type: props?.type || "map21",
-        year: props.year,
+        years: props.years,
         user_id: props?.user_id,
         email: props?.email,
         pgEnv: pgEnv || props?.pgEnv,
