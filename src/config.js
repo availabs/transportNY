@@ -1,7 +1,7 @@
 export const PROJECT_NAME = "NPMRDS";
 
-let API_HOST = "https://graph.availabs.org";
-let AUTH_HOST = "https://graph.availabs.org";
+let API_HOST = "https://dmsserver.availabs.org";
+let AUTH_HOST = "https://dmsserver.availabs.org";
 let CLIENT_HOST = "https://transportny.org";
 let DAMA_HOST = "https://graph.availabs.org";
 
