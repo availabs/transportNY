@@ -1,36 +1,34 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import { Provider } from 'react-redux';
-import store from './store';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import { Provider } from "react-redux";
+import store from "./store";
 
-import { API_HOST } from './config'
+import { API_HOST } from "./config";
 
-import PPDAF_THEME from "./theme"
+import PPDAF_THEME from "./theme";
 import {
   FalcorProvider,
   falcorGraph,
-  ThemeContext
-} from "~/modules/avl-components/src"
+  ThemeContext,
+} from "~/modules/avl-components/src";
 
-import reportWebVitals from './reportWebVitals';
+import reportWebVitals from "./reportWebVitals";
 
 import "./index.css";
 
-export const falcor = falcorGraph(API_HOST)
+export const falcor = falcorGraph("https://graph.availabs.org");
 
-
-
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <Provider store={ store }>
-  		<FalcorProvider falcor={ falcor }>
+    <Provider store={store}>
+      <FalcorProvider falcor={falcor}>
         <ThemeContext.Provider value={PPDAF_THEME}>
           <App />
         </ThemeContext.Provider>
       </FalcorProvider>
     </Provider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
 
 // If you want to start measuring performance in your app, pass a function

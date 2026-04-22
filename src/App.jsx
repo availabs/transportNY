@@ -29,12 +29,12 @@ const Sites = {
   npmrds,
 };
 //import AdditionalComponents from "./additional_components";
-import { DamaMap, Map } from "./pages/DataManager/";
+//import { DamaMap, Map } from "./pages/DataManager/";
 
-registerComponents({
-  "Map: Dama Map": DamaMap,
-  Map: Map,
-});
+// registerComponents({
+//   "Map: Dama Map": DamaMap,
+//   Map: Map,
+// });
 
 // registerDataType("selector", Selector)
 
@@ -69,7 +69,6 @@ const App = (props) => {
         app: "npmrdsv5",
         type: "dev2",
         baseUrl: adminBaseUrl,
-        API_HOST,
       })}
       adminPath={adminBaseUrl}
       pgEnvs={[defaultPgEnv]}
@@ -77,8 +76,8 @@ const App = (props) => {
       damaBaseUrl={damaBaseUrl}
       damaDataTypes={transportNYDataTypes}
       API_HOST={API_HOST}
-      AUTH_HOST={AUTH_HOST}
-      PROJECT_NAME={PROJECT_NAME}
+      DAMA_HOST={API_HOST}
+      AUTH_HOST={API_HOST}
       routes={WrappedRoutes}
     />
   );
