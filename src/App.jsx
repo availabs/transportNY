@@ -75,6 +75,7 @@ const App = (props) => {
       themes={themes}
       damaBaseUrl={damaBaseUrl}
       damaDataTypes={transportNYDataTypes}
+      damaMapPlugins={mapPlugins}
       API_HOST={API_HOST}
       DAMA_HOST={API_HOST}
       AUTH_HOST={API_HOST}

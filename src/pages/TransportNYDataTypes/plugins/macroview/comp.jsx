@@ -6,6 +6,7 @@ import { measure_info } from "./measures";
 import { Button } from "~/modules/avl-components/src";
 import { DamaContext } from "~/pages/DataManager/store";
 import { CMSContext } from "~/modules/dms/packages/dms/src";
+import { MapEditorContext } from "~/modules/dms/packages/dms/src/patterns/mapeditor/context";
 import { PM3_LAYER_KEY } from "./constants";
 import { MultiLevelSelect } from "~/modules/avl-map-2/src"
 import {CheckCircleIcon, XCircleIcon} from "@heroicons/react/20/solid/index.js";
@@ -55,9 +56,9 @@ const Comp = ({ state, setState }) => {
   /**
    * START MODAL STUFF
    */
-  const dctx = React.useContext(DamaContext);
+  const mctx = React.useContext(MapEditorContext);
   const cctx = React.useContext(CMSContext);
-  const ctx = dctx?.falcor ? dctx : cctx;
+  const ctx = mctx?.falcor ? mctx : cctx;
   let { falcor, falcorCache, pgEnv, baseUrl, user } = ctx;
   const [polling, setPolling ] = React.useState(false);
   const [pollingInterval, setPollingInterval] = React.useState(false);

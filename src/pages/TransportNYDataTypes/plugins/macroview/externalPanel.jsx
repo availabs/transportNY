@@ -17,6 +17,7 @@ import {
 } from "./updateFilters";
 import { DamaContext } from "~/pages/DataManager/store";
 import { CMSContext } from "~/modules/dms/packages/dms/src";
+import { MapEditorContext } from "~/modules/dms/packages/dms/src/patterns/mapeditor/context";
 import { usePrevious } from "~/pages/DataManager/MapEditor/components/LayerManager/utils";
 import { choroplethPaint } from "~/pages/DataManager/MapEditor/components/LayerEditor/datamaps";
 import { npmrdsPaint } from "./paint";
@@ -39,9 +40,9 @@ import {
 } from "./utils";
 
 const ExternalPanel = ({ state, setState, pathBase = "" }) => {
-  const dctx = React.useContext(DamaContext);
+  const mctx = React.useContext(MapEditorContext);
   const cctx = React.useContext(CMSContext);
-  const ctx = dctx?.falcor ? dctx : cctx;
+  const ctx = mctx?.falcor ? mctx : cctx;
   let { falcor, falcorCache, pgEnv, baseUrl } = ctx;
 
   // if (!falcorCache) {
@@ -118,7 +119,7 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
     filter: dataFilter,
     filterMode,
   } = useMemo(() => {
-    if (dctx) {
+    if (mctx) {
       return extractState(state);
     } else {
       const symbName = Object.keys(state.symbologies)[0];

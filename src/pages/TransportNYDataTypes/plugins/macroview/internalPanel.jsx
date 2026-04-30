@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo, createContext, useRef } from "react"
-import { DamaContext } from "~/pages/DataManager/store"
 import {get, set } from "lodash-es";
 
 import { getAttributes } from "~/pages/DataManager/MapEditor/attributes";
 import { ViewAttributes } from "~/pages/DataManager/Source/attributes"
+import { MapEditorContext } from "~/modules/dms/packages/dms/src/patterns/mapeditor/context";
 
 import {
   REGION_CODE_TO_NAME,
@@ -19,7 +19,7 @@ import {
 } from "./utils";
 
 const InternalPanel = ({ state, setState }) => {
-  const { falcor, falcorCache, pgEnv, baseUrl } = React.useContext(DamaContext);
+  const { falcor, falcorCache, pgEnv, baseUrl } = React.useContext(MapEditorContext);
   // console.log("internal panel state::", state)
   //if a layer is selected, use the source_id to get all the associated views
   let symbologyLayerPath = "";
@@ -68,7 +68,7 @@ const InternalPanel = ({ state, setState }) => {
     const getRelatedPm3Views = async (source_id) => {
       //console.time("fetch data");
       const lengthPath = [
-        "dama",
+        "uda",
         pgEnv,
         "sources",
         "byId",
@@ -78,16 +78,14 @@ const InternalPanel = ({ state, setState }) => {
       ];
       const resp = await falcor.get(lengthPath);
       return await falcor.get([
-        "dama",
+        "uda",
         pgEnv,
         "sources",
         "byId",
         source_id,
         "views",
         "byIndex",
-        { from: 0, to: get(resp.json, lengthPath, 0) - 1 },
-        "attributes",
-        Object.values(ViewAttributes),
+        { from: 0, to: get(resp.json, lengthPath, 0) - 1 }
       ]);
     };
 
@@ -168,12 +166,12 @@ const InternalPanel = ({ state, setState }) => {
       return Object.values(
         get(
           falcorCache,
-          ["dama", pgEnv, "sources", "byId", source_id, "views", "byIndex"],
+          ["uda", pgEnv, "sources", "byId", source_id, "views", "byIndex"],
           {}
         )
       ).map((v) =>
         getAttributes(
-          get(falcorCache, v.value, { attributes: {} })["attributes"]
+          get(falcorCache, v.value, {  })
         )
       );
     } else {
@@ -331,7 +329,7 @@ const InternalPanel = ({ state, setState }) => {
         },
       ],
     },
-    pm3LayerId
+    pm3LayerId && views.length
       ? {
           label: "Views",
           controls: [
@@ -339,7 +337,7 @@ const InternalPanel = ({ state, setState }) => {
               type: "multiselect",
               params: {
                 options: [
-                  BLANK_OPTION,
+                  
                   ...views.map((view) => ({
                     name: view.version || view.view_id,
                     value: view.view_id,
