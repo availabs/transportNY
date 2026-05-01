@@ -192,40 +192,34 @@ const Comp = ({ state, setState }) => {
 
   useEffect(() => {
     falcor.get([
-      "dama",
+      "uda",
       pgEnv,
       "sources",
       "byId",
-      sourceId,
-      "attributes",
-      "metadata",
+      sourceId
     ]);
   }, [sourceId]);
 
   useEffect(() => {
     falcor.get([
-      "dama",
+      "uda",
       pgEnv,
       "views",
       "byId",
       viewId,
-      "attributes",
-      ["metadata", "version"],
     ]);
   }, [viewId]);
 
   const sourceDataColumns = useMemo(() => {
     let sourceColumns = get(falcorCache, [
-        "dama",
+        "uda",
         pgEnv,
         "sources",
         "byId",
         sourceId,
         "attributes",
-        "metadata",
-        "value",
     ],[]);
-    // console.log('source columnns', sourceColumns, view.source_id, falcorCache)
+
     sourceColumns = sourceColumns?.columns ? sourceColumns.columns : sourceColumns;
     return Array.isArray(sourceColumns) ? sourceColumns.filter(d => d.name !== "ogc_fid") : []
     // return []
@@ -267,25 +261,23 @@ const Comp = ({ state, setState }) => {
     }
   }, [downloadFileName, viewDownloads]);
   const fetchViewPath = [
-    "dama",
+    "uda",
     pgEnv,
     "views",
     "byId",
     viewId,
-    "attributes",
-    ["metadata", "version"],
   ];
 
   //Gets the view so we can determine if our file is ready for download
   const doPolling = async () => {
-    falcor.invalidate(["dama", pgEnv, "views", "byId"]);
+    falcor.invalidate(["uda", pgEnv, "views", "byId"]);
     falcor.invalidate(fetchViewPath);
     falcor.get(fetchViewPath).then(resp => {
       let out = get(
           resp,
           [
             "json",
-            "dama", pgEnv, "views","byId", viewId, "attributes"
+            "uda", pgEnv, "views","byId", viewId
           ],
           {}
         );
@@ -300,12 +292,11 @@ const Comp = ({ state, setState }) => {
         resp,
         [
           "json",
-          "dama",
+          "uda",
           pgEnv,
           "views",
           "byId",
-          viewId,
-          "attributes",
+          viewId
         ],
         {}
       );

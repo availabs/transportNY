@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import {get, set, isEqual } from "lodash-es";
 import { format as d3format } from "d3-format";
-import { extractState, createFalcorFilterOptions } from "~/pages/DataManager/MapEditor/stateUtils";
+import { extractState, createFalcorFilterOptions, filterToUda } from "~/modules/dms/packages/dms/src/patterns/mapeditor/MapEditor/stateUtils"
 import {
   filters,
   updateSubMeasures,
@@ -43,7 +43,8 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
   const mctx = React.useContext(MapEditorContext);
   const cctx = React.useContext(CMSContext);
   const ctx = mctx?.falcor ? mctx : cctx;
-  let { falcor, falcorCache, pgEnv, baseUrl } = ctx;
+  let { falcor, pgEnv } = ctx;
+  const [geomData, setGeomData] = useState({})
 
   // if (!falcorCache) {
   //   falcorCache = falcor.getCache();
@@ -114,7 +115,6 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
   }, [pluginData, pluginDataPath]);
 
   const {
-    symbology_id,
     existingDynamicFilter,
     filter: dataFilter,
     filterMode,
@@ -248,7 +248,7 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
       const selectedUa = geography.filter(
         (geo) => geo.type === "urban_code"
       );
-      console.log({geography, selectedUa})
+
       if (selectedUa.length > 0 && uaLayerId) {
         console.log("inside setting border filter", selectedUa)
         //SOURCE 1493 view 2663 ua_boundaries
@@ -341,36 +341,28 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
   const geomOptions = JSON.stringify({
     groupBy: ["urban_code", "region_code", "mpo_name", "county"],
   });
-  useEffect(() => {
-    const getGeoms = async () => {
-      await falcor.get([
-        "dama",
-        pgEnv,
-        "viewsbyId",
-        viewId,
-        "options",
-        geomOptions,
-        "databyIndex",
-        { from: 0, to: 200 },
-        ["urban_code", "region_code", "mpo_name", "county"],
-      ]);
-    };
 
+  const fetchGeomPath = [
+    "uda",
+    pgEnv,
+    "viewsById",
+    viewId,
+    "options",
+    geomOptions,
+    "dataByIndex",
+    { from: 0, to: 200 },
+    ["urban_code", "region_code", "mpo_name", "county"],
+  ];
+  useEffect(() => {
     if (viewId) {
-      getGeoms();
+      falcor.get(fetchGeomPath).then((res) => {
+        const geomDataPath = fetchGeomPath.slice(0, -2);
+        const geomDataRes = get(res, ["json", ...geomDataPath]);
+        setGeomData(geomDataRes)
+      });
     }
   }, [viewId]);
-
   const geomControlOptions = useMemo(() => {
-    const geomData = get(falcorCache, [
-      "dama",
-      pgEnv,
-      "viewsbyId",
-      viewId,
-      "options",
-      geomOptions,
-      "databyIndex",
-    ]);
     if (geomData) {
       const geoms = {
         urban_code: [],
@@ -402,6 +394,7 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         .filter(truthyFilter)
         .map((da) => ({
           name: UA_CODE_TO_NAME[da] + " UA",
+          label: UA_CODE_TO_NAME[da] + " UA",
           value: da,
           type: "urban_code"
         }))
@@ -412,6 +405,7 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         .filter(truthyFilter)
         .map((da) => ({
           name: REGION_CODE_TO_NAME[da],
+          label: REGION_CODE_TO_NAME[da],
           value: da,
           type: "region_code",
         }))
@@ -420,7 +414,12 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         .filter(onlyUnique)
         .filter(objectFilter)
         .filter(truthyFilter)
-        .map((da) => ({ name: da + " MPO", value: da, type: "mpo_name" }))
+        .map((da) => ({ 
+          name: da + " MPO",
+          label: da + " MPO",
+          value: da,
+          type: "mpo_name" 
+        }))
         .sort(nameSort);
       geoms.county = geoms.county
         .filter(onlyUnique)
@@ -428,6 +427,7 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         .filter(truthyFilter)
         .map((da) => ({
           name: da.toLowerCase() + " County",
+          label: da.toLowerCase() + " County",
           value: da,
           type: "county",
         }))
@@ -442,7 +442,7 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
     } else {
       return [];
     }
-  }, [falcorCache]);
+  }, [geomData]);
 
   //transform from filters into plugin inputs
   const measureControls = Object.keys(measureFilters)
@@ -539,51 +539,53 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         method = "ckmeans";
       const domainOptions = {
         column: newDataColumn,
-        viewId: parseInt(viewId),
         numbins,
-        method,
-        dataFilter: falcorDataFilter,
+        method
       };
 
+      const udaFilter = filterToUda(dataFilter);
+      if (udaFilter) Object.assign(domainOptions, udaFilter);
+
       const showOther = "#ccc";
+      const optsKey = JSON.stringify(domainOptions);
       const res = await falcor.get([
-        "dama",
+        "uda",
         pgEnv,
-        "symbologies",
-        "byId",
-        [symbology_id],
+        "viewsById",
+        +viewId,
         "colorDomain",
-        "options",
-        JSON.stringify(domainOptions),
+        optsKey,
       ]);
-      const colorBreaks = get(res, [
+      const cdResult = get(res, [
         "json",
-        "dama",
+        "uda",
         pgEnv,
-        "symbologies",
-        "byId",
-        [symbology_id],
+        "viewsById",
+        +viewId,
         "colorDomain",
-        "options",
-        JSON.stringify(domainOptions),
+        optsKey,
       ]);
+
+      const colorBreaks = (cdResult && Array.isArray(cdResult.breaks) && cdResult.breaks.length)
+        ? { breaks: cdResult.breaks, max: cdResult.max }
+        : { breaks: [], max: 0 };
       //console.log({newDataColumn, max:colorBreaks['max'], colorange: getColorRange(7, "RdYlBu").reverse(), numbins, method, breaks:colorBreaks['breaks'], showOther, orientation:'vertical'})
 
       //format is used to format legend labels
       const { range: paintRange, format } = updateLegend(measureFilters);
       let { paint, legend } = choroplethPaint(
         newDataColumn,
-        colorBreaks["max"],
+        colorBreaks.max,
         paintRange,
         numbins,
         method,
-        colorBreaks["breaks"],
+        colorBreaks.breaks,
         showOther,
         "vertical"
       );
 
       const legendFormat = d3format(format);
-      legend = legend.map((legendBreak) => {
+      legend = legend?.map((legendBreak) => {
         const shouldFormat =
           !newDataColumn.toLowerCase().includes("phed") &&
           !newDataColumn.toLowerCase().includes("ted");

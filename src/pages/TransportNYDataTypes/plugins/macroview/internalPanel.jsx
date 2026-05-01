@@ -337,9 +337,9 @@ const InternalPanel = ({ state, setState }) => {
               type: "multiselect",
               params: {
                 options: [
-                  
                   ...views.map((view) => ({
                     name: view.version || view.view_id,
+                    label: view.version || view.view_id,
                     value: view.view_id,
                   })),
                 ],
