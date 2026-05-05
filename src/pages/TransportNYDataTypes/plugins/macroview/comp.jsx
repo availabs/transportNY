@@ -190,6 +190,29 @@ const Comp = ({ state, setState }) => {
       runCreate();
   }
 
+  useEffect(() => {
+    falcor.get([
+      "uda",
+      pgEnv,
+      "sources",
+      "byId",
+      sourceId,
+      ["metadata"]
+    ]);
+  }, [sourceId]);
+
+  const fetchViewPath = [
+    "uda",
+    pgEnv,
+    "views",
+    "byId",
+    viewId,
+    ["metadata", "version"],
+  ];
+
+  useEffect(() => {
+    falcor.get(fetchViewPath);
+  }, [viewId]);
 
   const sourceDataColumns = useMemo(() => {
     let sourceColumns = get(falcorCache, [
@@ -198,6 +221,8 @@ const Comp = ({ state, setState }) => {
         "sources",
         "byId",
         sourceId,
+        "metadata",
+        "value"
     ],[]);
     sourceColumns = sourceColumns?.columns ? sourceColumns.columns : sourceColumns;
     return Array.isArray(sourceColumns) ? sourceColumns.filter(d => d.name !== "ogc_fid") : []
@@ -206,7 +231,6 @@ const Comp = ({ state, setState }) => {
   /**
    * END MODAL STUFF
    */
-
 
   /**
    * polling stuff for requested download
@@ -239,13 +263,6 @@ const Comp = ({ state, setState }) => {
       setDownloadFileName("")
     }
   }, [downloadFileName, viewDownloads]);
-  const fetchViewPath = [
-    "uda",
-    pgEnv,
-    "viewsById",
-    viewId,
-    []
-  ];
 
   //Gets the view so we can determine if our file is ready for download
   const doPolling = async () => {
@@ -256,7 +273,7 @@ const Comp = ({ state, setState }) => {
           resp,
           [
             "json",
-            "uda", pgEnv, "viewsById", viewId
+            "uda", pgEnv, "views","byId", viewId
           ],
           {}
         );
@@ -273,8 +290,9 @@ const Comp = ({ state, setState }) => {
           "json",
           "uda",
           pgEnv,
-          "viewsById",
-          viewId
+          "views",
+          "byId",
+          viewId,
         ],
         {}
       );
