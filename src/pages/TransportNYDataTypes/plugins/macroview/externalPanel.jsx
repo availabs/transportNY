@@ -131,7 +131,6 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
   useEffect(() => {
     //TODO 9/4 9:51am
     //need to fix zoom stuff here, wrong path
-
     const getFilterBounds = async () => {
       //need array of [{column_name:foo, values:['bar', 'baz']}]
       //geography is currently [{name: foo, value: 'bar', type:'baz'}]
@@ -210,7 +209,6 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         });
       } else {
         if (countyLayerId) {
-          console.log("reserting filter for county::", countyLayerId)
           resetGeometryBorderFilter({
             layerId: countyLayerId,
             setState,
@@ -224,7 +222,6 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
       );
       if (selectedRegion.length > 0 && regionLayerId) {
         //SOURCE 1497 view 4135 nysdot_regions
-        console.log({selectedRegion})
         setGeometryBorderFilter({
           setState,
           layerId: regionLayerId,
@@ -236,7 +233,6 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         });
       } else {
         if (regionLayerId) {
-          console.log("reserting filter for region::", regionLayerId)
           resetGeometryBorderFilter({
             layerId: regionLayerId,
             setState,
@@ -250,7 +246,6 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
       );
 
       if (selectedUa.length > 0 && uaLayerId) {
-        console.log("inside setting border filter", selectedUa)
         //SOURCE 1493 view 2663 ua_boundaries
         setGeometryBorderFilter({
           setState,
@@ -266,16 +261,13 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
                   paddedCode = "0" + paddedCode
                 }
               }
-              console.log({paddedCode})
               return paddedCode;
             }
           ),
           layerBasePath: symbologyLayerPath,
         });
       } else {
-        console.log("trying to reset UA filter")
         if (uaLayerId) {
-          console.log("reserting filter for UA::", uaLayerId)
           resetGeometryBorderFilter({
             layerId: uaLayerId,
             setState,
@@ -484,7 +476,7 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         {
           type: "multiselect",
           params: {
-            options: [BLANK_OPTION, ...geomControlOptions],
+            options: geomControlOptions,
             default: "",
             searchable: true,
           },
