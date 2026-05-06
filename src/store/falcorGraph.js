@@ -1,7 +1,7 @@
 import { falcorGraph as fg } from "~/modules/avl-components/src"
 import { API_HOST } from '~/config'
 
-export const falcorGraph = fg(API_HOST);
+export const falcorGraph = fg('https://graph.availabs.org');
 
 export const UPDATE = 'avl-falcor/UPDATE';
 

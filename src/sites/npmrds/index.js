@@ -24,7 +24,7 @@ const Routes = [
   ...Analysis,
   TmcPage,
   ...Map,
-  PM3,
+  ...PM3,
   //...NpmrdsDocs,
   BatchReports,
   ...BatchReportsNew,

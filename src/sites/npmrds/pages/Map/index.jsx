@@ -36,19 +36,28 @@ const MapConfig = [
   { icon: 'fa-duotone fa-map',
     path: '/map',
     exact: true,
-    mainNav: true,
+    mainNav: false,
     sideNav: {
       color: 'dark',
       size: 'compact'
     },
+    sideNavActiveStyle: 'compact',
     name: 'Macro',
     auth: true,
     component: Map
   },
   { icon: 'fa-duotone fa-map',
+    path: '/macro',
+    exact: true,
+    mainNav: true,
+    name: 'Macro',
+    isLink: true
+  },
+  { icon: 'fa-duotone fa-map',
     path: '/map/:geoid/:year/:measure',
     exact: true,
     mainNav: false,
+    sideNavActiveStyle: 'compact',
     sideNav: {
       color: 'dark',
       size: 'compact'

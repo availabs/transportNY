@@ -3,10 +3,7 @@ import { ViewReport } from "../components/ReportBase"
 const BASE = {
   name: 'Analysis',
   icon: 'fa-duotone fa-chart-line',
-  sideNav: {
-    color: 'dark',
-    size: 'compact'
-  },
+  sideNavActiveStyle: 'compact',
   auth: false,
   component: ViewReport
 }

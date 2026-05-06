@@ -214,15 +214,25 @@ const PM3 = () => {
 }
 
 
-const config = {
+const config = [{
   icon: 'fa-duotone fa-chart-bar',
   path: '/map21',
   exact: true,
-  mainNav: true,
+  mainNav: false,
   sideNav: {},
   name: 'PM3',
   auth: true,
   component: PM3
-}
+},
+{
+  icon: 'fa-duotone fa-chart-bar',
+  path: '/map_21',
+  isLink: true,
+  exact: true,
+  mainNav: true,
+  name: 'PM3',
+  auth: true,
+  //component: PM3
+}]
 
 export default config;

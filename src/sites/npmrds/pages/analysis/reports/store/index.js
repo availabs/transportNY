@@ -85,6 +85,12 @@ const getAllYears = dateExtent =>
     +dateExtent[1].slice(0, 4) + 1
   )
 
+// Falcor cache leaves can be wrapped as { $type: 'atom', value: ... } sentinels.
+// Reading scalar fields straight off the cache leaks these wrappers into Redux
+// state and crashes React with "Objects are not valid as a React child".
+const unwrapAtom = node =>
+  (node && typeof node === "object" && "$type" in node) ? node.value : node;
+
 export const getDataDateExtent = () =>
 	dispatch => {
 		// falcorGraph.get(["npmrdsDataDateExtent"])
@@ -1987,14 +1993,14 @@ const _loadTemplateWithDates = (templateId, routeIds, datesMap, state, stationId
   const falcorCache = falcorGraph.getCache();
   const template = get(falcorCache, `templates2.id.${ templateId }`, {});
 
-  let name = template.name,
-    description = template.description,
-    folder = template.folder,
+  let name = unwrapAtom(template.name),
+    description = unwrapAtom(template.description),
+    folder = unwrapAtom(template.folder),
     route_comps = get(template, ["route_comps", "value"], []),
     graph_comps = get(template, ["graph_comps", "value"], []),
     station_comps = get(template, ["station_comps", "value"], []),
     colorRangeFromTemplate = get(template, ["color_range", "value"], []),
-    defaultType = template.default_type;
+    defaultType = unwrapAtom(template.default_type);
 
   let colorRange = colorRangeFromTemplate.length ? [...colorRangeFromTemplate] : [...DEFAULT_COLOR_RANGE];
 
@@ -2193,14 +2199,14 @@ const _loadTemplateWithSyntheticRoute = (templateId, tmcArray, dates, reportStat
   const falcorCache = falcorGraph.getCache();
   const template = get(falcorCache, `templates2.id.${ templateId }`, {});
 
-  let name = template.name,
-    description = template.description,
-    folder = template.folder,
+  let name = unwrapAtom(template.name),
+    description = unwrapAtom(template.description),
+    folder = unwrapAtom(template.folder),
     route_comps = get(template, ["route_comps", "value"], []),
     graph_comps = get(template, ["graph_comps", "value"], []),
     station_comps = get(template, ["station_comps", "value"], []),
     colorRangeFromTemplate = get(template, ["color_range", "value"], []),
-    defaultType = template.default_type;
+    defaultType = unwrapAtom(template.default_type);
 
   let colorRange = colorRangeFromTemplate.length ? [...colorRangeFromTemplate] : [...DEFAULT_COLOR_RANGE];
 
@@ -2350,14 +2356,14 @@ const _loadTemplate = (templateId, routeIds, state, stationIds = []) => {
 	const falcorCache = falcorGraph.getCache(),
     template = get(falcorCache, `templates2.id.${ templateId }`, {});
 
-	let name = template.name,
-	  description = template.description,
-	  folder = template.folder,
+	let name = unwrapAtom(template.name),
+	  description = unwrapAtom(template.description),
+	  folder = unwrapAtom(template.folder),
 	  route_comps = get(template, ["route_comps", "value"], []),
 	  graph_comps = get(template, ["graph_comps", "value"], []),
     station_comps = get(template, ["station_comps", "value"], []),
     colorRangeFromTemplate = get(template, ["color_range", "value"], DEFAULT_COLOR_RANGE),
-    defaultType = template.default_type;
+    defaultType = unwrapAtom(template.default_type);
 
   let colorRange = colorRangeFromTemplate.length ? [...colorRangeFromTemplate] : [...DEFAULT_COLOR_RANGE];
 
@@ -2726,7 +2732,7 @@ const MONTHS = {
 const getMonthString = settings => {
 
 	if (settings.month === 'all') return `Jan-Dec, ${ settings.year }`;
-	if ((settings.month !== 'advanced') && !useRelativeDateControls) {
+	if ((settings.month !== 'advanced') && !settings.useRelativeDateControls) {
     return `${ MONTHS[settings.month].slice(0, 3) }, ${ settings.year }`;
   }
 
