@@ -534,8 +534,11 @@ class ReportBase extends React.Component {
           .then(dataUrl => {
             template.pic = dataUrl;
             return this.props.saveTemplate(template, templateId)
-              .then(() => this.hideSaveModal());
+              .then(() => this.hideTemplateModal());
           })
+      })
+      .catch(err => {
+        console.error("template save failed", err);
       });
   }
 
