@@ -36,7 +36,6 @@ const DataUpdate = (map, state, setState) => {
 
   if (shapefileLayerId) {
     setState((draft) => {
-      console.log("tmc array changed, setting paint for specified TMC");
       let lineColor = "#CCCCCC"; // The fallback color if it DOES NOT match (e.g., Gray)
       if (tmc_array && tmc_array.length > 0) {
         set(
@@ -51,7 +50,6 @@ const DataUpdate = (map, state, setState) => {
           ],
         ); //Mapbox paint
       } else {
-        console.log("fallback line color")
         set(
           draft,
           `${symbologyLayerPath}['${shapefileLayerId}']['layers'][1]['paint']['line-color']`,
