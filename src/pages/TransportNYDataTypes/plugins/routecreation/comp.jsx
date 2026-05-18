@@ -24,10 +24,11 @@ const Comp = ({ state, setState, map }) => {
   let pluginDataPath = "";
   let symbologyLayerPath = "";
   let symbPath = "";
+  let pathBase = '';
   //state.symbologies indicates that the map context is DMS
   if (state.symbologies) {
     const symbName = Object.keys(state.symbologies)[0];
-    const pathBase = `symbologies['${symbName}']`;
+    pathBase = `symbologies['${symbName}']`;
     pluginDataPath = `${pathBase}.symbology.pluginData.routecreation`;
     symbologyLayerPath = `${pathBase}.symbology.layers`;
     symbPath = `${pathBase}.symbology`;
@@ -139,7 +140,7 @@ const Comp = ({ state, setState, map }) => {
 
     const setGeoBounds = async ({filter, setState}) => {
       const newExtent = await fetchBoundsForFilter(
-        state,
+        get(state,pathBase, state),
         falcor,
         pgEnv,
         filter,
