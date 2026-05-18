@@ -6,13 +6,16 @@ import React, {
   createContext,
   useRef,
 } from "react";
-import { SHAPEFILE_LAYER_KEY, BLANK_OPTION } from "./constants";
+import { srcAttr, SHAPEFILE_LAYER_KEY, INTERNAL_ROUTES_VIEW_ID,INTERNAL_ROUTES_APP_AND_TYPE, INTERNAL_DATASETS_ENV, INTERNAL_ROUTES_SOURCE_ID } from "./constants";
 import { CMSContext } from "~/modules/dms/packages/dms/src";
 import { Button } from "~/modules/avl-components/src";
 import { MapEditorContext } from "~/modules/dms/packages/dms/src/patterns/mapeditor/context";
+import { PageContext } from "~/modules/dms/packages/dms/src/patterns/page/context";
 import { fetchBoundsForFilter } from "~/modules/dms/packages/dms/src/patterns/mapeditor/MapEditor/stateUtils";
+import { nameToSlug } from "~/modules/dms/packages/dms/src/utils/type-utils";
 import { get, set, isEqual } from "lodash-es";
 import mapboxgl from "maplibre-gl";
+
 
 const INITIAL_MODAL_STATE = {
   open: false,
@@ -25,6 +28,7 @@ const INITIAL_MODAL_STATE = {
 };
 
 const Comp = ({ state, setState, map }) => {
+  const [routesSource, setRoutesSource] = useState({})
   const [modalState, setModalState] = useState(INITIAL_MODAL_STATE);
   const mctx = React.useContext(MapEditorContext);
   const cctx = React.useContext(CMSContext);
@@ -33,6 +37,10 @@ const Comp = ({ state, setState, map }) => {
   if (!falcorCache) {
     falcorCache = falcor.getCache();
   }
+
+  const pContext = React.useContext(PageContext) || {};
+  const { apiUpdate } = pContext;
+
   let pluginDataPath = "";
   let symbologyLayerPath = "";
   let symbPath = "";
@@ -194,11 +202,101 @@ const Comp = ({ state, setState, map }) => {
     }
   }, [searchInputTmc]);
 
+    const addItem = async () => {
+      const { open, ...newItem } = modalState;
+      const sourceType =
+        routesSource.type ||
+        (routesSource.name
+          ? nameToSlug(routesSource.name)
+          : undefined);
+      const res = await apiUpdate({
+        data: newItem,
+        config: {
+          format: {
+            ...routesSource,
+            type: `${sourceType}|${INTERNAL_ROUTES_VIEW_ID}:data`,
+          },
+        },
+      });
+      //TODO -- AFTER SUCCESSFUL addition of route, clear out local state
+      //OR -- stretch goal -- update the URL with the ID, and user can now edit the "current" route
+      return res;
+    };
+
+  const sourcePath = [
+    "uda",
+    INTERNAL_DATASETS_ENV,
+    "sources",
+    "byId",
+    [INTERNAL_ROUTES_SOURCE_ID],
+    srcAttr,
+  ];
+
+  useEffect(() => {
+    const getRouteSource = async () => {
+      const r = await falcor.get(sourcePath);
+      const valueGetter = (attr) =>
+        get(r, [
+          "json",
+          "uda",
+          INTERNAL_DATASETS_ENV,
+          "sources",
+          "byId",
+          INTERNAL_ROUTES_SOURCE_ID,
+          attr,
+        ]);
+
+      const app = valueGetter("app");
+      const name = valueGetter("name");
+      // For DMS sources, build env from source name slug (matches how data types are stored)
+      const sourceSlug = name ? nameToSlug(name) : null;
+      const env =
+        sourceSlug && app ? `${app}+${sourceSlug}` : INTERNAL_DATASETS_ENV;
+      const routeSource = {
+        ...srcAttr.reduce((acc, attr) => {
+          let value = valueGetter(attr);
+
+          if (attr === "metadata") {
+            return { ...acc, columns: value?.columns || [] };
+          }
+          if (attr === "config") {
+            return {
+              ...acc,
+              columns: JSON.parse(value || "{}")?.attributes || [],
+            };
+          }
+          return { ...acc, [attr]: value };
+        }, {}),
+        source_id: get(r, [
+          "json",
+          "uda",
+          INTERNAL_DATASETS_ENV,
+          "sources",
+          "byId",
+          INTERNAL_ROUTES_SOURCE_ID,
+          "$__path",
+          4,
+        ]),
+        env,
+        srcEnv: INTERNAL_DATASETS_ENV,
+        isDms: true,
+      };
+      setRoutesSource(routeSource);
+    };
+
+    getRouteSource();
+  }, []);
+
   const tmcRows = useMemo(() => {
     if (tmc_array?.length > 0) {
       return (
         <div>
-          {tmcData.map((tData) => {
+          {tmc_array.map((tmc) => {
+            const tData = tmcData.find((td) => td.tmc === tmc) || {
+              tmc,
+              miles: 0,
+              intersection: "",
+            };
             return (
               <div
                 key={`tmc_${tData.tmc}`}
@@ -259,7 +357,7 @@ const Comp = ({ state, setState, map }) => {
     console.log({ modalState, routeMeta });
     setModalState({ ...modalState, ...routeMeta });
   };
-  console.log({ modalState });
+
   return (
     <div
       className="grid grid-cols-1 gap-2 p-1 pointer-events-auto drop-shadow-lg p-4 bg-white/90"
@@ -322,6 +420,7 @@ const Comp = ({ state, setState, map }) => {
         setModalOpen={setModalOpen}
         modalState={modalState}
         setRouteMeta={setRouteMeta}
+        addItem={addItem}
       />
     </div>
   );
@@ -330,19 +429,11 @@ const Comp = ({ state, setState, map }) => {
 export { Comp };
 
 const SaveRouteModal = ({
-  view,
-  viewId,
-  geography,
   modalState,
   modalStyle,
-  setModalState,
-  setColumns,
   setModalOpen,
   setRouteMeta,
-  sourceDataColumns,
-  downloadAlreadyExists,
-  createDownload,
-  viewDownloads,
+  addItem
 }) => {
   return (
     <div style={modalStyle} className="bg-white/[95%]">
@@ -356,7 +447,7 @@ const SaveRouteModal = ({
           </div>
           <div className="mt-3 text-center sm:ml-2 sm:mt-0 sm:text-left w-full">
             <div className="text-lg align-center font-semibold leading-6 text-gray-900">
-              Create Data Download
+              Save Route
             </div>
           </div>
         </div>
@@ -412,7 +503,10 @@ const SaveRouteModal = ({
         </div>
         <div className="absolute" style={{ bottom: "20px", right: "20px" }}>
           <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-            <button className="disabled:bg-slate-300 disabled:cursor-warning inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto">
+            <button 
+              onClick={addItem}
+              className="disabled:bg-slate-300 disabled:cursor-warning inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto"
+            >
               Save
             </button>
             <button
