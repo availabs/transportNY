@@ -6,16 +6,17 @@ import React, {
   createContext,
   useRef,
 } from "react";
-import { srcAttr, SHAPEFILE_LAYER_KEY, INTERNAL_ROUTES_VIEW_ID,INTERNAL_ROUTES_APP_AND_TYPE, INTERNAL_DATASETS_ENV, INTERNAL_ROUTES_SOURCE_ID } from "./constants";
+import { useNavigate } from 'react-router';
+import { srcAttr, SHAPEFILE_LAYER_KEY, INTERNAL_ROUTES_VIEW_ID,INTERNAL_ROUTES_APP_AND_TYPE, PAGE_FILTER_KEY, INTERNAL_DATASETS_ENV, INTERNAL_ROUTES_SOURCE_ID } from "./constants";
 import { CMSContext } from "~/modules/dms/packages/dms/src";
 import { Button } from "~/modules/avl-components/src";
 import { MapEditorContext } from "~/modules/dms/packages/dms/src/patterns/mapeditor/context";
 import { PageContext } from "~/modules/dms/packages/dms/src/patterns/page/context";
 import { fetchBoundsForFilter } from "~/modules/dms/packages/dms/src/patterns/mapeditor/MapEditor/stateUtils";
 import { nameToSlug } from "~/modules/dms/packages/dms/src/utils/type-utils";
+import { convertToUrlParams } from "~/modules/dms/packages/dms/src/patterns/page/pages/_utils"
 import { get, set, isEqual } from "lodash-es";
 import mapboxgl from "maplibre-gl";
-
 
 const INITIAL_MODAL_STATE = {
   open: false,
@@ -25,9 +26,11 @@ const INITIAL_MODAL_STATE = {
   startTime: "",
   endDate: "",
   endTime: "",
+  id: null
 };
 
 const Comp = ({ state, setState, map }) => {
+  const navigate  = useNavigate();
   const [routesSource, setRoutesSource] = useState({})
   const [modalState, setModalState] = useState(INITIAL_MODAL_STATE);
   const mctx = React.useContext(MapEditorContext);
@@ -78,11 +81,14 @@ const Comp = ({ state, setState, map }) => {
       };
     }, [pluginDataPath, state]);
 
-  // const geomOptions = JSON.stringify({
-  //   groupBy: ["urban_code", "region_code", "mpo_name", "county"],
-  // });
+    //TODO  this might explode inside map editor
+  const { pageFilters } = useMemo(() => {
+    const symbData = get(state, symbPath, {});
+    const pageFilters = symbData.pageFilters;
+    return { pageFilters };
+  }, [state]);
 
-  const newOptions = JSON.stringify({
+  const tmcMetaOptions = JSON.stringify({
     filter: { tmc: tmc_array },
   });
 
@@ -92,12 +98,14 @@ const Comp = ({ state, setState, map }) => {
     "viewsById",
     view_id,
     "options",
-    newOptions,
+    tmcMetaOptions,
     "dataByIndex",
     { from: 0, to: 200 },
     ["tmc", "miles", "intersection"],
   ];
-
+  /**
+   * Gets data about specific TMCs so we can display extra info to the user
+   */
   useEffect(() => {
     if (tmc_array && tmc_array.length > 0) {
       falcor.get(fetchGeomPath).then((res) => {
@@ -111,6 +119,9 @@ const Comp = ({ state, setState, map }) => {
     }
   }, [tmc_array]);
 
+  /**
+   * Registers/Cleans up map onClick listener/handler
+   */
   useEffect(() => {
     const MAP_CLICK = (data1) => {
       const features = map.queryRenderedFeatures(data1.point, {
@@ -145,6 +156,9 @@ const Comp = ({ state, setState, map }) => {
     };
   }, [shapefileLayerId, tmc_array]);
 
+  /**
+   * User can remove a specified TMC by clicking on text in its row
+   */
   const removeTmc = useCallback((tmc) => {
     setState((draft) => {
       const currentTmcArray = get(draft, `${pluginDataPath}['tmc_array']`, []);
@@ -156,34 +170,39 @@ const Comp = ({ state, setState, map }) => {
     });
   });
 
+  /**
+   * Gets and then set bounds, for:
+   * 1) zoom to the search-input TMC 
+   * 2) loading existing route
+   */
+  const setGeoBounds = async ({ filter, setState }) => {
+    const newExtent = await fetchBoundsForFilter(
+      get(state, pathBase, state),
+      falcor,
+      pgEnv,
+      filter,
+    );
+    const parsedExtent =
+      typeof newExtent === "string" ? JSON.parse(newExtent) : newExtent;
+    const coordinates = parsedExtent?.coordinates[0];
+    const mapGeom = coordinates?.reduce(
+      (bounds, coord) => {
+        return bounds.extend(coord);
+      },
+      new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]),
+    );
+
+    if (mapGeom && Object.keys(mapGeom).length > 0) {
+      setState((draft) => {
+        set(draft, `${symbPath}.zoomToFilterBounds`, [
+          mapGeom["_sw"],
+          mapGeom["_ne"],
+        ]);
+      });
+    }
+  };
+
   useEffect(() => {
-    const setGeoBounds = async ({ filter, setState }) => {
-      const newExtent = await fetchBoundsForFilter(
-        get(state, pathBase, state),
-        falcor,
-        pgEnv,
-        filter,
-      );
-      const parsedExtent =
-        typeof newExtent === "string" ? JSON.parse(newExtent) : newExtent;
-      const coordinates = parsedExtent?.coordinates[0];
-      const mapGeom = coordinates?.reduce(
-        (bounds, coord) => {
-          return bounds.extend(coord);
-        },
-        new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]),
-      );
-
-      if (mapGeom && Object.keys(mapGeom).length > 0) {
-        setState((draft) => {
-          set(draft, `${symbPath}.zoomToFilterBounds`, [
-            mapGeom["_sw"],
-            mapGeom["_ne"],
-          ]);
-        });
-      }
-    };
-
     if (searchInputTmc && searchInputTmc.length === 9) {
       const geographyFilter = [
         {
@@ -202,38 +221,59 @@ const Comp = ({ state, setState, map }) => {
     }
   }, [searchInputTmc]);
 
-    const addItem = async () => {
-      const { open, startDate, startTime, endDate, endTime, ...rest } = modalState;
-      const sourceType =
-        routesSource.type ||
-        (routesSource.name
-          ? nameToSlug(routesSource.name)
-          : undefined);
-      
-      const payload = {
-        ...rest,
-        metadata: JSON.stringify({
-          dates: [
-            `${startDate}T${startTime || "00:00:00"}`,
-            `${endDate}T${endTime || "23:59:59"}`
-          ]
-        }),
-        tmc_array: JSON.stringify(tmc_array || [])
-      };
+  /**
+   * Saves new route to the DB, then closes modal
+   * Also updates route
+   */
+  const addItem = async () => {
+    const { open, startDate, startTime, endDate, endTime, ...rest } =
+      modalState;
+    const sourceType =
+      routesSource.type ||
+      (routesSource.name ? nameToSlug(routesSource.name) : undefined);
 
-      const res = await apiUpdate({
-        data: payload,
-        config: {
-          format: {
-            ...routesSource,
-            type: `${sourceType}|${INTERNAL_ROUTES_VIEW_ID}:data`,
-          },
-        },
-      });
-      //TODO -- AFTER SUCCESSFUL addition of route, clear out local state
-      //OR -- stretch goal -- update the URL with the ID, and user can now edit the "current" route
-      return res;
+    const payload = {
+      ...rest,
+      metadata: JSON.stringify({
+        dates: [
+          `${startDate}T${startTime || "00:00:00"}`,
+          `${endDate}T${endTime || "23:59:59"}`,
+        ],
+      }),
+      tmc_array: JSON.stringify(tmc_array || []),
     };
+
+    const res = await apiUpdate({
+      data: payload,
+      config: {
+        format: {
+          ...routesSource,
+          type: `${sourceType}|${INTERNAL_ROUTES_VIEW_ID}:data`,
+        },
+      },
+    });
+
+    if (res) {
+      const routeFilter = {
+        ...pageFilters.find(({ searchKey }) => searchKey === PAGE_FILTER_KEY),
+      };
+      routeFilter.values = [res.id];
+      const filtersObject = [routeFilter].reduce(
+        (acc, curr) => ({
+          ...acc,
+          [curr.searchKey]:
+            typeof curr.values === "string" ? [curr.values] : curr.values,
+        }),
+        {},
+      );
+      const url = `?${convertToUrlParams(filtersObject)}`;
+      navigate(`${url}`);
+      //and update URL with the route_id
+      //setModalState({...modalState, open: false, id: res.id});
+    } else {
+      setModalOpen(false);
+    }
+  };
 
   const sourcePath = [
     "uda",
@@ -244,6 +284,10 @@ const Comp = ({ state, setState, map }) => {
     srcAttr,
   ];
 
+  /**
+   * Gets info about the internal routes source
+   * So that we can send a valid request to save a new route
+   */
   useEffect(() => {
     const getRouteSource = async () => {
       const r = await falcor.get(sourcePath);
@@ -298,6 +342,90 @@ const Comp = ({ state, setState, map }) => {
 
     getRouteSource();
   }, []);
+
+  //If we have a page filter, it means someone is loading/viewing an existing route
+  //Get the data about it.
+  useEffect(() => {
+    if (
+      pageFilters &&
+      pageFilters.find((pFilter) => pFilter.searchKey === PAGE_FILTER_KEY)
+        ?.values?.length > 0
+    ) {
+
+      const routeIdFilterValue = pageFilters.find(
+        (pFilter) => pFilter.searchKey === PAGE_FILTER_KEY,
+      ).values[0];
+      const NAME_COL = "data->>'name' as name";
+      const DESC_COL = "data->>'description' as description";
+      const TMC_COL = "data->>'tmc_array' as tmc_array";
+      const METADATA_COL = "data->>'metadata' as metadata";
+      const loadRouteDataPath = [
+        "uda",
+        INTERNAL_ROUTES_APP_AND_TYPE,
+        "viewsById",
+        INTERNAL_ROUTES_VIEW_ID,
+        "dataById",
+        [routeIdFilterValue],
+        [
+          NAME_COL,
+          DESC_COL,
+          TMC_COL,
+          METADATA_COL
+        ],
+      ];
+
+      falcor.get(loadRouteDataPath).then((res) => {
+        const curRouteFromApi = get(res, [
+          "json",
+          ...loadRouteDataPath.slice(0, -1),
+        ]);
+        const curRouteTmcArray = JSON.parse(
+          curRouteFromApi[TMC_COL],
+        );
+        const curRouteMetadata = JSON.parse(
+          curRouteFromApi[METADATA_COL]
+        );
+
+        let startDate = "", endDate = "", startTime = "", endTime = "";
+        if (curRouteMetadata && curRouteMetadata.dates && Array.isArray(curRouteMetadata.dates) && curRouteMetadata.dates.length >= 2) {
+          const start = new Date(curRouteMetadata.dates[0]);
+          const end = new Date(curRouteMetadata.dates[1]);
+          if (!isNaN(start)) {
+            startDate = start.toISOString().split('T')[0];
+            startTime = start.toTimeString().split(':').slice(0, 2).join(':');
+          }
+          if (!isNaN(end)) {
+            endDate = end.toISOString().split('T')[0];
+            endTime = end.toTimeString().split(':').slice(0, 2).join(':');
+          }
+        }
+
+        setState((draft) => {
+          set(draft, `${pluginDataPath}['tmc_array']`, curRouteTmcArray);
+        });
+        setModalState({
+          name: curRouteFromApi[NAME_COL], 
+          description: curRouteFromApi[DESC_COL],
+          id: routeIdFilterValue,
+          startDate,
+          endDate,
+          startTime,
+          endTime
+        })
+        const geographyFilter = [
+          {
+            display_name: "tmc",
+            column_name: "tmc",
+            values: curRouteTmcArray,
+            zoomToFilterBounds: true,
+          },
+        ];
+        setGeoBounds({ filter: geographyFilter, setState });
+      });
+    }
+    
+  }, [pageFilters]);
+
 
   const tmcRows = useMemo(() => {
     if (tmc_array?.length > 0) {
@@ -366,7 +494,6 @@ const Comp = ({ state, setState, map }) => {
     setModalState({ ...modalState, open: newModalOpenVal });
 
   const setRouteMeta = (routeMeta) => {
-    console.log({ modalState, routeMeta });
     setModalState({ ...modalState, ...routeMeta });
   };
 
@@ -419,7 +546,7 @@ const Comp = ({ state, setState, map }) => {
             themeOptions={{ color: "transparent" }}
             //className='bg-white hover:bg-cool-gray-700 font-sans text-sm text-npmrds-100 font-medium'
             onClick={(e) => {
-              setModalState({ ...modalState, open: true });
+              setModalOpen(true)
             }}
             style={{ width: "100%", marginTop: "10px" }}
           >
@@ -535,23 +662,20 @@ const SaveRouteModal = ({
   );
 };
 
-const ModalInputField = ({ label, path, value, onChange, type = "text" }) => {
-  return (
-    <div>
-      <div className="font-bold">{label}</div>
-      <label className="flex w-full">
-        <div className="flex w-full items-center">
-          <input
-            type={type}
-            className="w-full p-2 bg-white rounded"
-            value={value}
-            onChange={(e) => {
-              console.log(e.target.value);
-              onChange({ [path]: e.target.value });
-            }}
-          />
-        </div>
-      </label>
-    </div>
-  );
-};
+const ModalInputField = ({ label, path, value, onChange, type = "text" }) => (
+  <div>
+    <div className="font-bold">{label}</div>
+    <label className="flex w-full">
+      <div className="flex w-full items-center">
+        <input
+          type={type}
+          className="w-full p-2 bg-white rounded"
+          value={value}
+          onChange={(e) => {
+            onChange({ [path]: e.target.value });
+          }}
+        />
+      </div>
+    </label>
+  </div>
+);
