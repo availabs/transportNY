@@ -121,7 +121,9 @@ const Comp = ({ state, setState, map }) => {
     
     const payload = {
       ...rest,
-      metadata: JSON.stringify({ dates: [`${startDate}T${startTime || "00:00:00"}`, `${endDate}T${endTime || "23:59:59"}`] }),
+      metadata: JSON.stringify({
+        ...(startDate && endDate ? { dates: [`${startDate}T${startTime || "00:00:00"}`, `${endDate}T${endTime || "23:59:59"}`] } : {})
+      }),
       tmc_array: JSON.stringify(tmc_array || []),
       updated_at: formattedTimestamp,
       ...(!modalState.id && { created_at: formattedTimestamp }),
