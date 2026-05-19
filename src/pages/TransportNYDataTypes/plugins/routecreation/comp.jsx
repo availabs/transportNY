@@ -7,7 +7,7 @@ import React, {
   useRef,
 } from "react";
 import { useNavigate } from 'react-router';
-import { srcAttr, SHAPEFILE_LAYER_KEY, INTERNAL_ROUTES_VIEW_ID,INTERNAL_ROUTES_APP_AND_TYPE, PAGE_FILTER_KEY, INTERNAL_DATASETS_ENV, INTERNAL_ROUTES_SOURCE_ID } from "./constants";
+import { srcAttr, SHAPEFILE_LAYER_KEY, INTERNAL_ROUTES_VIEW_ID,INTERNAL_ROUTES_TYPE, PAGE_FILTER_KEY, INTERNAL_ROUTES_SOURCE_ID } from "./constants";
 import { CMSContext } from "~/modules/dms/packages/dms/src";
 import { Button } from "~/modules/avl-components/src";
 import { MapEditorContext } from "~/modules/dms/packages/dms/src/patterns/mapeditor/context";
@@ -42,7 +42,8 @@ const Comp = ({ state, setState, map }) => {
   }
 
   const pContext = React.useContext(PageContext) || {};
-  const { apiUpdate } = pContext;
+  const { apiUpdate, pageState: { app } } = pContext;
+  const INTERNAL_DATASETS_KEY = `${app}+datasets`;
 
   let pluginDataPath = "";
   let symbologyLayerPath = "";
@@ -277,7 +278,7 @@ const Comp = ({ state, setState, map }) => {
 
   const sourcePath = [
     "uda",
-    INTERNAL_DATASETS_ENV,
+    INTERNAL_DATASETS_KEY,
     "sources",
     "byId",
     [INTERNAL_ROUTES_SOURCE_ID],
@@ -295,7 +296,7 @@ const Comp = ({ state, setState, map }) => {
         get(r, [
           "json",
           "uda",
-          INTERNAL_DATASETS_ENV,
+          INTERNAL_DATASETS_KEY,
           "sources",
           "byId",
           INTERNAL_ROUTES_SOURCE_ID,
@@ -307,7 +308,7 @@ const Comp = ({ state, setState, map }) => {
       // For DMS sources, build env from source name slug (matches how data types are stored)
       const sourceSlug = name ? nameToSlug(name) : null;
       const env =
-        sourceSlug && app ? `${app}+${sourceSlug}` : INTERNAL_DATASETS_ENV;
+        sourceSlug && app ? `${app}+${sourceSlug}` : INTERNAL_DATASETS_KEY;
       const routeSource = {
         ...srcAttr.reduce((acc, attr) => {
           let value = valueGetter(attr);
@@ -326,7 +327,7 @@ const Comp = ({ state, setState, map }) => {
         source_id: get(r, [
           "json",
           "uda",
-          INTERNAL_DATASETS_ENV,
+          INTERNAL_DATASETS_KEY,
           "sources",
           "byId",
           INTERNAL_ROUTES_SOURCE_ID,
@@ -334,7 +335,7 @@ const Comp = ({ state, setState, map }) => {
           4,
         ]),
         env,
-        srcEnv: INTERNAL_DATASETS_ENV,
+        srcEnv: INTERNAL_DATASETS_KEY,
         isDms: true,
       };
       setRoutesSource(routeSource);
@@ -361,7 +362,7 @@ const Comp = ({ state, setState, map }) => {
       const METADATA_COL = "data->>'metadata' as metadata";
       const loadRouteDataPath = [
         "uda",
-        INTERNAL_ROUTES_APP_AND_TYPE,
+        `${app}+${INTERNAL_ROUTES_TYPE}`,
         "viewsById",
         INTERNAL_ROUTES_VIEW_ID,
         "dataById",
@@ -644,13 +645,13 @@ const SaveRouteModal = ({
           <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
             <button 
               onClick={addItem}
-              className="disabled:bg-slate-300 disabled:cursor-warning inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto"
+              className="disabled:bg-slate-300 disabled:cursor-warning inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto cursor-pointer"
             >
               Save
             </button>
             <button
               type="button"
-              className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+              className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto cursor-pointer"
               onClick={() => setModalOpen(false)}
             >
               Cancel
