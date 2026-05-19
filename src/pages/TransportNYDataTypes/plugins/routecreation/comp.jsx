@@ -203,14 +203,26 @@ const Comp = ({ state, setState, map }) => {
   }, [searchInputTmc]);
 
     const addItem = async () => {
-      const { open, ...newItem } = modalState;
+      const { open, startDate, startTime, endDate, endTime, ...rest } = modalState;
       const sourceType =
         routesSource.type ||
         (routesSource.name
           ? nameToSlug(routesSource.name)
           : undefined);
+      
+      const payload = {
+        ...rest,
+        metadata: JSON.stringify({
+          dates: [
+            `${startDate}T${startTime || "00:00:00"}`,
+            `${endDate}T${endTime || "23:59:59"}`
+          ]
+        }),
+        tmc_array: JSON.stringify(tmc_array || [])
+      };
+
       const res = await apiUpdate({
-        data: newItem,
+        data: payload,
         config: {
           format: {
             ...routesSource,
