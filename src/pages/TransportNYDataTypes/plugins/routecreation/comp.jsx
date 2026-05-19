@@ -41,8 +41,7 @@ const Comp = ({ state, setState, map }) => {
   const mctx = React.useContext(MapEditorContext);
   const cctx = React.useContext(CMSContext);
   const pContext = React.useContext(PageContext) || {};
-  const isLoadedRef = React.useRef(false);
-  const { apiUpdate, pageState: { app } } = pContext;
+  const { apiUpdate, pageState: { app, filters: pageFilters } } = pContext;
   const ctx = mctx?.falcor ? mctx : cctx;
   const { falcor, pgEnv } = ctx;
 
@@ -67,16 +66,14 @@ const Comp = ({ state, setState, map }) => {
     };
   }, [state.symbologies]);
 
-  const { tmc_array, view_id, searchInputTmc, pageFilters } = useMemo(() => {
+  const { tmc_array, view_id, searchInputTmc } = useMemo(() => {
     const shapefileLayerId = get(state, `${pluginDataPath}['active-layers'][${SHAPEFILE_LAYER_KEY}]`);
     return {
       tmc_array: get(state, `${pluginDataPath}['tmc_array']`, []),
       view_id: get(state, `${symbologyLayerPath}['${shapefileLayerId}']['view_id']`, null),
-      searchInputTmc: get(state, `${pluginDataPath}['search_input_tmc']`, ""),
-      pageFilters:get(state, `${symbPath}.pageFilters`, [])
+      searchInputTmc: get(state, `${pluginDataPath}['search_input_tmc']`, "")
     };
   }, [pluginDataPath, symbologyLayerPath, state]);
-
   const { tmcData } = useRouteData(state, pluginDataPath, view_id, tmc_array, pgEnv);
   useMapTmcHandler(map, state, setState, pluginDataPath, symbPath);
 
@@ -138,9 +135,10 @@ const Comp = ({ state, setState, map }) => {
       const routeFilter = { ...pageFilters.find(({ searchKey }) => searchKey === PAGE_FILTER_KEY) };
       routeFilter.values = [res.id];
       const url = `?${convertToUrlParams({ [routeFilter.searchKey]: [res.id] })}`;
+      setModalState((prev) => ({ ...prev, open: false }))
       navigate(url);
     } else {
-      setModalState({ ...modalState, open: false });
+      setModalState((prev) => ({ ...prev, open: false }))
     }
   };
 
