@@ -13,6 +13,8 @@ const checkAuth = (props, navigate, location) => {
   // can we switch to isAuthenticating is true on load?
   //-----------------------------------------------------
 
+  if (get(props, ["user", "isAuthenticating"], false)) return false;
+
   let reqAuthLevel = get(props, "authLevel", -1);
   const authReq = get(props, "auth", false);
   reqAuthLevel = Math.max(reqAuthLevel, authReq ? 0 : -1);

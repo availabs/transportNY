@@ -4,7 +4,7 @@ import App from "./App";
 import { Provider } from "react-redux";
 import store from "./store";
 
-import { API_HOST } from "./config";
+import { GRAPH_HOST } from "./config";
 
 import PPDAF_THEME from "./theme";
 import {
@@ -17,7 +17,7 @@ import reportWebVitals from "./reportWebVitals";
 
 import "./index.css";
 
-export const falcor = falcorGraph("https://graph.availabs.org");
+export const falcor = falcorGraph(GRAPH_HOST);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
