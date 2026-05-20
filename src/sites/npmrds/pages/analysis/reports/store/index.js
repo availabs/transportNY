@@ -151,6 +151,10 @@ const getRouteData = (routeIds, report) => {
       falcorGraph.get(
         ["routes2", "id", routeIds, report.allYearsWithData, "tmc_array"]
       )
+      // .then(res => {
+      //   console.log("getRouteData::res", res);
+      //   return res;
+      // })
     )
 }
 

@@ -19,7 +19,7 @@ const LayoutWrapper = withAuth(
       return <Navigate to="/" />;
     }
 
-    console.log("navitemns", navItems);
+    // console.log("navitemns", navItems);
     return (
       <Layout navItems={navItems} {...props}>
         <Child />

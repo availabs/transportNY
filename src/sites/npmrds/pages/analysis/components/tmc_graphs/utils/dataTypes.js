@@ -30,6 +30,9 @@ const oneSixtieth = 1.0 / 60.0,
 	},
 
 	speedReducer = (data, tmcGraph, year) => {
+
+console.log("speedReducer", data, tmcGraph, year);
+
 		const tmcArray = [...new Set(data.map(d => d.tmc))],
 			length = tmcArray.reduce((a, c) => a + get(tmcGraph, `${ c }.npmrds2.meta.${ year }.miles`, 0), 0);
 		if (length === 0) return 0;
