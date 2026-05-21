@@ -133,13 +133,13 @@ class RouteLineGraph extends GeneralGraphComp {
 					const routeData = get(route, `data[${ key }]`, []),
 						year = this.getMaxYear(route);
 
-console.log("RouteLineGraph::generateGraphData::routeData, year", routeData, year);
+// console.log("RouteLineGraph::generateGraphData::routeData, year", routeData, year);
 
-console.log("RouteLineGraph::generateGraphData::reducer", reducer);
+// console.log("RouteLineGraph::generateGraphData::reducer", reducer);
 
 					const rolled = rollup(routeData, v => reducer(v, this.props.tmcGraph, year), d => d.resolution);
 
-console.log("RouteLineGraph::generateGraphData::rolled", rolled);
+// console.log("RouteLineGraph::generateGraphData::rolled", rolled);
 
 
 					const lineData = {
@@ -237,7 +237,7 @@ console.log("RouteLineGraph::generateGraphData::rolled", rolled);
 
 		const xDomain = this.getScaleDomain(graphData, resolution);
 
-console.log("RouteLineGraph::renderGraph::data", leftGraphData);
+// console.log("RouteLineGraph::renderGraph::data", leftGraphData);
 
 		return (
 			<LineGraph data={ leftGraphData }

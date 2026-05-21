@@ -583,17 +583,17 @@ const RouteComp = props => {
 				<div className="overflow-hidden text-ellipsis flex-1">
 					{ route.name }
 				</div>
-				<div className="grid grid-cols-2 gap-1 flex-0">
-					<div style={ { width: "26px" } }
+				<div className="grid grid-cols-2 gap-1">
+					<div
 						className={ `
-							fa fa-plus hover:bg-gray-500 hover:text-white
+							fa fa-plus px-1 pt-1 hover:bg-gray-500 hover:text-white
 							rounded flex justify-center items-center cursor-pointer
 						` }
 						onClick={ doAdd }/>
-					<div style={ { width: "26px" } }
+					<div
 						className={ `
 							${ inGroup ? "fa-regular fa-delete-right" : "fa fa-minus" }
-							hover:bg-gray-500 hover:text-white
+							hover:bg-gray-500 hover:text-white px-1 pt-1
 							rounded flex justify-center items-center cursor-pointer
 						` }
 						onClick={ doRemove }/>
