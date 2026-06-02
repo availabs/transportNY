@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router'
-import { ThemeContext, getComponentTheme } from '~/modules/dms/packages/dms/src/ui/useTheme'
-import Icon from '~/modules/dms/packages/dms/src/ui/components/Icon'
+import { ThemeContext, getComponentTheme } from '~/dms/packages/dms/src/ui/useTheme'
+import Icon from '~/dms/packages/dms/src/ui/components/Icon'
 
 const defaultSites = [
   { name: 'NPMRDS',       subdomain: 'npmrds',       icon: 'Pages' },

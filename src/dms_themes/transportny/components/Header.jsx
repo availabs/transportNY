@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { ComponentContext } from "../../../modules/dms/packages/dms/src/patterns/page/context";
+import { ComponentContext } from "../../../dms/packages/dms/src/patterns/page/context";
 
 const isJson = (str) => {
     try {

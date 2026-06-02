@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router'
-import Icon from '~/modules/dms/packages/dms/src/ui/components/Icon'
+import Icon from '~/dms/packages/dms/src/ui/components/Icon'
 
 const defaultLinks = [
   { name: 'Data Sources', path: '/datasources', icon: 'Database' },
