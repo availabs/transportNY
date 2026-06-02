@@ -29,7 +29,6 @@ export const tmcAttributes = [
   'direction',
   'f_system',
   'faciltype',
-  'is_controlled_access',
   'miles',
   'tmclinear',
   'mpo_code',

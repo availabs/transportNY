@@ -53,6 +53,6 @@ export const MacroviewPlugin = {
     externalPanel: ExternalPanel,
     comp: Comp,
     cleanup: (map, state, setState) => {
-      map.off("click", MAP_CLICK);
+      //map.off("click", MAP_CLICK);
     },
   }

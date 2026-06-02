@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import {get, set, isEqual } from "lodash-es";
 import { format as d3format } from "d3-format";
-import { extractState, createFalcorFilterOptions } from "~/pages/DataManager/MapEditor/stateUtils";
+import { extractState, createFalcorFilterOptions, filterToUda } from "~/modules/dms/packages/dms/src/patterns/mapeditor/MapEditor/stateUtils"
 import {
   filters,
   updateSubMeasures,
@@ -17,6 +17,7 @@ import {
 } from "./updateFilters";
 import { DamaContext } from "~/pages/DataManager/store";
 import { CMSContext } from "~/modules/dms/packages/dms/src";
+import { MapEditorContext } from "~/modules/dms/packages/dms/src/patterns/mapeditor/context";
 import { usePrevious } from "~/pages/DataManager/MapEditor/components/LayerManager/utils";
 import { choroplethPaint } from "~/pages/DataManager/MapEditor/components/LayerEditor/datamaps";
 import { npmrdsPaint } from "./paint";
@@ -39,10 +40,11 @@ import {
 } from "./utils";
 
 const ExternalPanel = ({ state, setState, pathBase = "" }) => {
-  const dctx = React.useContext(DamaContext);
+  const mctx = React.useContext(MapEditorContext);
   const cctx = React.useContext(CMSContext);
-  const ctx = dctx?.falcor ? dctx : cctx;
-  let { falcor, falcorCache, pgEnv, baseUrl } = ctx;
+  const ctx = mctx?.falcor ? mctx : cctx;
+  let { falcor, pgEnv } = ctx;
+  const [geomData, setGeomData] = useState({})
 
   // if (!falcorCache) {
   //   falcorCache = falcor.getCache();
@@ -113,12 +115,11 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
   }, [pluginData, pluginDataPath]);
 
   const {
-    symbology_id,
     existingDynamicFilter,
     filter: dataFilter,
     filterMode,
   } = useMemo(() => {
-    if (dctx) {
+    if (mctx) {
       return extractState(state);
     } else {
       const symbName = Object.keys(state.symbologies)[0];
@@ -130,7 +131,6 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
   useEffect(() => {
     //TODO 9/4 9:51am
     //need to fix zoom stuff here, wrong path
-
     const getFilterBounds = async () => {
       //need array of [{column_name:foo, values:['bar', 'baz']}]
       //geography is currently [{name: foo, value: 'bar', type:'baz'}]
@@ -209,7 +209,6 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         });
       } else {
         if (countyLayerId) {
-          console.log("reserting filter for county::", countyLayerId)
           resetGeometryBorderFilter({
             layerId: countyLayerId,
             setState,
@@ -223,7 +222,6 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
       );
       if (selectedRegion.length > 0 && regionLayerId) {
         //SOURCE 1497 view 4135 nysdot_regions
-        console.log({selectedRegion})
         setGeometryBorderFilter({
           setState,
           layerId: regionLayerId,
@@ -235,7 +233,6 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         });
       } else {
         if (regionLayerId) {
-          console.log("reserting filter for region::", regionLayerId)
           resetGeometryBorderFilter({
             layerId: regionLayerId,
             setState,
@@ -247,9 +244,8 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
       const selectedUa = geography.filter(
         (geo) => geo.type === "urban_code"
       );
-      console.log({geography, selectedUa})
+
       if (selectedUa.length > 0 && uaLayerId) {
-        console.log("inside setting border filter", selectedUa)
         //SOURCE 1493 view 2663 ua_boundaries
         setGeometryBorderFilter({
           setState,
@@ -265,16 +261,13 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
                   paddedCode = "0" + paddedCode
                 }
               }
-              console.log({paddedCode})
               return paddedCode;
             }
           ),
           layerBasePath: symbologyLayerPath,
         });
       } else {
-        console.log("trying to reset UA filter")
         if (uaLayerId) {
-          console.log("reserting filter for UA::", uaLayerId)
           resetGeometryBorderFilter({
             layerId: uaLayerId,
             setState,
@@ -340,36 +333,28 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
   const geomOptions = JSON.stringify({
     groupBy: ["urban_code", "region_code", "mpo_name", "county"],
   });
-  useEffect(() => {
-    const getGeoms = async () => {
-      await falcor.get([
-        "dama",
-        pgEnv,
-        "viewsbyId",
-        viewId,
-        "options",
-        geomOptions,
-        "databyIndex",
-        { from: 0, to: 200 },
-        ["urban_code", "region_code", "mpo_name", "county"],
-      ]);
-    };
 
+  const fetchGeomPath = [
+    "uda",
+    pgEnv,
+    "viewsById",
+    viewId,
+    "options",
+    geomOptions,
+    "dataByIndex",
+    { from: 0, to: 200 },
+    ["urban_code", "region_code", "mpo_name", "county"],
+  ];
+  useEffect(() => {
     if (viewId) {
-      getGeoms();
+      falcor.get(fetchGeomPath).then((res) => {
+        const geomDataPath = fetchGeomPath.slice(0, -2);
+        const geomDataRes = get(res, ["json", ...geomDataPath]);
+        setGeomData(geomDataRes)
+      });
     }
   }, [viewId]);
-
   const geomControlOptions = useMemo(() => {
-    const geomData = get(falcorCache, [
-      "dama",
-      pgEnv,
-      "viewsbyId",
-      viewId,
-      "options",
-      geomOptions,
-      "databyIndex",
-    ]);
     if (geomData) {
       const geoms = {
         urban_code: [],
@@ -401,6 +386,7 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         .filter(truthyFilter)
         .map((da) => ({
           name: UA_CODE_TO_NAME[da] + " UA",
+          label: UA_CODE_TO_NAME[da] + " UA",
           value: da,
           type: "urban_code"
         }))
@@ -411,6 +397,7 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         .filter(truthyFilter)
         .map((da) => ({
           name: REGION_CODE_TO_NAME[da],
+          label: REGION_CODE_TO_NAME[da],
           value: da,
           type: "region_code",
         }))
@@ -419,7 +406,12 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         .filter(onlyUnique)
         .filter(objectFilter)
         .filter(truthyFilter)
-        .map((da) => ({ name: da + " MPO", value: da, type: "mpo_name" }))
+        .map((da) => ({ 
+          name: da + " MPO",
+          label: da + " MPO",
+          value: da,
+          type: "mpo_name" 
+        }))
         .sort(nameSort);
       geoms.county = geoms.county
         .filter(onlyUnique)
@@ -427,6 +419,7 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         .filter(truthyFilter)
         .map((da) => ({
           name: da.toLowerCase() + " County",
+          label: da.toLowerCase() + " County",
           value: da,
           type: "county",
         }))
@@ -441,7 +434,7 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
     } else {
       return [];
     }
-  }, [falcorCache]);
+  }, [geomData]);
 
   //transform from filters into plugin inputs
   const measureControls = Object.keys(measureFilters)
@@ -483,7 +476,7 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         {
           type: "multiselect",
           params: {
-            options: [BLANK_OPTION, ...geomControlOptions],
+            options: geomControlOptions,
             default: "",
             searchable: true,
           },
@@ -538,51 +531,53 @@ const ExternalPanel = ({ state, setState, pathBase = "" }) => {
         method = "ckmeans";
       const domainOptions = {
         column: newDataColumn,
-        viewId: parseInt(viewId),
         numbins,
-        method,
-        dataFilter: falcorDataFilter,
+        method
       };
 
+      const udaFilter = filterToUda(dataFilter);
+      if (udaFilter) Object.assign(domainOptions, udaFilter);
+
       const showOther = "#ccc";
+      const optsKey = JSON.stringify(domainOptions);
       const res = await falcor.get([
-        "dama",
+        "uda",
         pgEnv,
-        "symbologies",
-        "byId",
-        [symbology_id],
+        "viewsById",
+        +viewId,
         "colorDomain",
-        "options",
-        JSON.stringify(domainOptions),
+        optsKey,
       ]);
-      const colorBreaks = get(res, [
+      const cdResult = get(res, [
         "json",
-        "dama",
+        "uda",
         pgEnv,
-        "symbologies",
-        "byId",
-        [symbology_id],
+        "viewsById",
+        +viewId,
         "colorDomain",
-        "options",
-        JSON.stringify(domainOptions),
+        optsKey,
       ]);
+
+      const colorBreaks = (cdResult && Array.isArray(cdResult.breaks) && cdResult.breaks.length)
+        ? { breaks: cdResult.breaks, max: cdResult.max }
+        : { breaks: [], max: 0 };
       //console.log({newDataColumn, max:colorBreaks['max'], colorange: getColorRange(7, "RdYlBu").reverse(), numbins, method, breaks:colorBreaks['breaks'], showOther, orientation:'vertical'})
 
       //format is used to format legend labels
       const { range: paintRange, format } = updateLegend(measureFilters);
       let { paint, legend } = choroplethPaint(
         newDataColumn,
-        colorBreaks["max"],
+        colorBreaks.max,
         paintRange,
         numbins,
         method,
-        colorBreaks["breaks"],
+        colorBreaks.breaks,
         showOther,
         "vertical"
       );
 
       const legendFormat = d3format(format);
-      legend = legend.map((legendBreak) => {
+      legend = legend?.map((legendBreak) => {
         const shouldFormat =
           !newDataColumn.toLowerCase().includes("phed") &&
           !newDataColumn.toLowerCase().includes("ted");

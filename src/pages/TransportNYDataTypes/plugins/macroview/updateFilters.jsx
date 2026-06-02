@@ -578,7 +578,6 @@ const getMeasure = (filters) => {
 
 const updateLegend = (filters) => {
   let range, format;
-  console.log("legend filters::", filters)
   switch (filters.measure.value) {
     case 'lottr':
       range = getColorRange(7, "RdYlBu", true).reverse()

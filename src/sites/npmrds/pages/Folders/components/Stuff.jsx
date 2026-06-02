@@ -982,7 +982,7 @@ const RouteSelector = ({ onClick, selectedRoutes, children }) => {
 
   React.useEffect(() => {
     if (folders.length && !openedFolders.length) {
-      setOpenedFolders([folders.filter(f => f.type === "user")[0].id]);
+      setOpenedFolders([folders.filter(f => f.type === "user")[0]?.id]);
     }
   }, [folders, openedFolders]);
 
@@ -1053,8 +1053,8 @@ const FolderPath = ({ openedFolders, setOpenedFolders }) => {
     <div className="text-2xl font-medium flex relative">
       <div className="flex-1 flex items-end">
         { openedFolders.map((f, i) => (
-            <div key={ f.id }>
-              <PathItem name={ f.name }
+            <div key={ f?.id }>
+              <PathItem name={ f?.name }
                 openPath={ openedFolders.slice(0, i + 1) }
                 setOpenedFolders={ setOpenedFolders }
               />

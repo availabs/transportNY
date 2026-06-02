@@ -6,6 +6,7 @@ import { measure_info } from "./measures";
 import { Button } from "~/modules/avl-components/src";
 import { DamaContext } from "~/pages/DataManager/store";
 import { CMSContext } from "~/modules/dms/packages/dms/src";
+import { MapEditorContext } from "~/modules/dms/packages/dms/src/patterns/mapeditor/context";
 import { PM3_LAYER_KEY } from "./constants";
 import { MultiLevelSelect } from "~/modules/avl-map-2/src"
 import {CheckCircleIcon, XCircleIcon} from "@heroicons/react/20/solid/index.js";
@@ -55,9 +56,9 @@ const Comp = ({ state, setState }) => {
   /**
    * START MODAL STUFF
    */
-  const dctx = React.useContext(DamaContext);
+  const mctx = React.useContext(MapEditorContext);
   const cctx = React.useContext(CMSContext);
-  const ctx = dctx?.falcor ? dctx : cctx;
+  const ctx = mctx?.falcor ? mctx : cctx;
   let { falcor, falcorCache, pgEnv, baseUrl, user } = ctx;
   const [polling, setPolling ] = React.useState(false);
   const [pollingInterval, setPollingInterval] = React.useState(false);
@@ -191,40 +192,38 @@ const Comp = ({ state, setState }) => {
 
   useEffect(() => {
     falcor.get([
-      "dama",
+      "uda",
       pgEnv,
       "sources",
       "byId",
       sourceId,
-      "attributes",
-      "metadata",
+      ["metadata"]
     ]);
   }, [sourceId]);
 
+  const fetchViewPath = [
+    "uda",
+    pgEnv,
+    "views",
+    "byId",
+    viewId,
+    ["metadata", "version"],
+  ];
+
   useEffect(() => {
-    falcor.get([
-      "dama",
-      pgEnv,
-      "views",
-      "byId",
-      viewId,
-      "attributes",
-      ["metadata", "version"],
-    ]);
+    falcor.get(fetchViewPath);
   }, [viewId]);
 
   const sourceDataColumns = useMemo(() => {
     let sourceColumns = get(falcorCache, [
-        "dama",
+        "uda",
         pgEnv,
         "sources",
         "byId",
         sourceId,
-        "attributes",
         "metadata",
-        "value",
+        "value"
     ],[]);
-    // console.log('source columnns', sourceColumns, view.source_id, falcorCache)
     sourceColumns = sourceColumns?.columns ? sourceColumns.columns : sourceColumns;
     return Array.isArray(sourceColumns) ? sourceColumns.filter(d => d.name !== "ogc_fid") : []
     // return []
@@ -232,7 +231,6 @@ const Comp = ({ state, setState }) => {
   /**
    * END MODAL STUFF
    */
-
 
   /**
    * polling stuff for requested download
@@ -265,26 +263,17 @@ const Comp = ({ state, setState }) => {
       setDownloadFileName("")
     }
   }, [downloadFileName, viewDownloads]);
-  const fetchViewPath = [
-    "dama",
-    pgEnv,
-    "views",
-    "byId",
-    viewId,
-    "attributes",
-    ["metadata", "version"],
-  ];
 
   //Gets the view so we can determine if our file is ready for download
   const doPolling = async () => {
-    falcor.invalidate(["dama", pgEnv, "views", "byId"]);
+    falcor.invalidate(["uda", pgEnv, "viewsById"]);
     falcor.invalidate(fetchViewPath);
     falcor.get(fetchViewPath).then(resp => {
       let out = get(
           resp,
           [
             "json",
-            "dama", pgEnv, "views","byId", viewId, "attributes"
+            "uda", pgEnv, "views","byId", viewId
           ],
           {}
         );
@@ -299,12 +288,11 @@ const Comp = ({ state, setState }) => {
         resp,
         [
           "json",
-          "dama",
+          "uda",
           pgEnv,
           "views",
           "byId",
           viewId,
-          "attributes",
         ],
         {}
       );
