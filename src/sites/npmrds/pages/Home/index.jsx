@@ -92,7 +92,7 @@ const TemplateSelector = ({ id, title, onClick, children }) => {
         </div>
         <div className="min-w-0 flex-1">
           <span className="absolute inset-0" aria-hidden="true" />
-          <p className="text-[14px] font-bold uppercase text-gray-500">{ title[1] }</p>
+          <p className="text-[14px] font-bold uppercase text-gray-500">{ title?.[1] || '' }</p>
           <p className="h-12 overflow-hidden text-[12px] font-thin text-gray-500">{ template?.description }</p>
         </div>
       </div>
@@ -578,6 +578,7 @@ console.log("SET OPENED FOLDERS:", f);
     const refs = d3range(length).map(i => get(falcorCache, ["folders2", "user", "index", i, "value"]));
     const allFolders = refs.map(ref => get(falcorCache, ref, null)).filter(Boolean);
     const folderTree = get(falcorCache, ["folders2", "user", "tree", "value"], []);
+    console.log('folder tree', folderTree, falcorCache)
     const topLevelFolders = new Set(folderTree.map(f => f.id));
 
     const folders = allFolders

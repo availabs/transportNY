@@ -23,8 +23,8 @@ const theme = {
           "name": "default",
           "wrapper": "relative",
           "gridOverlay": "absolute inset-0 pointer-events-none",
-          "container": "w-full grid grid-cols-6 ",
-          "gridSize": 6,
+          "container": "w-full grid md:grid-cols-12 ",
+          "gridSize": 12,
           "layouts": {
             "centered": "max-w-[1020px] mx-auto",
             "fullwidth": ""
@@ -41,20 +41,68 @@ const theme = {
           "addSectionIconWrapper": "flex items-center",
           "addSectionIcon": "size-6",
           "sizes": {
-            "1": {
+            "1c": {
+              "className": "col-span-6 md:col-span-1",
+              "iconSize": 100
+            },
+            "2c": {
+              "className": "col-span-6 md:col-span-2",
+              "iconSize": 33
+            },
+            "3c": {
+              "className": "col-span-6 md:col-span-3",
+              "iconSize": 50
+            },
+            "4c": {
+              "className": "col-span-12 md:col-span-4",
+              "iconSize": 100
+            },
+            "5c": {
+              "className": "col-span-12 md:col-span-4",
+              "iconSize": 33
+            },
+            "6c": {
               "className": "col-span-12 md:col-span-6",
+              "iconSize": 50
+            },
+            "7c": {
+              "className": "col-span-12 md:col-span-7",
+              "iconSize": 100
+            },
+            "8c": {
+              "className": "col-span-12 md:col-span-8",
+              "iconSize": 33
+            },
+            "9c": {
+              "className": "col-span-12 md:col-span-9",
+              "iconSize": 50
+            },
+            "10c": {
+              "className": "col-span-12 md:col-span-10",
+              "iconSize": 100
+            },
+            "11c": {
+              "className": "col-span-12 md:col-span-11",
+              "iconSize": 33
+            },
+            "12c": {
+              "className": "col-span-12 md:col-span-12",
+              "iconSize": 50
+            },
+            "1": {
+              "className": "col-span-12 md:col-span-12",
               "iconSize": 100
             },
             "1/3": {
-              "className": "col-span-12 md:col-span-2",
+              "className": "col-span-12 md:col-span-4",
               "iconSize": 33
             },
             "1/2": {
-              "className": "col-span-12 md:col-span-3",
+              "className": "col-span-12 md:col-span-6",
               "iconSize": 50
             },
             "2/3": {
-              "className": "col-span-12 md:col-span-4",
+              "className": "col-span-12 md:col-span-8",
               "iconSize": 66
             }
           },
@@ -247,7 +295,7 @@ const theme = {
         "wrapper": "relative isolate flex min-h-svh w-full max-lg:flex-col overflow-clip",
         "wrapper2": "flex-1 flex items-start flex-col items-stretch max-w-full min-h-screen",
         "wrapper3": "flex flex-1",
-        "childWrapper": "flex-1 h-full"
+        "childWrapper": "flex-1 h-full min-h-screen"
       }
     ]
   },

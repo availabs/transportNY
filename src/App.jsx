@@ -18,8 +18,7 @@ import tsmonew from '~/sites/tsmo_new'
 
 import npmrds from '~/sites/npmrds'
 import themes from './dms_themes'
-import {PROJECT_NAME, API_HOST, AUTH_HOST} from "./config.js";
-
+import {PROJECT_NAME, API_HOST, AUTH_HOST, DAMA_HOST} from "./config.js";
 
 const Sites = {
   www: transportNY,
@@ -29,7 +28,6 @@ const Sites = {
 }
 //import AdditionalComponents from "./additional_components";
 import { DamaMap, Map } from "./pages/DataManager/"
-
 
 
 registerComponents({
@@ -81,11 +79,11 @@ const App = (props) => {
       damaDataTypes={transportNYDataTypes}
       API_HOST={API_HOST}
       AUTH_HOST={AUTH_HOST}
+      DAMA_HOST={DAMA_HOST}
       PROJECT_NAME={PROJECT_NAME}
       routes={WrappedRoutes}
     />
   )
-
 
 }
 

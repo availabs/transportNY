@@ -4,7 +4,8 @@ import App from './App';
 import { Provider } from 'react-redux';
 import store from './store';
 
-import { API_HOST } from './config'
+import { NPMRDS_API_HOST } from './config'
+
 
 import PPDAF_THEME from "./theme"
 import {
@@ -17,7 +18,8 @@ import reportWebVitals from './reportWebVitals';
 
 import "./index.css";
 
-export const falcor = falcorGraph(API_HOST)
+
+export const falcor = falcorGraph(NPMRDS_API_HOST)
 
 
 
