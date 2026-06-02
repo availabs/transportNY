@@ -75,6 +75,7 @@
     "web-vitals": "^0.2.4",
     "write-excel-file": "^2.0.9",
     "xhr2": "^0.2.1",
+    "y-protocols": "^1.0.7",
     "yjs": "^13.6.30"
   },
   "scripts": {
@@ -118,6 +119,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^3.1.0",
     "autoprefixer": "^10.4.2",
+    "babel-plugin-react-compiler": "^1.0.0",
     "chokidar": "^3.5.1",
     "process": "^0.11.10",
     "tailwindcss": "^4.1.18"

@@ -16,11 +16,17 @@ import transportNY from "~/sites/transportny";
 import tsmo from "~/sites/tsmo";
 import tsmonew from "~/sites/tsmo_new";
 
+<<<<<<< HEAD
+import npmrds from '~/sites/npmrds'
+import themes from './dms_themes'
+import {PROJECT_NAME, API_HOST, AUTH_HOST, DAMA_HOST} from "./config.js";
+=======
 import npmrds from "~/sites/npmrds";
 import themes from "./dms_themes";
 import { PROJECT_NAME, API_HOST, AUTH_HOST } from "./config.js";
 
 console.log("APP.jsx API_HOST", API_HOST);
+>>>>>>> 8357f1e941b5f6dee5ca66d42a367f6c1e374484
 
 const Sites = {
   www: transportNY,
@@ -31,10 +37,18 @@ const Sites = {
 //import AdditionalComponents from "./additional_components";
 //import { DamaMap, Map } from "./pages/DataManager/";
 
+<<<<<<< HEAD
+
+registerComponents({
+  "Map: Dama Map": DamaMap,
+  "Map": Map
+})
+=======
 // registerComponents({
 //   "Map: Dama Map": DamaMap,
 //   Map: Map,
 // });
+>>>>>>> 8357f1e941b5f6dee5ca66d42a367f6c1e374484
 
 // registerDataType("selector", Selector)
 
@@ -77,11 +91,22 @@ const App = (props) => {
       damaDataTypes={transportNYDataTypes}
       damaMapPlugins={mapPlugins}
       API_HOST={API_HOST}
+<<<<<<< HEAD
+      AUTH_HOST={AUTH_HOST}
+      DAMA_HOST={DAMA_HOST}
+      PROJECT_NAME={PROJECT_NAME}
+      routes={WrappedRoutes}
+    />
+  )
+
+}
+=======
       DAMA_HOST={API_HOST}
       AUTH_HOST={API_HOST}
       routes={WrappedRoutes}
     />
   );
 };
+>>>>>>> 8357f1e941b5f6dee5ca66d42a367f6c1e374484
 
 export default App;
