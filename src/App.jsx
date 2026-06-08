@@ -21,18 +21,13 @@ import npmrds from '~/sites/npmrds'
 import themes from './dms_themes'
 import {PROJECT_NAME, API_HOST, AUTH_HOST, DAMA_HOST} from "./config.js";
 
-
 const Sites = {
-  //www: transportNY,
   tsmo: tsmonew,
   tsmo_old: tsmo,
   npmrds,
 };
-//import AdditionalComponents from "./additional_components";
-//import { DamaMap, Map } from "./pages/DataManager/";
 
 
-// registerDataType("selector", Selector)
 
 const defaultPgEnv = "npmrds2";
 const adminBaseUrl = "/list";
@@ -49,7 +44,7 @@ const App = (props) => {
   const site = useMemo(() => {
     let siteOutpt = SUBDOMAIN
       ? get(Sites, SUBDOMAIN, { Routes: [] })
-      : Sites["www"];
+      : { Routes:[] } ;
     //console.log('SUBDOMAIN', siteOutpt)
     return siteOutpt;
   }, [SUBDOMAIN]);

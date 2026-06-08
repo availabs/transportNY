@@ -33,7 +33,7 @@ const Routes = [
   ...DataManager(DAMA_ARGS),
   // ...Documentation,
   // GraphTest,
-  NoMatch
+  // NoMatch
 ]
 
 export default Routes
