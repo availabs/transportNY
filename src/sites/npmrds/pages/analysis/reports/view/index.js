@@ -5,6 +5,7 @@ const BASE = {
   icon: 'fa-duotone fa-chart-line',
   sideNavActiveStyle: 'compact',
   auth: false,
+  authLevel:0,
   component: ViewReport
 }
 const PATHS = [

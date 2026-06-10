@@ -46,13 +46,13 @@ export const _addStationComp = (state, stationId, res) => {
     compTitle: ""
   }
 
-  const stationData = get(res, ["json", "hds", "continuous", "stations", "byId", stationId]);
+  const stationData = get(res, ["json", "hds", "continuous", "stations", "byId", stationId], {});
 
   const newStationComp = {
     compId: makeNewStationCompId(),
     stationId,
     color: getStationColor(),
-    name: `${ stationData.stationId } (${ stationData.muni }) (${ stationData.data_type.split(",").map(s => s[0]).join(", ") })`,
+    name: `${ stationData.stationId } (${ stationData.muni }) (${ (stationData.data_type || "").split(",").map(s => s[0]).join(", ") })`,
     data: {},
     workingSettings: JSON.parse(JSON.stringify(settings)),
     settings
@@ -132,12 +132,12 @@ export const loadStationCompsFromReport = (report, falcorCache) => {
 
   return (get(report, "station_comps") || [])
     .map(comp => {
-      const stationData = get(falcorCache, ["hds", "continuous", "stations", "byId", comp.stationId]);
+      const stationData = get(falcorCache, ["hds", "continuous", "stations", "byId", comp.stationId], {});
       return {
         compId: comp.compId,
         stationId: comp.stationId,
         color: comp.color,
-        name: `${ stationData.stationId } (${ stationData.muni }) (${ stationData.data_type.split(",").map(s => s[0]).join(", ") })`,
+        name: `${ stationData.stationId } (${ stationData.muni }) (${ (stationData.data_type || "").split(",").map(s => s[0]).join(", ") })`,
         data: {},
         workingSettings: JSON.parse(JSON.stringify(comp.settings)),
         settings: JSON.parse(JSON.stringify(comp.settings))
@@ -173,9 +173,9 @@ export const loadStationCompsFromTemplate = (station_comps, falcorCache, station
       data: {},
       settings: JSON.parse(JSON.stringify(sc.settings))
     };
-    const stationData = get(falcorCache, ["hds", "continuous", "stations", "byId", comp.stationId]);
+    const stationData = get(falcorCache, ["hds", "continuous", "stations", "byId", comp.stationId], {});
     comp.name = `${ stationData.stationId } (${ stationData.muni }) ` +
-      `(${ stationData.data_type.split(",").map(s => s[0]).join(", ") })`;
+      `(${ (stationData.data_type || "").split(",").map(s => s[0]).join(", ") })`;
     return comp;
   })
 }

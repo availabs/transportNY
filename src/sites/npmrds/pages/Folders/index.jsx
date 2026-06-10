@@ -73,7 +73,8 @@ const Folders = ({ user }) => {
     const length = get(falcorCache, ["folders2", "user", "length"], 0);
     const refs = d3range(length).map(i => get(falcorCache, ["folders2", "user", "index", i, "value"]));
     const allFolders = refs.map(ref => get(falcorCache, ref, null)).filter(Boolean);
-    const folderTree = get(falcorCache, ["folders2", "user", "tree", "value"], []);
+    const folderTreeValue = get(falcorCache, ["folders2", "user", "tree", "value"], []);
+    const folderTree = Array.isArray(folderTreeValue) ? folderTreeValue : [];
     const topLevelFolders = new Set(folderTree.map(f => f.id));
 
     const folders = allFolders

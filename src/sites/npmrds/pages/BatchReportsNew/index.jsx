@@ -884,7 +884,8 @@ const FolderSelector = ({ folderTree, ...props }) => {
   }, [user]);
 
   const foldersTree = React.useMemo(() => {
-    return get(falcorCache, ["folders2", "user", "tree", "value"], [])
+    const treeValue = get(falcorCache, ["folders2", "user", "tree", "value"], []);
+    return (Array.isArray(treeValue) ? treeValue : [])
       .filter(f => {
         if (f.type === "user") return true;
         if (f.type === "AVAIL") return groupAuthLevels["AVAIL"] >= f.editable;

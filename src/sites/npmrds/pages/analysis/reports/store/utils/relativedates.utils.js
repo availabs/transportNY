@@ -90,7 +90,9 @@ const DATE_TIME_REGEX_2 = /^(\d{4}[-]\d{2}[-]\d{2})(?:T(\d{2}[:]\d{2}(?:[:]\d{2}
 
 export const getDatesAndTimes = (dates, format = "YYYYMMDD") => {
   const response = [[null, null], [null, null]];
-  dates.forEach((date, i) => {
+  // Callers pass `datesMap[routeId]`, which is undefined when a route's
+  // metadata hasn't cached yet; guard so `.forEach` never throws.
+  (Array.isArray(dates) ? dates : []).forEach((date, i) => {
     if (DATE_TIME_REGEX_1.test(date)) {
       const [, d, t] = DATE_TIME_REGEX_1.exec(date);
       response[0][i] = moment(d, "YYYYMMDD").format(format);

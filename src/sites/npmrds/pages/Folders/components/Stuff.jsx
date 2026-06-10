@@ -1215,7 +1215,7 @@ export const ThumbnailContainer = ({ children }) => {
 }
 
 const expandFolderTree = (folderTree, action) => {
-  return folderTree.map(f => {
+  return (Array.isArray(folderTree) ? folderTree : []).map(f => {
     return {
       Item: (
         () => (
@@ -1301,7 +1301,8 @@ const FolderStuffContainer = props => {
   }, [falcor, parent]);
 
   React.useEffect(() => {
-    const folderTree = get(falcorCache, ["folders2", "user", "tree", "value"], [])
+    const treeValue = get(falcorCache, ["folders2", "user", "tree", "value"], []);
+    const folderTree = (Array.isArray(treeValue) ? treeValue : [])
       .filter(f => f.type !== "AVAIL");
     setFolders(folderTree.filter(f => f.id !== parent));
   }, [falcorCache, parent]);

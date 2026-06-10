@@ -900,19 +900,21 @@ const FolderSortValues = {
 }
 
 const populateFolders = (folderTree, falcorCache) => {
-  return folderTree.map(f => {
+  return (Array.isArray(folderTree) ? folderTree : []).map(f => {
+    const stuffValue = get(falcorCache, ["folders2", "stuff", f.id, "value"], []);
+    const routeChildren = (Array.isArray(stuffValue) ? stuffValue : [])
+      .filter(s => s.stuff_type === "route")
+      .map(s => {
+        return {
+          ...get(falcorCache, ["routes2", "id", s.stuff_id]),
+          value: s.stuff_id
+        }
+      });
     return {
       ...f,
       children: [
         ...populateFolders(f.children, falcorCache),
-        ...get(falcorCache, ["folders2", "stuff", f.id, "value"], [])
-          .filter(s => s.stuff_type === "route")
-          .map(s => {
-            return {
-              ...get(falcorCache, ["routes2", "id", s.stuff_id]),
-              value: s.stuff_id
-            }
-          })
+        ...routeChildren
       ]
     }
   }).filter(f => f.children.length)

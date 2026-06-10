@@ -83,7 +83,7 @@ const ITEMS = [
 ]
 
 const setFolderValues = (foldersTree, falcorCache) => {
-  return foldersTree.reduce((a, c) => {
+  return (Array.isArray(foldersTree) ? foldersTree : []).reduce((a, c) => {
     const stuff = get(falcorCache, ["folders2", "stuff", c.id, "value"], []);
     const routeIds = stuff.filter(stuff => stuff.stuff_type === "route")
       .map(stuff => stuff.stuff_id);

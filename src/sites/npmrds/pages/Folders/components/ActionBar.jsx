@@ -264,7 +264,7 @@ const ActionBar = ({ selectedStuff, selectAll, deselectAll, parent, stuff }) => 
     }
 
     const followFolderTree = tree => {
-      return tree.map(f => ({
+      return (Array.isArray(tree) ? tree : []).map(f => ({
         ...f,
         disabled: selectedFolders.has(+f.id),
         children: followFolderTree(f.children)

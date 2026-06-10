@@ -122,6 +122,11 @@ export const getDataDateExtent = () =>
         const minDate = get(res, minDatePath);
         const maxDate = get(res, maxDatePath);
 
+        // The UDA view returns no rows on a cold/empty fetch; both reads are
+        // then undefined and `.split` would crash. Bail rather than dispatch
+        // a broken date extent.
+        if (!minDate || !maxDate) return;
+
         const dateExtent = [minDate, maxDate];
 
         const [minYear, minMonth, minDay] = minDate.split("-").map(Number);
@@ -1852,7 +1857,8 @@ const _addRouteComp = (state, routeIds, copiedSettings, groupId = null) => {
 
   for (const routeId of routeIds) {
     const data = get(falcorGraph.getCache(), `routes2.id.${ routeId }`, {});
-    const dates = get(data, ["metadata", "value", "dates"], baseDates)
+    const rawDates = get(data, ["metadata", "value", "dates"], baseDates);
+    const dates = (Array.isArray(rawDates) ? rawDates : baseDates)
                     .map(d => +d.replaceAll("-", ""));
     const {
   		amPeakStart,

@@ -577,8 +577,10 @@ console.log("SET OPENED FOLDERS:", f);
     const length = get(falcorCache, ["folders2", "user", "length"], 0);
     const refs = d3range(length).map(i => get(falcorCache, ["folders2", "user", "index", i, "value"]));
     const allFolders = refs.map(ref => get(falcorCache, ref, null)).filter(Boolean);
-    const folderTree = get(falcorCache, ["folders2", "user", "tree", "value"], []);
-    console.log('folder tree', folderTree, falcorCache)
+    const folderTreeValue = get(falcorCache, ["folders2", "user", "tree", "value"], []);
+    // Falcor resolves this to a non-array (truthy) before the user's folders load,
+    // so the `[]` default above doesn't protect `.map`; guard on the actual type.
+    const folderTree = Array.isArray(folderTreeValue) ? folderTreeValue : [];
     const topLevelFolders = new Set(folderTree.map(f => f.id));
 
     const folders = allFolders
