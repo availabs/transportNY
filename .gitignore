@@ -14,6 +14,7 @@
 
 # config
 src/config.json
+ritis.config.json
 *.env
 # misc
 .DS_Store
