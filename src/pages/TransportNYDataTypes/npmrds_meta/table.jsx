@@ -4,14 +4,16 @@ import { Table } from '~/modules/avl-components/src'
 import get from 'lodash/get'
 import { useParams, useNavigate, useSearchParams } from 'react-router'
 
-import { DamaContext } from "~/pages/DataManager/store";
+import { useFalcor } from "@availabs/avl-falcor";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 
 const ViewSelector = ({ views }) => {
     const { viewId, sourceId, page } = useParams()
     const [searchParams] = useSearchParams();
     const variable = searchParams.get("variable")
     const navigate = useNavigate()
-    const { baseUrl } = React.useContext(DamaContext)
+    const { baseUrl } = React.useContext(DatasetsContext)
 
     const activeViewId = variable && !viewId ? variable : viewId;
 
@@ -65,7 +67,9 @@ const TablePage = ({
         _setFilters(prev => ({ ...prev, ...filters }));
     }, []);
 
-    const { pgEnv, falcor, falcorCache, user } = React.useContext(DamaContext);
+    const { user, datasources } = React.useContext(DatasetsContext);
+    const { falcor, falcorCache } = useFalcor();
+    const pgEnv = getExternalEnv(datasources);
 
     const activeView = React.useMemo(() => {
         return get(

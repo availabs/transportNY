@@ -42,7 +42,7 @@ const SelectSpeedLimitSource = ({ dispatch, selectedViewId, selectedSourceId }) 
     async function getData() {
       console.log("getting data")
       const lengthPath = [
-        "dama",
+        "uda",
         pgEnv,
         "sources",
         "byId",
@@ -53,7 +53,7 @@ const SelectSpeedLimitSource = ({ dispatch, selectedViewId, selectedSourceId }) 
 
       const resp = await falcor.get(lengthPath);
       await falcor.get([
-        "dama",
+        "uda",
         pgEnv,
         "sources",
         "byId",
@@ -64,7 +64,6 @@ const SelectSpeedLimitSource = ({ dispatch, selectedViewId, selectedSourceId }) 
           from: 0,
           to: get(resp.json, lengthPath, 0) - 1,
         },
-        "attributes",
         Object.values(ViewAttributes),
       ]);
     }
@@ -77,11 +76,11 @@ const SelectSpeedLimitSource = ({ dispatch, selectedViewId, selectedSourceId }) 
     return Object.values(
       get(
         falcorCache,
-        ["dama", pgEnv, "sources", "byId", selectedSourceId, "views", "byIndex"],
+        ["uda", pgEnv, "sources", "byId", selectedSourceId, "views", "byIndex"],
         {}
       )
     ).map((v) =>
-      getAttributes(get(falcorCache, v.value, { attributes: {} })["attributes"])
+      getAttributes(get(falcorCache, v.value, {}))
     );
   }, [falcorCache, selectedSourceId, pgEnv]);
 

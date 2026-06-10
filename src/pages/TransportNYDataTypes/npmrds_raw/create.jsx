@@ -10,7 +10,8 @@ import {
   Transition,
 } from "@headlessui/react";
 
-import { DamaContext } from "~/pages/DataManager/store";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 import PublishNpmrdsRaw from "./publish";
 
 import { MAX_NPMRDS_SOURCE_NAME_LENGTH } from "../npmrds/pages/Create";
@@ -78,7 +79,8 @@ const Create = (props) => {
   const [loading, setLoading] = useState(false);
   const [states, setStates] = useState([]);
 
-  const { pgEnv, user } = React.useContext(DamaContext);
+  const { user, datasources } = React.useContext(DatasetsContext);
+  const pgEnv = getExternalEnv(datasources);
   function isSelected(val) {
     return (states || []).find((el) => el === val) ? true : false;
   }

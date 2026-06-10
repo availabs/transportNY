@@ -42,7 +42,7 @@ const SelectMpoBoundariesSource = ({ dispatch, selectedMpoBoundariesViewId, sele
     async function getData() {
       console.log("getting data")
       const lengthPath = [
-        "dama",
+        "uda",
         pgEnv,
         "sources",
         "byId",
@@ -53,7 +53,7 @@ const SelectMpoBoundariesSource = ({ dispatch, selectedMpoBoundariesViewId, sele
 
       const resp = await falcor.get(lengthPath);
       await falcor.get([
-        "dama",
+        "uda",
         pgEnv,
         "sources",
         "byId",
@@ -64,7 +64,6 @@ const SelectMpoBoundariesSource = ({ dispatch, selectedMpoBoundariesViewId, sele
           from: 0,
           to: get(resp.json, lengthPath, 0) - 1,
         },
-        "attributes",
         Object.values(ViewAttributes),
       ]);
     }
@@ -77,11 +76,11 @@ const SelectMpoBoundariesSource = ({ dispatch, selectedMpoBoundariesViewId, sele
     return Object.values(
       get(
         falcorCache,
-        ["dama", pgEnv, "sources", "byId", selectedMpoBoundariesSourceId, "views", "byIndex"],
+        ["uda", pgEnv, "sources", "byId", selectedMpoBoundariesSourceId, "views", "byIndex"],
         {}
       )
     ).map((v) =>
-      getAttributes(get(falcorCache, v.value, { attributes: {} })["attributes"])
+      getAttributes(get(falcorCache, v.value, {}))
     );
   }, [falcorCache, selectedMpoBoundariesSourceId, pgEnv]);
 

@@ -1,12 +1,14 @@
 import React from "react"
 
 import { DAMA_HOST } from "~/config";
-import { DamaContext } from "~/pages/DataManager/store";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 
 const CreateComponent = ({ source }) => {
 
   // const navigate = useNavigate();
-  const { pgEnv, baseUrl } = React.useContext(DamaContext);
+  const { datasources, baseUrl } = React.useContext(DatasetsContext);
+  const pgEnv = getExternalEnv(datasources);
   const { name: sourceName } = source;
 
   const uploadOSMFile = React.useCallback(file => {

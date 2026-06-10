@@ -3,7 +3,9 @@ import React from "react"
 // import { useParams, useNavigate, useSearchParams } from 'react-router'
 
 import { DAMA_HOST } from "~/config";
-import { DamaContext } from "~/pages/DataManager/store";
+import { useFalcor } from "@availabs/avl-falcor";
+import { getExternalEnv } from "~/modules/dms/packages/dms/src/patterns/datasets/utils/datasources";
+import { DatasetsContext } from '~/modules/dms/packages/dms/src/patterns/datasets/context.js';
 
 import {
   useFetchSources,
@@ -18,7 +20,9 @@ const OSM_DATA_COLUMNS = ["osm_id", "wkb_geometry"];
 
 const CreateComponent = ({ source }) => {
 
-  const { pgEnv, baseUrl, falcor, falcorCache } = React.useContext(DamaContext);
+  const { datasources, baseUrl } = React.useContext(DatasetsContext);
+  const { falcor, falcorCache } = useFalcor();
+  const pgEnv = getExternalEnv(datasources);
   const { name: damaSourceName, source_id: damaSourceId, type } = source;
 
   const [createState, setCreateState] = React.useState({

@@ -10,15 +10,15 @@ import {
 
 export const useFetchSources = ({ falcor, falcorCache, pgEnv }) => {
   React.useEffect(() => {
-    falcor.get(["dama", pgEnv, "sources", "length"]);
+    falcor.get(["uda", pgEnv, "sources", "length"]);
 
-    const length = get(falcorCache, ["dama", pgEnv, "sources", "length"], 0);
+    const length = get(falcorCache, ["uda", pgEnv, "sources", "length"], 0);
 
     if (length) {
       falcor.get([
-        "dama", pgEnv, "sources", "byIndex",
+        "uda", pgEnv, "sources", "byIndex",
         { from: 0, to: length - 1 },
-        "attributes", Object.values(SourceAttributes)
+        Object.values(SourceAttributes)
       ])
     }
   }, [falcor, falcorCache, pgEnv]);
@@ -26,8 +26,8 @@ export const useFetchSources = ({ falcor, falcorCache, pgEnv }) => {
 
 export const useGetSources = ({ falcorCache, pgEnv, categories = [], columns = [] }) => {
   return React.useMemo(() => {
-    return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
-      .map(v => getAttributes(get(falcorCache, v.value, { "attributes": {} })["attributes"]))
+    return Object.values(get(falcorCache, ["uda", pgEnv, "sources", "byIndex"], {}))
+      .map(v => getAttributes(get(falcorCache, v.value, {})))
       .filter(src => {
         return categories.reduce((a, c) => {
           return a && src?.categories?.reduce((aa, cc) => {
@@ -55,15 +55,15 @@ export const useFetchSourceViews = ({ falcor, falcorCache, pgEnv, source_id }) =
   React.useEffect(() => {
     if (!source_id) return;
 
-    falcor.get(["dama", pgEnv, "sources", "byId", source_id, "views", "length"]);
+    falcor.get(["uda", pgEnv, "sources", "byId", source_id, "views", "length"]);
 
-    const length = get(falcorCache, ["dama", pgEnv, "sources", "byId", source_id, "views", "length"], 0);
+    const length = get(falcorCache, ["uda", pgEnv, "sources", "byId", source_id, "views", "length"], 0);
 
     if (length) {
       falcor.get([
-        "dama", pgEnv, "sources", "byId", source_id, "views", "byIndex",
+        "uda", pgEnv, "sources", "byId", source_id, "views", "byIndex",
         { from: 0, to: length - 1 },
-        "attributes", Object.values(ViewAttributes)
+        Object.values(ViewAttributes)
       ]);
     }
   }, [falcor, falcorCache, pgEnv, source_id]);
@@ -71,8 +71,8 @@ export const useFetchSourceViews = ({ falcor, falcorCache, pgEnv, source_id }) =
 
 export const useGetViews = ({ falcorCache, pgEnv, source_id }) => {
   return React.useMemo(() => {
-    return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byId", source_id, "views", "byIndex"], {}))
-      .map(v => getAttributes(get(falcorCache, v.value, { "attributes": {} })["attributes"]))
+    return Object.values(get(falcorCache, ["uda", pgEnv, "sources", "byId", source_id, "views", "byIndex"], {}))
+      .map(v => getAttributes(get(falcorCache, v.value, {})))
       .sort((a, b) => String(a.version || a.view_id).localeCompare(String(b.version || b.view_id)));
   }, [falcorCache, source_id, pgEnv]);
 }

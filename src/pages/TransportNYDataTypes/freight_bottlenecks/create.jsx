@@ -79,21 +79,21 @@ const Create = ({ source }) => {
 
     useEffect(() => {
         async function fetchData() {
-            const geomLengthPath = ["dama", pgEnv, "sources", "length"];
+            const geomLengthPath = ["uda", pgEnv, "sources", "length"];
             const sourceLen = await falcor.get(geomLengthPath);
 
             await falcor.get([
-                "dama", pgEnv, "sources", "byIndex",
+                "uda", pgEnv, "sources", "byIndex",
                 { from: 0, to: get(sourceLen.json, geomLengthPath, 0) - 1 },
-                "attributes", ['source_id', 'metadata', 'categories', 'name']
+                ['source_id', 'metadata', 'categories', 'name']
             ]);
         }
         fetchData();
     }, [falcor, pgEnv]);
 
     const geomSources = useMemo(() => {
-        return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
-            .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
+        return Object.values(get(falcorCache, ["uda", pgEnv, "sources", "byIndex"], {}))
+            .map(v => getAttributes(get(falcorCache, v?.value, {})))
             .filter(s => s.categories &&
                 s.categories.some(categoryGroup =>
                     categoryGroup.includes("TMC META")
@@ -101,8 +101,8 @@ const Create = ({ source }) => {
     }, [falcorCache, pgEnv]);
 
     const pm3Sources = useMemo(() => {
-        return Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byIndex"], {}))
-            .map(v => getAttributes(get(falcorCache, v?.value, { "attributes": {} })["attributes"]))
+        return Object.values(get(falcorCache, ["uda", pgEnv, "sources", "byIndex"], {}))
+            .map(v => getAttributes(get(falcorCache, v?.value, {})))
             .filter(s => s.categories &&
                 s.categories.some(categoryGroup =>
                     categoryGroup.includes("MAP21")
@@ -111,13 +111,13 @@ const Create = ({ source }) => {
 
     useEffect(() => {
         async function fetchData() {
-            const pm3LengthPath = ["dama", pgEnv, "sources", "byId", selectedpm3Source?.source_id, "views", "length"];
+            const pm3LengthPath = ["uda", pgEnv, "sources", "byId", selectedpm3Source?.source_id, "views", "length"];
             const pm3ViewsLen = await falcor.get(pm3LengthPath);
 
             await falcor.get([
-                "dama", pgEnv, "sources", "byId", selectedpm3Source?.source_id, "views", "byIndex",
+                "uda", pgEnv, "sources", "byId", selectedpm3Source?.source_id, "views", "byIndex",
                 { from: 0, to: get(pm3ViewsLen.json, pm3LengthPath, 0) - 1 },
-                "attributes", ['view_id', 'version', 'metadata']
+                ['view_id', 'version', 'metadata']
             ]);
         }
         fetchData();
@@ -125,22 +125,22 @@ const Create = ({ source }) => {
 
     useEffect(() => {
         async function fetchData() {
-            const geomLengthPath = ["dama", pgEnv, "sources", "byId", selectedGeomSource?.source_id, "views", "length"];
+            const geomLengthPath = ["uda", pgEnv, "sources", "byId", selectedGeomSource?.source_id, "views", "length"];
             const geomViewsLen = await falcor.get(geomLengthPath);
 
             await falcor.get([
-                "dama", pgEnv, "sources", "byId", selectedGeomSource?.source_id, "views", "byIndex",
+                "uda", pgEnv, "sources", "byId", selectedGeomSource?.source_id, "views", "byIndex",
                 { from: 0, to: get(geomViewsLen.json, geomLengthPath, 0) - 1 },
-                "attributes", ['view_id', 'version', 'metadata']
+                ['view_id', 'version', 'metadata']
             ]);
         }
         fetchData();
     }, [falcor, pgEnv, selectedGeomSource]);
 
     const geomViews = useMemo(() => {
-        return selectedGeomSource?.source_id && (Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byId", selectedGeomSource?.source_id, "views", "byIndex"], {}))
+        return selectedGeomSource?.source_id && (Object.values(get(falcorCache, ["uda", pgEnv, "sources", "byId", selectedGeomSource?.source_id, "views", "byIndex"], {}))
             .map(v =>
-                Object.entries(get(falcorCache, v?.value, { "attributes": {} })["attributes"])
+                Object.entries(get(falcorCache, v?.value, {}))
                     .reduce((out, attr) => {
                         const [k, v] = attr
                         typeof v.value !== 'undefined' ?
@@ -153,9 +153,9 @@ const Create = ({ source }) => {
     }, [falcorCache, selectedGeomSource, pgEnv]);
 
     const pm3Views = useMemo(() => {
-        return selectedpm3Source?.source_id && Object.values(get(falcorCache, ["dama", pgEnv, "sources", "byId", selectedpm3Source?.source_id, "views", "byIndex"], {}))
+        return selectedpm3Source?.source_id && Object.values(get(falcorCache, ["uda", pgEnv, "sources", "byId", selectedpm3Source?.source_id, "views", "byIndex"], {}))
             .map(v =>
-                Object.entries(get(falcorCache, v?.value, { "attributes": {} })["attributes"])
+                Object.entries(get(falcorCache, v?.value, {}))
                     .reduce((out, attr) => {
                         const [k, v] = attr;
                         typeof v.value !== 'undefined' ?
