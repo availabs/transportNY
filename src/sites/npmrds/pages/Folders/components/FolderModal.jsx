@@ -120,6 +120,9 @@ const FolderModal = ({ openedFolders = [], isOpen = false, close, folder, user }
       .then(() => close(e));
   }, [falcor, state, close, parent]);
   const editFolder = React.useCallback(e => {
+    // `folder` is undefined for the create-modal instances and can clear out
+    // from under an open edit modal; don't reach into `.id` without it.
+    if (!folder) return;
     falcor.call(["folders2", "edit"], [state, folder.id])
       .then(() => {
         close(e);
