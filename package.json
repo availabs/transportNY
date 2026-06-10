@@ -30,6 +30,7 @@
     "d3-transition": "^3.0.1",
     "dbf": "^0.1.4",
     "downloadjs": "^1.4.7",
+    "exceljs": "^4.4.0",
     "falcor": "^2.3.2",
     "fflate": "^0.8.0",
     "file-saver": "^2.0.5",
