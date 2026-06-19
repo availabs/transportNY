@@ -40,6 +40,12 @@ import icons from "./icons";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // textSettings — the global type scale.
+//
+// MEASURE RULE (page authoring): hero/section title + description blocks almost
+// always want a section `size` of 6 or 8 — NOT 12 — to reproduce the designs'
+// text wrap (the mockups cap ledes at ~640-760px). A full-width prose section
+// reads as off-brand even with the right tokens. See
+// skills/creating-pages-from-a-design-pattern.md §5.6.7 ("measure" pattern).
 // ─────────────────────────────────────────────────────────────────────────────
 const F_DISP = "font-display";   // Oswald
 const F_SANS = "font-proxima";   // Proxima Nova / Source Sans 3
@@ -55,7 +61,7 @@ const textSettings = {
       "displayMax", "displayHero", "displayXL", "displayLG", "displayMD", "displaySM", "displayXS",
       "displayItalicLG", "displayItalicMD",
       "proseLG", "prose", "proseSM", "proseXS",
-      "metaMD", "metaSM", "metaXS",
+      "metaMD", "metaSM", "metaXS", "metaAccent", "chip",
       "kicker", "cardTitle", "cardTitleSM",
       "statNum", "statXL", "statLG", "statMD",
     ],
@@ -105,6 +111,13 @@ const textSettings = {
     metaMD: `font-mono! text-[12px]! leading-[1.45] tabular-nums text-slate-600!`,
     metaSM: `font-mono! text-[11px]! leading-[1.4] uppercase tracking-[0.18em] text-slate-500!`,
     metaXS: `font-mono! text-[10px]! leading-[1.4] uppercase tracking-[0.18em] text-slate-400!`,
+    // Accent meta — the amber data callout under hero KPIs ("51% non-recurrent —
+    // incidents, work zones, weather"). Mono like metaMD, NOT uppercase, amber-700.
+    metaAccent: `font-mono! text-[12px]! leading-[1.45] tabular-nums font-medium text-[#B45309]!`,
+    // Chip — the bordered as-of badge on data cards ("2025 · statewide",
+    // "thru 2026-04"). Mono micro-caps in a hairline rounded box; works as a
+    // Card valueFontStyle or a Lexical /Style token.
+    chip: `font-mono! text-[9.5px]! uppercase tracking-[0.14em] text-slate-400! border border-zinc-950/10 rounded px-1.5 py-0.5 inline-block w-fit`,
 
     // Editorial kicker — the "// 01" amber labels that head sections
     kicker: `font-mono! text-[11px]! uppercase tracking-[0.2em] text-[#CA8A04]!`,
@@ -249,21 +262,23 @@ const layoutGroup = {
   options: { activeStyle: 0 },
   styles: [
     {
+      // Band Y padding stays minimal (py-2): sections carry their own p-3 gutters
+      // (sectionArray defaultPaddingStep), so the band only needs a slim frame.
       name: "content",
-      wrapper1: "w-full bg-[#ECEEF2] py-12",
+      wrapper1: "w-full bg-[#ECEEF2] py-2",
       wrapper2: "mr-auto w-full max-w-[1480px] pl-12 pr-8 flex flex-col gap-6",
       wrapper3: "",
     },
     {
       name: "content_tint",
-      wrapper1: "w-full bg-[#E4E8EE] py-12",
+      wrapper1: "w-full bg-[#E4E8EE] py-2",
       wrapper2: "mr-auto w-full max-w-[1480px] pl-12 pr-8 flex flex-col gap-6",
       wrapper3: "",
     },
     {
       name: "header",
       wrapper1: "w-full bg-white border-b border-zinc-950/10",
-      wrapper2: "mr-auto w-full max-w-[1480px] pl-12 pr-8 py-10 flex flex-col gap-4",
+      wrapper2: "mr-auto w-full max-w-[1480px] pl-12 pr-8 py-2 flex flex-col gap-4",
       wrapper3: "",
     },
     {
@@ -283,7 +298,7 @@ const layoutGroup = {
     {
       name: "hero",
       wrapper1: "w-full tny-hero-topo border-b border-zinc-950/10",
-      wrapper2: "mr-auto w-full max-w-[1480px] pl-12 pr-8 py-10 flex flex-col gap-5",
+      wrapper2: "mr-auto w-full max-w-[1480px] pl-12 pr-8 py-2 flex flex-col gap-5",
       wrapper3: "",
     },
     {
@@ -850,7 +865,13 @@ const dataCard = {
       cardsGrid:                     "grid gap-4",
       cellsGrid:                     "grid",
       subWrapper:                    "flex flex-col w-full",
-      subWrapperCompactView:         "rounded-[8px] bg-white",
+      // Section chrome owns the card shape now: border / per-corner radius / bg
+      // live on the section (sectionArray resolveBorder/resolveRadius/resolveBg),
+      // not on the card. Keeping `rounded-[8px] bg-white` here painted a fully-
+      // rounded white box over the section's per-corner radius, so fused compound
+      // cards never showed their intended corners. Empty = defer to the section.
+      // (The `context` style below keeps its own shell deliberately.)
+      subWrapperCompactView:         "",
       header:                        "font-display text-[12.5px] tracking-[0.04em] text-slate-500 px-3 pt-3 pb-1",
       headerValueWrapper:            "flex flex-col w-full",
       headerValueWrapperFullBleed:   "w-full relative overflow-hidden",
@@ -874,20 +895,35 @@ const dataCard = {
       img8XL:     "max-w-[32rem] max-h-[32rem]",
       imgDefault: "max-w-[50px] max-h-[50px]",
       // Mirror of textSettings so Card cells can resolve a font-style by name
-      displayHero: `${F_DISP} font-semibold text-[52px] leading-[1.02] tracking-tight`,
-      displayXL:   `${F_DISP} font-semibold text-[44px] leading-[1.05] tracking-tight`,
-      displayLG:   `${F_DISP} font-semibold text-[38px] leading-[1.05] tracking-tight uppercase`,
-      displayMD:   `${F_DISP} font-semibold text-[28px] leading-[1.1]`,
-      displaySM:   `${F_DISP} font-medium text-[22px] leading-[1.2]`,
-      displayXS:   `${F_DISP} font-medium text-[18px] leading-[1.25]`,
-      proseLG:     `${F_SANS} text-[16px] leading-[1.65]`,
-      prose:       `${F_SANS} text-[14.5px] leading-[1.65]`,
-      proseSM:     `${F_SANS} text-[12.5px] leading-[1.55]`,
-      proseXS:     `${F_SANS} text-[11.5px] leading-[1.5]`,
-      metaMD:      `${F_MONO} text-[12px] leading-[1.45] tabular-nums`,
-      metaSM:      `${F_MONO} text-[10.5px] uppercase tracking-[0.18em]`,
-      metaXS:      `${F_MONO} text-[9.5px] uppercase tracking-[0.18em]`,
-      kicker:      `${F_MONO} text-[10.5px] uppercase tracking-[0.2em] text-[#CA8A04]`,
+      displayHero: `${F_DISP} font-semibold text-[52px]! leading-[1.02] tracking-tight`,
+      displayXL: `${F_DISP} font-semibold text-[44px]! leading-[1.05] tracking-tight`,
+      displayLG: `${F_DISP} font-semibold text-[38px]! leading-[1.05] tracking-tight uppercase`,
+      displayMD: `${F_DISP} font-semibold text-[28px]! leading-[1.1]`,
+      displaySM: `${F_DISP} font-medium text-[22px]! leading-[1.2]`,
+      displayXS: `${F_DISP} font-medium text-[18px]! leading-[1.25]`,
+      proseLG: `${F_SANS} text-[16px]! leading-[1.65]`,
+      prose: `${F_SANS} text-[14.5px]! leading-[1.65] text-slate-700!`,
+      proseSM: `${F_SANS} text-[12.5px]! leading-[1.55] text-slate-500!`,
+      proseXS: `${F_SANS} text-[11.5px]! leading-[1.5] text-slate-500!`,
+      metaMD: `${F_MONO} text-[12px]! leading-[1.45] tabular-nums text-slate-600!`,
+      metaSM: `${F_MONO} text-[10.5px]! uppercase tracking-[0.18em] pb-1! text-slate-500!`,
+      // ── Parity with textSettings (keep these in sync!): every token an author
+      // can pick in Lexical should also exist here, because Card cells resolve
+      // valueFontStyle/headerFontStyle against THIS map, not textSettings.
+      statNum: `${F_MONO} text-[40px]! font-medium leading-[1.05] tabular-nums ${INK} pb-0!`,
+      statXL: `${F_DISP} font-semibold text-[52px]! leading-[1.0] tracking-tight tabular-nums ${INK} pb-0!`,
+      statLG: `${F_DISP} font-semibold text-[28px]! leading-[1.05] tabular-nums ${INK} pb-0!`,
+      statMD: `${F_DISP} font-semibold text-[22px]! leading-[1.15] tabular-nums ${INK} pb-0!`,
+      cardTitle: `${F_DISP} font-medium text-[18px]! leading-[1.15] tracking-tight uppercase ${INK}`,
+      cardTitleSM: `${F_DISP} font-medium text-[15px]! leading-[1.15] tracking-tight uppercase ${INK}`,
+      metaAccent: `${F_MONO} text-[12px]! leading-[1.45] tabular-nums font-medium text-[#B45309]!`,
+      // As-of / methodology badge. Full-width (fills its cell so stacked chips'
+      // borders align), flex-centered content, symmetric vertical padding. The
+      // `!` on padding/width overrides theme.value's `px-3 pb-3` which is merged
+      // onto the same cell element (that collision was the asymmetric padding).
+      chip: `${F_MONO} text-[9.5px]! uppercase tracking-[0.14em] leading-none text-slate-400! border border-zinc-950/10 rounded w-full! flex items-center justify-center text-center! px-2! py-1!`,
+      metaXS: `${F_MONO} text-[9.5px]! uppercase tracking-[0.18em] text-slate-400!`,
+      kicker: `${F_MONO} text-[10.5px]! uppercase tracking-[0.2em] text-[#CA8A04]!`,
       textXS:           "text-[11px] font-medium",
       textXSReg:        "text-[11px] font-normal",
       textSM:           "text-[12.5px] font-medium",
@@ -898,20 +934,20 @@ const dataCard = {
       textMDReg:        "text-[15px] font-normal",
       textMDBold:       "text-[15px] font-bold",
       textMDSemiBold:   "text-[15px] font-semibold",
-      textXL:           `text-[20px] font-medium ${F_DISP}`,
-      textXLSemiBold:   `text-[20px] font-semibold ${F_DISP}`,
-      text2XL:          `text-[24px] font-semibold ${F_DISP}`,
-      text2XLReg:       `text-[24px] font-normal ${F_DISP}`,
-      text3XL:          `text-[28px] font-semibold ${F_DISP}`,
-      text3XLReg:       `text-[28px] font-normal ${F_DISP}`,
-      text4XL:          `text-[34px] font-semibold ${F_DISP} tracking-tight`,
-      text5XL:          `text-[40px] font-semibold ${F_DISP} tracking-tight`,
-      text6XL:          `text-[52px] font-semibold ${F_DISP} tracking-tight`,
-      text7XL:          `text-[64px] font-semibold ${F_DISP} tracking-tight`,
-      text8XL:          `text-[80px] font-semibold ${F_DISP} tracking-tight`,
-      numLG:            `${F_MONO} text-[22px] font-medium tabular-nums text-[#0F1722]`,
-      numXL:            `${F_MONO} text-[28px] font-medium tabular-nums text-[#0F1722]`,
-      num2XL:           `${F_MONO} text-[40px] font-medium tabular-nums text-[#0F1722]`,
+      textXL: `text-[20px] font-medium ${F_DISP}`,
+      textXLSemiBold: `text-[20px] font-semibold ${F_DISP}`,
+      text2XL: `text-[24px] font-semibold ${F_DISP}`,
+      text2XLReg: `text-[24px] font-normal ${F_DISP}`,
+      text3XL: `text-[28px] font-semibold ${F_DISP}`,
+      text3XLReg: `text-[28px] font-normal ${F_DISP}`,
+      text4XL: `text-[34px] font-semibold ${F_DISP} tracking-tight`,
+      text5XL: `text-[40px] font-semibold ${F_DISP} tracking-tight`,
+      text6XL: `text-[52px] font-semibold ${F_DISP} tracking-tight`,
+      text7XL: `text-[64px] font-semibold ${F_DISP} tracking-tight`,
+      text8XL: `text-[80px] font-semibold ${F_DISP} tracking-tight`,
+      numLG: `${F_MONO} text-[22px] font-medium tabular-nums text-[#0F1722]`,
+      numXL: `${F_MONO} text-[28px] font-medium tabular-nums text-[#0F1722]`,
+      num2XL: `${F_MONO} text-[40px] font-medium tabular-nums text-[#0F1722]`,
       justifyTextLeft:   "text-start justify-items-start",
       justifyTextRight:  "text-end justify-items-end",
       justifyTextCenter: "text-center justify-items-center",
@@ -921,14 +957,14 @@ const dataCard = {
       name: "kpi",
       wrapper:     "rounded-[8px] border border-zinc-950/10 bg-white shadow-sm p-5 flex flex-col gap-2",
       header:      "font-display font-medium text-[15px] text-[#0f1722] leading-tight",
-      value:       `${F_MONO} text-[40px] font-medium tabular-nums text-[#0F1722]`,
+      value: `${F_MONO} text-[40px] font-medium tabular-nums text-[#0F1722]`,
       description: "font-proxima text-[12.5px] text-slate-600 leading-snug",
     },
     {
       name: "compliance",
       wrapper:     "rounded-[8px] border border-zinc-950/10 bg-white shadow-sm p-5 flex flex-col gap-3",
       header:      "font-display font-medium text-[15px] text-[#0f1722] leading-tight",
-      value:       `${F_MONO} text-[40px] font-medium tabular-nums text-[#0F1722]`,
+      value: `${F_MONO} text-[40px] font-medium tabular-nums text-[#0F1722]`,
     },
     {
       name: "editorial",
@@ -946,14 +982,14 @@ const dataCard = {
       name: "compact",
       wrapper:     "rounded-[8px] border border-zinc-950/10 bg-white shadow-sm p-4 flex flex-col gap-2 relative",
       header:      "font-display uppercase text-[10.5px] tracking-[0.18em] text-slate-500",
-      value:       `${F_MONO} text-[24px] font-medium tabular-nums text-[#0F1722]`,
+      value: `${F_MONO} text-[24px] font-medium tabular-nums text-[#0F1722]`,
       description: "font-proxima text-[11.5px] text-slate-500",
     },
     {
       name: "dashboard",
       wrapper:     "rounded-[6px] border border-zinc-950/5 bg-white p-3 flex items-center gap-3",
       header:      "font-display uppercase text-[10.5px] tracking-[0.18em] text-slate-500",
-      value:       `${F_MONO} text-[18px] font-medium tabular-nums text-[#0F1722]`,
+      value: `${F_MONO} text-[18px] font-medium tabular-nums text-[#0F1722]`,
     },
     {
       // "context" — diagnostic / explainer card, no value-vs-target verdict.
@@ -1239,11 +1275,15 @@ const graph = {
   options: { activeStyle: 0 },
   styles: [{
     name: "default",
+    // Built-in chart padding (consumed by graph_new/GraphComponent's outer div) —
+    // keeps the plot off the section/card edge without per-section margin tweaks.
+    padding:      "p-4",
     text:         `${F_SANS} text-[12px] text-slate-600`,
     darkModeText: `${F_SANS} text-[12px] text-white bg-transparent`,
-    headerWrapper:"flex items-baseline justify-between mb-2",
-    title:        "font-display uppercase text-[12.5px] tracking-wide text-slate-700",
-    subtitle:     "font-mono text-[10.5px] uppercase tracking-wider text-slate-500",
+    headerWrapper:"flex items-baseline justify-between gap-3 mb-2",
+    // shrink-0 keeps the title on one line; a long subtitle wraps instead.
+    title:        "font-display uppercase text-[12.5px] tracking-wide text-slate-700 shrink-0",
+    subtitle:     "font-mono text-[10.5px] uppercase tracking-wider text-slate-500 text-right",
     axis:         "stroke-zinc-950/15",
     grid:         "stroke-zinc-950/5",
     tooltip:      "rounded-[6px] bg-[#0F1722] text-white text-[12px] px-2.5 py-1.5 shadow-lg font-proxima",
@@ -1262,7 +1302,9 @@ const graph = {
     // graph without per-section config. (See graph_new/theme.js ChartDefaults.)
     chartDefaults: {
       colors: { type: "palette", value: ["#10B981", "#1F3F8F", "#EAAD43", "#37576B", "#EF4444"] },
-      margin: { top: 16, right: 24, bottom: 40, left: 56 },
+      // left 64 (was 56): fits horizontal-bar category labels ("Pipeline") as well as
+      // numeric ticks, so sections don't need per-section margin overrides for labels.
+      margin: { top: 16, right: 24, bottom: 40, left: 64 },
       height: 280,
       // Brand line look: a slightly bolder emerald line, smooth curve, faint
       // gridlines. `area`/`areaOpacity` stay opt-in (a section or yColumn turns the
