@@ -275,6 +275,26 @@ const layoutGroup = {
       wrapper2: "mr-auto w-full max-w-[1480px] pl-12 pr-8 flex flex-col gap-6",
       wrapper3: "",
     },
+    // card — ONE white card floating on the grey pane, holding a run of sections as a
+    // single composed unit (no inter-section grey gutters). The white surface + border
+    // + rounding live on wrapper3 (the innermost band layer that directly wraps the
+    // sections). Used to fuse the month-strip + time-space grid (merged into one band)
+    // so they read as one card rather than two stacked cards.
+    {
+      name: "card",
+      wrapper1: "w-full bg-[#ECEEF2] py-4",
+      wrapper2: "mr-auto w-full max-w-[1480px] pl-12 pr-8",
+      wrapper3: "bg-white rounded-2xl border border-zinc-950/10 shadow-sm px-3 py-4 flex flex-col gap-2",
+    },
+    // panel — like `card` but a plain WHITE FIELD: no border, no rounding, no shadow.
+    // Holds a run of sections as one composed unit WITHOUT reading as a boxed card
+    // (per the corridor explorer: combined header → month strip → date → grid → legend).
+    {
+      name: "panel",
+      wrapper1: "w-full bg-[#ECEEF2] py-4",
+      wrapper2: "mr-auto w-full max-w-[1480px] pl-12 pr-8",
+      wrapper3: "bg-white px-5 py-5 flex flex-col gap-2",
+    },
     {
       name: "header",
       wrapper1: "w-full bg-white border-b border-zinc-950/10",
@@ -304,7 +324,22 @@ const layoutGroup = {
     {
       name: "tone_bar",
       wrapper1: "w-full bg-[#1F3F8F] text-white border-b border-black/10",
-      wrapper2: "mr-auto w-full max-w-[1480px] pl-12 pr-8 h-12 flex items-center gap-8",
+      // min-h (not fixed h-12) so the section grid can grow to contain its controls instead of
+      // overflowing; items-stretch makes the grid fill the band so its cells get a definite height
+      // (which lets each control's filtersWrapper h-full + items-center vertically center it).
+      wrapper2: "mr-auto w-full max-w-[1480px] pl-12 pr-8 min-h-12 flex items-stretch gap-8",
+      wrapper3: "",
+    },
+    {
+      // filter_bar — a full filter strip: the `content` band's gutter + 12-col
+      // sectionArray grid (auto-height) on a blue tone surface. Unlike `tone_bar`
+      // (a fixed h-12 flex bar for a single row of chips), this lets a multi-control
+      // filter bar with stacked labels lay out by section size and grow to contain
+      // its controls. Pair with filterStyle "tone_bar" (stacked white label,
+      // full-width multiselect_with_search control).
+      name: "filter_bar",
+      wrapper1: "w-full bg-[#1F3F8F] text-white py-4 border-b border-black/10",
+      wrapper2: "mr-auto w-full max-w-[1480px] pl-12 pr-8 flex flex-col gap-6",
       wrapper3: "",
     },
     {
@@ -645,9 +680,23 @@ const multiselect = {
     },
     {
       name: "tone_bar",
-      inputWrapper: "flex items-center gap-1.5 px-2 -mx-2 py-1 rounded text-white hover:bg-white/10 cursor-pointer",
+      // min-w so an EMPTY control still has a clickable box (was collapsing to nothing); min-h
+      // keeps it vertically aligned with the label.
+      inputWrapper: "flex items-center gap-1.5 min-w-[72px] min-h-7 px-2 -mx-2 py-1 rounded text-white hover:bg-white/10 cursor-pointer",
       singleValue:  "font-semibold text-[13px] text-white",
+      singlePlaceholder: "text-[13px] text-white/80 italic",
+      // multi chips render as plain white values (not gray tokens) to match the
+      // dashboard mockup "Region: Statewide ▾"; the × keeps them clearable.
+      tokenWrapper: "inline-flex items-center gap-1 font-semibold text-[13px] text-white",
+      removeIconClass: "size-3 text-white/60 hover:text-white cursor-pointer",
       caretWrapper: "ml-1 text-white/70",
+      // the open-out: a WHITE menu (the bar is blue) with a real min-width so it isn't a sliver.
+      menuWrapper:      "absolute z-40 mt-1 min-w-[220px] rounded-[8px] border border-zinc-950/10 bg-white shadow-lg overflow-hidden",
+      optionsWrapper:   "max-h-72 overflow-y-auto py-1",
+      menuItem:         "px-3 py-2 text-[13.5px] text-slate-700 hover:bg-slate-50 cursor-pointer flex items-center gap-2",
+      menuItemSelected: "px-3 py-2 text-[13.5px] text-[#0F1722] bg-[#1F3F8F]/5 cursor-pointer flex items-center gap-2 font-medium",
+      smartMenuWrapper: "px-3 py-2 border-b border-zinc-950/5 bg-slate-50/60",
+      smartMenuItem:    "w-full h-8 px-2 rounded border border-zinc-950/10 bg-white text-[13px] text-[#0F1722] focus:outline-none focus:border-[#1F3F8F]",
     },
     {
       name: "multiselect_with_search",
@@ -918,10 +967,13 @@ const dataCard = {
       cardTitleSM: `${F_DISP} font-medium text-[15px]! leading-[1.15] tracking-tight uppercase ${INK}`,
       metaAccent: `${F_MONO} text-[12px]! leading-[1.45] tabular-nums font-medium text-[#B45309]!`,
       // As-of / methodology badge. Full-width (fills its cell so stacked chips'
-      // borders align), flex-centered content, symmetric vertical padding. The
-      // `!` on padding/width overrides theme.value's `px-3 pb-3` which is merged
-      // onto the same cell element (that collision was the asymmetric padding).
-      chip: `${F_MONO} text-[9.5px]! uppercase tracking-[0.14em] leading-none text-slate-400! border border-zinc-950/10 rounded w-full! flex items-center justify-center text-center! px-2! py-1!`,
+      // borders align) with symmetric vertical padding. The inner value wrapper
+      // ships `text-end justify-items-end min-h-[20px]` (column justify:'right' +
+      // theme.valueWrapper); the descendant overrides below force it to
+      // `text-center` and drop the min-height so a single short line centers both
+      // ways — scoped here (not via global justifyTextRight / valueWrapper, which
+      // would hit every value cell). `!` beats theme.value's merged `px-3 pb-3`.
+      chip: `${F_MONO} text-[9.5px]! uppercase tracking-[0.14em] leading-none text-slate-400! border border-zinc-950/10 rounded w-full! px-2! py-1! text-center! [&_div]:text-center [&_div]:min-h-0`,
       metaXS: `${F_MONO} text-[9.5px]! uppercase tracking-[0.18em] text-slate-400!`,
       kicker: `${F_MONO} text-[10.5px]! uppercase tracking-[0.2em] text-[#CA8A04]!`,
       textXS:           "text-[11px] font-medium",
@@ -1012,6 +1064,25 @@ const dataCard = {
       cardBorder:            "border border-dashed border-zinc-950/15",
       header:                "font-display font-medium text-[15px] text-[#0f1722] leading-tight",
       value:                 "",
+    },
+    {
+      // "ink" — dark insight / callout card (the design's `.tny-card-ink`: #0F2D4D,
+      // white text). Gold eyebrow, big white stat, muted-white meta, white prose. The
+      // dark shell + inner padding live on `subWrapperCompactView` (Card.jsx reads that
+      // for the visible per-card chrome, like `context`); the section needs no border/bg.
+      // Inherits sizes/fonts from styles[0] and overrides only the shell + per-token
+      // COLORS (each `!` so it wins over the column value wrapper). Authors pick it via
+      // the section "Card style" control (display.cardStyle:'ink').
+      name: "ink",
+      subWrapperCompactView: "rounded-[8px] bg-[#0F2D4D] shadow-sm p-5 h-full flex flex-col gap-1.5",
+      cardBorder:            "",
+      value:                 "",  // drop default's px-3 pb-3 + dark ink color (shell owns padding)
+      kicker:  `${F_MONO} text-[10px]! uppercase tracking-[0.2em] text-[#FACC15]!`,
+      statXL:  `${F_DISP} font-semibold text-[44px]! leading-none tracking-tight tabular-nums text-white! pb-0!`,
+      statLG:  `${F_DISP} font-semibold text-[28px]! leading-none tracking-tight tabular-nums text-white! pb-0!`,
+      metaSM:  `${F_MONO} text-[11px]! uppercase tracking-wider text-white/60!`,
+      metaXS:  `${F_MONO} text-[9.5px]! uppercase tracking-[0.18em] text-white/50!`,
+      proseSM: `${F_SANS} text-[13px]! leading-[1.6] text-white/80!`,
     },
   ],
 };
@@ -1210,6 +1281,19 @@ const table = {
       cell:                           "relative flex items-center min-h-[42px] border-b border-zinc-950/5",
       cellInner:                      "w-full min-h-full flex flex-wrap items-center truncate py-2.5 px-4 font-[400] text-[13px] leading-[18px] text-slate-700",
     },
+    {
+      // Heat-grid / dense data cells (data_color_cell, data_bar matrices). Minimal
+      // Y padding so rows pack tight, a small X gap between cells, short rows. Set
+      // per-section via `display.tableStyle: "heat"`. Inherits the rest from default.
+      name: "heat",
+      // No table chrome of its own — the section compound card frames it. Drop the
+      // default tableContainer's border / rounding / shadow; keep bg + scroll.
+      tableContainer:                 "flex flex-col bg-white overflow-x-auto overflow-y-auto max-h-[calc(78vh_-_10px)]",
+      headerCellContainer:            "w-full px-[3px] py-1 content-center text-center font-mono text-[9.5px] font-normal uppercase tracking-[0.14em]",
+      headerCellContainerBg:          "bg-white text-slate-400",
+      cell:                           "relative flex items-center min-h-[26px] border-b border-transparent",
+      cellInner:                      "w-full min-h-full flex items-center truncate py-[2px] px-[3px] font-[400] text-[12px] leading-[16px] text-slate-700",
+    },
   ],
 };
 
@@ -1313,6 +1397,9 @@ const graph = {
       strokeWidth: 2,
       area: false,
       areaOpacity: 0.14,
+      // Brand bars are solid (the translucent 0.75 CSS default reads washed-out).
+      // A section can still override per-graph via display.barOpacity.
+      barOpacity: 1,
       // Brand axis typography (CSS values, applied inline by the axis renderers). Ticks
       // use the mono numeric ladder (matches the report's metaSM/num treatment) — 11px
       // slate-500 monospace; axis labels use the Proxima sans, 13px medium slate-700.
@@ -1409,14 +1496,35 @@ const filters = {
       filterLabel:                 "font-mono text-[10.5px] uppercase tracking-wider text-slate-500 mb-1",
       filtersWrapper:              "w-full flex flex-col gap-2",
     },
-    { // 3 · tone_bar — inline on a dark band (white label, transparent control)
+    { // 3 · tone_bar — thin INLINE control on a tone band: white label BESIDE a
+      // transparent bold value + caret ("Region: Statewide ▾"). Matches the TSMO
+      // dashboard mockups (congestion/reliability/incidents/workzones). Pair with
+      // the `tone_bar` LAYOUTGROUP band (thin h-12 flex) + controlStyle `tone_bar`.
       name: "tone_bar",
       placement: "inline",
       controlStyle: "tone_bar",
-      filterLabel:                 "font-mono text-[10.5px] uppercase tracking-wider text-white/60",
-      labelWrapperInline:          "shrink-0 inline-flex items-center gap-1",
-      conditionRowInline:          "inline-flex items-center gap-1.5 w-fit",
-      filtersWrapper:              "w-full flex flex-wrap items-center gap-2",
+      filterLabel:                 "text-[12px] text-white/70 whitespace-nowrap",
+      labelWrapperInline:          "shrink-0 inline-flex items-center",
+      filterSettingsWrapperInline: "min-w-0",
+      conditionRowInline:          "inline-flex items-center gap-2 w-fit",
+      // h-full + items-center → fill the (stretched) section cell and vertically center the control,
+      // so the chips sit on the band's mid-line regardless of the tallest cell (e.g. a 2-line note).
+      filtersWrapper:              "h-full w-full flex flex-wrap items-center gap-x-8 gap-y-2",
+    },
+    { // 4 · filter_panel — stacked white-box controls in a `filter_bar` band grid:
+      // white label ABOVE a full-width multiselect_with_search control (chips with
+      // × + clean dropdown search; `input` styles the keyword text box). For
+      // filter-HEAVY explorer pages (incident_search). One control per Filter
+      // section; the band's 12-col grid arranges them by section size.
+      name: "filter_panel",
+      placement: "stacked",
+      controlStyle: "multiselect_with_search",
+      filterLabel:                  "font-mono text-[10px] uppercase tracking-[0.16em] text-white/60 mb-1.5",
+      labelWrapperStacked:          "w-full",
+      conditionRowStacked:          "w-full flex flex-col gap-1",
+      filterSettingsWrapperStacked: "w-full",
+      filtersWrapper:               "w-full",
+      input:                        "w-full h-10 px-3 flex items-center text-[13px] text-[#0F1722] placeholder:text-slate-400 border border-zinc-950/10 rounded-[6px] bg-white focus:outline-none focus:border-[#1F3F8F]",
     },
   ],
 };
@@ -1896,6 +2004,32 @@ const iconStyles = {
   },
 };
 
+// data_bar column type — brand-coloured horizontal bars. `fills` maps the
+// data-driven colour key (a sibling column value) to a brand fill; the bar scale
+// is data-driven via the column's `barMaxColumn`. Read by the dataBar columnType
+// via getComponentTheme(theme, 'dataBar').
+const dataBar = {
+  wrapper: "w-full flex items-center gap-2",
+  track:   "relative flex-1 min-w-0 h-3 rounded-[3px] bg-slate-100 overflow-hidden",
+  fill:    "absolute inset-y-0 left-0 rounded-[3px] transition-[width] duration-300",
+  value:   "shrink-0 font-mono text-[10.5px] tabular-nums text-slate-500 pl-1 pr-2",  // pr-2: breathing room from the cell edge
+  fills: {
+    primary: "bg-[#1F3F8F]",   // region-rank: top-N
+    muted:   "bg-[#37576B]",   // region-rank: rest
+    warn:    "bg-[#E8843F]",   // corridor WZ share < 50%
+    alert:   "bg-[#D6453B]",   // corridor WZ share ≥ 50%
+  },
+};
+
+// data_color_cell column type — the seasonality heat grid's 5-stop amber scale,
+// shaded within each region row. Read via getComponentTheme(theme, 'dataColorCell').
+const dataColorCell = {
+  wrapper: "w-full h-5 flex items-center justify-center px-[2px]", // outer: a couple px of horizontal breathing room between tiles
+  cell:    "w-full h-full rounded-[2px] flex items-center justify-center", // inner: the colour swatch
+  value:   "text-[10px] tabular-nums leading-none text-slate-700",
+  palette: ["#FEF3C7", "#FDE68A", "#FBBF24", "#D97706", "#7C2D12"],
+};
+
 const transportnyTheme = {
   // Foundation
   textSettings,
@@ -1935,6 +2069,8 @@ const transportnyTheme = {
   dataCard,
   card,
   pill,
+  dataBar,
+  dataColorCell,
   pagination,
   icon: iconTheme,
 
