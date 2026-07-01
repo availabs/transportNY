@@ -12,7 +12,7 @@ import {
 
 import DefaultRoutes from "~/Routes";
 
-//import transportNY from "~/sites/transportny";
+import transportNY from "~/sites/transportny";
 import tsmo from "~/sites/tsmo";
 import tsmonew from "~/sites/tsmo_new";
 
@@ -25,6 +25,7 @@ const Sites = {
   tsmo: tsmonew,
   tsmo_old: tsmo,
   npmrds,
+  www:transportNY
 };
 
 
