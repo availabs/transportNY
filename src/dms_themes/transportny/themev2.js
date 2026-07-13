@@ -289,6 +289,17 @@ const layoutGroup = {
       wrapper2: "mr-auto w-full max-w-[1480px] pl-12 pr-8 flex flex-col gap-6",
       wrapper3: "",
     },
+    // workbench — full-screen tool surface (Freight Atlas map v2): NO max-width,
+    // NO gutters, NO band padding. The single section (padding "p-0") fills
+    // everything beside the sidenav; height comes from the section's element
+    // (the Map component's `screen` = 100vh option). overflow-hidden so the map
+    // owns the viewport with no page scroll.
+    {
+      name: "workbench",
+      wrapper1: "w-full h-screen overflow-hidden bg-[#ECEEF2]",
+      wrapper2: "w-full h-full",
+      wrapper3: "h-full",
+    },
     // card — ONE white card floating on the grey pane, holding a run of sections as a
     // single composed unit (no inter-section grey gutters). The white surface + border
     // + rounding live on wrapper3 (the innermost band layer that directly wraps the
@@ -452,6 +463,9 @@ const sidenav = {
     {
       name: "compact",
       subMenuActivate: "onHover",
+      // type:"label" nav rows (e.g. the secondary nav's "Atlas" section
+      // header): tiny centered mono caption — no icon, no fake nav chrome.
+      navLabel: "w-full pt-3 pb-1 text-center font-mono text-[9px] font-semibold text-slate-500 uppercase tracking-[0.18em] select-none",
       layoutContainer1: "lg:ml-16",
       layoutContainer2: "fixed inset-y-0 left-0 w-16 max-lg:hidden z-20",
       logoWrapper: "w-16 bg-[#12181F]",
@@ -1134,6 +1148,22 @@ const dataCard = {
       proseSM: `${F_SANS} text-[13px]! leading-[1.6] text-white/80!`,
     },
     {
+      // "tile" — gallery preset tile (freight-atlas-gallery.html §gallery grid): each card
+      // is a white shell with hover accent border and p-4 body; typography comes from the
+      // column tokens (cardTitleSM / proseSM / metaXS). `linkMeta` is the tile's footer-link
+      // token ("open in atlas →", brand blue) — columns opt in via valueFontStyle:'linkMeta'.
+      // Pick via the section "Card style" control (display.cardStyle:'tile').
+      name: "tile",
+      subWrapperCompactView: "rounded-[8px] border border-zinc-950/10 bg-white shadow-sm overflow-hidden hover:border-[#37576B] transition-colors p-4 h-full",
+      cardBorder: "",
+      header: "",
+      value:  "",
+      linkMeta: `${F_MONO} text-[10px]! uppercase tracking-[0.18em] text-[#1F3F8F]!`,
+      cardTitleSM: `${F_DISP} font-medium text-[16px]! leading-[1.2] tracking-tight uppercase text-[#0f1722]! pb-1`,
+      proseSM: `${F_SANS} text-[12.5px]! leading-snug text-slate-600! pb-3`,
+      metaXS: `${F_MONO} text-[10px]! uppercase tracking-[0.18em] text-slate-400!`,
+    },
+    {
       // "rowaligned" — for label-left / value-right fact rows (`headerValueLayout:'row'`). The default
       // header/value carry asymmetric vertical padding (header pt-3 pb-1, value pb-3) tuned for STACKED
       // cells; in a row that padding offsets the label vs the value text. Here both get horizontal-only
@@ -1398,6 +1428,16 @@ const lexical = {
     text_italic:  "italic",
     text_underline: "underline underline-offset-2",
     text_code:    `${F_MONO} text-[0.92em] px-1.5 py-0.5 rounded bg-zinc-950/5 border border-zinc-950/6 text-[#37576B]`,
+
+    // Tables (lexical TableNode) — the DS comparison-table treatment
+    // (freight-atlas-about.html §what-changed): white card shell on the
+    // scroll wrapper, hairline row dividers, slate header band. Cell
+    // typography comes from the DS ladder; authors can still override
+    // per-text-node with inline styles.
+    tableScrollableWrapper: "overflow-x-auto max-w-full my-2 rounded-[8px] border border-zinc-950/10 bg-white shadow-sm",
+    table: "border-collapse border-spacing-0 w-full",
+    tableCell: `border-0 border-b border-zinc-950/5 align-top text-left px-4 py-2 relative outline-none min-w-[75px] ${F_SANS} text-[12.5px] text-slate-700`,
+    tableCellHeader: "bg-slate-50 text-left border-b border-zinc-950/10",
     text_strikethrough: "line-through",
 
     list_ol:                 "list-decimal pl-6 space-y-1 text-[14.5px] text-slate-700",
@@ -1492,15 +1532,77 @@ const avlGraph = graph;
 // ─────────────────────────────────────────────────────────────────────────────
 // map
 // ─────────────────────────────────────────────────────────────────────────────
+// Shape follows ui/components/map/map.theme.js (legend / popup / hover objects
+// consumed via useMapTheme + useMapLegendTheme by the Map section, mapeditor,
+// and hover comps). Design source: freight-atlas-map.html legend card.
 const map = {
   options: { activeStyle: 0 },
   styles: [{
-    name: "default",
-    container:   "relative rounded-[8px] border border-zinc-950/10 overflow-hidden bg-[#E8E4D2] tny-map",
-    controls:    "absolute top-2 right-2 flex flex-col gap-1 rounded-[6px] bg-white shadow-md p-1",
-    legend:      "absolute bottom-2 left-2 rounded-[6px] bg-white shadow-md p-3 border border-zinc-950/10",
-    legendTitle: "font-display uppercase text-[11px] tracking-wide text-slate-600 mb-1.5",
-    popover:     "rounded-[6px] bg-white shadow-lg border border-zinc-950/10 p-3 text-[12.5px]",
+    name: "transportny",
+    zoomInIcon: "Plus",
+    zoomOutIcon: "Minus",
+    compassIcon: "NavigationArrow",
+    mapStyleIcon: "MapLayers",
+    homeIcon: "Home",
+    loadingIcon: "Spinner",
+    settingsIcon: "Settings",
+    closeIcon: "XMark",
+    legend: {
+      panel: "p-4",
+      panelInner: "relative w-72 min-h-10 max-h-[calc(100vh_-_111px)] overflow-auto rounded-[8px] border border-zinc-950/10 bg-white shadow-lg pointer-events-auto scrollbar-sm",
+      header: "h-9 px-3 flex items-center gap-2 border-b border-zinc-950/10 bg-slate-50/80 sticky top-0 z-10",
+      headerTitle: `${F_DISP} font-medium text-[13px] text-[#2D3E4C] flex-1`,
+      headerMeta: `${F_MONO} text-[9.5px] uppercase tracking-wider text-slate-500`,
+      section: "",
+      row: "px-3 pt-2.5 pb-2 border-b border-zinc-950/5 last:border-0",
+      rowHover: "",
+      rowActive: "bg-blue-500/5",
+      titleRow: "group/title flex w-full items-center gap-2 mb-1.5",
+      title: `flex-1 ${F_SANS} text-[12px] font-semibold text-[#0f1722] truncate`,
+      columnTag: `${F_MONO} text-[9px] uppercase tracking-wider text-slate-400 shrink-0`,
+      listRow: "flex w-full items-center",
+      label: `flex h-5 flex-1 items-center truncate px-2 ${F_SANS} text-[11px] text-slate-600`,
+      secondaryLabel: `${F_MONO} text-[9px] text-slate-500`,
+      groupLabel: "truncate flex-1 font-medium text-slate-700",
+      groupMetaLabel: "text-xs text-slate-500",
+      symbolWrapper: "flex h-5 w-6 items-center",
+      symbolFill: "h-2.5 w-3.5 rounded-sm",
+      symbolCircle: "h-3 w-3 rounded-full border border-white shadow-sm",
+      symbolLine: "h-1 w-4 rounded",
+      rampTrack: "flex h-2 rounded overflow-hidden mb-1",
+      rampTicks: `flex justify-between ${F_MONO} text-[9px] text-slate-500 tabular-nums`,
+      horizontalPanel: "w-full max-h-[350px] overflow-x-auto scrollbar-sm",
+      horizontalTrack: "flex w-full flex-1 p-2",
+      loading: "flex w-full justify-center overflow-hidden pb-2",
+      empty: "text-sm text-slate-500",
+      infoIcon: "text-slate-400 group-hover/icon:text-[#1F3F8F]",
+      infoButton: "size-5 shrink-0 inline-flex items-center justify-center rounded text-[#1F3F8F] hover:text-[#16307A] hover:bg-[#1F3F8F]/10 cursor-pointer",
+      infoButtonFill: "fill-[#1F3F8F]",
+      controlButton: "cursor-pointer transition-colors group-hover:fill-slate-500 group-hover:hover:fill-[#1F3F8F]",
+      controlButtonActive: "fill-[#1F3F8F]",
+      controlButtonInactive: "fill-slate-300",
+      controlButtonReveal: "collapse group-hover:visible",
+      selectorBox: "rounded-[6px] h-[36px] pl-0 flex w-full w-[216px] items-center border border-zinc-950/10 bg-white cursor-pointer hover:border-[#37576B]",
+    },
+    popup: {
+      panel: "rounded-[8px] border border-zinc-950/10 bg-white shadow-lg",
+      infoPanel: "flex w-64 flex-col gap-2 rounded-[8px] border border-zinc-950/10 bg-white px-3 py-3 shadow-lg",
+      menuPanel: "divide-y divide-zinc-950/5 rounded-[8px] border border-zinc-950/10 bg-white shadow-lg",
+      listPanel: "w-48 max-h-[250px] overflow-auto rounded-[8px] border border-zinc-950/10 bg-white p-2 shadow-lg",
+      listItem: `group flex w-full items-center rounded-[4px] px-1 py-1 ${F_SANS} text-[13px] text-slate-700 hover:bg-[#1F3F8F]/10 hover:text-[#16307A]`,
+      listItemText: "truncate flex items-center px-4 py-1 text-[13px]",
+    },
+    hover: {
+      // DS treatment (patterns: .tny-card + .tny-active-bar): tint→white gradient
+      // wash, amber active-rail on the left, Oswald-caps title like card headers.
+      panel: "w-[300px] min-w-[300px] max-w-[300px] max-h-64 overflow-y-auto rounded-[8px] border border-zinc-950/10 border-l-[3px] border-l-[#FACC15] bg-[linear-gradient(180deg,#F7F8FA,#ffffff)] p-3 shadow-lg scrollbar-xs",
+      title: `w-full border-b border-zinc-950/10 pb-1.5 mb-1 ${F_DISP} font-medium text-[13px] uppercase tracking-wide text-[#0f1722] truncate`,
+      row: "flex border-b border-zinc-950/5 py-1 last:border-0",
+      label: `flex-1 pl-1 ${F_MONO} text-[10px] uppercase tracking-wide text-slate-500 self-center`,
+      value: `flex-1 pl-4 pr-1 text-right ${F_SANS} text-[12px] font-medium text-slate-800 tabular-nums`,
+      removeButton: "rounded absolute inline-block top-0 bg-white text-slate-500 border border-zinc-950/10 shadow-sm cursor-pointer hover:text-[#1F3F8F]",
+      pointer: "absolute w-6 h-6 rounded-bl rounded-tr bg-[#F7F8FA] border-r border-b border-zinc-950/10 top-0 left-0 z-10",
+    },
   }],
 };
 
@@ -2263,6 +2365,15 @@ const iconStyles = {
     box:  "inline-flex size-12 rounded bg-[#1F3F8F]/10 items-center justify-center text-[#1F3F8F] mb-1",
     icon: "w-6 h-6",
   },
+  // per-product tints for the landing product cards
+  productChipNavy: {
+    box:  "inline-flex size-12 rounded bg-[#0F2D4D]/10 items-center justify-center text-[#0F2D4D] mb-1",
+    icon: "w-6 h-6",
+  },
+  productChipSlate: {
+    box:  "inline-flex size-12 rounded bg-[#37576B]/12 items-center justify-center text-[#37576B] mb-1",
+    icon: "w-6 h-6",
+  },
 };
 
 // data_bar column type — brand-coloured horizontal bars. `fills` maps the
@@ -2295,6 +2406,25 @@ const flowStep = {
   label: `${F_DISP} font-medium text-[12.5px] text-slate-700 truncate`,
   count: `ml-auto pl-2 ${F_DISP} font-semibold text-[18px] tabular-nums text-[#0F1722]`,
   connector: "shrink-0 text-slate-300 text-[16px] pl-1 -mr-1 select-none",
+};
+
+// stacked_bar column type — segmented distribution bars (control-room overview: stage
+// distribution + tickets open/done per pattern). Track/legend get the brand voice (mockup's
+// 8px #e2e8f0 track + metaXS legend); segment colours come from each column's `segments`
+// config (inline hex — the control-room stage palette), with `fills` as the themed keys.
+// Read via getComponentTheme(theme, 'stackedBar').
+const stackedBar = {
+  wrapper: "w-full",
+  track: "w-full flex h-2 rounded-[4px] bg-[#e2e8f0] overflow-hidden",
+  segment: "h-full shrink-0",
+  legend: `pt-1.5 ${F_MONO} text-[10px] uppercase tracking-[0.18em] text-slate-400 tabular-nums`,
+  empty: `pt-1.5 ${F_MONO} text-[10px] uppercase tracking-[0.18em] text-slate-400`,
+  fills: {
+    primary: "bg-[#1F3F8F]",
+    muted:   "bg-[#37576B]",
+    success: "bg-[#10B981]",
+    alert:   "bg-[#FCA5A5]",   // open tickets (mockup's soft red)
+  },
 };
 
 // data_color_cell column type — the seasonality heat grid's 5-stop amber scale,
@@ -2348,6 +2478,7 @@ const transportnyTheme = {
   dataBar,
   dataColorCell,
   flowStep,
+  stackedBar,
   pagination,
   icon: iconTheme,
 

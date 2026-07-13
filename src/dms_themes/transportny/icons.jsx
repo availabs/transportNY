@@ -130,7 +130,18 @@ const Building = svg(<path d="M3 21h18M5 21V8l7-5 7 5v13M9 14h6M9 18h6"/>);
 const Map      = svg(<path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>);
 const Export   = svg(<path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>);
 
+// ── Product marks (landing page) — one glyph per product, family style:
+// single stroke, one story each. NPMRDS = a corridor whose middle breaks into
+// a travel-time pulse; TSMO = an ops radar sweeping from a roadside station
+// with an incident blip; FreightAtlas = the trifold plan map carrying a
+// freight corridor to a port node.
+const ProductNpmrds = svg(<path d="M3 13.5h3.5l2-5.5 3 8.5 2.5-6 1.5 3H21"/>);
+const ProductTsmo = svg(<><circle cx="6.5" cy="17.5" r="1.7"/><path d="M6.5 11.5a6 6 0 0 1 6 6"/><path d="M6.5 6.5a11 11 0 0 1 11 11"/><circle cx="16" cy="8" r="1.7"/></>);
+const ProductFreightAtlas = svg(<><path d="M3 6.5l6-2.5 6 2.5 6-2.5v13l-6 2.5-6-2.5-6 2.5z"/><path d="M6.5 13.5c3-3.5 7.5-.5 10.5-4.5"/><circle cx="17.5" cy="8.5" r="1.6"/></>);
+
 const icons = {
+  // Product marks
+  ProductNpmrds, ProductTsmo, ProductFreightAtlas,
   // Navigation
   Pages, Sections, Settings, History, Search, Database, Menu, Folder,
   // Freight Atlas — modes + surfaces
