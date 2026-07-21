@@ -55,15 +55,22 @@ const App = (props) => {
     return LayoutWrapper(Routes);
   }, [site]);
 
+  // Stable references: these are passed to <DmsSite>, whose router/route memoization
+  // (and, under React Compiler, its whole render) keys off prop identity. Building
+  // dmsConfig/pgEnvs inline made a new object+array every render, which — with React
+  // Compiler on — cascades into the DMS route tree remounting on every render (maps
+  // tear down/recreate in a loop). Memoize so identity is stable across renders.
+  const dmsConfig = useMemo(
+    () => adminConfig[0]({ app: "npmrdsv5", type: "dev2", baseUrl: adminBaseUrl }),
+    []
+  );
+  const pgEnvs = useMemo(() => [defaultPgEnv], []);
+
   return (
     <DmsSite
-      dmsConfig={adminConfig[0]({
-        app: "npmrdsv5",
-        type: "dev2",
-        baseUrl: adminBaseUrl,
-      })}
+      dmsConfig={dmsConfig}
       adminPath={adminBaseUrl}
-      pgEnvs={[defaultPgEnv]}
+      pgEnvs={pgEnvs}
       themes={themes}
       damaBaseUrl={damaBaseUrl}
       damaDataTypes={transportNYDataTypes}

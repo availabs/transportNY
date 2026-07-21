@@ -8,7 +8,7 @@
 // What's preserved from the original theme.js (NOT taken from v2):
 //   • Widget imports (LogoNav, QuickLinks) and the `widgets` registry
 //   • pageComponents (AddPageButton, Header) — used as page-section types
-//   • navOptions.authMenu (Datasets · Site Status)
+//   • navOptions.authMenu (Datasets · Site Manager · Admin — last two group-gated)
 //   • The full `sidenav` block — both `transportny-dark` (active) and
 //     `compact` styles, verbatim. The user prefers where these are.
 //   • layout.options.sideNav.bottomMenu — keeps QuickLinks alongside
@@ -36,6 +36,7 @@ import QuickLinks from "./QuickLinks";
 import Header from "./components/Header";
 import AddPageButton from "./components/AddPageButton";
 import ReportRouteList from "./components/ReportRouteList"
+import RouteComparison from "./components/RouteComparison"
 
 import icons from "./icons";
 
@@ -63,7 +64,7 @@ const textSettings = {
       "displayItalicLG", "displayItalicMD",
       "proseLG", "prose", "proseSM", "proseXS", "prosePre",
       "metaMD", "metaSM", "metaXS", "metaAccent", "chip",
-      "kicker", "cardTitle", "cardTitleSM", "labelSM", "btnPrimary", "btnOutline",
+      "kicker", "cardTitle", "cardTitleSM", "labelSM", "btnPrimary", "btnOutline", "toggleOn", "toggleOff",
       "statNum", "statXL", "statLG", "statMD",
     ],
   },
@@ -133,6 +134,12 @@ const textSettings = {
     // Proper-case display label — small stat-box / lifecycle-step labels ("In progress",
     // "Resolved / closed") where the meta ladder's uppercase would shout. Oswald 12.5px medium.
     labelSM: `${F_DISP} font-medium text-[12.5px] leading-[1.3] text-slate-700`,
+    // Segmented-view toggle chips — a direction-free pair (filled current view + ghost link)
+    // that reads as a QA ⇄ Design toggle on the control-room detail pages. Two cells with a
+    // small grid gap, NOT a contained segmented control (a shared p-0.5 container isn't
+    // Card-expressible — the cells grid has one uniform gap).
+    toggleOn:  `font-mono! text-[10.5px]! uppercase tracking-wide inline-flex items-center w-fit h-7 px-3! py-0! rounded-md bg-[#1F3F8F] text-white! no-underline!`,
+    toggleOff: `font-mono! text-[10.5px]! uppercase tracking-wide inline-flex items-center w-fit h-7 px-3! py-0! rounded-md border border-zinc-950/10 bg-slate-50 text-slate-500! hover:text-slate-800 no-underline! cursor-pointer`,
     // Primary action link-as-button — the brand press-button (blue face, darker bottom edge,
     // Oswald caps). For links that should read as buttons (header-band actions like "Add ticket").
     // `!` beats link/paragraph defaults (text color, underline) AND the dataCard value-cell
@@ -354,6 +361,26 @@ const layoutGroup = {
       name: "hero",
       wrapper1: "w-full tny-hero-topo border-b border-zinc-950/10",
       wrapper2: "mr-auto w-full max-w-[1480px] pl-12 pr-8 py-2 flex flex-col gap-5",
+      wrapper3: "",
+    },
+    {
+      // hero_dark — "the gantry": a dusk guide-sign band (landing page hero).
+      // Dark navy field with faint lane lines + a blue glow, gold retroreflective
+      // bottom edge; sections inside carry inverse (white) type via inline lexical
+      // styles. Additive: only groups that opt into theme:"hero_dark" use it.
+      name: "hero_dark",
+      wrapper1: "w-full border-b-4 border-[#FACC15] bg-[#0F1722] bg-[radial-gradient(circle_at_80%_-20%,rgba(31,63,143,0.35),transparent_55%),repeating-linear-gradient(90deg,transparent_0_118px,rgba(255,255,255,0.035)_118px_120px)]",
+      wrapper2: "mr-auto w-full max-w-[1480px] pl-12 pr-8 pt-6 pb-8 flex flex-col gap-5",
+      wrapper3: "",
+    },
+    {
+      // hero_atlas — the landing hero: light survey-sheet field behind the hero
+      // copy and product panels. Gold edge stays. (The animated three.js road
+      // backdrop was removed 2026-07-15 — the dependency wasn't worth the small
+      // design win; the static gradient carries the style.)
+      name: "hero_atlas",
+      wrapper1: "w-full relative overflow-hidden border-b-4 border-[#FACC15] bg-[linear-gradient(180deg,#FCFDFE_0%,#EDF1F6_100%)]",
+      wrapper2: "relative mr-auto w-full max-w-[1480px] pl-12 pr-8 pt-6 pb-8 flex flex-col gap-5",
       wrapper3: "",
     },
     {
@@ -588,12 +615,36 @@ const logo = {
   linkPath:     "/",
 };
 
+// logoNav — the product-switcher dropdown at the top of the sidenav (LogoNav.jsx).
+// `sites` is the product registry the dropdown lists: icon/chip reuse the landing
+// page's product identity (solid shield + white product icon), `tag` is the mono
+// one-word descriptor. Subdomains match the live pattern mounts.
+const logoNav = {
+  sites: [
+    { name: "NPMRDS",        subdomain: "npmrds",        icon: "ProductNpmrds",       chip: "bg-[#0F2D4D]", tag: "travel time" },
+    { name: "TSMO",          subdomain: "tsmo2",         icon: "ProductTsmo",         chip: "bg-[#37576B]", tag: "operations" },
+    { name: "Freight Atlas", subdomain: "freightatlas2", icon: "ProductFreightAtlas", chip: "bg-[#1F3F8F]", tag: "freight" },
+  ],
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // button — v2 brand vocabulary
 // ─────────────────────────────────────────────────────────────────────────────
 const button = {
   options: { activeStyle: 0 },
   styles: [
+    {
+      // linkMono — quiet mono deep-link (landing panel inner links): uppercase
+      // 11px mono, slate, blue on hover. Text carries its own trailing arrow.
+      name: "linkMono",
+      button: "inline-flex items-center font-mono text-[11px] uppercase tracking-[0.14em] text-[#475569] hover:text-[#1F3F8F] cursor-pointer",
+    },
+    {
+      // rail — full-width product-panel CTA (landing "exit panels"): navy bar,
+      // white sign type left, gold arrow right; brightens on hover.
+      name: "rail",
+      button: "w-full h-11 px-5 -mx-1 flex items-center justify-between rounded-[6px] bg-[#0F2D4D] hover:bg-[#1F3F8F] transition-colors text-white font-display uppercase text-[13px] tracking-wide cursor-pointer after:content-['→'] after:text-[#FACC15] after:text-[16px]",
+    },
     {
       name: "default",
       button: "tny-press cursor-pointer inline-flex items-center gap-2 px-4 h-10 bg-[#1F3F8F] hover:bg-[#16307A] border-b-4 border-[#0F2D4D] text-white font-display uppercase text-[13px] tracking-wide rounded-[6px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F3F8F]/40 disabled:opacity-50",
@@ -677,15 +728,24 @@ const multiselect = {
       name: "default",
       view:           "font-proxima",
       mainWrapper:    "relative",
-      inputWrapper:   "flex w-full items-center gap-1.5 min-h-11 px-3 rounded-[6px] border border-zinc-950/15 hover:border-zinc-950/30 bg-white focus-within:border-[#1F3F8F] focus-within:ring-2 focus-within:ring-[#1F3F8F]/15 cursor-pointer",
+      // flex-wrap: selected-value chips wrap to new lines inside the control
+      // instead of extending past its right edge over the neighboring control.
+      inputWrapper:   "flex flex-wrap w-full items-center gap-1.5 min-h-11 px-3 rounded-[6px] border border-zinc-950/15 hover:border-zinc-950/30 bg-white focus-within:border-[#1F3F8F] focus-within:ring-2 focus-within:ring-[#1F3F8F]/15 cursor-pointer",
       caretWrapper:   "ml-auto pl-1 text-slate-500",
       caretIcon:      "CaretDown",
       input:          "flex-1 bg-transparent text-[14px] text-[#0F1722] placeholder:text-slate-400 focus:outline-none",
       statusWrapper:  "text-[12px] text-slate-500",
       singleValue:        "text-[14px] text-[#0F1722]",
       singlePlaceholder:  "text-[14px] text-slate-400",
-      tokenWrapper:   "inline-flex items-center gap-1 h-7 pl-2 pr-1 rounded-[4px] bg-[#37576B]/10 text-[#0F2D4D] text-[12.5px] font-medium",
-      removeIcon:     "XMark",
+      // Single-select clear × — STATIC flex item between the value and the caret
+      // (reserved space). Without this key the library default leaks in
+      // (`absolute inset-y-0 right-6`), which paints the × ON TOP of the value
+      // text because these triggers use a static caret and reserve no right
+      // padding. Named styles inherit this from styles[0]. Glyph color/size
+      // come from removeIconClass.
+      singleClearWrapper: "flex items-center shrink-0 cursor-pointer",
+      removeIcon:     "inline-flex items-center self-center shrink-0 cursor-pointer",
+      removeIconName: "XMark",
       removeIconClass:"size-3.5 text-slate-500 hover:text-[#EF4444] cursor-pointer",
       menuWrapper:    "absolute z-40 mt-1 w-full rounded-[8px] border border-zinc-950/10 bg-white shadow-lg overflow-hidden",
       optionsWrapper: "max-h-72 overflow-y-auto py-1",
@@ -731,13 +791,19 @@ const multiselect = {
     {
       name: "tone_bar",
       // min-w so an EMPTY control still has a clickable box (was collapsing to nothing); min-h
-      // keeps it vertically aligned with the label.
-      inputWrapper: "flex items-center gap-1.5 min-w-[72px] min-h-7 px-2 -mx-2 py-1 rounded text-white hover:bg-white/10 cursor-pointer",
+      // keeps it vertically aligned with the label. flex-wrap + max-w-full + min-w-0: with many
+      // selected chips the row WRAPS inside the control's own bounds (the band is min-h so it
+      // grows) instead of running horizontally over the next filter section — which both garbled
+      // the neighbor's label and put its DOM on top of these chips' × hit targets.
+      inputWrapper: "flex flex-wrap max-w-full items-center gap-1.5 min-w-[72px] min-h-7 px-2 -mx-2 py-1 rounded text-white hover:bg-white/10 cursor-pointer",
       singleValue:  "font-semibold text-[13px] text-white",
       singlePlaceholder: "text-[13px] text-white/80 italic",
       // multi chips render as plain white values (not gray tokens) to match the
       // dashboard mockup "Region: Statewide ▾"; the × keeps them clearable.
-      tokenWrapper: "inline-flex items-center gap-1 font-semibold text-[13px] text-white",
+      // whitespace-nowrap: a token is an atomic value — it must never wrap INTERNALLY
+      // ("Region 11 - New York / City" mid-label breaks); with the wrapper's flex-wrap,
+      // multiple tokens wrap as whole units instead.
+      tokenWrapper: "inline-flex items-center gap-1 font-semibold text-[13px] text-white whitespace-nowrap",
       removeIconClass: "size-3 text-white/60 hover:text-white cursor-pointer",
       caretWrapper: "ml-1 text-white/70",
       // the open-out: a WHITE menu (the bar is blue) with a real min-width so it isn't a sliver.
@@ -750,7 +816,8 @@ const multiselect = {
     },
     {
       name: "multiselect_with_search",
-      inputWrapper:     "flex w-full items-center gap-1.5 min-h-11 px-3 rounded-[6px] border border-zinc-950/15 hover:border-zinc-950/30 bg-white cursor-pointer",
+      // flex-wrap: chips wrap inside the control (same overflow fix as `default`).
+      inputWrapper:     "flex flex-wrap w-full items-center gap-1.5 min-h-11 px-3 rounded-[6px] border border-zinc-950/15 hover:border-zinc-950/30 bg-white cursor-pointer",
       menuWrapper:      "absolute z-40 mt-1 w-full rounded-[8px] border border-zinc-950/10 bg-white shadow-lg overflow-hidden",
       smartMenuWrapper: "px-2 py-2 border-b border-zinc-950/10 bg-slate-50/60",
       smartMenuItem:    "w-full h-8 px-2 rounded border border-zinc-950/10 bg-white text-[13px] focus:outline-none focus:border-[#1F3F8F]",
@@ -1028,6 +1095,13 @@ const dataCard = {
       statMD: `${F_DISP} font-semibold text-[22px]! leading-[1.15] tabular-nums ${INK} pb-0!`,
       cardTitle: `${F_DISP} font-medium text-[18px]! leading-[1.15] tracking-tight uppercase ${INK}`,
       cardTitleSM: `${F_DISP} font-medium text-[15px]! leading-[1.15] tracking-tight uppercase ${INK}`,
+      // Proper-case field label (modal/create-form headerFontStyle). Parity with textSettings —
+      // was missing here, so headerFontStyle:"labelSM" silently fell back to textXS in Cards.
+      labelSM: `${F_DISP} font-medium text-[12.5px]! leading-[1.3] text-slate-700!`,
+      // Segmented-view toggle chips (QA ⇄ Design) — see textSettings. px/py `!` beat the
+      // injected value-cell paddings, same trick as btnPrimary/btnOutline.
+      toggleOn:  `${F_MONO} text-[10.5px]! uppercase tracking-wide inline-flex items-center w-fit h-7 px-3! py-0! rounded-md bg-[#1F3F8F] text-white! no-underline!`,
+      toggleOff: `${F_MONO} text-[10.5px]! uppercase tracking-wide inline-flex items-center w-fit h-7 px-3! py-0! rounded-md border border-zinc-950/10 bg-slate-50 text-slate-500! hover:text-slate-800 no-underline! cursor-pointer`,
       metaAccent: `${F_MONO} text-[12px]! leading-[1.45] tabular-nums font-medium text-[#B45309]!`,
       // As-of / methodology badge. Full-width (fills its cell so stacked chips'
       // borders align) with symmetric vertical padding. The inner value wrapper
@@ -1321,6 +1395,10 @@ const table = {
       cellInvalid:                    "bg-red-50 hover:bg-red-100",
       cellEditableTextBox:            "absolute border focus:outline-none min-w-[180px] min-h-[50px] z-[10] whitespace-pre-wrap",
       cellFrozenCol:                  "",
+
+      // Active master-detail row (row_highlight 'accent' style): brand-blue tint + left edge.
+      // The matched row's cells go transparent so this shows through (see TableCell/TableRow).
+      rowHighlightAccent:             "bg-[#1F3F8F]/[0.06] shadow-[inset_3px_0_0_#1F3F8F]",
 
       // Total / striped / gutter.
       totalRow:                       "bg-slate-50 sticky bottom-0 z-[3] border-t border-zinc-950/10",
@@ -1660,7 +1738,7 @@ const filters = {
       filterLabel:                 "font-mono text-[10.5px] uppercase tracking-wider text-slate-500",
       filterSettingsWrapperInline: "min-w-0",
       labelWrapperInline:          "shrink-0 inline-flex items-center gap-1",
-      conditionRowInline:          "inline-flex items-center gap-1.5 h-8 pl-2.5 pr-1.5 rounded-[6px] border border-zinc-950/10 hover:border-[#37576B] bg-white w-fit transition-colors",
+      conditionRowInline:          "inline-flex items-center gap-1.5 min-h-8 pl-2.5 pr-1.5 rounded-[6px] border border-zinc-950/10 hover:border-[#37576B] bg-white w-fit max-w-full transition-colors",
       filtersWrapper:              "w-full flex flex-wrap items-start gap-2",
     },
     { // 2 · labeled — stacked label above a compact control, no panel box
@@ -1679,8 +1757,13 @@ const filters = {
       controlStyle: "tone_bar",
       filterLabel:                 "text-[12px] text-white/70 whitespace-nowrap",
       labelWrapperInline:          "shrink-0 inline-flex items-center",
-      filterSettingsWrapperInline: "min-w-0",
-      conditionRowInline:          "inline-flex items-center gap-2 w-fit",
+      // flex-1 min-w-0: the value area takes ALL remaining width in the section cell.
+      // The old `w-fit` sized the row from fit-content — but on a flex-WRAP control,
+      // max-content is only the largest single child (the longest token), so the row
+      // always came up short and the caret/× wrapped onto a second line even when the
+      // cell had plenty of room ("the filter doesn't take up the room it's given").
+      filterSettingsWrapperInline: "flex-1 min-w-0",
+      conditionRowInline:          "flex items-center gap-2 w-full",
       // h-full + items-center → fill the (stretched) section cell and vertically center the control,
       // so the chips sit on the band's mid-line regardless of the tallest cell (e.g. a 2-line note).
       filtersWrapper:              "h-full w-full flex flex-wrap items-center gap-x-8 gap-y-2",
@@ -2330,7 +2413,16 @@ const navOptions = {
   authMenu: {
     navItems: [
       { name: "Datasets",    icon: "Database", path: "/datasources", type: "link" },
-      { name: "Site Status", icon: "Settings", path: "/status",      type: "link" },
+      // Control room (npmrds subdomain). `groups` = core userMenu per-item gating (2026-07-17):
+      // an item renders only when `user.groups` intersects its `groups`. Items without the key
+      // render as before. Old bundled cores ignore the key (item shows ungated) until the dms
+      // git sync lands.
+      { name: "Site Manager", icon: "Settings", path: "/sitemgmt", type: "link",
+        groups: ["AVAIL", "NYSDOT Admin"] },
+      // DMS admin dashboard (manage patterns/pages/sources/themes) at the app's adminPath /
+      // BASE_URL (default "/list"). AVAIL-only (2026-07-17, Alex).
+      { name: "Admin", icon: "Lock", path: "/list", type: "link",
+        groups: ["AVAIL"] },
     ],
   },
 };
@@ -2342,6 +2434,7 @@ const pageComponents = {
   AddPageButton,
   Header,
   ReportRouteList,
+  RouteComparison,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2374,7 +2467,24 @@ const iconStyles = {
     box:  "inline-flex size-12 rounded bg-[#37576B]/12 items-center justify-center text-[#37576B] mb-1",
     icon: "w-6 h-6",
   },
+  // solid "shield" variants — white icon on the product's field (landing panels)
+  productShieldNavy: {
+    box:  "inline-flex size-14 rounded-[10px] bg-[#0F2D4D] items-center justify-center text-white align-middle mr-3",
+    icon: "w-8 h-8",
+  },
+  productShieldSlate: {
+    box:  "inline-flex size-14 rounded-[10px] bg-[#37576B] items-center justify-center text-white align-middle mr-3",
+    icon: "w-8 h-8",
+  },
+  productShieldBlue: {
+    box:  "inline-flex size-14 rounded-[10px] bg-[#1F3F8F] items-center justify-center text-white align-middle mr-3",
+    icon: "w-8 h-8",
+  },
 };
+
+// The lexical IconNode resolves chip boxes from the LEXICAL editor theme
+// (config.theme.iconStyles) — attach the map to the lexical style too.
+lexical.styles[0].iconStyles = iconStyles;
 
 // data_bar column type — brand-coloured horizontal bars. `fills` maps the
 // data-driven colour key (a sibling column value) to a brand fill; the bar scale
@@ -2454,6 +2564,7 @@ const transportnyTheme = {
   nestable,
   nestableInHouse,
   logo,
+  logoNav,
 
   // Interaction
   button,
