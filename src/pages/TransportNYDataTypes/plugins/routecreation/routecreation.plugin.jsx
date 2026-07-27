@@ -47,6 +47,17 @@ export const RoutecreationPlugin = {
             `${symbologyLayerPath}['${shapefileLayerId}']['layers'][1]['paint']`,
             { ...npmrdsPaint }
           ); //Mapbox paint
+          // SymbologyViewLayer's getLayerTileUrl only appends `?cols=` when a layer
+          // sets data-column/filter/filter-group/dynamic-filters; otherwise PostGIS's
+          // ST_AsMVT excludes every property but geom/ogc_fid, so click hit-testing
+          // gets back an empty `properties`. This layer has no real filter/color
+          // binding to a column - piggyback on that machinery purely to get `tmc`
+          // included in tile properties.
+          set(
+            draft,
+            `${symbologyLayerPath}['${shapefileLayerId}']['data-column']`,
+            'tmc'
+          );
         });
       }
     },

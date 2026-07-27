@@ -11,8 +11,6 @@ import { MapEditorContext } from "~/modules/dms/packages/dms/src/patterns/mapedi
 import { get, set, isEqual } from "lodash-es";
 
 const DataUpdate = (map, state, setState) => {
-  console.log("hello world in comp");
-
   let pluginDataPath = "";
   let symbologyLayerPath = "";
   let symbPath = "";
@@ -33,7 +31,6 @@ const DataUpdate = (map, state, setState) => {
     state,
     `${pluginDataPath}['active-layers'][${SHAPEFILE_LAYER_KEY}]`,
   );
-
   if (shapefileLayerId) {
     setState((draft) => {
       let lineColor = "#CCCCCC"; // The fallback color if it DOES NOT match (e.g., Gray)
