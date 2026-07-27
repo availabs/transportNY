@@ -25,7 +25,7 @@ const Sites = {
   tsmo: tsmonew,
   tsmo_old: tsmo,
   npmrds,
-  www:transportNY
+  //www:transportNY
 };
 
 
