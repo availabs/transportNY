@@ -3,6 +3,7 @@ import { cloneDeep } from 'lodash-es';
 import { buildUdaConfig } from '../../../../modules/dms/packages/dms/src/patterns/page/components/sections/components/dataWrapper/buildUdaConfig';
 import { nameToSlug } from '../../../../modules/dms/packages/dms/src/utils/type-utils';
 import { getColorRange } from '../../../../modules/dms/packages/dms/src/ui/components/graph_new/colorSchemeUnifier';
+import { defaultRouteDateRange } from './relativeDateResolution';
 
 // Same palette a graph's own default series colors come from
 // (ComponentRegistry/graph_new/config.jsx's `DefaultPalette`) — reused here so a route's
@@ -71,17 +72,18 @@ export function useReportRow({ apiLoad, apiUpdate, item, externalSource, isEdit 
   // only `item` changes, one render after the URL does. Every write to
   // `rawReportRow` is tagged with the item id it was loaded/persisted for; deriving
   // `reportRow` by comparing that tag against the CURRENT `item.id` (at render
-  // time, not inside an effect) means every consumer — including
-  // useGraphPublish's orphan-cleanup effect — sees `null` the instant `item.id`
-  // changes, regardless of effect-ordering between this hook's own reset effect
-  // and any other hook's effects in the same commit. Without this, the orphan
-  // cleanup effect could see the previous report's routes (with real graphIds)
-  // alongside the new report's own (different) section ids, treat every route as
-  // orphaned, and persist a corrupted copy of the OLD report's routes under the
-  // NEW report's own id — confirmed live 2026-07-22 (a fresh page created via
-  // "+ Add Page" showed another report's routes, and the new page's own storage
-  // row in the DB contained a byte-for-byte copy of that other report's routes
-  // with graphIds zeroed out).
+  // time, not inside an effect) means every consumer sees `null` the instant
+  // `item.id` changes, regardless of effect-ordering between this hook's own reset
+  // effect and any other hook's effects in the same commit. This guard was
+  // originally built to stop a since-deleted orphan-cleanup effect (removed by
+  // Design Push #2, 2026-08-06) from seeing the previous report's routes (with real
+  // graphIds) alongside the new report's own (different) section ids, treating
+  // every route as orphaned, and persisting a corrupted copy of the OLD report's
+  // routes under the NEW report's own id — confirmed live 2026-07-22 (a fresh page
+  // created via "+ Add Page" showed another report's routes, and the new page's own
+  // storage row in the DB contained a byte-for-byte copy of that other report's
+  // routes with graphIds zeroed out). Kept regardless of that effect's removal — any
+  // consumer of `reportRow` benefits from not acting on stale cross-report state.
   const reportRow = rawReportRow?.forItemId === (item?.id ?? null) ? rawReportRow : null;
   const routes = reportRow?.routes || EMPTY_ROUTES;
 
@@ -133,16 +135,17 @@ export function useReportRow({ apiLoad, apiUpdate, item, externalSource, isEdit 
   // `ReportRouteList` — only `item` changes, one render after the URL does, via
   // EditWrapper's own effect). Without `forItemId`, a page switch mid-fetch left
   // `reportRow`/`reportRowIdRef` holding the PREVIOUS report's row while `item.id`
-  // already pointed at the new one — and `useGraphPublish`'s orphan-cleanup effect
-  // (which strips any route's `graphIds` not found in the CURRENT page's own
-  // sections) would then see the old report's routes against the new report's
-  // section ids, find every graphId "orphaned," and auto-persist the wipe under the
-  // new report's `report_id` using the old row's id — corrupting a second page with
-  // zero user interaction. Confirmed live 2026-07-21 (see
-  // reportroutelist-graphids-wiped-on-refresh.md's follow-up). The `forItemId`
-  // check after the await re-verifies this load is still the current one before
-  // committing anything, so a slow, now-superseded fetch can't clobber state a
-  // newer navigation already moved past.
+  // already pointed at the new one — and a since-deleted orphan-cleanup effect
+  // (removed by Design Push #2, 2026-08-06; it used to strip any route's
+  // `graphIds` not found in the CURRENT page's own sections) would then see the
+  // old report's routes against the new report's section ids, find every graphId
+  // "orphaned," and auto-persist the wipe under the new report's `report_id` using
+  // the old row's id — corrupting a second page with zero user interaction.
+  // Confirmed live 2026-07-21 (see reportroutelist-graphids-wiped-on-refresh.md's
+  // follow-up). The `forItemId` check after the await re-verifies this load is
+  // still the current one before committing anything, so a slow, now-superseded
+  // fetch can't clobber state a newer navigation already moved past — a general
+  // cross-report race guard, not specific to that deleted effect.
   const loadReportRow = async (forItemId) => {
     if (!apiLoad || !forItemId || !externalSource?.columns) return;
     const udaConfig = buildUdaConfig({
@@ -218,12 +221,13 @@ export function useReportRow({ apiLoad, apiUpdate, item, externalSource, isEdit 
   // mutation after. This is a genuine DMS data row (split-table, schema-free), not a
   // page attribute and not this section's own `element-data`.
   const persistRoutes = async (nextRoutes) => {
-    // Page-level edit-mode gate: mirrors the convention every other dataWrapper
-    // component follows (mutations only happen while the page is open on /edit/...).
-    // This is a single choke point — every mutating handler and the orphan-cleanup
-    // effect (see useGraphPublish) both funnel through here, so gating here is
-    // sufficient on its own to guarantee no write ever fires while a report is merely
-    // being viewed.
+    // `isEdit` here is ReportRouteList.jsx's `canMutate` — simply `editPageMode`,
+    // the page open at /edit/... (report-authoring-ux-overhaul.md item 3, 2026-08-19:
+    // RRL deliberately mutates unconditionally in page-edit-mode, no separate
+    // per-section pencil-click required first, unlike Card/Spreadsheet's SectionEdit
+    // vs SectionView gating). This is a single choke point — every mutating handler
+    // funnels through here, so gating here is sufficient on its own to guarantee no
+    // write ever fires outside page-edit-mode.
     if (!isEdit || !apiUpdate || !item?.id || !reportRow || !storageDataFormat) return;
     const currentId = reportRowIdRef.current;
     const payload = { report_id: String(item.id), routes: JSON.stringify(nextRoutes) };
@@ -244,19 +248,16 @@ export function useReportRow({ apiLoad, apiUpdate, item, externalSource, isEdit 
   // (catalog names aren't something the user typed, so there's nothing to
   // "reject"); on RENAME (ReportRouteList.jsx's onSaveEditName) a collision is
   // blocked instead, since there the user explicitly chose the new name.
-  const dedupeRouteName = (name) => {
-    const existing = new Set(routes.map(r => r.name));
-    if (!name || !existing.has(name)) return name;
-    let n = 2;
-    while (existing.has(`${name} (${n})`)) n++;
-    return `${name} (${n})`;
-  };
-
-  // `newRouteData` is the route object resolved by the add-flow's own catalog
-  // lookup — this hook only owns assigning it a local `route_comp_id` and
-  // persisting it, not resolving/fetching it.
-  const addRoute = async (newRouteData) => {
-    if (!apiUpdate || !item?.id || !newRouteData || saving || !reportRow) return;
+  //
+  // `newRoutesData` are the route objects resolved by the tag-browser modal's own catalog
+  // lookup — this hook only owns assigning each a local `route_comp_id`/color/deduped name and
+  // persisting the batch, not resolving/fetching it. Always takes an array (even a single
+  // selection) and does one `persistRoutes` call for the whole batch: looping a single-item add
+  // would race, since each call would close over `routes` at the render it was created, and
+  // several calls fired before a re-render lands would each persist `[...staleRoutes, oneNewRoute]`,
+  // silently dropping all but the last.
+  const addRoutes = async (newRoutesData) => {
+    if (!apiUpdate || !item?.id || !newRoutesData?.length || saving || !reportRow) return;
     setSaving(true);
     setError('');
     try {
@@ -270,20 +271,39 @@ export function useReportRow({ apiLoad, apiUpdate, item, externalSource, isEdit 
         }
       });
 
-      // Auto-assign an identity color from the shared palette, cycling by the route's
-      // position — mirrors the old tool's `getRouteColor()`. `routes.length` (the count
-      // BEFORE this route is appended) is the right index: first route gets palette[0], etc.
-      const newRoute = {
-        color: ROUTE_COLOR_PALETTE[routes.length % ROUTE_COLOR_PALETTE.length],
-        ...newRouteData,
-        name: dedupeRouteName(newRouteData.name),
-        route_comp_id: `comp-${maxId + 1}`
+      const existingNames = new Set(routes.map(r => r.name));
+      const dedupeAgainst = (name) => {
+        if (!name || !existingNames.has(name)) return name;
+        let n = 2;
+        while (existingNames.has(`${name} (${n})`)) n++;
+        return `${name} (${n})`;
       };
 
-      await persistRoutes([...routes, newRoute]);
+      const newRoutes = newRoutesData.map((newRouteData, i) => {
+        const name = dedupeAgainst(newRouteData.name);
+        existingNames.add(name);
+        // Ryan's call, 2026-08-20: every route should get a real date range the moment it's
+        // added, not "NO DATES SET" — an unbounded (all-history) query is silently wrong for
+        // almost every real use case, and this is already what happens today for any dateless
+        // route's Graph/Table/Map queries (transformReportRoutes' empty-date-array leaf gets
+        // dropped by buildUdaConfig.js as "no constraint", not "no rows"). Only applies when
+        // the incoming data carries NEITHER a fixed range NOR a derived-date formula — the
+        // catalog/tag-browser path never supplies either today, but this guard keeps the
+        // default from ever clobbering a real one if that changes.
+        const hasDateInfo = (newRouteData.startDate && newRouteData.endDate) || newRouteData.dateFormula;
+        return {
+          color: ROUTE_COLOR_PALETTE[(routes.length + i) % ROUTE_COLOR_PALETTE.length],
+          ...(hasDateInfo ? {} : defaultRouteDateRange()),
+          ...newRouteData,
+          name,
+          route_comp_id: `comp-${maxId + 1 + i}`,
+        };
+      });
+
+      await persistRoutes([...routes, ...newRoutes]);
     } catch (e) {
-      console.error('<ReportRouteList:add>', e);
-      setError('Could not add route.');
+      console.error('<ReportRouteList:addRoutes>', e);
+      setError('Could not add routes.');
       throw e;
     } finally {
       setSaving(false);
@@ -349,23 +369,29 @@ export function useReportRow({ apiLoad, apiUpdate, item, externalSource, isEdit 
     }
   };
 
-  // Toggle whether a route feeds a given graph's route list. `graphIds` is a hidden
-  // per-route field (section ids of the graphs this route has been clicked onto) —
-  // never surfaced as an abstract "group"; the UI is just "this route is on Graph N."
-  // A route feeds no graph until explicitly toggled onto one (no implicit sharing).
-  const toggleRouteGraph = async (index, sectionId) => {
-    if (!apiUpdate || !item?.id || saving || !reportRow) return;
+  // Batched "paste into all" for the copy/paste-a-date-span feature: one persistRoutes call for
+  // every target route, same reasoning as addRoutes (looping updateRoute per route would race a
+  // stale `routes` closure and drop all but the last write). Callers are responsible for
+  // excluding derived-date routes and the copy source from `routeIndexes` — this function just
+  // applies the span uniformly to whatever indexes it's given.
+  //
+  // Design push #2 (2026-08-06): shrunk to date-span only — weekday mask moved off the route
+  // entirely (see useGraphPublish.js/QuickControls), so there's nothing else left to paste.
+  const pasteWindowToRoutes = async (routeIndexes, { startDate, endDate }) => {
+    if (!apiUpdate || !item?.id || saving || !reportRow || !routeIndexes?.length) return;
     setSaving(true);
     setError('');
     try {
       const newRoutes = cloneDeep(routes);
-      const current = new Set(newRoutes[index].graphIds || []);
-      if (current.has(sectionId)) current.delete(sectionId); else current.add(sectionId);
-      newRoutes[index].graphIds = Array.from(current);
+      routeIndexes.forEach((i) => {
+        if (!newRoutes[i]) return;
+        newRoutes[i].startDate = startDate;
+        newRoutes[i].endDate = endDate;
+      });
       await persistRoutes(newRoutes);
     } catch (e) {
-      console.error('<ReportRouteList:toggleGraph>', e);
-      setError('Could not update route.');
+      console.error('<ReportRouteList:pasteWindowToRoutes>', e);
+      setError('Could not paste the date span.');
     } finally {
       setSaving(false);
     }
@@ -378,10 +404,10 @@ export function useReportRow({ apiLoad, apiUpdate, item, externalSource, isEdit 
     error,
     setError,
     persistRoutes,
-    addRoute,
+    addRoutes,
     removeRoute,
     reorderRoutes,
     updateRoute,
-    toggleRouteGraph,
+    pasteWindowToRoutes,
   };
 }

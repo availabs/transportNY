@@ -36,9 +36,13 @@ import QuickLinks from "./QuickLinks";
 import Header from "./components/Header";
 import AddPageButton from "./components/AddPageButton";
 import ReportRouteList from "./components/ReportRouteList"
+import ReportPageHeader from "./components/ReportPageHeader"
 import { npmrdsMeasureMenu } from "./components/MeasurePicker"
+import { calloutStatMenu } from "./components/CalloutStatPicker"
 import { npmrdsQuickControls } from "./components/QuickControls"
 import RouteComparison from "./components/RouteComparison"
+import CreateReportButton from "./components/CreateReportButton"
+import ChooseReportButton from "./components/ChooseReportButton"
 
 import icons from "./icons";
 
@@ -66,8 +70,8 @@ const textSettings = {
       "displayItalicLG", "displayItalicMD",
       "proseLG", "prose", "proseSM", "proseXS", "prosePre",
       "metaMD", "metaSM", "metaXS", "metaAccent", "chip",
-      "kicker", "cardTitle", "cardTitleSM", "labelSM", "btnPrimary", "btnOutline", "toggleOn", "toggleOff",
-      "statNum", "statXL", "statLG", "statMD",
+      "kicker", "cardTitle", "cardTitleSM", "labelSM", "labelMD", "btnPrimary", "btnOutline", "toggleOn", "toggleOff",
+      "statNum", "statXL", "statLG", "statMD", "buttonRow", "kickerXS",
     ],
   },
   styles: [{
@@ -93,6 +97,13 @@ const textSettings = {
     displayMD:   `${F_DISP} font-semibold text-[28px] leading-[1.1] ${INK}`,
     displaySM:   `${F_DISP} font-medium text-[22px] leading-[1.2] ${INK}`,
     displayXS:   `${F_DISP} font-medium text-[18px] leading-[1.25] ${INK}`,
+    // 26px UPPERCASE — the ladder had no rung between `displayLG` (38px, uppercase)
+    // and `displayMD` (28px, proper case), and the NPMRDS Reports header drops its
+    // page title to 26px uppercase so it sits on the search row's baseline
+    // (npmrds-reports.html revision 9: "fit the title the search bar and the buttons
+    // on one line"). ADDITIVE — neither neighbour changes, so every existing page
+    // title renders exactly as before.
+    displayMDCaps: `${F_DISP} font-semibold text-[26px] leading-[1.05] tracking-tight uppercase ${INK}`,
 
     // ── Display italic — editorial pull quotes ──
     displayItalicLG: `${F_DISP} italic font-medium text-[28px] leading-[1.2] ${INK_2}`,
@@ -120,13 +131,45 @@ const textSettings = {
     // Accent meta — the amber data callout under hero KPIs ("51% non-recurrent —
     // incidents, work zones, weather"). Mono like metaMD, NOT uppercase, amber-700.
     metaAccent: `font-mono! text-[12px]! leading-[1.45] tabular-nums font-medium text-[#B45309]!`,
+    // ── Emphasised metric pair (additive, 2026-08-24) — a mono/tabular figure that needs
+    // more weight than metaMD/metaAccent without competing with a statXL headline. Added for
+    // the congestion Cost-of-Congestion card, where the recurrent / non-recurrent split sat at
+    // 12px under a 52px total and was reported unreadable (QA 2211340). `metaStrongAccent` is
+    // the amber twin so the non-recurrent figure keeps its colour distinction when both grow.
+    metaStrong: `font-mono! text-[15px]! leading-[1.35] tabular-nums font-semibold ${INK}!`,
+    metaStrongAccent: `font-mono! text-[15px]! leading-[1.35] tabular-nums font-semibold text-[#B45309]!`,
     // Chip — the bordered as-of badge on data cards ("2025 · statewide",
     // "thru 2026-04"). Mono micro-caps in a hairline rounded box; works as a
     // Card valueFontStyle or a Lexical /Style token.
     chip: `font-mono! text-[9.5px]! uppercase tracking-[0.14em] text-slate-400! border border-zinc-950/10 rounded px-1.5 py-0.5 inline-block w-fit`,
 
+    // Button row — a paragraph whose ONLY content is a button node (a card's CTA rail).
+    // Lexical emits a trailing <br> in such a paragraph, and the paragraph's own strut
+    // then spends a full 22.5px line box on it — measured as ~26px of dead white below
+    // every doorway CTA, where the mockup's rail is flush with the card's bottom edge.
+    // StyledParagraphNode REPLACES the paragraph class, so this token is the whole
+    // declaration: zero leading collapses the phantom line, and dropping the default
+    // `mb-4` removes the margin the mockup does not have. ADDITIVE — no existing token
+    // changes, and a paragraph that does not opt in renders exactly as before.
+    buttonRow: `leading-[0]`,
+
     // Editorial kicker — the "// 01" amber labels that head sections
     kicker: `font-mono! text-[11px]! uppercase tracking-[0.2em] text-[#CA8A04]!`,
+    // Compact kicker — the same amber label inside a CARD header, where the mockups
+    // draw it a notch smaller and tighter (`text-[10px] tracking-[0.18em]`, e.g.
+    // npmrds-home.html § 02 "// change over time"). At `kicker`'s 11px/0.2em that
+    // label wraps to a second line in a card column and costs 22px of band height.
+    // ADDITIVE — `kicker` itself is unchanged, so every band head renders as before.
+    kickerXS: `font-mono! text-[10px]! uppercase tracking-[0.18em] text-[#CA8A04]!`,
+    // Group-head kicker — the numeral that heads a template GROUP inside a band
+    // (npmrds-reports.html: `font-mono text-[10.5px] uppercase tracking-[0.2em]
+    // text-[#CA8A04]`, byte-for-byte). Why it cannot be `kicker`: `kicker` declares no
+    // leading, and a lexical section's own wrapper sets an ABSOLUTE `leading-[22.4px]`
+    // that every child inherits — so a one-line kicker paragraph measured a 22.4px line
+    // box against the mockup's 15.75px (P7, 2026-08-20; 9 places on the reports page).
+    // `leading-[1.5]` makes the line box relative to the token's own size again.
+    // ADDITIVE — `kicker` is the BAND kicker on every transportny page and is unchanged.
+    kickerSM: `font-mono! text-[10.5px]! leading-[1.5] uppercase tracking-[0.2em] text-[#CA8A04]!`,
     nav:    `${F_DISP} font-medium text-[13.5px] uppercase tracking-wide`,
 
     // Card title — Oswald uppercase 18px (product / feature cards)
@@ -136,6 +179,21 @@ const textSettings = {
     // Proper-case display label — small stat-box / lifecycle-step labels ("In progress",
     // "Resolved / closed") where the meta ladder's uppercase would shout. Oswald 12.5px medium.
     labelSM: `${F_DISP} font-medium text-[12.5px] leading-[1.3] text-slate-700`,
+    // One step up from labelSM — the compact metric-panel measure name
+    // (npmrds-home § 04: `font-display font-medium text-[15px] text-[#0f1722]`).
+    // `cardTitleSM` is the same 15px face but UPPERCASE + tracking-tight, which
+    // shouts INTERSTATE RELIABILITY in a dense 2x2 grid; `labelSM` is the right
+    // case and colourless-enough face but 12.5px/slate-700. ADDITIVE — neither
+    // existing token changes, so § 01's labelSM rows and every cardTitleSM on the
+    // site render exactly as before.
+    labelMD: `${F_DISP} font-medium text-[15px] leading-[1.3] ${INK}`,
+    // Unit suffix beside a `stat_value` KPI figure ("79.8 %", "374.7 M hr/yr").
+    // ⚠ `stat_value` resolves BOTH `valueFontStyle` and `unitFontStyle` against
+    // textSettings (statValue.jsx reads getComponentTheme(theme,'textSettings')),
+    // NOT the dataCard mirror — so a unit token has to live HERE to be reachable.
+    // The column type's built-in default is a relative `text-[0.4em]` (8.8px beside
+    // a 22px figure), where the designs draw `text-[12px] font-medium text-slate-500`.
+    statUnitSM: `${F_DISP} text-[12px] font-medium text-slate-500`,
     // Segmented-view toggle chips — a direction-free pair (filled current view + ghost link)
     // that reads as a QA ⇄ Design toggle on the control-room detail pages. Two cells with a
     // small grid gap, NOT a contained segmented control (a shared p-0.5 container isn't
@@ -434,6 +492,17 @@ const layoutGroup = {
       wrapper2: "w-full px-0 flex flex-col gap-6",
       wrapper3: "",
     },
+    {
+      // flush — full-bleed band for a page whose rail is `pages.sectionGroup`
+      // styles[1] 'flush' (the report canvas's route rail), selected by the same
+      // group.theme name. No max-w cap, no pl-12/pr-8 gutter: the rail hugs the
+      // true page edge; the content column supplies its own inset instead
+      // (pages.sectionGroup styles[1].contentCol carries px-8 py-8 for this).
+      name: "flush",
+      wrapper1: "w-full bg-[#ECEEF2]",
+      wrapper2: "w-full",
+      wrapper3: "",
+    },
   ],
 };
 
@@ -620,12 +689,19 @@ const logo = {
 // logoNav — the product-switcher dropdown at the top of the sidenav (LogoNav.jsx).
 // `sites` is the product registry the dropdown lists: icon/chip reuse the landing
 // page's product identity (solid shield + white product icon), `tag` is the mono
-// one-word descriptor. Subdomains match the live pattern mounts.
+// one-word descriptor.
+//
+// `path` is the live mount and what the dropdown links to — the three products
+// share ONE origin so switching between them keeps the user's session (the DMS
+// token is origin-scoped localStorage, so the old per-product subdomains logged
+// people out on every hop). `subdomain` is retained ONLY as LogoNav's fallback
+// while the retired hosts still resolve; drop it once the 301s have soaked. See
+// planning/transportny/tasks/current/subdomain-to-path-consolidation.md.
 const logoNav = {
   sites: [
-    { name: "NPMRDS",        subdomain: "npmrds",        icon: "ProductNpmrds",       chip: "bg-[#0F2D4D]", tag: "travel time" },
-    { name: "TSMO",          subdomain: "tsmo2",         icon: "ProductTsmo",         chip: "bg-[#37576B]", tag: "operations" },
-    { name: "Freight Atlas", subdomain: "freightatlas2", icon: "ProductFreightAtlas", chip: "bg-[#1F3F8F]", tag: "freight" },
+    { name: "NPMRDS",        path: "/npmrds",       subdomain: "npmrds",        icon: "ProductNpmrds",       chip: "bg-[#0F2D4D]", tag: "travel time" },
+    { name: "TSMO",          path: "/tsmo",         subdomain: "tsmo2",         icon: "ProductTsmo",         chip: "bg-[#37576B]", tag: "operations" },
+    { name: "Freight Atlas", path: "/freightatlas", subdomain: "freightatlas2", icon: "ProductFreightAtlas", chip: "bg-[#1F3F8F]", tag: "freight" },
   ],
 };
 
@@ -642,10 +718,63 @@ const button = {
       button: "inline-flex items-center font-mono text-[11px] uppercase tracking-[0.14em] text-[#475569] hover:text-[#1F3F8F] cursor-pointer",
     },
     {
+      // linkMonoXS — the IN-CARD deep-link row (npmrds-home's doorway cards draw it as
+      // `font-mono text-[10px] uppercase tracking-wider text-slate-500`). ADDITIVE beside
+      // linkMono rather than a tweak to it: linkMono is the BAND-HEAD link ("open macro
+      // view →") on every transportnyv2 page and must not move.
+      // Why the smaller size is load-bearing and not just cosmetic: two of these links sit
+      // in one lexical layout-container inside a `col-span-4` card, and a grid item's
+      // automatic minimum size is its min-content — at linkMono's 11px/0.14em the pair
+      // measures 237px and forces the card's lexical column to 269px inside a 209px content
+      // box, so the card overflowed its own border and the CTA rail hung into the band
+      // gutter. At the design's 10px/tracking-wider the pair is 185px and fits on one line,
+      // which is what the mockup draws (horizontal-parity pass 2026-08-14).
+      // `leading-[15px]` is not decoration: these links sit in `buttonRow` paragraphs
+      // (`leading-[0]`), and an inline-flex box with inherited zero leading collapses to
+      // a 1px row — measured. An explicit line box makes the button stand up on its own,
+      // and 15px is exactly the mockup's line for this row. (`railBlue` and friends get
+      // away without one because they carry `h-11`.)
+      name: "linkMonoXS",
+      button: "inline-flex items-center leading-[15px] font-mono text-[10px] uppercase tracking-wider text-slate-500 hover:text-[#1F3F8F] cursor-pointer",
+    },
+    {
+      // linkMonoRow — `linkMono` plus the ROW GUTTER, for a footer/nav run of mono deep-links
+      // laid out as inline siblings in one lexical paragraph. Why the gutter has to live in the
+      // button style: the mockup's footer link row is `flex flex-wrap gap-x-6`, and a lexical
+      // PARAGRAPH is the only primitive that flows-and-wraps like that (a layout-container is a
+      // grid — one item per link measured +65.9px at 390 because a grid cannot reflow) — but a
+      // lexical `button` node has no margin knob, so six `linkMono`s in one paragraph rendered
+      // as "HOMEMACRO-VIEWREPORTROUTE-COMPARISONMAP-21DOCS" (P7, 2026-08-20). `mr-6` IS the
+      // mockup's `gap-x-6` (24px) and, unlike `px-3`, it does not inset the first link from the
+      // band's left edge. NO `last:mr-0`: the lexical ButtonNode wraps each button in its own
+      // element, so `last:` matched EVERY link and cancelled the gutter outright (measured — the
+      // links closed back up to 0px). The trailing 24px after the final link is harmless.
+      // ADDITIVE — `linkMono` itself is unchanged.
+      name: "linkMonoRow",
+      button: "inline-flex items-center mr-6 font-mono text-[11px] uppercase tracking-[0.14em] text-[#475569] hover:text-[#1F3F8F] cursor-pointer",
+    },
+    {
       // rail — full-width product-panel CTA (landing "exit panels"): navy bar,
       // white sign type left, gold arrow right; brightens on hover.
       name: "rail",
       button: "w-full h-11 px-5 -mx-1 flex items-center justify-between rounded-[6px] bg-[#0F2D4D] hover:bg-[#1F3F8F] transition-colors text-white font-display uppercase text-[13px] tracking-wide cursor-pointer after:content-['→'] after:text-[#FACC15] after:text-[16px]",
+    },
+    // railBlue / railSlate / railGold — the same `rail` CTA bar in the other three
+    // product fields, so a doorway card's badge, icon shield and CTA share one colour
+    // (npmrds-home.html § 01/02/03: #1F3F8F Macro View · #37576B Reports · #8A5F03
+    // Route comparison; `rail` itself stays the #0F2D4D navy MAP-21 uses). Additive —
+    // no existing style is changed, so every page that names `rail` is unaffected.
+    {
+      name: "railBlue",
+      button: "w-full h-11 px-5 -mx-1 flex items-center justify-between rounded-[6px] bg-[#1F3F8F] hover:bg-[#16307A] transition-colors text-white font-display uppercase text-[13px] tracking-wide cursor-pointer after:content-['→'] after:text-[#FACC15] after:text-[16px]",
+    },
+    {
+      name: "railSlate",
+      button: "w-full h-11 px-5 -mx-1 flex items-center justify-between rounded-[6px] bg-[#37576B] hover:bg-[#1f3450] transition-colors text-white font-display uppercase text-[13px] tracking-wide cursor-pointer after:content-['→'] after:text-[#FACC15] after:text-[16px]",
+    },
+    {
+      name: "railGold",
+      button: "w-full h-11 px-5 -mx-1 flex items-center justify-between rounded-[6px] bg-[#8A5F03] hover:bg-[#6d4b02] transition-colors text-white font-display uppercase text-[13px] tracking-wide cursor-pointer after:content-['→'] after:text-[#FACC15] after:text-[16px]",
     },
     {
       name: "default",
@@ -1102,6 +1231,73 @@ const dataCard = {
       prose: `${F_SANS} text-[14.5px]! leading-[1.65] text-slate-700!`,
       proseSM: `${F_SANS} text-[12.5px]! leading-[1.55] text-slate-500!`,
       proseXS: `${F_SANS} text-[11.5px]! leading-[1.5] text-slate-500!`,
+      // ── Clamped cell prose — the design's `truncate` / fixed-line-budget row text.
+      // ADDITIVE ON PURPOSE: `truncate` is NOT added to proseSM/proseXS above, because
+      // those are shared by every card on the site and would start clipping all of them
+      // (feedback_card_edits_bc). Opt in per column with valueFontStyle.
+      //
+      // Two things these tokens have to do that a plain font token does not:
+      //  1. `line-clamp-N`, NOT `truncate` — `truncate`'s `white-space:nowrap` makes the cell's
+      //     min-content the whole string, and the cell wrapper is a GRID ITEM with
+      //     `min-width:auto`, so a `minmax(0,1fr)` track can no longer hold it and the row
+      //     blows out sideways. `line-clamp` ellipsises at the same place while leaving
+      //     min-content at the longest word. It also fixes the line box for free: on a LINK
+      //     cell Card.jsx puts valueFontStyle on the INLINE <a>, so a font token's `leading`
+      //     never reaches the line box (the value div's inherited 16px/24px strut sizes every
+      //     line — a 2-line link cell costs 48px, not 2x17.25); `line-clamp`'s
+      //     `display:-webkit-box` makes the <a> block-level and it lays out its own lines.
+      //     ⚠ Do NOT also write `block` here: `display:block` beats `display:-webkit-box` in
+      //     the compiled sheet, the clamp silently stops clamping, and you are left with a
+      //     wrapping cell that merely hides its overflow (measured, 2026-08-13).
+      //  2. an explicit line budget that matches the mockup's (1 line for a one-line row
+      //     description, 2 for a stacked title+description row).
+      proseSMClamp1: `${F_SANS} text-[12.5px]! leading-[1.55]! text-slate-500! line-clamp-1`,
+      proseXSClamp2: `${F_SANS} text-[11.5px]! leading-[1.5]! text-slate-500! line-clamp-2`,
+      // proseSMClamp2 — the template/result card's two-line description
+      // (npmrds-reports.html: `font-proxima text-[12px] leading-[1.5] text-slate-600
+      // line-clamp-2`). ADDITIVE, and NOT proseXSClamp2 with a different colour: that
+      // token is 11.5px/slate-500 and is already in use, so tightening its colour
+      // would change every card that clamps today (feedback_card_edits_bc). 12.5px is
+      // the brand's `proseSM` rung; `text-slate-600` is the design's body ink, the
+      // same disagreement proseSMInk exists to resolve.
+      proseSMClamp2: `${F_SANS} text-[12.5px]! leading-[1.5]! text-slate-600! line-clamp-2`,
+      // proseSMClamp2's ONE-LINE sibling, in the placeholder colour — the search trigger's
+      // prompt. The mockup gives that prompt `truncate` (one line, ellipsis) because the
+      // trigger is a fixed-height control; a Card value cell has no truncation knob at all
+      // (`wrapText` only toggles `whitespace-pre-wrap`), so the prompt wrapped onto a second
+      // line and pushed the header off the mockup's 40px row — measured 426.7px of text in a
+      // 357.3px cell at 1480 (P7, 2026-08-20). `line-clamp-1` is the same mechanism
+      // proseSMClamp2 already uses on this page's template cards. slate-500 because a
+      // placeholder is not body copy (the mockup: `text-slate-500`). ADDITIVE.
+      proseSMClamp1: `${F_SANS} text-[12.5px]! leading-[1.5]! text-slate-500! line-clamp-1`,
+      // proseSMTrunc1 — `proseSMClamp1` plus `break-all`, i.e. the mockup's `truncate`
+      // rendered faithfully. ADDITIVE, not a change to proseSMClamp1: the two differ in
+      // where the ellipsis lands, and both are legitimate.
+      //   · line-clamp alone breaks at WORD boundaries, so "Uncongested reference" in a
+      //     118px box renders "Uncongested…" and leaves 44px of the track empty.
+      //   · `word-break: break-all` lets the break fall mid-word, so the same cell reads
+      //     "Uncongested refer…" — the design's own clipping (measured 2026-08-14; the
+      //     mockup shows "Emissions · 6 pollut…", which this reproduces exactly).
+      // It does NOT re-introduce `truncate`'s blowout: break-all leaves min-content at one
+      // character, where `white-space:nowrap` makes it the whole string. Rows that fit are
+      // unaffected — with one line there is no break point until the clip point.
+      // Use it for a single-line row description; keep proseSMClamp1 where word-granular
+      // clipping is wanted (e.g. multi-line prose that must stay readable).
+      proseSMTrunc1: `${F_SANS} text-[12.5px]! leading-[1.55]! text-slate-500! line-clamp-1 break-all`,
+      // proseSMInk — proseSM at the DOORWAY body colour. ADDITIVE, not a change to
+      // proseSM: the two maps have always disagreed about this token's colour
+      // (textSettings `proseSM` is slate-600, this mirror is slate-500), which was
+      // invisible while the doorway prose was a LEXICAL paragraph resolving against
+      // textSettings. Converting the doorway to a Card moves that paragraph into a
+      // plain cell, where `valueFontStyle` resolves HERE — so without this token the
+      // conversion would silently lighten the design's `text-slate-600` body copy.
+      // Everything else matches proseSM exactly (npmrds-home.html doorway:
+      // `font-proxima text-[12.5px] leading-[1.55] text-slate-600`).
+      proseSMInk: `${F_SANS} text-[12.5px]! leading-[1.55] text-slate-600!`,
+      // Row title inside a list-style card (mockup: `font-proxima text-[13px] font-medium
+      // text-[#0f1722]`). `block` so the <a> lays out its own 19.5px line instead of paying
+      // the value div's 24px strut — see (1) above for why a link cell needs this at all.
+      proseRowSM: `${F_SANS} text-[13px]! font-medium leading-[1.5]! text-[#0f1722]! block`,
       metaMD: `${F_MONO} text-[12px]! leading-[1.45] tabular-nums text-slate-600!`,
       metaSM: `${F_MONO} text-[10.5px]! uppercase tracking-[0.18em] pb-1! text-slate-500!`,
       // ── Parity with textSettings (keep these in sync!): every token an author
@@ -1116,11 +1312,64 @@ const dataCard = {
       // Proper-case field label (modal/create-form headerFontStyle). Parity with textSettings —
       // was missing here, so headerFontStyle:"labelSM" silently fell back to textXS in Cards.
       labelSM: `${F_DISP} font-medium text-[12.5px]! leading-[1.3] text-slate-700!`,
+      // Parity with textSettings (see there for why labelMD exists at all).
+      labelMD: `${F_DISP} font-medium text-[15px]! leading-[1.3] ${INK}!`,
+      // labelMD + the mockup's `truncate`, by the proseSMTrunc1 recipe: `line-clamp-1`
+      // (never `truncate` — nowrap makes the cell's min-content the whole string and a
+      // `minmax(0,1fr)` track blows out sideways) plus `break-all` so the ellipsis lands
+      // mid-word exactly where the design's does. npmrds-home § 04 draws its measure
+      // names `flex-1 min-w-0 truncate`, and "Non-Interstate NHS reliability" does not
+      // fit the live 2-across panel at any track width.
+      labelMDTrunc1: `${F_DISP} font-medium text-[15px]! leading-[1.3]! ${INK}! line-clamp-1 break-all`,
+      // Parity with textSettings. stat_value reads unitFontStyle off textSettings, but
+      // Card.jsx ALSO applies `theme[valueFontStyle]` to the value wrapper from this
+      // map, so the token must exist in both or the wrapper falls back to textXS.
+      statUnitSM: `${F_DISP} text-[12px]! font-medium text-slate-500!`,
       // Segmented-view toggle chips (QA ⇄ Design) — see textSettings. px/py `!` beat the
       // injected value-cell paddings, same trick as btnPrimary/btnOutline.
       toggleOn:  `${F_MONO} text-[10.5px]! uppercase tracking-wide inline-flex items-center w-fit h-7 px-3! py-0! rounded-md bg-[#1F3F8F] text-white! no-underline!`,
       toggleOff: `${F_MONO} text-[10.5px]! uppercase tracking-wide inline-flex items-center w-fit h-7 px-3! py-0! rounded-md border border-zinc-950/10 bg-slate-50 text-slate-500! hover:text-slate-800 no-underline! cursor-pointer`,
+      // ── ctaRail* — the doorway card's FULL-BLEED bottom CTA, as a LINK CELL token.
+      // The cell peer of the `button` styles `rail` / `railBlue` / `railSlate` /
+      // `railGold` (same four product fields, same type, same gold arrow), for the
+      // npmrds-home doorways now that they are Cards rather than lexical sections.
+      // Deliberately NOT in textSettings: a lexical author already has the `button`
+      // styles above; these exist only because Card.jsx resolves a link cell's
+      // `valueFontStyle` against THIS map and puts it on the <a> itself.
+      //
+      // Four things here are load-bearing, all measured on /edit/home 2026-08-14:
+      //  1. `flex` + `justify-between`: the sign type left, the ::after arrow right,
+      //     exactly like the mockup's `h-11 px-5 flex items-center justify-between`
+      //     rail. `flex` also satisfies resolveLinkAnchorStyle's "token declares its
+      //     own display" guard, so the link-cell blockify fix leaves it alone.
+      //  2. `w-[calc(100%+2px)] -mx-px -mb-px` — the full bleed, and BOTH halves are
+      //     needed. (a) A v1-layout Card cell ships an always-on
+      //     `border border-transparent` (Card.layout.js), which insets any child by
+      //     1px on every side; the negative margins bleed back over it, the same
+      //     trick `rail`'s own `-mx-1` uses against its section padding. (b) The
+      //     explicit width is NOT redundant with `width:auto`: the cell's value div
+      //     carries `justify-items-start` (theme `justifyTextLeft`), and current
+      //     Chromium implements Box Alignment in BLOCK layout — so `justify-self`
+      //     lands on every block-level child and shrink-wraps it. Measured on
+      //     /edit/home: a bare `<div>` injected into a value div comes out **8px**
+      //     wide inside a 239.3px box, and the CTA anchor rendered 152.2px until
+      //     this width was added. That is also why `chip` above carries `w-full!`
+      //     — same cause, discovered the same way.
+      //  3. `rounded-b-[7px]`: the section paints the card at `rounded-[8px] border`,
+      //     with `overflow: visible` — nothing clips a child. 8px outer − 1px border
+      //     = the 7px INNER curve, so the rail's own bottom corners follow the card's.
+      //  4. no `h-full`: the rail must stay 44px (`h-11`) while the row ABOVE it
+      //     absorbs the card's leftover height (display.cellsRowsTemplate '… 1fr
+      //     max-content'), which is what pins it flush to the bottom edge.
+      // The hover tint is the one addition to the mockup (it draws none) and matches
+      // the `rail*` button styles, so a doorway CTA behaves the same in both forms.
+      ctaRail: `${F_DISP} flex items-center justify-between h-11 px-5 w-[calc(100%+2px)] -mx-px -mb-px rounded-b-[7px] bg-[#0F2D4D] hover:bg-[#1F3F8F] transition-colors text-white! uppercase text-[13px]! tracking-wide no-underline! cursor-pointer after:content-['→'] after:text-[#FACC15] after:text-[16px]`,
+      ctaRailBlue: `${F_DISP} flex items-center justify-between h-11 px-5 w-[calc(100%+2px)] -mx-px -mb-px rounded-b-[7px] bg-[#1F3F8F] hover:bg-[#16307A] transition-colors text-white! uppercase text-[13px]! tracking-wide no-underline! cursor-pointer after:content-['→'] after:text-[#FACC15] after:text-[16px]`,
+      ctaRailSlate: `${F_DISP} flex items-center justify-between h-11 px-5 w-[calc(100%+2px)] -mx-px -mb-px rounded-b-[7px] bg-[#37576B] hover:bg-[#1f3450] transition-colors text-white! uppercase text-[13px]! tracking-wide no-underline! cursor-pointer after:content-['→'] after:text-[#FACC15] after:text-[16px]`,
+      ctaRailGold: `${F_DISP} flex items-center justify-between h-11 px-5 w-[calc(100%+2px)] -mx-px -mb-px rounded-b-[7px] bg-[#8A5F03] hover:bg-[#6d4b02] transition-colors text-white! uppercase text-[13px]! tracking-wide no-underline! cursor-pointer after:content-['→'] after:text-[#FACC15] after:text-[16px]`,
       metaAccent: `${F_MONO} text-[12px]! leading-[1.45] tabular-nums font-medium text-[#B45309]!`,
+      metaStrong: `${F_MONO} text-[15px]! leading-[1.35] tabular-nums font-semibold ${INK}!`,
+      metaStrongAccent: `${F_MONO} text-[15px]! leading-[1.35] tabular-nums font-semibold text-[#B45309]!`,
       // As-of / methodology badge. Full-width (fills its cell so stacked chips'
       // borders align) with symmetric vertical padding. The inner value wrapper
       // ships `text-end justify-items-end min-h-[20px]` (column justify:'right' +
@@ -1130,6 +1379,38 @@ const dataCard = {
       // would hit every value cell). `!` beats theme.value's merged `px-3 pb-3`.
       chip: `${F_MONO} text-[9.5px]! uppercase tracking-[0.14em] leading-none text-slate-400! border border-zinc-950/10 rounded w-full! px-2! py-1! text-center! [&_div]:text-center [&_div]:min-h-0`,
       metaXS: `${F_MONO} text-[9.5px]! uppercase tracking-[0.18em] text-slate-400!`,
+      // metaXSLink — metaXS in the brand's action blue, for a card's foot LINK
+      // ("use template →", "open →"; npmrds-reports.html draws it
+      // `font-mono text-[9.5px] uppercase tracking-[0.16em] text-[#1F3F8F]`). A link
+      // cell's valueFontStyle is resolved against THIS map and lands on the anchor
+      // itself, so the blue and the no-underline have to live here — the `button`
+      // theme's linkMono* styles are only reachable from a Lexical button node.
+      // ADDITIVE: metaXS is unchanged, so every meta cell renders as before.
+      metaXSLink: `${F_MONO} text-[9.5px]! uppercase tracking-[0.18em] text-[#1F3F8F]! no-underline!`,
+      // plateEmpty — patterns.html §14's "no preview" tile: the 4:5 plate footprint,
+      // kept so the row stays on rhythm, saying what is missing rather than showing a
+      // broken image. Box-shaped tokens must carry their own width (`w-full!`) and
+      // beat theme.value's merged `px-3 pb-3` — same rules as `chip` above, which is
+      // also why the `[&_div]` descendants are re-centred and un-min-heighted.
+      // This is the fallback rung of the plate's preference order (a captured
+      // thumbnail at usable resolution → a layout-derived shape → this); the first
+      // two need a re-capture pipeline and a new column type (task Escalations).
+      plateEmpty: `${F_MONO} text-[8px]! uppercase tracking-[0.14em] leading-none text-slate-400! border border-zinc-950/10 rounded-[4px] bg-[#ECEEF2] w-full! aspect-[4/5] flex items-center justify-center px-1! py-1! text-center! [&_div]:text-center [&_div]:min-h-0`,
+      // ── Parity with textSettings — a Card cell resolves valueFontStyle HERE, so a
+      // token that exists only in textSettings silently falls back to `textXS`.
+      // These three were missing; adding them changes nothing that already renders.
+      displayMDCaps: `${F_DISP} font-semibold text-[26px]! leading-[1.05] tracking-tight uppercase ${INK}`,
+      btnPrimary: `inline-flex items-center w-fit h-9 px-3.5! py-0! bg-[#1F3F8F] hover:bg-[#16307A] border-b-4 border-[#0F2D4D] text-white! no-underline! ${F_DISP} font-medium uppercase text-[12px]! tracking-wide rounded-[6px] cursor-pointer`,
+      btnOutline: `inline-flex items-center w-fit h-9 px-3.5! py-0! bg-white hover:bg-slate-50 border border-slate-200 text-slate-600! no-underline! ${F_DISP} font-medium uppercase text-[12px]! tracking-wide rounded-[6px] cursor-pointer`,
+      // ── Unit suffix in a list row (npmrds-home § 01: `ratio` / `veh-hr` / `tons/yr`).
+      // ADDITIVE, not a change to metaXS: the design draws this run at `text-[9px]`
+      // where metaXS is 9.5px, and metaXS is shared by as-of badges and card meta all
+      // over the site (feedback_card_edits_bc). Half a pixel sounds like nothing, but
+      // this run sits in a `max-content` grid TRACK shared by four rows, so the widest
+      // unit's width is a tax on every description beside it: at 9.5px `TONS/YR` sizes
+      // that track to 69px, at the design's 9px to 66.3px, and the 2.7px comes straight
+      // back to the description column (horizontal-parity pass 2026-08-14).
+      unitXS: `${F_MONO} text-[9px]! uppercase tracking-[0.18em] text-slate-400!`,
       kicker: `${F_MONO} text-[10.5px]! uppercase tracking-[0.2em] text-[#CA8A04]!`,
       textXS:           "text-[11px] font-medium",
       textXSReg:        "text-[11px] font-normal",
@@ -1304,6 +1585,13 @@ const pill = {
     { name: "status_bad",  wrapper: "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] border border-[#EF4444]/30 bg-[#EF4444]/10 font-mono text-[10px] uppercase tracking-[0.16em] text-[#991B1B] [&::before]:content-[''] [&::before]:size-1.5 [&::before]:rounded-full [&::before]:bg-[#EF4444]" },
     { name: "status_na",   wrapper: "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] border border-zinc-950/10 bg-slate-100 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600 [&::before]:content-[''] [&::before]:size-1.5 [&::before]:rounded-full [&::before]:bg-slate-400" },
     { name: "route", wrapper: "inline-flex items-center gap-2 h-8 pl-2.5 pr-2 rounded-full bg-white text-slate-700 shadow-sm border border-zinc-950/5 text-[12.5px] font-proxima" },
+    // chip_meta — the design's NEUTRAL metadata chip: a hairline box with mono
+    // micro-caps and no status dot (npmrds-reports.html's difficulty chips, which
+    // draw beginner / intermediate / advanced identically because difficulty is a
+    // label, not a verdict). The status_* styles all carry a coloured ::before dot,
+    // which would read as a state. ADDITIVE — appended, and `options.activeStyle`
+    // still points at styles[0], so nothing that resolves a pill today moves.
+    { name: "chip_meta", wrapper: "inline-flex items-center h-5 px-1.5 rounded-[3px] border border-zinc-950/15 bg-slate-50 font-mono text-[9.5px] uppercase tracking-[0.18em] text-slate-500" },
   ],
 };
 
@@ -1396,7 +1684,9 @@ const table = {
       headerLeftGutter:               "flex justify-between sticky left-0 z-[1]",
       headerWrapper:                  "flex justify-between",
       headerCellContainer:            "w-full px-3 py-2 content-center font-display uppercase text-[11px] tracking-wide",
-      headerCellContainerBg:          "bg-slate-50/80 text-slate-600 border-b border-zinc-950/10",
+      // Opaque on purpose: headerContainer is `sticky top-0`, so any alpha lets
+      // body rows scroll through and show under the column labels (ticket #199).
+      headerCellContainerBg:          "bg-slate-50 text-slate-600 border-b border-zinc-950/10",
       headerCellContainerBgSelected:  "bg-blue-100 text-[#0F1722]",
       colResizer:                     "z-5 -ml-2 w-[1px] hover:w-[2px] bg-zinc-950/5 hover:bg-zinc-950/15",
       headerCellLabel:                "truncate select-none",
@@ -1423,7 +1713,9 @@ const table = {
       totalCell:                      "hover:bg-slate-100 font-medium",
       stripedRow:                     "",
       gutterCellWrapper:              "flex items-center justify-center cursor-pointer sticky left-0 z-[1] font-mono text-[11px]",
-      gutterCellWrapperNotSelected:   "bg-slate-50/60 text-slate-400",
+      // Opaque for the same reason as the header: gutterCellWrapper is
+      // `sticky left-0`, so alpha lets cells scroll through it horizontally.
+      gutterCellWrapperNotSelected:   "bg-slate-50 text-slate-400",
       gutterCellWrapperSelected:      "bg-blue-100 text-[#0F1722]",
 
       pivotGroupHeader:               "bg-slate-100 text-slate-700 text-center border-b border-r border-zinc-950/5",
@@ -1462,7 +1754,8 @@ const table = {
       // information than the dashboard default.
       name: "report",
       headerCellContainer:            "w-full px-4 py-2.5 content-center font-mono text-[10px] font-normal uppercase tracking-[0.16em]",
-      headerCellContainerBg:          "bg-slate-50/60 text-slate-500 border-b border-zinc-950/10",
+      // Opaque — sticky header, see the `default` style's note (ticket #199).
+      headerCellContainerBg:          "bg-slate-50 text-slate-500 border-b border-zinc-950/10",
       cell:                           "relative flex items-center min-h-[42px] border-b border-zinc-950/5",
       cellInner:                      "w-full min-h-full flex flex-wrap items-center truncate py-2.5 px-4 font-[400] text-[13px] leading-[18px] text-slate-700",
     },
@@ -1475,7 +1768,8 @@ const table = {
       name: "flush",
       tableContainer:                 "flex flex-col bg-white overflow-x-auto overflow-y-auto max-h-[calc(78vh_-_10px)]",
       headerCellContainer:            "w-full px-4 py-2.5 content-center font-mono text-[10px] font-normal uppercase tracking-[0.16em]",
-      headerCellContainerBg:          "bg-slate-50/60 text-slate-500 border-b border-zinc-950/10",
+      // Opaque — sticky header, see the `default` style's note (ticket #199).
+      headerCellContainerBg:          "bg-slate-50 text-slate-500 border-b border-zinc-950/10",
       cell:                           "relative flex items-center min-h-[42px] border-b border-zinc-950/5",
       cellInner:                      "w-full min-h-full flex flex-wrap items-center truncate py-2.5 px-4 font-[400] text-[13px] leading-[18px] text-slate-700",
     },
@@ -1646,7 +1940,8 @@ const map = {
     legend: {
       panel: "p-4",
       panelInner: "relative w-72 min-h-10 max-h-[calc(100vh_-_111px)] overflow-auto rounded-[8px] border border-zinc-950/10 bg-white shadow-lg pointer-events-auto scrollbar-sm",
-      header: "h-9 px-3 flex items-center gap-2 border-b border-zinc-950/10 bg-slate-50/80 sticky top-0 z-10",
+      // Opaque — the panel body scrolls under this sticky header (ticket #199 class).
+      header: "h-9 px-3 flex items-center gap-2 border-b border-zinc-950/10 bg-slate-50 sticky top-0 z-10",
       headerTitle: `${F_DISP} font-medium text-[13px] text-[#2D3E4C] flex-1`,
       headerMeta: `${F_MONO} text-[9.5px] uppercase tracking-wider text-slate-500`,
       section: "",
@@ -1845,28 +2140,60 @@ const pages = {
 
   // The sticky in-page-nav rail (the mockup's "on this page" <aside>). A distinct
   // layout region rendered as the content LayoutGroup's outerChildren, themed
-  // entirely here (flat shape — sectionGroup.jsx / InPageNav.jsx read it via
-  // getComponentTheme(theme,'pages.sectionGroup')). Rail = a nav card + any
-  // sidebar-group sections stacked below.
+  // entirely here. sectionGroup.jsx reads it via getComponentTheme(theme,
+  // 'pages.sectionGroup', group.theme) so a band's own theme name selects the style;
+  // InPageNav.jsx reads the same key with no selector (always styles[0]) but only
+  // ever renders when a band has navLabel'd sections, so this doesn't matter for a
+  // 'flush' rail band, which has none. Rail = a nav card + any sidebar-group sections
+  // stacked below.
+  // options.activeStyle + styles[] follows the standard getComponentTheme convention
+  // (see @availabs/dms/CLAUDE.md). sectionGroup.jsx passes the band's own `group.theme`
+  // as the selector — a band opts into "flush" by setting its theme name to 'flush';
+  // every other band's group.theme (undefined, 'default', 'content', ...) falls through
+  // to styles[0], so this is additive and doesn't touch any existing page's rendering.
   sectionGroup: {
-    // content ↔ rail row (inside the band's max-w-[1480px] content container).
-    // items-stretch keeps the rail column full-height so its inner sticky pins.
-    // min-h-screen: the band fills at least the viewport so a short results column
-    // doesn't leave the sidebar rail floating in a short area; the rail's own
-    // overflow-y-auto (sideNavContainer2) still scrolls only when its content
-    // genuinely exceeds the viewport. min-height is BC-safe — tall bands are unaffected.
-    contentRow: "flex flex-row gap-10 items-stretch min-h-screen",
-    contentCol: "flex-1 min-w-0",
-    sideNavContainer1: "w-[302px] shrink-0 hidden xl:block",
-    sideNavContainer2: "sticky top-[60px] h-[calc(100vh_-_68px)] overflow-y-auto pr-2",
-    sideNavContainer3: "flex flex-col gap-4",
-    // "On this page" nav card
-    navWrapper:    "rounded-[8px] border border-zinc-950/10 bg-white p-4",
-    navLabelText:  "On this page",
-    navLabel:      "font-mono uppercase text-[10px] tracking-[0.16em] text-slate-500 mb-3",
-    navList:       "flex flex-col gap-0.5",
-    navItem:       "block w-full text-left font-proxima text-[13px] text-slate-600 hover:text-[#0F2D4D] py-1.5 pl-3 border-l-2 border-transparent transition-colors cursor-pointer",
-    navItemActive: "block w-full text-left font-proxima text-[13px] text-[#0F2D4D] font-medium py-1.5 pl-3 border-l-2 border-[#EAAD43] bg-slate-50/60 transition-colors cursor-pointer",
+    options: { activeStyle: 0 },
+    styles: [
+      {
+        name: "default",
+        // content ↔ rail row (inside the band's max-w-[1480px] content container).
+        // items-stretch keeps the rail column full-height so its inner sticky pins.
+        // min-h-screen: the band fills at least the viewport so a short results column
+        // doesn't leave the sidebar rail floating in a short area; the rail's own
+        // overflow-y-auto (sideNavContainer2) still scrolls only when its content
+        // genuinely exceeds the viewport. min-height is BC-safe — tall bands are unaffected.
+        contentRow: "flex flex-row gap-10 items-stretch min-h-screen",
+        contentCol: "flex-1 min-w-0",
+        sideNavContainer1: "w-[302px] shrink-0 hidden xl:block",
+        sideNavContainer2: "sticky top-[60px] h-[calc(100vh_-_68px)] overflow-y-auto pr-2",
+        sideNavContainer3: "flex flex-col gap-4",
+        // "On this page" nav card
+        navWrapper:    "rounded-[8px] border border-zinc-950/10 bg-white p-4",
+        navLabelText:  "On this page",
+        navLabel:      "font-mono uppercase text-[10px] tracking-[0.16em] text-slate-500 mb-3",
+        navList:       "flex flex-col gap-0.5",
+        navItem:       "block w-full text-left font-proxima text-[13px] text-slate-600 hover:text-[#0F2D4D] py-1.5 pl-3 border-l-2 border-transparent transition-colors cursor-pointer",
+        navItemActive: "block w-full text-left font-proxima text-[13px] text-[#0F2D4D] font-medium py-1.5 pl-3 border-l-2 border-[#EAAD43] bg-slate-50/60 transition-colors cursor-pointer",
+      },
+      {
+        // npmrds-report.html's rail: fixed 340px flex sibling of the content column,
+        // no padding (hugs the content area's left edge — the content column supplies
+        // the inset, not this container), sticky top-0 h-svh (exact tab height — safe
+        // only because this page carries no sticky chrome above the rail, e.g. no
+        // breadcrumb band; a page that keeps one needs its own top-offset variant).
+        // contentRow drops to gap-0 to match (no gap between rail and content column).
+        name: "flush",
+        contentRow: "flex flex-row gap-0 items-stretch min-h-screen",
+        // The band no longer supplies an inset (layoutGroup styles[1] 'flush' has no
+        // pl-12/pr-8), so the content column carries its own px-8 py-8 here, exactly
+        // per the mockup's content-column div. The rail stays flush at x=0 — only
+        // the content side gets the inset.
+        contentCol: "flex-1 min-w-0 px-8 py-8",
+        sideNavContainer1: "w-[340px] shrink-0 hidden xl:block bg-white border-r border-zinc-950/10",
+        sideNavContainer2: "sticky top-0 h-svh overflow-hidden",
+        sideNavContainer3: "flex flex-col h-full",
+      },
+    ],
   },
 
   sectionArray: {
@@ -2469,7 +2796,10 @@ const pageComponents = {
   AddPageButton,
   Header,
   ReportRouteList,
+  ReportPageHeader,
   RouteComparison,
+  CreateReportButton,
+  ChooseReportButton,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2477,8 +2807,18 @@ const pageComponents = {
 // keyed by ComponentRegistry component name. See sectionMenuExtensions.js /
 // sectionMenu.jsx in the dms submodule for the generic extension point.
 // ─────────────────────────────────────────────────────────────────────────────
+// Keyed by the resolved component's `.name`, which differs by element-type
+// despite both resolving to the same graph_new component (see
+// ComponentRegistry/index.jsx): legacy-migrated sections keep `.name: 'Graph'`,
+// but the "AVL Graph" registry entry force-overrides `.name` back to
+// 'AVL Graph' — which is what virtually every real report graph (RRL's
+// "+ Add Graph", the Report Page template's starter graph, every converted
+// report) actually resolves to. Both keys must be registered or these
+// extensions silently stop firing for real graphs.
 const sectionMenuExtensions = {
+  "Graph": [npmrdsMeasureMenu],
   "AVL Graph": [npmrdsMeasureMenu],
+  "Card": [calloutStatMenu],
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2490,8 +2830,16 @@ const sectionMenuExtensions = {
 // Measure/Comparison Mode state as npmrdsMeasureMenu above — see
 // components/QuickControls and components/MeasurePicker's applyMeasurePick.
 // ─────────────────────────────────────────────────────────────────────────────
+// Design push #2 (2026-08-06): QuickControls' Routes/Measure/When/Aggregate pills apply to
+// Table (Spreadsheet) and Map cards too, not just chart types (Mode is the one pill that hides
+// itself there — see QuickControlsRow's own `hasMode`). The older Settings-drawer Measure
+// item-group (sectionMenuExtensions below) stays chart-only on purpose — Quick Controls fully
+// covers Table/Map editing on its own, no reason to wire a second surface for them.
 const sectionHeaderExtensions = {
+  "Graph": [npmrdsQuickControls],
   "AVL Graph": [npmrdsQuickControls],
+  "Spreadsheet": [npmrdsQuickControls],
+  "Map": [npmrdsQuickControls],
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2536,6 +2884,21 @@ const iconStyles = {
   productShieldBlue: {
     box:  "inline-flex size-14 rounded-[10px] bg-[#1F3F8F] items-center justify-center text-white align-middle mr-3",
     icon: "w-8 h-8",
+  },
+  // Gold shield — the fourth product field in the NPMRDS category set
+  // (npmrds-home.html § 03 "Route comparison" doorway, #8a5f03). Additive: the
+  // three shields above are untouched, so every existing card is byte-identical.
+  productShieldGold: {
+    box:  "inline-flex size-14 rounded-[10px] bg-[#8A5F03] items-center justify-center text-white align-middle mr-3",
+    icon: "w-8 h-8",
+  },
+  // Row affordance chevron — the 12px slate glyph at the right edge of a list row
+  // (npmrds-home.html § 02 ready-made report rows: `size-3 text-slate-300 shrink-0`).
+  // Unstyled icon nodes render at the IconNode default (~28px here), which both looks
+  // wrong and eats ~16px of the row's text column. Additive: no existing style changes.
+  rowChevron: {
+    box:  "inline-flex items-center justify-center text-slate-300 align-middle",
+    icon: "w-3 h-3",
   },
 };
 
